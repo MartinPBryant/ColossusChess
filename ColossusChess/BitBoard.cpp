@@ -1,0 +1,816 @@
+#ifdef _WIN32
+#include <intrin.h>
+#endif
+#include <assert.h>
+//#include <cstring>
+//#include <bitset>
+
+//#include "GlobalConstants.h"
+#include "GlobalTypes.h"
+#include "BitBoard.h"
+//#include "Engine.h"
+
+//----------------------------------------------------------------------------------------------------
+
+// Basic population count and bitscan routines (64-bit and 32-bit)
+
+//#define x64
+
+#if defined _WIN64 && !defined TB_NO_HW_POP_COUNT
+
+// 64-bit hardware based routines
+//#define PopulationCountX(ui64) PopulationCountHardware(ui64)
+//#define BitScanForwardX(ui64) BitScanForwardHardwarePOPCNT(ui64)
+//#define BitScanReverseX(ui64) BitScanReverseBSR(ui64)
+
+__forceinline uint32_t PopulationCountHardware(uint64_t ui64) // Fastest
+{
+#ifdef _WIN32
+	return (uint32_t)__popcnt64(ui64);
+#else
+	return __builtin_popcountll(ui64);
+#endif
+}
+
+__forceinline unsigned long BitScanForwardHardwareBSF(uint64_t ui64) // Marginally slower than BitScanForwardHardwarePOPCNT
+{
+	unsigned long _Index;
+	_BitScanForward64(&_Index, ui64);
+	return _Index;
+}
+
+__forceinline uint32_t BitScanForwardHardwarePOPCNT(uint64_t ui64) // Fastest
+{
+	return (uint32_t)__popcnt64((ui64 & (0 - ui64)) - 1);
+}
+
+__forceinline uint32_t BitScanReverseBSR(uint64_t ui64) // Fastest
+{
+	unsigned long _Index;
+	_BitScanReverse64(&_Index, ui64);
+	return (uint32_t)_Index;
+}
+
+__forceinline int poplsb(uint64_t *bb) {
+	int lsb = BitScanForwardX(*bb);
+	*bb &= *bb - 1;
+	return lsb;
+}
+
+//int getlsb(uint64_t bb) {
+//	assert(bb);  // lsb(0) is undefined
+//	return __builtin_ctzll(bb);
+//}
+
+#else
+
+// Software based routines (used for 32-bit or very old 64-bit processors)
+#define PopulationCountX(ui64) PopulationCountByArray(ui64)
+#define BitScanForwardX(ui64) BitScanForwardDeBruijn(ui64)
+#define BitScanReverseX(ui64) BitScanReverseMs1b(ui64)
+
+__forceinline int PopulationCountBrianKernighan(uint64_t ui64) // Slowest but simplest s/w
+{ // Brian Kernighan's method
+	int count = 0;
+	while (ui64) {
+		count++;
+		ClearLS1B(ui64);
+	}
+	return count;
+}
+
+// Faster to declare constants outside of functions!
+const uint64_t k1 = 0x5555555555555555; /*  -1/3   */
+const uint64_t k2 = 0x3333333333333333; /*  -1/5   */
+const uint64_t k4 = 0x0f0f0f0f0f0f0f0f; /*  -1/17  */
+const uint64_t kf = 0x0101010101010101; /*  -1/255 */
+__forceinline uint64_t PopulationCountSWAR(uint64_t ui64) // Nearly fastest s/w
+{  // SWAR (SIMD (Single Instructions on Multiple Data) Within A Register) method
+	ui64 = ui64 - ((ui64 >> 1)  & k1); /* put count of each 2 bits into those 2 bits */
+	ui64 = (ui64 & k2) + ((ui64 >> 2)  & k2); /* put count of each 4 bits into those 4 bits */
+	ui64 = (ui64 + (ui64 >> 4)) & k4; /* put count of each 8 bits into those 8 bits */
+	ui64 = (ui64 * kf) >> 56; /* returns 8 most significant bits of x + (x<<8) + (x<<16) + (x<<24) + ...  */
+	return ui64;
+}
+
+extern uint8_t PopulationCount16[1 << 16];
+__forceinline uint64_t PopulationCountByArray(uint64_t ui64) // Fastest (just) s/w
+{
+	union
+	{
+		uint64_t bb;
+		uint16_t ui16[4];
+	} v = { ui64 };
+	return PopulationCount16[v.ui16[0]] + PopulationCount16[v.ui16[1]] + PopulationCount16[v.ui16[2]] + PopulationCount16[v.ui16[3]];
+}
+
+// Faster to declare constants outside of functions!
+const int DeBruijnIndex64[64] = {
+	0, 47,  1, 56, 48, 27,  2, 60,
+   57, 49, 41, 37, 28, 16,  3, 61,
+   54, 58, 35, 52, 50, 42, 21, 44,
+   38, 32, 29, 23, 17, 11,  4, 62,
+   46, 55, 26, 59, 40, 36, 15, 53,
+   34, 51, 20, 43, 31, 22, 10, 45,
+   25, 39, 14, 33, 19, 30,  9, 24,
+   13, 18,  8, 12,  7,  6,  5, 63
+};
+const uint64_t DeBruijnui64 = 0x03f79d71b4cb0a89;
+__forceinline int BitScanForwardDeBruijn(uint64_t ui64) // Fastest s/w
+{
+	return DeBruijnIndex64[((ui64 ^ (ui64 - 1)) * DeBruijnui64) >> 58];
+}
+
+__forceinline int BitScanReverseDeBruijn(uint64_t ui64)
+{
+	ui64 |= ui64 >> 1;
+	ui64 |= ui64 >> 2;
+	ui64 |= ui64 >> 4;
+	ui64 |= ui64 >> 8;
+	ui64 |= ui64 >> 16;
+	ui64 |= ui64 >> 32;
+	return DeBruijnIndex64[(ui64 * DeBruijnui64) >> 58];
+}
+
+extern int Ms1b[256];
+__forceinline int BitScanReverseMs1b(uint64_t ui64) // Fastest s/w
+{
+	int result = 0;
+	if (ui64 > 0xFFFFFFFF) {
+		ui64 >>= 32;
+		result = 32;
+	}
+	if (ui64 > 0xFFFF) {
+		ui64 >>= 16;
+		result += 16;
+	}
+	if (ui64 > 0xFF) {
+		ui64 >>= 8;
+		result += 8;
+	}
+	return result + Ms1b[ui64];
+}
+
+#endif
+
+//----------------------------------------------------------------------------------------------------
+
+// Bitboard manipulation routines (compass points are from white's perspective)
+inline uint64_t Rank(int square) { return  CUINT64(0xff) << (square & 56); }
+inline uint64_t File(int square) { return CUINT64(0x0101010101010101) << (square & 7); }
+inline uint64_t LeftDiagonal(int square) { const uint64_t longDiagonal = CUINT64(0x0102040810204080); int diagonal = 56 - 8 * (square & 7) - (square & 56); int north = -diagonal & (diagonal >> 31); int south = diagonal & (-diagonal >> 31); return (longDiagonal >> south) << north; }
+inline uint64_t RightDiagonal(int square) { const uint64_t longDiagonal = CUINT64(0x8040201008040201); int diagonal = 8 * (square & 7) - (square & 56); int north = -diagonal & (diagonal >> 31); int south = diagonal & (-diagonal >> 31); return (longDiagonal >> south) << north; }
+
+inline uint64_t North(uint64_t bb) { return  bb << 8; }
+inline uint64_t South(uint64_t bb) { return  bb >> 8; }
+inline uint64_t East(uint64_t bb) { return (bb << 1) & NotFileABB; }
+inline uint64_t West(uint64_t bb) { return (bb >> 1) & NotFileHBB; }
+inline uint64_t NorthEast(uint64_t bb) { return (bb << 9) & NotFileABB; }
+inline uint64_t NorthWest(uint64_t bb) { return (bb << 7) & NotFileHBB; }
+inline uint64_t SouthEast(uint64_t bb) { return (bb >> 7) & NotFileABB; }
+inline uint64_t SouthWest(uint64_t bb) { return (bb >> 9) & NotFileHBB; }
+
+inline uint64_t NorthFill(uint64_t bb) { bb |= (bb << 8); bb |= (bb << 16); bb |= (bb << 32); return bb; }
+inline uint64_t SouthFill(uint64_t bb) { bb |= (bb >> 8); bb |= (bb >> 16); bb |= (bb >> 32); return bb; }
+inline uint64_t EastFill(uint64_t bb) { const uint64_t pr0 = ~FileABB; const uint64_t pr1 = pr0 & (pr0 << 1); const uint64_t pr2 = pr1 & (pr1 << 2); bb |= pr0 & (bb << 1); bb |= pr1 & (bb << 2); bb |= pr2 & (bb << 4); return bb; }
+inline uint64_t WestFill(uint64_t bb) { const uint64_t pr0 = ~FileHBB; const uint64_t pr1 = pr0 & (pr0 >> 1); const uint64_t pr2 = pr1 & (pr1 >> 2); bb |= pr0 & (bb >> 1); bb |= pr1 & (bb >> 2); bb |= pr2 & (bb >> 4); return bb; }
+inline uint64_t NorthEastFill(uint64_t bb) { const uint64_t pr0 = ~FileABB; const uint64_t pr1 = pr0 & (pr0 << 9);  const uint64_t pr2 = pr1 & (pr1 << 18); bb |= pr0 & (bb << 9); bb |= pr1 & (bb << 18); bb |= pr2 & (bb << 36); return bb; }
+inline uint64_t NorthWestFill(uint64_t bb) { const uint64_t pr0 = ~FileHBB; const uint64_t pr1 = pr0 & (pr0 << 7); const uint64_t pr2 = pr1 & (pr1 << 14); bb |= pr0 & (bb << 7); bb |= pr1 & (bb << 14); bb |= pr2 & (bb << 28); return bb; }
+inline uint64_t SouthEastFill(uint64_t bb) { const uint64_t pr0 = ~FileABB; const uint64_t pr1 = pr0 & (pr0 >> 7);  const uint64_t pr2 = pr1 & (pr1 >> 14); bb |= pr0 & (bb >> 7); bb |= pr1 & (bb >> 14); bb |= pr2 & (bb >> 28); return bb; }
+inline uint64_t SouthWestFill(uint64_t bb) { const uint64_t pr0 = ~FileHBB; const uint64_t pr1 = pr0 & (pr0 >> 9); const uint64_t pr2 = pr1 & (pr1 >> 18); bb |= pr0 & (bb >> 9); bb |= pr1 & (bb >> 18); bb |= pr2 & (bb >> 36); return bb; }
+
+inline uint64_t EastNorthFill(uint64_t bb) { return East(NorthFill(bb)); }
+inline uint64_t WestNorthFill(uint64_t bb) { return West(NorthFill(bb)); }
+inline uint64_t EastSouthFill(uint64_t bb) { return East(SouthFill(bb)); }
+inline uint64_t WestSouthFill(uint64_t bb) { return West(SouthFill(bb)); }
+
+inline uint64_t NorthSpan(uint64_t bb) { return North(NorthFill(bb)); }
+inline uint64_t SouthSpan(uint64_t bb) { return South(SouthFill(bb)); }
+inline uint64_t EastNorthSpan(uint64_t bb) { return East(NorthSpan(bb)); }
+inline uint64_t WestNorthSpan(uint64_t bb) { return West(NorthSpan(bb)); }
+inline uint64_t EastSouthSpan(uint64_t bb) { return East(SouthSpan(bb)); }
+inline uint64_t WestSouthSpan(uint64_t bb) { return West(SouthSpan(bb)); }
+
+inline uint64_t FileFill(uint64_t bb) { return NorthFill(bb) | SouthFill(bb); }
+inline uint64_t EastFileFill(uint64_t bb) { return East(FileFill(bb)); }
+inline uint64_t WestFileFill(uint64_t bb) { return West(FileFill(bb)); }
+
+inline uint64_t noNeighborOnEastFile(uint64_t bb) { return bb & ~WestFileFill(bb); }
+inline uint64_t noNeighborOnWestFile(uint64_t bb) { return bb & ~EastFileFill(bb); }
+
+inline uint64_t isolanis(uint64_t bb) { return noNeighborOnEastFile(bb) & noNeighborOnWestFile(bb); }
+inline uint64_t halfIsolanis(uint64_t bb) { return noNeighborOnEastFile(bb) ^ noNeighborOnWestFile(bb); }
+inline uint64_t openSide1(uint64_t side1Pawns, uint64_t side2Pawns) { return side1Pawns & ~SouthSpan(side2Pawns); }
+inline uint64_t openSide2(uint64_t side2Pawns, uint64_t side1Pawns) { return side2Pawns & ~NorthSpan(side1Pawns); }
+inline uint64_t backwardSide1(uint64_t side1Pawns, uint64_t side2Pawns) {
+	uint64_t stops = North(side1Pawns);
+	uint64_t side1AttackSpans = EastNorthSpan(side1Pawns) | WestNorthSpan(side1Pawns);
+	uint64_t side2Attacks = SouthEast(side2Pawns) | SouthWest(side2Pawns);
+	return South(stops & side2Attacks & ~side1AttackSpans);
+}
+inline uint64_t backwardSide2(uint64_t side2Pawns, uint64_t side1Pawns) {
+	uint64_t stops = South(side2Pawns);
+	uint64_t side2AttackSpans = EastSouthSpan(side2Pawns) | WestSouthSpan(side2Pawns);
+	uint64_t side1Attacks = NorthEast(side1Pawns) | NorthWest(side1Pawns);
+	return North(stops & side1Attacks & ~side2AttackSpans);
+}
+inline uint64_t stragglerSide1(uint64_t side1Pawns, uint64_t side2Pawns) { return backwardSide1(side1Pawns, side2Pawns) & openSide1(side1Pawns, side2Pawns) & (Rank2BB | Rank3BB); }
+inline uint64_t stragglerSide2(uint64_t side2Pawns, uint64_t side1Pawns) { return backwardSide2(side2Pawns, side1Pawns) & openSide2(side2Pawns, side1Pawns) & (Rank7BB | Rank6BB); }
+
+inline uint64_t passedSide1(uint64_t wpawns, uint64_t bpawns) { // Modified so that doubled pawns don't count as two passed pawns
+	uint64_t allFrontSpans = SouthSpan(bpawns);
+	allFrontSpans |= East(allFrontSpans) | West(allFrontSpans);
+	return wpawns & ~allFrontSpans & ~SouthSpan(wpawns);
+}
+inline uint64_t passedSide2(uint64_t bpawns, uint64_t wpawns) {
+	uint64_t allFrontSpans = NorthSpan(wpawns);
+	allFrontSpans |= East(allFrontSpans) | West(allFrontSpans);
+	return bpawns & ~allFrontSpans & ~NorthSpan(bpawns);
+}
+
+inline uint64_t closedFiles(uint64_t bb1, uint64_t bb2) { return FileFill(bb1) & FileFill(bb2); }
+inline uint64_t openFiles(uint64_t bb1, uint64_t bb2) { return ~FileFill(bb1) & ~FileFill(bb2); }
+inline uint64_t halfOpenOrOpenFiles(uint64_t bb) { return ~FileFill(bb); }
+inline uint64_t halfOpenFile(uint64_t bb1, uint64_t bb2) { return halfOpenOrOpenFiles(bb1) ^ openFiles(bb1, bb2); }
+
+inline uint8_t fileSet(uint64_t bb) { return (uint8_t)SouthFill(bb); }
+
+inline bool Aligned(int square1, int square2, int square3) { return LineListBB[square1][square2] & UINT64SetBit(square3); }
+
+//----------------------------------------------------------------------------------------------------
+
+alignas(64) const uint64_t KingSafetyFiles[8] = { (FileABB | FileBBB | FileCBB), (FileABB | FileBBB | FileCBB), (FileBBB | FileCBB | FileDBB), (FileCBB | FileDBB | FileEBB), (FileDBB | FileEBB | FileFBB), (FileEBB | FileFBB | FileGBB), (FileFBB | FileGBB | FileHBB), (FileFBB | FileGBB | FileHBB) };
+alignas(64) const uint64_t FilesBB[8] = { FileABB, FileBBB, FileCBB, FileDBB, FileEBB, FileFBB, FileGBB, FileHBB };
+
+alignas(64) uint64_t RanksListBB[64];
+alignas(64) uint64_t FilesListBB[64];
+alignas(64) uint64_t LeftDiagonalsListBB[64];
+alignas(64) uint64_t RightDiagonalsListBB[64];
+alignas(64) uint64_t LineListBB[64][64]; // e.g. LineListBB[D2][D6] gives the squares D1 - D8
+alignas(64) uint64_t BetweenListBB[64][64]; // e.g. BetweenListBB[D2][D6] gives the squares D3 - D5
+
+alignas(64) uint64_t KingAttacksBBList[64];
+alignas(64) uint64_t KnightAttacksBBList[64];
+alignas(64) uint64_t PawnAttacksBBList[Sides][64];
+
+alignas(64) uint64_t AttacksByPieceBBList[King + 2][64];
+alignas(64) int8_t DirectAttacksByPiece[8][64][64];
+
+alignas(64) uint64_t PassedPawnCatchableByKing[2][2][64]; // side to move, king colour, king square
+
+#if !defined _WIN64 || defined TB_NO_HW_POP_COUNT
+int Ms1b[256];
+void init_Ms1b()
+{
+	int i;
+	for (i = 0; i < 256; i++) {
+		Ms1b[i] = (
+			(i > 127) ? 7 :
+			(i > 63) ? 6 :
+			(i > 31) ? 5 :
+			(i > 15) ? 4 :
+			(i > 7) ? 3 :
+			(i > 3) ? 2 :
+			(i > 1) ? 1 :
+			0
+			);
+	};
+}
+
+uint8_t PopulationCount16[1 << 16];
+void InitialisePopulationCount16()
+{
+	for (int index = 0; index < (1 << 16); index++)
+		PopulationCount16[index] = uint8_t(std::bitset<16>(index).count());
+}
+
+#endif
+
+// Return a bitboard containing all the squares attacked by the king in the provided bitboard
+// This is only used here to initialise the KingAttacksBBList array
+uint64_t KingAttacksBB(uint64_t kingSquareBB)
+{
+	uint64_t attacksBB = East(kingSquareBB) | West(kingSquareBB);
+	kingSquareBB |= attacksBB;
+	attacksBB |= North(kingSquareBB) | South(kingSquareBB);
+	return attacksBB;
+}
+
+// Return a bitboard containing all the squares attacked by the knight(s) in the provided bitboard
+// This is only used here to initialise the KnightAttacksBBList array
+uint64_t KnightAttacksBB(uint64_t knightSquareBB)
+{
+	uint64_t attacksBB, eastBB, westBB;
+	eastBB = East(knightSquareBB);
+	westBB = West(knightSquareBB);
+	attacksBB = (eastBB | westBB) << 16;
+	attacksBB |= (eastBB | westBB) >> 16;
+	eastBB = East(eastBB);
+	westBB = West(westBB);
+	attacksBB |= (eastBB | westBB) << 8;
+	attacksBB |= (eastBB | westBB) >> 8;
+	return attacksBB;
+}
+
+// Return a bitboard containing all the squares attacked by the pawn(s) in the provided bitboard
+inline uint64_t Side0PawnAttacksBB(uint64_t pawnSquareBB)
+{
+	return NorthEast(pawnSquareBB) | NorthWest(pawnSquareBB);
+}
+
+// Return a bitboard containing all the squares attacked by the pawn(s) in the provided bitboard
+inline uint64_t Side1PawnAttacksBB(uint64_t pawnSquareBB)
+{
+	return SouthEast(pawnSquareBB) | SouthWest(pawnSquareBB);
+}
+
+// 'Fancy' magic bitboards (862208 bytes : About 2.74 times smaller and about 2.5% faster than 'plain')
+// I tried putting the AttacksPointer, InnerRay, MagicMultiplier and BlockerPermutationBitsPreAdjusted into a struct (to try to save array indexing) but it was slower! :O
+alignas(64) uint64_t RookAttacksFancyBB[102400]; // 819200 = 800KB
+alignas(64) uint64_t BishopAttacksFancyBB[5248]; // 41984 = 41KB
+alignas(64) uint64_t* RookAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the RookAttacksFancyBB array above
+alignas(64) uint64_t* BishopAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the BishopAttacksFancyBB array above
+
+alignas(64) uint64_t RookInnerRays[64];
+alignas(64) uint64_t BishopInnerRays[64];
+
+// The sum of moves in all the rays (not counting the last step of the ray)
+// 2^12 = 4096 (i.e. the number of blocker permutations for a rook on e.g. A1) x 64 squares x 8 bytes (i.e. 1 uint64_t) = 2MB
+alignas(64)
+const int RookBlockerPermutationBits[64] = {
+  12, 11, 11, 11, 11, 11, 11, 12,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  11, 10, 10, 10, 10, 10, 10, 11,
+  12, 11, 11, 11, 11, 11, 11, 12
+};
+alignas(64)
+const int RookBlockerPermutationBitsPreAdjusted[64] = {
+  64 - 12, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 12,
+  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
+  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
+  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
+  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
+  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
+  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
+  64 - 12, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 12
+};
+
+// 2^9 = 512 (i.e. the number of blocker permutations for a bishop on e.g. D4) x 64 squares x 8 bytes (i.e. 1 uint64_t) = 256KB
+alignas(64)
+const int BishopBlockerPermutationBits[64] = {
+  6, 5, 5, 5, 5, 5, 5, 6,
+  5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 7, 7, 7, 7, 5, 5,
+  5, 5, 7, 9, 9, 7, 5, 5,
+  5, 5, 7, 9, 9, 7, 5, 5,
+  5, 5, 7, 7, 7, 7, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5,
+  6, 5, 5, 5, 5, 5, 5, 6
+};
+alignas(64)
+const int BishopBlockerPermutationBitsPreAdjusted[64] = {
+  64 - 6, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 6,
+  64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5,
+  64 - 5, 64 - 5, 64 - 7, 64 - 7, 64 - 7, 64 - 7, 64 - 5, 64 - 5,
+  64 - 5, 64 - 5, 64 - 7, 64 - 9, 64 - 9, 64 - 7, 64 - 5, 64 - 5,
+  64 - 5, 64 - 5, 64 - 7, 64 - 9, 64 - 9, 64 - 7, 64 - 5, 64 - 5,
+  64 - 5, 64 - 5, 64 - 7, 64 - 7, 64 - 7, 64 - 7, 64 - 5, 64 - 5,
+  64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5,
+  64 - 6, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 6
+};
+
+alignas(64)
+const uint64_t RookMagicMultipliers[64] = {
+  0x80004000976080ULL,
+  0x1040400010002000ULL,
+  0x4880200210000980ULL,
+  0x5280080010000482ULL,
+  0x200040200081020ULL,
+  0x2100080100020400ULL,
+  0x4280008001000200ULL,
+  0x1000a4425820300ULL,
+  0x29002100800040ULL,
+  0x4503400040201004ULL,
+  0x209002001004018ULL,
+  0x1131000a10002100ULL,
+  0x9000800120500ULL,
+  0x10e001804820010ULL,
+  0x29000402000100ULL,
+  0x2002000d01c40292ULL,
+  0x80084000200c40ULL,
+  0x10004040002002ULL,
+  0x201030020004014ULL,
+  0x80012000a420020ULL,
+  0x129010008001204ULL,
+  0x6109010008040002ULL,
+  0x950010100020004ULL,
+  0x803a0000c50284ULL,
+  0x80004100210080ULL,
+  0x200240100140ULL,
+  0x20004040100800ULL,
+  0x4018090300201000ULL,
+  0x4802010a00102004ULL,
+  0x2001000900040002ULL,
+  0x4a02104001002a8ULL,
+  0x2188108200204401ULL,
+  0x40400020800080ULL,
+  0x880402000401004ULL,
+  0x10040800202000ULL,
+  0x604410a02001020ULL,
+  0x200200206a001410ULL,
+  0x86000400810080ULL,
+  0x428200040600080bULL,
+  0x2001000041000082ULL,
+  0x80002000484000ULL,
+  0x210002002c24000ULL,
+  0x401a200100410014ULL,
+  0x5021000a30009ULL,
+  0x218000509010010ULL,
+  0x4000400410080120ULL,
+  0x20801040010ULL,
+  0x29040040820011ULL,
+  0x4080400024800280ULL,
+  0x500200040100440ULL,
+  0x2880142001004100ULL,
+  0x412020400a001200ULL,
+  0x18c028004080080ULL,
+  0x884001020080401ULL,
+  0x210810420400ULL,
+  0x801048745040200ULL,
+  0x4401002040120082ULL,
+  0x408200210012ULL,
+  0x110008200441ULL,
+  0x2010002004100901ULL,
+  0x801000800040211ULL,
+  0x480d000400820801ULL,
+  0x820104201280084ULL,
+  0x1001040311802142ULL,
+};
+
+alignas(64)
+const uint64_t BishopMagicMultipliers[64] = {
+  0x1024b002420160ULL,
+  0x1008080140420021ULL,
+  0x2012080041080024ULL,
+  0xc282601408c0802ULL,
+  0x2004042000000002ULL,
+  0x12021004022080ULL,
+  0x880414820100000ULL,
+  0x4501002211044000ULL,
+  0x20402222121600ULL,
+  0x1081088a28022020ULL,
+  0x1004c2810851064ULL,
+  0x2040080841004918ULL,
+  0x1448020210201017ULL,
+  0x4808110108400025ULL,
+  0x10504404054004ULL,
+  0x800010422092400ULL,
+  0x40000870450250ULL,
+  0x402040408080518ULL,
+  0x1000980a404108ULL,
+  0x1020804110080ULL,
+  0x8200c02082005ULL,
+  0x40802009a0800ULL,
+  0x1000201012100ULL,
+  0x111080200820180ULL,
+  0x904122104101024ULL,
+  0x4008200405244084ULL,
+  0x44040002182400ULL,
+  0x4804080004021002ULL,
+  0x6401004024004040ULL,
+  0x404010001300a20ULL,
+  0x428020200a20100ULL,
+  0x300460100420200ULL,
+  0x404200c062000ULL,
+  0x22101400510141ULL,
+  0x104044400180031ULL,
+  0x2040040400280211ULL,
+  0x8020400401010ULL,
+  0x20100110401a0040ULL,
+  0x100101005a2080ULL,
+  0x1a008300042411ULL,
+  0x120a025004504000ULL,
+  0x4001084242101000ULL,
+  0xa020202010a4200ULL,
+  0x4000002018000100ULL,
+  0x80104000044ULL,
+  0x1004009806004043ULL,
+  0x100401080a000112ULL,
+  0x1041012101000608ULL,
+  0x40400c250100140ULL,
+  0x80a10460a100002ULL,
+  0x2210030401240002ULL,
+  0x6040aa108481b20ULL,
+  0x4009004050410002ULL,
+  0x8106003420200e0ULL,
+  0x1410500a08206000ULL,
+  0x92548802004000ULL,
+  0x1040041241028ULL,
+  0x120042025011ULL,
+  0x8060104054400ULL,
+  0x20004404020a0a01ULL,
+  0x40008010020214ULL,
+  0x4000050209802c1ULL,
+  0x208244210400ULL,
+  0x10140848044010ULL,
+};
+
+// Return a bitboard containing all the squares attacked by the rook on the provided square with the provided blockers
+// This is used by the move generators
+uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
+{
+	occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
+	occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
+	occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
+	// I *THINK* that _pext_u64 (part of BMI2) does the above 3 instructions in one go??? TEST!
+	return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
+}
+
+// Return a bitboard containing all the squares attacked by the bishop on the provided square with the provided blockers
+// This is used by the move generators
+uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
+{
+	occupiedSquaresBB &= BishopInnerRays[square]; // Get the relevant blockers for the bishop on 'square'
+	occupiedSquaresBB *= BishopMagicMultipliers[square];
+	occupiedSquaresBB >>= BishopBlockerPermutationBitsPreAdjusted[square];
+	return *(BishopAttacksFancyPointer[square] + occupiedSquaresBB);
+}
+
+// Generate the inner rays bitboard for a rook on the given square, e.g. for f6 ...
+// . . . . . . . .
+// . . . . . 1 . .
+// . 1 1 1 1 . 1 .
+// . . . . . 1 . .
+// . . . . . 1 . .
+// . . . . . 1 . .
+// . . . . . 1 . .
+// . . . . . . . .
+// This is only used here to initialise the RookInnerRays array
+uint64_t GenerateRookInnerRay(int square)
+{
+	uint64_t resultBB = 0ULL;
+	int rank = square / 8, file = square % 8, r, f;
+	for (r = rank + 1; r <= 6; r++) resultBB |= (1ULL << (file + r * 8));
+	for (r = rank - 1; r >= 1; r--) resultBB |= (1ULL << (file + r * 8));
+	for (f = file + 1; f <= 6; f++) resultBB |= (1ULL << (f + rank * 8));
+	for (f = file - 1; f >= 1; f--) resultBB |= (1ULL << (f + rank * 8));
+	return resultBB;
+}
+
+// Generate the inner rays bitboard for a bishop on the given square
+// This is only used here to initialise the BishopInnerRays array
+uint64_t GenerateBishopInnerRay(int square)
+{
+	uint64_t resultBB = 0ULL;
+	int rank = square / 8, file = square % 8, r, f;
+	for (r = rank + 1, f = file + 1; r <= 6 && f <= 6; r++, f++) resultBB |= (1ULL << (f + r * 8));
+	for (r = rank + 1, f = file - 1; r <= 6 && f >= 1; r++, f--) resultBB |= (1ULL << (f + r * 8));
+	for (r = rank - 1, f = file + 1; r >= 1 && f <= 6; r--, f++) resultBB |= (1ULL << (f + r * 8));
+	for (r = rank - 1, f = file - 1; r >= 1 && f >= 1; r--, f--) resultBB |= (1ULL << (f + r * 8));
+	return resultBB;
+}
+
+uint64_t GenerateRookAttacks(int square, uint64_t blockersBB) {
+	uint64_t resultBB = 0ULL;
+	int rank = square / 8, file = square % 8, r, f;
+	for (r = rank + 1; r <= 7; r++) {
+		resultBB |= (1ULL << (file + r * 8));
+		if (blockersBB & (1ULL << (file + r * 8))) break;
+	}
+	for (r = rank - 1; r >= 0; r--) {
+		resultBB |= (1ULL << (file + r * 8));
+		if (blockersBB & (1ULL << (file + r * 8))) break;
+	}
+	for (f = file + 1; f <= 7; f++) {
+		resultBB |= (1ULL << (f + rank * 8));
+		if (blockersBB & (1ULL << (f + rank * 8))) break;
+	}
+	for (f = file - 1; f >= 0; f--) {
+		resultBB |= (1ULL << (f + rank * 8));
+		if (blockersBB & (1ULL << (f + rank * 8))) break;
+	}
+	return resultBB;
+}
+
+uint64_t GenerateBishopAttacks(int square, uint64_t blockersBB) {
+	uint64_t resultBB = 0ULL;
+	int rank = square / 8, file = square % 8, r, f;
+	for (r = rank + 1, f = file + 1; r <= 7 && f <= 7; r++, f++) {
+		resultBB |= (1ULL << (f + r * 8));
+		if (blockersBB & (1ULL << (f + r * 8))) break;
+	}
+	for (r = rank + 1, f = file - 1; r <= 7 && f >= 0; r++, f--) {
+		resultBB |= (1ULL << (f + r * 8));
+		if (blockersBB & (1ULL << (f + r * 8))) break;
+	}
+	for (r = rank - 1, f = file + 1; r >= 0 && f <= 7; r--, f++) {
+		resultBB |= (1ULL << (f + r * 8));
+		if (blockersBB & (1ULL << (f + r * 8))) break;
+	}
+	for (r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--) {
+		resultBB |= (1ULL << (f + r * 8));
+		if (blockersBB & (1ULL << (f + r * 8))) break;
+	}
+	return resultBB;
+}
+
+uint64_t PermutationIndexToBB(int permutationIndex, int blockerPermutationBits, uint64_t innerRays) { // index: 0 .. 4095 (12 bits)
+	int i, j;
+	uint64_t result = 0ULL;
+	for (i = 0; i < blockerPermutationBits; i++) { // e.g. 0 .. 11
+		j = BitScanForwardX(innerRays);
+		ClearLS1B(innerRays);
+		if (permutationIndex & (1 << i)) result |= (1ULL << j);
+	}
+	return result;
+}
+
+inline uint64_t FlipVertical(uint64_t bb) {
+	const uint64_t k1 = CUINT64(0x00FF00FF00FF00FF);
+	const uint64_t k2 = CUINT64(0x0000FFFF0000FFFF);
+	bb = ((bb >> 8) & k1) | ((bb & k1) << 8);
+	bb = ((bb >> 16) & k2) | ((bb & k2) << 16);
+	bb = (bb >> 32) | (bb << 32);
+	return bb;
+}
+
+bool PassedPawnCatchableByKingMirrored()
+{
+	bool result = true;
+
+	for (int square = A1; square <= H8; square++)
+	{
+		if (PassedPawnCatchableByKing[0][0][square] != FlipVertical(PassedPawnCatchableByKing[1][1][square ^ 56]))
+			result = false;
+		if (PassedPawnCatchableByKing[0][1][square] != FlipVertical(PassedPawnCatchableByKing[1][0][square ^ 56]))
+			result = false;
+	}
+
+	return result;
+}
+
+void InitialiseBitBoardLists()
+{
+	// Initialise attack lists (one off)
+	std::memset(AttacksByPieceBBList, 0, sizeof(AttacksByPieceBBList));
+
+	int rookFancyIndex = 0;
+	int bishopFancyIndex = 0;
+	for (int square = A1; square <= H8; square++)
+	{
+		uint64_t squareBB = UINT64SetBit(square);
+
+		if (square < A8)
+			PawnAttacksBBList[0][square] = Side0PawnAttacksBB(squareBB);
+		else
+			PawnAttacksBBList[0][square] = 0;
+		if (square > H1)
+			PawnAttacksBBList[1][square] = Side1PawnAttacksBB(squareBB);
+		else
+			PawnAttacksBBList[1][square] = 0;
+
+		KnightAttacksBBList[square] = KnightAttacksBB(squareBB);
+		AttacksByPieceBBList[Knight][square] = KnightAttacksBBList[square];
+
+		KingAttacksBBList[square] = KingAttacksBB(squareBB);
+		AttacksByPieceBBList[King][square] = KingAttacksBBList[square];
+
+		RookInnerRays[square] = GenerateRookInnerRay(square);
+		RookAttacksFancyPointer[square] = &RookAttacksFancyBB[rookFancyIndex];
+		for (int permutationIndex = 0; permutationIndex < (1 << RookBlockerPermutationBits[square]); permutationIndex++) // 1 << (max)12 = 4096
+		{
+			uint64_t blockersBB;
+			blockersBB = PermutationIndexToBB(permutationIndex, RookBlockerPermutationBits[square], RookInnerRays[square]);
+			int keyIndex;
+			keyIndex = (int)((blockersBB * RookMagicMultipliers[square]) >> (64 - RookBlockerPermutationBits[square]));
+			*(RookAttacksFancyPointer[square] + keyIndex) = GenerateRookAttacks(square, blockersBB);
+			rookFancyIndex++;
+		}
+
+		BishopInnerRays[square] = GenerateBishopInnerRay(square);
+		BishopAttacksFancyPointer[square] = &BishopAttacksFancyBB[bishopFancyIndex];
+		for (int permutationIndex = 0; permutationIndex < (1 << BishopBlockerPermutationBits[square]); permutationIndex++) // 1 << (max)9 = 512
+		{
+			uint64_t blockersBB;
+			blockersBB = PermutationIndexToBB(permutationIndex, BishopBlockerPermutationBits[square], BishopInnerRays[square]);
+			int keyIndex;
+			keyIndex = (int)((blockersBB * BishopMagicMultipliers[square]) >> (64 - BishopBlockerPermutationBits[square]));
+			*(BishopAttacksFancyPointer[square] + keyIndex) = GenerateBishopAttacks(square, blockersBB);
+			bishopFancyIndex++;
+		}
+
+		AttacksByPieceBBList[Bishop][square] = BishopAttacksBB(square, 0);
+		AttacksByPieceBBList[Rook][square] = RookAttacksBB(square, 0);
+		AttacksByPieceBBList[Queen][square] = BishopAttacksBB(square, 0) | RookAttacksBB(square, 0);
+
+		// White to move, black king catching white pawns
+		// The black king can't catch any pawns on a higher rank
+		// The black king can't catch any pawns if it is on rank 0 or 1
+
+		int kingRank = square >> 3;
+		int movesToPromotionRank = 7 - kingRank;
+		uint64_t bb = UINT64SetBit(square);
+		for (int i = 0; i < movesToPromotionRank; i++)
+			bb |= West(bb) | East(bb); // The king can catch pawns to either side by the same number of moves to the promotion rank
+		if (kingRank < 2) // If the king is on the 1st or 2nd rank it can't catch any pawns so clear the bitboard BUG FIX!
+			bb = 0;
+		for (int i = 0; i < kingRank - 2; i++) // Fill in a pyramid down the board to the 3rd rank
+			bb |= South(West(bb) | bb | East(bb));
+		bb |= South(bb);// | 0xff; // Fill in the 2nd rank the same as the 3rd rank and fill in the 1st rank for completeness WHY???
+
+
+		PassedPawnCatchableByKing[0][1][square] = bb;
+
+		// Black to move, white king catching black pawns is just a reflection
+		PassedPawnCatchableByKing[1][0][square ^ 56] = FlipVertical(bb);
+	}
+	
+	// Passed pawn runners
+	for (int square = A1; square <= H8; square++)
+	{
+		int square2;
+
+		// Black to move, black king catching white pawns
+		
+		square2 = square;
+		if (square < 56)
+			square2 += 8; // If it's not already on the promotion rank then it can advance
+		// Now it can capture the union of the current square and the squares to each side
+		PassedPawnCatchableByKing[1][1][square] = PassedPawnCatchableByKing[0][1][square2] | UINT64SetBit(square2); // Also have to 'or' in the square itself to handle when the king is on the 1st rank
+		if (square % 8 > 0)
+			PassedPawnCatchableByKing[1][1][square] |= PassedPawnCatchableByKing[0][1][square2 - 1] | UINT64SetBit(square2 - 1);
+		if (square % 8 < 7)
+			PassedPawnCatchableByKing[1][1][square] |= PassedPawnCatchableByKing[0][1][square2 + 1] | UINT64SetBit(square2 + 1);
+
+		PassedPawnCatchableByKing[0][0][square ^ 56] = FlipVertical(PassedPawnCatchableByKing[1][1][square]);
+	}
+	assert(PassedPawnCatchableByKingMirrored());
+
+	// Initialise helper bitmap lists
+	for (int squareIndex1 = A1; squareIndex1 <= H8; squareIndex1++)
+	{
+		RanksListBB[squareIndex1] = Rank(squareIndex1);
+		FilesListBB[squareIndex1] = File(squareIndex1);
+		LeftDiagonalsListBB[squareIndex1] = LeftDiagonal(squareIndex1);
+		RightDiagonalsListBB[squareIndex1]= RightDiagonal(squareIndex1);
+
+		for (int squareIndex2 = A1; squareIndex2 <= H8; squareIndex2++)
+		{
+			LineListBB[squareIndex1][squareIndex2] = 0;
+			BetweenListBB[squareIndex1][squareIndex2] = 0;
+			if ((squareIndex1 != squareIndex2) && ((LeftDiagonalsListBB[squareIndex1] | RightDiagonalsListBB[squareIndex1]) & UINT64SetBit(squareIndex2)))
+			{
+				LineListBB[squareIndex1][squareIndex2] = (BishopAttacksBB(squareIndex1, 0) & BishopAttacksBB(squareIndex2, 0)) | UINT64SetBit(squareIndex1) | UINT64SetBit(squareIndex2);
+				BetweenListBB[squareIndex1][squareIndex2] = BishopAttacksBB(squareIndex1, UINT64SetBit(squareIndex2)) & BishopAttacksBB(squareIndex2, UINT64SetBit(squareIndex1));
+			}
+			if ((squareIndex1 != squareIndex2) && ((RanksListBB[squareIndex1] | FilesListBB[squareIndex1]) & UINT64SetBit(squareIndex2)))
+			{
+				LineListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, 0) & RookAttacksBB(squareIndex2, 0) | UINT64SetBit(squareIndex1) | UINT64SetBit(squareIndex2);
+				BetweenListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, UINT64SetBit(squareIndex2)) & RookAttacksBB(squareIndex2, UINT64SetBit(squareIndex1));
+			}
+		}
+	}
+
+	// Possible direct checks NOT FINISHED!
+	for (int piece = Pawn; piece < King; piece++)
+	{
+		for (int attackedSquare = A1; attackedSquare <= H8; attackedSquare++)
+		{
+			for (int square = A1; square <= H8; square++)
+			{
+				int8_t v = 0;
+				switch (piece)
+				{
+				case Pawn:
+					break;
+				case Knight:
+					if (KnightAttacksBBList[square] & UINT64SetBit(attackedSquare))
+						v = 2;
+					break;
+				case Bishop:
+					break;
+				case Rook:
+					break;
+				case Queen:
+					break;
+				case King:
+					if (KingAttacksBBList[square] & UINT64SetBit(attackedSquare))
+						v = 2;
+					break;
+				}
+				DirectAttacksByPiece[piece][attackedSquare][square] = v;
+			}
+		}
+	}
+
+
+#if !defined _WIN64 || defined TB_NO_HW_POP_COUNT
+	// Initialise array for software bit scan reverse
+	init_Ms1b();
+	InitialisePopulationCount16();
+#endif
+}

@@ -1,0 +1,2186 @@
+---------------------------------------------------------------------------------------------------------
+FOR TESTING I TYPICALLY HAVE THE BASELINE ENGINE PLAY 1ST AND THE NEWLY MODIFIED ENGINE PLAY 2ND
+
+I RECORD THE RESULT RELATIVE TO THE NEWLY MODIFIED ENGINE (SO I NEGATE THE CUTECHESSCLI PRINTED RESULT)
+THEREFORE IF THE RESULT BELOW IS +ve IT'S A THUMBS UP FOR THE MODIFICATION (???IS ANY OF THIS TRUE???)
+
+20NNx
+=====
+
+CC1 v CC2 {Fixed bracketing bug in AddToTT} (-0.40) PCS2
+CC1 v CC2 {Fixed bracketing bug in AddToTT} (0.12) PCS1
+
+CC2 v CC3 {Whole bugged clause removed from AddToTT} (-2.87) PCS2
+CC2 v CC3 {Whole bugged clause removed from AddToTT} (-2.64) PCS1
+CC2 v CC3 {Whole bugged clause removed from AddToTT} (0.78) ASUS1
+
+CC3 v CC4 {KP shelter removed from eval} (was about +2.5/17000 when managed to crash all cmd windows!!!) PCS2
+CC3 v CC4 {KP shelter removed from eval} (-0.26) PCS1
+CC3 v CC4 {KP shelter removed from eval} (-1.04) ASUS1
+
+25b vs 25bNonPGO (5.14) PCS2
+
+CC3 v CC5 {KP shelter max/min bug fix!} (-2.55) PCS2
+CC3 v CC5 {KP shelter max/min bug fix!} (-3.32) PCS1
+CC3 v CC5 {KP shelter max/min bug fix!} (-1.96) ASUS1
+
+CC5 v CC6 {KP shelter *8 not *2} (1.89) PCS2
+
+CC5 v CC7 {KP shelter *3 not *2} (was about -3.5/13689 when managed to crash all cmd windows!!!) PCS2
+CC5 v CC7 {KP shelter *3 not *2} (1.53) PCS1
+CC5 v CC7 {KP shelter *3 not *2} (-2.80) ASUS1
+
+CC7 v CC8 {KP shelter not given if K beyond 2nd rank} (0.23) PCS2
+CC7 v CC8 {KP shelter not given if K beyond 2nd rank} (0.54) PCS1
+CC7 v CC8 {KP shelter not given if K beyond 2nd rank} (1.41) ASUS1
+
+CC7 v CC9 {Timeup gives 20% less time} 10s+0.1s (3.81, +/-3.52, 17530) PCS2
+CC7 v CC10 {Timeup gives 20% more time} 10s+0.1s (2.81) PCS2
+CC7 v CC10 {Timeup gives 20% more time} 10s+0.1s (1.81) PCS1
+CC7 v CC10 {Timeup gives 20% more time} 10s+0.1s (0.76) ASUS1
+
+CC7 v CC11 {DrawScore made branchless and gives 4* mat diff bonus} (crashed) PCS2
+CC7 v CC11 {DrawScore made branchless and gives 4* mat diff bonus} (-4.07) PCS1
+CC7 v CC11 {DrawScore made branchless and gives 4* mat diff bonus} (1.63) ASUS1
+
+CC7 v CC7With6pcEGTB {3'+1" 2000 games} (-25.76, +/-9.53, 2000) ASUS1
+CC7 v CC7With6pcEGTB {0.4s/move} (-19.63) ASUS1
+CC7 v CC7With6pcEGTB {0.1s/move} (-25.84) ASUS1
+CC7 v CC7With5pcEGTB {0.1s/move} (-17.09) ASUS1
+CC7 v CC7With4pcEGTB {0.1s/move} (-7.42) ASUS1
+
+CC7 v CC14 {QS probes 6pc EGTBs at all plies {SSD}} (12.6) PCS2
+
+CC7 v CC15 {QS probes 6pc EGTBs at 1st ply {SSD}} (1.32) PCS2
+
+CC7 v CC16 {QS probes 5pc EGTBs at all plies {SSD}} (-2.52) PCS2
+CC7 v CC16 {QS probes 5pc EGTBs at all plies {HD}} (0.57) PCS1
+CC7 v CC16 {QS probes 5pc EGTBs at all plies {SSD}} (-1.27) ASUS1
+
+CC16 v CC17 {EGTB saved to TT in main} (-2.40) PCS2
+CC16 v CC17 {EGTB saved to TT in main} (-0.66) PCS1
+CC16 v CC17 {EGTB saved to TT in main} (6.36) ASUS1 :O
+
+CC18: minor optimisations and bug fixes
+CC18 v CC18Contempt {Contempt set to 10} (3.32) PCS2
+CC18 v CC18Contempt {Contempt set to -10} (1.89) PCS2
+
+CC18 v CC19 {addToTT breaks when finds 'oldest'} (-4.74) PCS2
+CC18 v CC19 {addToTT breaks when finds 'oldest'} (-4.31) PCS1
+CC18 v CC19 {addToTT breaks when finds 'oldest'} (-2.05) ASUS1
+
+CC19 v CC20 {TT optimisations} (-2.74) PCS2
+CC19 v CC20 {TT optimisations} (-0.4) PCS1
+CC19 v CC20 {TT optimisations} (3.23) ASUS1
+
+CC20 v CC21 {no aspiration windows at root} (26.30) PCS2
+CC20 v CC21 {no aspiration windows at root} (25.11, 11779) PCS1
+CC20 v CC21 {no aspiration windows at root} (28.43, 11010) ASUS1
+
+CC20 v CC22 {fail high moves immediately saved to rootBestMove} (-2.88) PCS2 [accidentally no EGTB]
+CC20 v CC22 {fail high moves immediately saved to rootBestMove} (-2.28) PCS2 [EGTB fixed]
+CC20 v CC22 {fail high moves immediately saved to rootBestMove} (-5.66) PCS1
+CC20 v CC22 {fail high moves immediately saved to rootBestMove} (-4.00) ASUS1
+
+CC22 v CC23 {fail high opens windows to +inf immediately} (2.21) PCS2
+CC22 v CC23 {fail high opens windows to +inf immediately} (-1.04) PCS1
+CC22 v CC23 {fail high opens windows to +inf immediately} (2.76) ASUS1
+
+
+FROM NOW ON I'LL RECORD THE FASTCHESS RESULT AS IS
+THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
+
+CC22 v CC24 {immediate DBR removed in main and QS} (3.82) PCS2
+CC22 v CC24 {immediate DBR removed in main and QS} (1.88) PCS1
+CC22 v CC24 {immediate DBR removed in main and QS} (5.52) ASUS1
+CC22 v CC24 {immediate DBR removed in main and QS} (3.18) NIPOGI1
+
+CC22 v CC25 {DBR requires 2 repeats in main and QS} (2.24) PCS2
+CC22 v CC25 {DBR requires 2 repeats in main and QS} (-0.73) PCS1
+CC22 v CC25 {DBR requires 2 repeats in main and QS} (3.75) ASUS1
+CC22 v CC25 {DBR requires 2 repeats in main and QS} (1.93) NIPOGI1
+
+CC22 v CC26 {When in EGTB at root still uses lower EGTBs in tree} (-3.91) PCS2
+CC22 v CC26 {When in EGTB at root still uses lower EGTBs in tree} (-0.24) PCS1
+CC22 v CC26 {When in EGTB at root still uses lower EGTBs in tree} (-0.64) ASUS1
+CC22 v CC26 {When in EGTB at root still uses lower EGTBs in tree} (-0.21) NIPOGI1
+
+CC1 v CC26 (-11.63) PCS2
+CC1 v CC26 (-15.44) PCS1
+CC1 v CC26 (-13.84) ASUS1
+CC1 v CC26 (-17.46) NIPOGI1
+
+CC26 v CC27 {'sees through' EGTBs when losing as well as when winning} (3.25) PCS2
+CC26 v CC27 {'sees through' EGTBs when losing as well as when winning} (-3.51) PCS1
+CC26 v CC27 {'sees through' EGTBs when losing as well as when winning} (4.45) ASUS1
+CC26 v CC27 {'sees through' EGTBs when losing as well as when winning} (2.17) NIPOGI1
+
+CC1 v CC27 (-14.10) PCS2
+CC1 v CC27 (-14.06) PCS1
+CC1 v CC27 (-11.05) ASUS1
+CC1 v CC27 (-10.58) NIPOGI1
+
+TO ACCEPT 27 OR NOT???
+CC27 v CC1 (10.79) PCS2
+CC27 v CC1 (12.98) PCS1
+CC27 v CC1 (14.72) ASUS1
+CC27 v CC1 (10.25) NIPOGI1
+
+CC26 v CC1 (13.02) PCS2
+CC26 v CC1 (13.09) PCS1
+CC26 v CC1 (12.77) ASUS1
+CC26 v CC1 (13.26) NIPOGI1
+
+CC26 v CC28 {'sees through' EGTBs removed completely} (-0.69) PCS2
+CC26 v CC28 {'sees through' EGTBs removed completely} (3.61) PCS1
+CC26 v CC28 {'sees through' EGTBs removed completely} (3.53) ASUS1
+CC26 v CC28 {'sees through' EGTBs removed completely} (1.36) NIPOGI1
+
+CC26 v CC29 {EGTBs offset with ply} (-0.33) PCS2 - NEED TO COMPENSATE IN TT AND DO IN QS!!!!!
+CC26 v CC29 {EGTBs offset with ply} (-1.27) PCS1
+CC26 v CC29 {EGTBs offset with ply} (2.85) ASUS1
+CC26 v CC29 {EGTBs offset with ply} (-0.38) NIPOGI1
+
+CC26 v CC32 {don't probe EGTBs if in check} (-0.42) PCS2
+CC26 v CC32 {don't probe EGTBs if in check} (+0.90) PCS1
+CC26 v CC32 {don't probe EGTBs if in check} (11.90) ASUS1 - I think this is anomolous! I forgot it wasn't plugged in and the battery died early in the run. It seemed to restart ok after plugging in but I don't trust this.
+CC26 v CC32 {don't probe EGTBs if in check} (1.62) ASUS1 - Trying again! Therefore don't trust a restarted run!
+CC26 v CC32 {don't probe EGTBs if in check} (+0.45) NIPOGI1
+
+CC26 v CC33 {new EGTBs 'see through' code} (3.21) PCS2
+CC26 v CC33 {new EGTBs 'see through' code} (4.05) PCS1
+CC26 v CC33 {new EGTBs 'see through' code} (2.90) ASUS1
+CC26 v CC33 {new EGTBs 'see through' code} (-1.95) NIPOGI1
+
+CC33 v CC1 (10.77) PCS2
+I don't know why '33' would lose about 3 ELO but it does seem like it might?!
+
+CC26 v CC34 {new restructured EGTBs 'see through' code using WinningBaseScore} (-1.29) PCS2
+CC26 v CC34 {new restructured EGTBs 'see through' code} (4.07) PCS1
+CC26 v CC34 {new restructured EGTBs 'see through' code} (5.99) ASUS1
+CC26 v CC34 {new restructured EGTBs 'see through' code} (-4.86) NIPOGI1
+WOW! That's a lot of variation!
+
+CC34 v CC35 {draws return max(drawscore,alpha)} (1.56) PCS2
+CC34 v CC35 {draws return max(drawscore,alpha)} (2.05) PCS1
+CC34 v CC35 {draws return max(drawscore,alpha)} (1.65) ASUS1
+CC34 v CC35 {draws return max(drawscore,alpha)} (-0.21) NIPOGI1
+
+CC26 v CC38 {EGTB scores offset with ply (no see thru)} (0.85) PCS2
+CC26 v CC38 {EGTB scores offset with ply (no see thru)} (-0.9) PCS1
+CC26 v CC38 {EGTB scores offset with ply (no see thru)} (-2.8) ASUS1
+CC26 v CC38 {EGTB scores offset with ply (no see thru)} (-0.52) NIPOGI1
+
+CC38 v CC39 {in standpat in QS, no longer use tteLowerLimitScore to improve bestMoveScore} (0.87) PCS2
+
+CC38 v CC40 {Don't probe EGTB if WinningBaseScore+1000-ply<=alpha, just return alpha} (3.21) PCS2
+CC38 v CC40 {Don't probe EGTB if WinningBaseScore+1000-ply<=alpha, just return alpha} (-0.02) PCS1
+CC38 v CC40 {Don't probe EGTB if WinningBaseScore+1000-ply<=alpha, just return alpha} (-2.24) ASUS1
+CC38 v CC40 {Don't probe EGTB if WinningBaseScore+1000-ply<=alpha, just return alpha} (-2.68) NIPOGI1
+
+CC38 v CC41 {new EGTBs 'see through' code} (-4.59) PCS2
+CC38 v CC41 {new EGTBs 'see through' code} (-0.33) PCS1
+CC38 v CC41 {new EGTBs 'see through' code} (-1.72) ASUS1
+CC38 v CC41 {new EGTBs 'see through' code} (-0.63) NIPOGI1
+
+CC41 v CC42 {probes 6pc EGTBs in QS} (10.37) PCS2
+CC41 v CC42 {probes 6pc EGTBs in QS} (40.84) PCS1
+CC41 v CC42 {probes 6pc EGTBs in QS} (14.06) ASUS1
+CC41 v CC42 {probes 6pc EGTBs in QS} (31.84) NIPOGI1
+
+CC41 v CC43 {addToTT special mating clauses removed} (1.60) PCS2
+CC41 v CC43 {addToTT special mating clauses removed} (0.12) PCS1
+CC41 v CC43 {addToTT special mating clauses removed} (0.24) ASUS1
+CC41 v CC43 {addToTT special mating clauses removed} (-2.85) NIPOGI1
+
+#CC44 - 'Sub-optimal DTZ' bug fix in SearchNormal
+#CC45 - futility pruning tests beta>LosingBaseScore
+#CC46 - null move tests beta>LosingBaseScore
+#CC47 - futility pruning AND null move tests beta>LosingBaseScore
+
+CC44 v CC45 {futility pruning tests beta>LosingBaseScore} (1.89) PCS2
+CC44 v CC45 {futility pruning tests beta>LosingBaseScore} (0.52) PCS1
+CC44 v CC45 {futility pruning tests beta>LosingBaseScore} (-0.49) ASUS1
+CC44 v CC45 {futility pruning tests beta>LosingBaseScore} (-7.85) NIPOGI1
+
+CC44 v CC46 {null move tests beta>LosingBaseScore} (-2.28) PCS2
+CC44 v CC46 {null move tests beta>LosingBaseScore} (0.49) PCS1
+CC44 v CC46 {null move tests beta>LosingBaseScore} (0.75) ASUS1
+CC44 v CC46 {null move tests beta>LosingBaseScore} (0.50) NIPOGI1
+
+CC44 v CC47 {futility pruning AND null move tests beta>LosingBaseScore} (0.52) PCS2
+
+CC47 v CC1 (12.11) PCS2
+CC47 v CC1 (14.98) PCS1
+CC47 v CC1 (12.06) ASUS1
+CC47 v CC1 (13.26) NIPOGI1
+
+CC47 v CC48 {TT bug fix but slower} (4.0) PCS2
+CC47 v CC48 {TT bug fix but slower} (-1.72) PCS1
+CC47 v CC48 {TT bug fix but slower} (2.97) ASUS1
+CC47 v CC48 {TT bug fix but slower} (2.54) NIPOGI1
+
+CC47 v CC49 {49 as 48 but persists found entries index} (2.55) PCS2
+CC47 v CC49 {49 as 48 but persists found entries index} (4.50) PCS1
+CC47 v CC49 {49 as 48 but persists found entries index} (2.36) ASUS1
+CC47 v CC49 {49 as 48 but persists found entries index} (-1.49) NIPOGI1
+
+CC47 v CC50 {QS doesn't save 'All' type nodes to TT} (5.05, +/-3.83, 16391) PCS2
+
+CC47 v CC51 {AddToTT skips DR>=SSTD test} (290.55, +/-60.47, 147) NIPOGI1
+
+CC47 v CC52 {AddToTT returns if DR<=-6} (5.96, +/-4.30, 13771) NIPOGI1
+
+CC47 v CC53 {QS doesn't save to TT if zero moves} (10.62, +/-5.1, 9664) ASUS1
+
+CC47 v CC54 {ANY aged entry selected for replacement} (9.26) PCS2
+CC47 v CC54 {ANY aged entry selected for replacement} (-16.53) PCS1
+CC47 v CC54 {ANY aged entry selected for replacement} (2.33) PCS1 - SANITY CHECK!
+CC47 v CC54 {ANY aged entry selected for replacement} (14.17) ASUS1
+CC47 v CC54 {ANY aged entry selected for replacement} (3.23) NIPOGI1
+WTAF???!!!
+
+CC47 v CC55 {QS doesn't probe TT at PV nodes (partial)} (2.28) PCS2
+
+CC47 v CC56 {QS doesn't probe TT at PV nodes (total)} (7.87, +/-4.11, 14231) PCS2
+
+CC47 v CC57 {QS touches found TT entry age} (1.49) PCS2
+CC47 v CC57 {QS touches found TT entry age} (1.13) PCS1
+
+CC47 v CC58 {main touches found TT entry age} (-0.16) PCS2
+CC47 v CC58 {main touches found TT entry age} (3.07) ASUS1
+CC47 v CC58 {main touches found TT entry age} (2.88) NIPOGI1
+
+CC47 v CC59 {main touches found TT entry age (as soon as possible)} (?) ASUS1
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------
+2025b
+=====
+
+Removed TT clauses where it accepts a winning score regardless of STD {suspected to be at least part of the ever-expanding-mate-distance problem} (+2.8, +/-3.5, 20000) PCS2
+TT stores - removed age test when testing DR>=SSTD (+1.6, +/-3.5, 20000) PCS2
+Nullmove tests beta > LosingBaseScore (+0.4, +/-3.5, 20000) PCS2
+No MDP in QS (-0.2, +/-3.5, 20000) PCS2
+Nullmove R uses 256 not 128 divisor (-4.7, +/-3.5, 20000) PCS2
+Nullmove R set to INF (-107.3, +/-21.4, 571) PCS2
+Nullmove verification again like SF (+0.4, +/-3.4, 20000) PCS2
+Nullmove verification again like SF but won't go straight in QS (-2.6, +/-3.4, 20000) PCS2
+Nullmove more strict tests at lower plies (+5.1, +/-3.5, 20000) PCS2
+Nullmove more strict tests at lower plies - relaxed v original (+3.2, +/-3.4, 20000) PCS2
+Nullmove more strict tests at lower plies - relaxed again (-1.6, +/-3.4, 20000) PCS2
+Nullmove more strict tests at lower plies tuned and no verification search (-1.6, +/-3.4, 20000) PCS2
+QS tteLowerLimitScore test removed (-2.4, +/-3.4, 20000) PCS2
+QS tteLowerLimitScore test removed only at PV nodes (-3.5, +/-3.8, 16797) PCS2 - REDUNDANT as it only ever really works at pv nodes???
+QS doesn't store TT at PV nodes (+0.7, +/-3.5, 20000) PCS2
+TT stores standpat scores only if TT entry not found (+0.2, +/-3.5, 20000) PCS2
+DBR at root slightly preferred (+1.1, +/-3.4, 20000) PCS2
+Nullmove tests stricter when DR>15 (+2.3, +/-3.4, 20000) PCS2
+Nullmove tests stricter when DR>20 (+2.0, +/-3.5, 20000) PCS2
+Added OOPCM status into TT (+0.1, +/-3.4, 20000) PCS2
+No Nullmove when DR>30 (+4.1, +/-3.5, 20000) PCS2
+
+Latest(non-PGO) v 25a (-8.7, +/-3.4, 20000) PCS2 - I.E. LATEST WORSE! :D unless it's just the non-PGO
+
+Nullmove not done at PV nodes (+2.0, +/-3.4, 20000) PCS2
+TT removed winning scores preference (+1.9, +/-3.4, 20000) PCS2
+EVAL: added backward Ps on semi open files when opponent has heavy pieces {32} (+6.2, +/-3.5, 20000) PCS2
+EVAL: added backward Ps on semi open files when opponent has heavy pieces {20} (+5.0, +/-3.5, 20000) PCS2
+EVAL: KP shelter penalty changed from *2 to *3 (0.0, +/-3.5, 20000) PCS2
+EVAL: KP shelter penalty tests K on back 2 ranks (-2.2, +/-3.4, 20000) PCS2 - ***WHY???
+EVAL: KP shelter penalty tests K on back 2 ranks and changed from *2 to *8 (-11.9, +/-3.5, 20000) PCS2
+EVAL: KP shelter taken out (-3.7, +/-3.5, 20000) PCS2
+EVAL: KP shelter gives +ve bonus rather than -ve penalty (-1.0, +/-3.4, 20000) PCS2 - SHOULD BE IDENTICAL I THINK
+EVAL: KP shelter gives +ve bonus rather than -ve penalty and tests K on back 2 ranks (+3.1, +/-3.4, 20000) PCS2 - OPPOSITE RESULT TO ABOVE AT ***
+EVAL: KP shelter gives +ve bonus rather than -ve penalty and tests K on back 2 ranks and *2 changed to *4 (-1.4, +/-3.4, 20000) PCS2
+SEE pruning bug fix (+0.6, +/-3.4, 20000) PCS2
+QS doesn't do checks at DR=0 (-10.3, +/-3.4, 20000) PCS2
+Round robin: 16msv32v64v128v256v512
+Rank Name                          Elo     +/-   Games   Score    Draw
+   1 512                           320       7   10000   86.3%   22.3%
+   2 256                           182       6   10000   74.0%   28.9%
+   3 128                            64       6   10000   59.1%   31.5%
+   4 64                            -48       6   10000   43.1%   30.6%
+   5 32                           -183       6   10000   25.9%   24.9%
+   6 16                           -353       8   10000   11.6%   17.2%
+KP shelter quadrupled (-9.3, +/-3.5, 20000) PCS2 - TRY REMOVING IT! :D
+Mating moves added for ordering (-4.1, +/-3.4, 20000) PCS2
+LMP back again but doesn't prune P moves to 7th (-7.5, +/-3.5, 20000) PCS2
+Single history table (-12.4, +/-3.4, 20000) PCS2
+Late moves reduced more according to quiet count (-0.3, +/-3.4, 20000) PCS2
+LMP only if bestSortScore <= 0 (+12.2, +/-3.4, 20000) PCS2 - WHY ARE THESE 3 SO DIFFERENT??? BECAUSE ONLY TESTED WHEN depthRemaining <= 8? BEHAVES DIFFERENTLY WITH LOWER SEARCH DEPTHS
+LMP only if bestSortScore <= 0 (-6.5, +/-3.5, 20000) ASUS1
+LMP only if bestSortScore <= 0 (-4.0, +/-3.5, 20000) PCS1
+SEE pruning if depthRemaining<=IterationPly/2 (+2.5, +/-3.4, 20000) PCS2
+SEE pruning if depthRemaining<=IterationPly/2 (+2.0, +/-3.5, 20000) PCS1
+SEE pruning if depthRemaining<=IterationPly/4 (-3.6, +/-3.4, 20000) PCS2
+SEE pruning if depthRemaining<=IterationPly/4 (-4.3, +/-3.4, 20000) ASUS1
+SEE pruning if depthRemaining<=IterationPly*3/4 (-3.1, +/-3.4, 20000) PCS2
+Futility pruning: DR = 8 vs halfID vs quarterID vs 3quarterID
+Rank Name                          Elo     +/-   Games   Score    Draw - PCS2
+   1 20NNx2                         15       3   30000   52.1%   49.0%
+   2 20NNx1                         13       3   30000   51.8%   48.9%
+   3 20NNx3                         -2       3   30000   49.7%   48.5%
+   4 20NNx4                        -25       3   30000   46.4%   47.9%
+Rank Name                          Elo     +/-   Games   Score    Draw - ASUS1 - crashed with 'Black's connection stalls' - 1st time in ages!
+   1 20NNx1                          9       3   28112   51.2%   46.1%
+   2 20NNx2                          5       3   28109   50.7%   46.3%
+   3 20NNx4                         -4       3   28111   49.4%   46.5%
+   4 20NNx3                         -9       3   28110   48.7%   46.3%
+LMP only if bestSortScore <= 0 with DR<ID/2 (+18.6, +/-3.4, 20000) PCS2
+LMP only if bestSortScore <= 0 with DR<ID/2 (+11.1, +/-3.5, 20000) ASUS1
+LMP only if bestSortScore <= 0 with DR<ID/2 (+7.7, +/-3.6, 20000) PCS1
+Latest(non-PGO) v 25a (+16.9, +/-3.5, 20000) PCS2
+Latest without LMP(PGO) v 25a (-3.1, +/-3.5, 20000) PCS2
+Latest without LMP(PGO) v 25a (-3.0, +/-3.6, 20000) ASUS1
+Latest without LMP(PGO) v 25a (-14.8, +/-3.6, 20000) PCS1 :O THIS IS SUSPICIOUS LIKE ONCE BEFORE WHERE WE HAD A 'BAD' EXE
+Latest without LMP(PGO) v 25a (-14.7, +/-3.6, 20000) PCS1 RAN AGAIN AS A SANITY CHECK!
+Latest without LMP(PGO) v 25a (-14.8, +/-3.6, 20000) PCS1 GOT RID OF 'restart=on' IN CUTECHESS T.BAT FILE
+25a v Latest without LMP(PGO) (+18.2, +/-3.6, 20000) PCS1 REVERSED ENGINES FOR SANITY CHECK!
+25a v Latest without LMP(PGO) (+16.4, +/-3.6, 20000) PCS1 RESTARTED PC FOR SANITY CHECK!
+25a v Latest without LMP(PGO) (-0.5, +/-3.6, 20000) PCS1 RENAMED EXE TO EXE.BAD AND COPIED OVER AGAIN - WOW! SOMEHOW, SOMETHING WRONG WITH THAT ORIGINAL EXE
+...DID AN EXTENDED MEMORY TEST ON PCS1... NO ERRORS FOUND
+...ALSO DID A MEMORY TEST ON ASUS1... NO ERRORS FOUND
+Latest without LMP(PGO)-BAD v Latest without LMP(PGO)-GOOD (+1.8, +/-3.5, 20000) PCS1 - SO THE 'BADNESS' HAS DISSAPPEARED! :O
+DURING ALL THE ABOVE 'BADNESS' TESTING, WINDOWS UPDATE HAD BEEN MESSING ABOUT. MAYBE THAT WAS IT??? PAUSED WINDOWS UPDATE FOR 35 DAYS (THE MAXIMUM) ON ALL TEST PCs
+Latest without LMP(PGO) v 25a (-1.7, +/-3.5, 20000) PCS1 FINAL SANITY CHECK (HOPEFULLY)
+
+Latest QS vs 25a QS (-0.6, +/-3.4, 20000) PCS2
+Latest QS vs 25a QS (+0.9, +/-3.5, 20000) PCS1
+Latest QS vs 25a QS (+7.0, +/-3.5, 20000) ASUS1 - :O SO IT SEEMS THE WINDOWS UPDATE SPECULATION ABOVE WAS WRONG
+Latest QS vs 25a QS (+9.6, +/-3.5, 20000) ASUS1 - RUN AGAIN FOR CONFIRMATION :O AT LEAST IT'S BETTER! :D
+Latest QS vs 25a QS (-0.9, +/-3.5, 20000) ASUS1 - RENAMED 2ND EXE (25a QS) TO .BAD AND COPIED OVER AGAIN
+25a QS{good} vs 25a QS{bad} (-2.0, +/-3.5, 20000) ASUS1 - I HAVE NO IDEA WHY THIS 'BAD' THING HAPPENS. JUST HAVE TO TEST ON ALL 3 PCs AND BE ALERT TO IT.
+Latest Eval vs Latest Eval but KP shelter put back to -ve (+0.6, +/-3.4, 20000) PCS2
+Latest Eval vs Latest Eval but KP shelter put back to -ve (-2.6, +/-3.5, 20000) PCS1
+Latest Eval vs Latest Eval but KP shelter put back to -ve (+1.1, +/-3.5, 20000) ASUS1
+Latest Eval vs Latest Eval but KP safety back 2 ranks test removed (-2.0, +/-3.4, 20000) PCS2
+Latest Eval vs Latest Eval but KP safety back 2 ranks test removed (-1.0, +/-3.4, 20000) PCS1
+Latest Eval vs Latest Eval but KP safety back 2 ranks test removed (-0.9, +/-3.5, 20000) ASUS1
+Latest Eval vs Latest Eval but backward Ps test removed (+4.3, +/-3.5, 20000) PCS2
+Latest Eval vs Latest Eval but backward Ps test removed (+0.4, +/-3.5, 20000) PCS1
+Latest Eval vs Latest Eval but backward Ps test removed (+4.8, +/-3.6, 20000) ASUS1
+Latest with 25a's SearchNormal vs 25a (-4.3, +/-3.6, 20000) PCS2 - :O GOING TO HAVE TO WORK FROM 25a AND RE-APPLY EVERYTHING
+
+* PUT 2025a BACK IN PLACE AND RE-COMPILED AS CC1 SO MAKE SURE TO KEEP THAT EXE AND DO TESTS AGAINST IT *
+*REMEMBER TO DO RYZEN MASTER STUFF!!!*
+
+Backward Ps improved {CC2} (+6.2, +/-3.5, 20000) PCS2
+Backward Ps improved {CC2} (+3.1, +/-3.6, 20000) PCS1
+Backward Ps improved {CC2} (+1.6, +/-3.6, 20000) ASUS1
+
+Latest QS {CC3} (-1.4, +/-3.5, 20000) PCS2 (vs CC2)
+Latest QS {CC3} (-2.2, +/-3.5, 20000) PCS1 (vs CC2)
+Latest QS {CC3} (-16.3, +/-3.6, 20000) ASUS1 (vs CC2) - SURELY THIS MUST BE ANOTHER 'BAD' - RETRYING FOR SANITY
+Latest QS {CC3} (-0.7, +/-3.6, 20000) ASUS1 (vs CC2)
+
+Latest QS without adding standpat to TT {CC4} (+5.7, +/-3.4, 20000) PCS2 (vs CC2)
+Latest QS without adding standpat to TT {CC4} (+1.6, +/-3.4, 20000) PCS2 (vs CC2) - sanity check
+Latest QS without adding standpat to TT {CC4} (-3.0, +/-3.5, 20000) PCS1 (vs CC2)
+Latest QS without adding standpat to TT {CC4} (-1.7, +/-3.6, 20000) ASUS1 (vs CC2)
+
+CC3 vs CC1 (+2.3, +/-3.5, 20000) PCS2
+CC3 vs CC1 (+0.5, +/-3.6, 20000) PCS1
+CC3 vs CC1 (-0.7, +/-3.6, 20000) ASUS1
+
+25a(non-PGO) vs LatestWithoutLMP (+1.4, +/-3.5, 20000) PCS2 {i.e. 25a slightly better}
+25a(non-PGO) vs LatestWithoutLMP (+5.3, +/-3.6, 20000) PCS1 {BAD? RE-TESTING}
+25a(non-PGO) vs LatestWithoutLMP (+4.7, +/-3.6, 20000) PCS1 {MAYBE NOT THEN!}
+25a(non-PGO) vs LatestWithoutLMP (+2.8, +/-3.6, 20000) ASUS1
+
+25a(non-PGO) vs LatestWithoutLMPWITH25aSearchNormal{CC4} (-0.7, +/-3.5, 20000) PCS2 - i.e. latest better
+25a(non-PGO) vs LatestWithoutLMPWITH25aSearchNormal{CC4} (-3.8, +/-3.6, 20000) PCS1
+25a(non-PGO) vs LatestWithoutLMPWITH25aSearchNormal{CC4} (-2.0, +/-3.6, 20000) ASUS1
+
+25a(non-PGO) vs AsAboveWithTTProbingFixes{CC5} (-4.6, +/-3.5, 20000) PCS2 - i.e. latest better
+25a(non-PGO) vs AsAboveWithTTProbingFixes{CC5} (-4.3, +/-3.6, 20000) PCS1
+25a(non-PGO) vs AsAboveWithTTProbingFixes{CC5} (-3.6, +/-3.6, 20000) ASUS1
+
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (+0.4, +/-3.5, 20000) PCS2 - so maybe the AddToTT changes are bad???
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (-6.1, +/-3.6, 20000) PCS1 {BAD? RE-TESTING}
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (+7.4, +/-3.6, 20000) PCS1 {THIS IS CRAZY!}
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (+14.4, +/-3.6, 20000) ASUS1 {BAD? RE-TESTING}
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (-0.8, +/-3.6, 20000) ASUS1
+
+Trying again with fastchess...
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (3.82, +/-3.59, 20000) PCS1
+25a(non-PGO) vs AsAboveWithAddToTTFixes{CC6} (1.37, +/-3.65, 20000) ASUS1
+This seems more realistic but need to do many times to see if it eliminates the 'bad' runs
+
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1{CC7} (-1.51, +/-3.54, 20000) PCS2
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1{CC7} (-4.46, +/-3.57, 20000) PCS1
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1{CC7} (-3.21, +/-3.62, 20000) ASUS1
+
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1AndTTAgeTestRemoved{CC8} (-4.40, +/-3.52, 20000) PCS2
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1AndTTAgeTestRemoved{CC8} (-0.61, +/-3.56, 20000) PCS1
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1AndTTAgeTestRemoved{CC8} (-4.19, +/-3.63, 20000) ASUS1
+This is inconsistent with CC6 as the remaining changes are surely only cosmetic!?
+
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1AndTTAgeTestRemovedAndCosmetic{CC9} (-3.96, +/-3.51, 20000) PCS2 - CC9 is effectively CC6
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1AndTTAgeTestRemovedAndCosmetic{CC9} (-1.79, +/-3.58, 20000) PCS1
+25a(non-PGO) vs AsAboveWithAddToTTFixesOnlyPt1AndTTAgeTestRemovedAndCosmetic{CC9} (+2.52, +/-3.64, 20000) ASUS1
+
+Sensible to try CC6 v CC9 {even though they are essentially the same}
+CC6 vs CC9 (+1.29, +/-3.44, 20000) PCS2
+CC6 vs CC9 (+0.21, +/-3.51, 20000) PCS1
+CC6 vs CC9 (-0.66, +/-3.56, 20000) ASUS1
+
+Sensible to try CC5 v CC9 {to see if the AddToTT changes have any effect}
+CC5 vs CC9 (-0.73, +/-3.45, 20000) PCS2
+CC5 vs CC9 (+0.92, +/-3.51, 20000) PCS1
+CC5 vs CC9 (-0.61, +/-3.55, 20000) ASUS1
+So the AddToTT fixes overall seem fine... no better, no worse.
+
+25a(non-PGO) vs CC9WithNonStickyDrawScoreTweak{CC10} (-5.51, +/-3.53, 20000) PCS2 - :O sceptical?!?! trying again!
+25a(non-PGO) vs CC9WithNonStickyDrawScoreTweak{CC10} (-2.40, +/-3.54, 20000) PCS2
+25a(non-PGO) vs CC9WithNonStickyDrawScoreTweak{CC10} (-4.33, +/-3.57, 20000) PCS1
+25a(non-PGO) vs CC9WithNonStickyDrawScoreTweak{CC10} (-1.75, +/-3.63, 20000) ASUS1
+
+CC10 vs CC11 {null moves not allowed at PV nodes} (-2.95, +/-3.44, 20000) PCS2
+CC10 vs CC11 {null moves not allowed at PV nodes} (-1.39, +/-3.47, 20000) PCS1
+CC10 vs CC11 {null moves not allowed at PV nodes} (+0.52, +/-3.52, 20000) ASUS1
+
+CC11 v CC12 {null move 15/30 ply extra tests} (3.56, +/-3.43, 20000) PCS2
+CC11 v CC12 {null move 15/30 ply extra tests} (0.45, +/-3.47, 20000) PCS1
+CC11 v CC12 {null move 15/30 ply extra tests} (3.79, +/-3.52, 20000) ASUS1
+This is the opposite of previous testing. Taken this out. Revisit later!
+
+CC11 v CC13 {O1PCM fix} (1.27, +/-3.41, 20000) PCS2
+CC11 v CC13 {O1PCM fix} (-1.30, +/-3.48, 20000) PCS1
+CC11 v CC13 {O1PCM fix} (1.69, +/-3.52, 20000) ASUS1
+
+CC13 v CC14 {PruningAtHalfID} (+4.52, +/-3.42, 20000) PCS2
+CC13 v CC14 {PruningAtHalfID} (+4.53, +/-3.49, 20000) PCS1
+CC13 v CC14 {PruningAtHalfID} (+1.27, +/-3.52, 20000) ASUS1
+This is the opposite of previous testing. Taken this out. Revisit later!
+
+CC13 v CC15 {O1PCMAddedToTT} (+0.31, +/-3.40, 20000) PCS2
+CC13 v CC15 {O1PCMAddedToTT} (+1.11, +/-3.49, 20000) PCS1
+CC13 v CC15 {O1PCMAddedToTT} (+1.53, +/-3.51, 20000) ASUS1
+
+CC1 v CC15 (-1.18, +/-3.51, 20000) PCS2
+CC1 v CC15 (-4.40, +/-3.58, 20000) PCS1
+CC1 v CC15 (-4.78, +/-3.61, 20000) ASUS1
+
+CC15 v CC16 {EGTB tidy up} (+0.54, +/-3.40, 20000) PCS2
+CC15 v CC16 {EGTB tidy up} (3.53, +/-3.48, 20000) PCS1
+CC15 v CC16 {EGTB tidy up} (-1.49, +/-3.52, 20000) ASUS1
+
+CC1 v CC17 {General tidy up} (-3.02, +/-3.53, 20000) PCS2
+CC1 v CC17 {General tidy up} (-4.81, +/-3.57, 20000) PCS1
+CC1 v CC17 {General tidy up} (-0.43, +/-3.61, 20000) ASUS1
+
+CC1 v CC18 {LMP} (-26.75, +/-3.54, 20000) PCS2
+CC1 v CC18 {LMP} (-15.54, +/-3.60, 20000) PCS1
+CC1 v CC18 {LMP} (-8.20, +/-3.63, 20000) ASUS1
+
+CC17 v CC18 {LMP} (-20.37) PCS2
+CC17 v CC18 {LMP} (-8.81) PCS1
+CC17 v CC18 {LMP} (-2.07) ASUS1
+Why are ASUS1 results so much lower??? Less benefits at lower search depths?
+CC17 v CC18 {LMP} *250ms (-12.90) ASUS1
+
+DO A GO DEPTH 21 ON ALL 3 TEST PCs TO SEE RELATIVE MAX SPEED
+PCS2:  info time 18450 nodes 75612172 nps 4098220 hashfull 1000
+PCS1:  info time 26280 nodes 75612172 nps 2877175 hashfull 1000 *1.42
+ASUS1: info time 31052 nodes 75612172 nps 2435017 hashfull 1000 *1.68
+
+CC18 v CC19 {No pruning if in check} (-1.88) PCS2
+CC18 v CC19 {No pruning if in check} (+0.80) PCS1
+CC18 v CC19 {No pruning if in check} *250ms (-4.48) ASUS1
+
+CC1 v CC19 (-20.77) PCS2
+CC1 v CC19 (-10.53) PCS1
+CC1 v CC19 (-9.31) ASUS1
+
+CC19 v CC20 {SEE pruning if depthRemaining<=IterationPly/4} (+2.81) PCS2
+CC19 v CC20 {SEE pruning if depthRemaining<=IterationPly/4} (+2.59, 14739) PCS1
+
+CC19 v CC21 {SEE pruning if depthRemaining<=IterationPly/2} (+1.42) PCS2
+CC19 v CC21 {SEE pruning if depthRemaining<=IterationPly/2} (-1.46) PCS1
+CC19 v CC21 {SEE pruning if depthRemaining<=IterationPly/2} (+2.28) ASUS1
+
+CC19 v CC22 {LMP pruning if depthRemaining<=8} (9.70) PCS2
+CC19 v CC22 {LMP pruning if depthRemaining<=8} (8.95) PCS1
+CC19 v CC22 {LMP pruning if depthRemaining<=8} (15.00) ASUS1
+
+CC19 v CC23 {LMP pruning if depthRemaining<=ID*3/4} (9.07) PCS2 REALISED LATER THAT THIS WAS OVERFLOWING ARRAY BOUNDS!!!
+CC19 v CC23 {LMP pruning if depthRemaining<=ID*3/4} (9.47) PCS1
+CC19 v CC23 {LMP pruning if depthRemaining<=ID*3/4} (7.09) ASUS1
+
+CC19 v CC24 {LMP pruning if depthRemaining<=ID/4} (1.32) PCS2
+CC19 v CC24 {LMP pruning if depthRemaining<=ID/4} (-2.52) PCS1
+CC19 v CC24 {LMP pruning if depthRemaining<=ID/4} (-8.57) ASUS1
+
+CC1 v CC24 {LMP pruning if depthRemaining<=ID/4} (-23.59) PCS2
+CC1 v CC24 {LMP pruning if depthRemaining<=ID/4} (-18.55) PCS1
+CC1 v CC24 {LMP pruning if depthRemaining<=ID/4} (-16.29) ASUS1
+
+CC24 v CC25 {LMP pruning if ply>8} (10.08, +/-6.82, 5150) PCS1 REALISED LATER THAT THIS WAS OVERFLOWING ARRAY BOUNDS!!!
+CC24 v CC25 {LMP pruning if ply>8} (9.98, +/-7.06, 5026) ASUS1
+
+CC24 v CC26 {Futility pruning if depthRemaining<=ID/4} (11.82) PCS2
+CC24 v CC26 {Futility pruning if depthRemaining<=ID/4} (12.32) PCS1
+CC24 v CC26 {Futility pruning if depthRemaining<=ID/4} (12.32) ASUS1
+
+CC24 v CC27 {SEE pruning if depthRemaining<=3} (0.38) PCS2
+CC24 v CC27 {SEE pruning if depthRemaining<=3} (-0.68) PCS1
+CC24 v CC27 {SEE pruning if depthRemaining<=3} (1.75) ASUS1
+
+CC24 v CC28 {Node level futility pruning if depthRemaining<=ID/4} (1.18) PCS2
+CC24 v CC28 {Node level futility pruning if depthRemaining<=ID/4} (-1.34) PCS1
+CC24 v CC28 {Node level futility pruning if depthRemaining<=ID/4} (0.90) ASUS1
+
+CC24 v CC29 {Node level futility pruning if depthRemaining<=ID/2} (3.86) PCS2
+CC24 v CC29 {Node level futility pruning if depthRemaining<=ID/2} (-0.30) PCS1
+CC24 v CC29 {Node level futility pruning if depthRemaining<=ID/2} (0.35) ASUS1
+
+CC30 {LMP dr<=8} vs CC31 {LMP dr<=6} (-3.68) PCS2
+CC30 {LMP dr<=8} vs CC31 {LMP dr<=6} (-8.44) PCS1
+CC30 {LMP dr<=8} vs CC31 {LMP dr<=6} (-10.13) ASUS1
+
+CC1 vs CC31 {LMP dr<=6} (-19.22) PCS2
+CC1 vs CC31 {LMP dr<=6} (-10.77) PCS1
+CC1 vs CC31 {LMP dr<=6} (-3.47) ASUS1
+***TRY THIS AT SLOWER TIME CONTROL
+
+CC24 vs CC31 (-1.75) PCS2 11-15 ply
+CC24 vs CC31 (6.69) PCS1 10-14 ply
+CC24 vs CC31 (9.92) ASUS1 similar but has to be a bit less
+It seems that '6' is too much for shallower searches
+Need to try longer time control as when does 1/4 ID exceed 6???!!! Need at least ID24!
+***need to fix dr overflow! in CC24
+
+CC24 vs CC31 400ms (-2.22) PCS2
+
+CC31 {LMP dr<=6} vs CC32 {LMP if DR<=ID/3 AND array bound error fixed} (-5.00) PCS2
+CC31 {LMP dr<=6} vs CC32 {LMP if DR<=ID/3 AND array bound error fixed} (-10.70) PCS1
+CC31 {LMP dr<=6} vs CC32 {LMP if DR<=ID/3 AND array bound error fixed} (-11.03) ASUS1
+
+CC1 vs CC32 (-28.89) PCS2
+CC1 vs CC32 (-19.34) PCS1
+CC1 vs CC32 (-17.77) ASUS1
+
+CC32 vs CC33 {SEE pruning removed} (3.58) PCS2
+CC32 vs CC33 {SEE pruning removed} (5.23) PCS1
+CC32 vs CC33 {SEE pruning removed} (-2.69) ASUS1
+***So SEE pruning does help a bit
+
+CC32 vs CC34 {SEE pruning if depthRemaining<=IterationPly/3} (3.39) PCS2
+CC32 vs CC34 {SEE pruning if depthRemaining<=IterationPly/3} (2.47) PCS1
+CC32 vs CC34 {SEE pruning if depthRemaining<=IterationPly/3} (2.95) ASUS1
+
+CC32 vs CC35 {LMP if ply>=IterationPly*2/3} (9.63, +/-4.87, 10153) PCS2
+CC32 vs CC35 {LMP if ply>=IterationPly*2/3} (12.60, +/-5.99, 6664) PCS1
+CC32 vs CC35 {LMP if ply>=IterationPly*2/3} (8.42, +/-6.40, 6323) ASUS1
+
+CC36 {PGO CC32} vs 2025a {1'+1s} (20.22, +/-4.53, 10295) PCS2
+
+CC32 vs CC37 {null tests 'specials' if DR>15} (1.51) PCS2
+CC32 vs CC37 {null tests 'specials' if DR>15} (1.06) PCS1
+CC32 vs CC37 {null tests 'specials' if DR>15} (-2.66) ASUS1
+*** Surely hardly ever kicks in at hyper bullet speed. Need to test at slower time control.
+CC32 vs CC37 {null tests 'specials' if DR>15} 400ms (4.66) PCS2
+
+CC32 vs CC38 {null tests beta>LosingBaseScore} (1.44) PCS2
+CC32 vs CC38 {null tests beta>LosingBaseScore} (2.87) PCS1
+CC32 vs CC38 {null tests beta>LosingBaseScore} (-1.60) ASUS1
+
+CC32 vs CC39 {no null if ply<=ID/4} (13.94, +/-4.85, 10114) PCS2
+CC32 vs CC39 {no null if ply<=ID/4} (5.06, +/-6.36, 5993) PCS1
+CC32 vs CC39 {no null if ply<=ID/4} (7.01, +/-6.61, 5765) ASUS1
+
+CC32 vs CC40 {null tests 'specials' if ply<=ID/4} (0.66) PCS2
+CC32 vs CC40 {null tests 'specials' if ply<=ID/4} (0.99) PCS1
+CC32 vs CC40 {null tests 'specials' if ply<=ID/4} (1.22) ASUS1
+
+CC32 vs CC41 {null uses bestKnownScore} (2.92) PCS2
+CC32 vs CC41 {null uses bestKnownScore} (-1.20) PCS1
+CC32 vs CC41 {null uses bestKnownScore} (-0.66) ASUS1
+
+CC32 vs CC42 {null R=3} (9.68) PCS2
+CC32 vs CC42 {null R=3} (5.37) PCS1
+CC32 vs CC42 {null R=3} (7.37) ASUS1
+
+CC32 vs CC43 {null R=std::max(3, ((depthRemaining + 1) >> 1))} (2.00) PCS2
+CC32 vs CC43 {null R=std::max(3, ((depthRemaining + 1) >> 1))} (1.62) PCS1
+CC32 vs CC43 {null R=std::max(3, ((depthRemaining + 1) >> 1))} (2.29) ASUS1
+
+CC32 vs CC44 {null uses bestKnownScore[fixed]} (-3.27) PCS2
+CC32 vs CC44 {null uses bestKnownScore[fixed]} (-2.10) PCS1
+CC32 vs CC44 {null uses bestKnownScore[fixed]} (-4.00) ASUS1
+
+CC1 vs CC44 (-28.33) PCS2
+CC1 vs CC44 (-23.38) PCS1
+CC1 vs CC44 (-20.56) ASUS1
+
+CC44 vs CC45 {standpat not stored in TT} (-2.48) PCS2
+CC44 vs CC45 {standpat not stored in TT} (-0.99) PCS1
+CC44 vs CC45 {standpat not stored in TT} (-4.45) ASUS1
+
+CC1 vs CC45 (-29.83) PCS2
+CC1 vs CC45 (-26.21) PCS1
+CC1 vs CC45 (-19.95) ASUS1
+
+CC45 vs CC46 {null R matdiff component limited to 9} (-3.61) PCS2
+CC45 vs CC46 {null R matdiff component limited to 9} (1.32) PCS1
+CC45 vs CC46 {null R matdiff component limited to 9} (-2.76) ASUS1
+
+CC46 vs CC47 {nullMoveScore limited to WinningBaseScore-1} (-1.63) PCS2
+CC46 vs CC47 {nullMoveScore limited to WinningBaseScore-1} (-0.99) PCS1
+CC46 vs CC47 {nullMoveScore limited to WinningBaseScore-1} (0.75) ASUS1
+
+CC47 vs CC48 {null R matdiff component limited to 6} (4.60) PCS2
+CC47 vs CC48 {null R matdiff component limited to 6} (0.45) PCS1
+CC47 vs CC48 {null R matdiff component limited to 6} (2.08) ASUS1
+
+CC47 vs CC49 {null tests O1M} (-1.25) PCS2
+CC47 vs CC49 {null tests O1M} (-2.33) PCS1
+CC47 vs CC49 {null tests O1M} (-0.12) ASUS1
+
+CC49 vs CC50 {null ZLKM optimised} (-2.62) PCS2
+CC49 vs CC50 {null ZLKM optimised} (-2.45) PCS1
+CC49 vs CC50 {null ZLKM optimised} (-3.39) ASUS1
+
+CC50 vs CC51 {QS preserves special flags} (-1.11) PCS2
+CC50 vs CC51 {QS preserves special flags} (0.26) PCS1
+CC50 vs CC51 {QS preserves special flags} (-2.21) ASUS1
+
+CC1 vs CC51 (-34.88) PCS2
+CC1 vs CC51 (-25.95) PCS1
+CC1 vs CC51 (-24.59) ASUS1
+
+CC51 vs CC52 {Don't prune if TWM} (3.25) PCS2
+CC51 vs CC52 {Don't prune if TWM} (1.27) PCS1
+CC51 vs CC52 {Don't prune if TWM} (-0.56) ASUS1
+
+CC51 vs CC53 {null tests FMTP} (0.12) PCS2
+CC51 vs CC53 {null tests FMTP} (1.32) PCS1
+CC51 vs CC53 {null tests FMTP} (-0.26) ASUS1
+
+CC53 vs CC54 {null calculates O1M/FMTP} (-1.46) PCS2
+CC53 vs CC54 {null calculates O1M/FMTP} (1.20) PCS1
+CC53 vs CC54 {null calculates O1M/FMTP} (0.68) ASUS1
+
+CC1 vs CC55 {tidied} @250ms (-35.05) PCS2
+
+CC55 vs CC56 {draw code tidied} (0.52) PCS2
+CC55 vs CC56 {draw code tidied} (-2.22) PCS1
+CC55 vs CC56 {draw code tidied} (-2.48) ASUS1
+
+CC56 vs CC57 {QS pruning took out (alpha < WinningBaseScore - 1) test} (0.09) PCS2
+CC56 vs CC57 {QS pruning took out (alpha < WinningBaseScore - 1) test} (-0.78) PCS1
+CC56 vs CC57 {QS pruning took out (alpha < WinningBaseScore - 1) test} (1.02) ASUS1
+
+CC56 vs CC58 {QS pruning added (bestMoveScore > LosingBaseScore) test} (-0.66) PCS2
+CC56 vs CC58 {QS pruning added (bestMoveScore > LosingBaseScore) test} (-1.29) PCS1
+CC56 vs CC58 {QS pruning added (bestMoveScore > LosingBaseScore) test} (0.94) ASUS1
+
+CC58 vs CC59 {null returns beta if score>=winning} (0.85) PCS2
+CC58 vs CC59 {null returns beta if score>=winning} (-4.92) PCS1
+CC58 vs CC59 {null returns beta if score>=winning} (2.80) ASUS1
+
+CC59 vs CC60 {O1M extends if previous move was O1M} (slightly positive {10024v9976}... windows restarted) PCS2
+CC59 vs CC60 {O1M extends if previous move was O1M} (0.63) PCS1
+CC59 vs CC60 {O1M extends if previous move was O1M} (0.76) ASUS1
+
+CC61 - took out both null score manipulations
+
+CC61 vs CC62 {QS SEE pruning not done at PV nodes} (1.51) PCS2
+CC61 vs CC62 {QS SEE pruning not done at PV nodes} (3.58) PCS1
+CC61 vs CC62 {QS SEE pruning not done at PV nodes} (3.93) ASUS1
+
+CC61 vs CC63 {QS fut pruning done at PV nodes} (0.87) PCS2
+
+CC64 - as CC61 but using 'fastchess' messaging
+
+CC64 vs CC65 {TimeUp called every 256th node in main {was 4}} (-4.13) PCS2
+CC64 vs CC65 {TimeUp called every 256th node in main {was 4}} (-2.12) PCS1
+CC64 vs CC65 {TimeUp called every 256th node in main {was 4}} (-7.56) ASUS1
+
+CC64 vs CC66 {TimeUp optimised and called after EGTB probe in main and also slight optimisation in QS} (2.24) PCS2
+CC64 vs CC66 {TimeUp optimised and called after EGTB probe in main and also slight optimisation in QS} (-5.73) PCS1
+CC64 vs CC66 {TimeUp optimised and called after EGTB probe in main and also slight optimisation in QS} (-6.85) ASUS1
+
+CC67[1 thread] vs CC67[4 threads] {Lazy SMP messaging bug fix} (-155.58, +/-24.19, 490) PCS2
+
+2025a vs 2025b {40/40s} (RESULT LOST DUE TO PC CRASH BUT WAS ABOUT -39,+/-7.5,4200) PCS2
+2025a vs 2025b FRC {30+0.5} (-34.86, +/-11.58, 1920) PCS2
+
+
+---------------------------------------------------------------------------------------------------------
+2025a
+=====
+
+Multi-thread bug fix - only Thread 0 increments age - 2 thread test (-0.1, +/-3.5, 20000) PCS2
+DBR - 2 repeats only tested for at root (+3.4, +/-3.5, 20000) PCS2
+DBR - 2 repeats only tested for at root (+2.7, +/-3.5, 20000) PCS1
+Non-consistent final ply given 10% more time (-4.5, +/-3.3, 20000) PCS2
+Obvious move if last 75% of iterations consistent (+0.5, +/-3.4, 20000) PCS1
+Main does perpetual check test at last 2 ply (-5.6, +/-3.5, 20000) PCS2 {IS IT BECAUSE OF THE TIME OVERHEAD OR THAT SOMETIMES THEY ARE DECLARED DRAWS WHEN THEY AREN'T? could be mating net? e.g.KQvK ... TEST WITHOUT DECLARING DRAW}
+QS detects lone K stalemate (-1.0, +/-3.5, 20000) PCS1
+Perpetual check code removed (+1.6, +/-3.5, 20000) PCS1
+Null move tests ZLKM (-3.3, +/-3.4, 20000) PCS2
+Perpetual tests at last 2 ply of main (-4.6, +/-3.5, 20000) PCS2
+Perpetual tests at last 2 ply of main but doesn't use result (+1.5, +/-3.5, 20000) PCS1 - so it's not the overhead but the action
+Perpetual tests at last but 2 ply of main {i.e. dr=3/4} (-5.5, +/-3.5, 20000) PCS2
+Perpetual tests revamped (-2.0, +/-3.4, 20000) PCS2
+No null moves at bottom 1/8th ply (-0.4, +/-3.4, 20000) PCS2 {hardly kicks in especially at fast time controls}
+No null moves at bottom 1/4th ply {half offset} (-7.9, +/-3.5, 20000) PCS2
+Null move verification search (-7.9, +/-3.5, 20000) PCS1 {but not tuned to new R}
+Null moves done at PV nodes but less reduction (-1.1, +/-3.5, 20000) PCS2
+Null moves R like Rubichess (+1.8, +/-3.5, 20000) PCS2
+SEE considers promotions during the sequence (+0.2, +/-3.5, 20000) PCS2
+Null move verification more like Rubi #1 (-6.4, +/-3.5, 20000) PCS2
+Null move returns beta not currentMoveScore (-3.7, +/-3.5, 20000) PCS1
+SF step 10 - simple minus 1 (+0.9, +/-3.5, 20000) PCS2
+SF step 10 - simple minus 2 (-6.0, +/-4.0, 14967) PCS2
+SF step 10 - simple minus 1 at PV and CUT nodes (+3.4, +/-3.5, 20000) PCS2
+Null move verification more like SF #1 (-3.8, +/-3.5, 20000) PCS1
+SF step 10 - also minus 1 for TT STD>=DR (-1.2, +/-3.4, 20000) PCS2
+IID removed (-1.9, +/-3.4, 20000) PCS2
+QS TT bug fix (+3.6, +/-3.4, 20000) PCS1
+QS tiny optimisation (+2.6, +/-3.4, 20000) PCS2
+LMP for SEE -ve moves (-0.7, +/-3.5, 20000) PCS2
+Standpat scores stored in TT with depth 0 (-4.9, +/-3.7, 16803) PCS2
+K PST mirrored (+0.9, +/-3.5, 20000) PCS1
+N PST mirrored (-1.8, +/-3.5, 20000) PCS2
+2024b{4 threads} v 2024b{1 thread} (+45.9, +/-5.3, 8474) PCS2
+QS uses TT value if better than standPatScore #1 {bit buggy} (+2.8, +/-3.8, 16339) PCS2
+QS uses TT value if better than standPatScore #2 (+5.1, +/-3.5, 20000) PCS2
+LMP piece moves only (-11.1, +/-3.6, 20000) PCS1 - :O SUSPICIOUS!
+LMP pawn moves only (-3.8, +/-3.5, 20000) PCS1
+LMP piece moves only - SANITY CHECK (-5.1, +/-3.5, 20000) PCS2
+Passed P moves not reduced (+4.0, +/-3.5, 20000) PCS2
+Passed P moves not reduced unless SEE -ve (+1.3, +/-3.5, 20000) PCS2
+Passed P moves not pruned (-6.0, +/-3.4, 20000) PCS2
+No null move when only Ps and O1M (-2.2, +/-3.5, 20000) PCS2
+No null move when only Ps and O1M {KP only} (+7.6, +/-5.8, 20000) PCS1
+No null move when only Ps {KP only} (+1.8, +/-5.7, 20000) PCS1
+QS uses TT value if better than standPatScore #3 (+1.5, +/-3.4, 20000) PCS2
+TT probes touch entry's age (-9.0, +/-3.4, 20000) PCS2
+TT probes touch entry's age only if STD>=DR (-10.4, +/-6.4, 5838) PCS2
+2025x{4 threads} v 2025x{1 thread} - NO LOCKING AT ALL (-135.8, +/-27.3, 336) PCS2
+2025x{4 threads} v 2025x{1 thread} - NO LOCKING when probing (-142.9, +/-25.3, 426) PCS2
+2025x{4 threads} v 2025x{1 thread} - NO LOCKING when probing in QS (+30.5, +/-10.8, 2067) PCS2
+2025x{4 threads, QS+main probe locking} v 2025x{4 threads, QS no probe locking with minimised racing} (+16.3, +/-9.3, 2681) PCS2 - STILL GETTING 'CONNECTION STALLS'
+2025x{4 threads, QS+main probe locking} v 2025x{4 threads, QS+main no probe locking with minimised racing} (-67.2, +/-5.5, 8535) PCS2 - HOW CAN THIS HAVE THE OPPOSITE RESULT??? BUGGY!
+QS minimises TT probe locking {4 threads} (-0.6, +/-3.8, 16819) PCS2
+QS and main minimises TT probe locking {4 threads} (-8.8, +/-3.6, 18649) PCS2 - WTF??? SOME BUG INTRODUCED??? SOME SIDE EFFECT???
+MatingPositionsTable removed (+0.6, +/-3.5, 20000) PCS2
+QS and main minimises TT probe locking {4 threads but stalling problem fixed} (-13.0, +/-9.0, 2918) PCS2
+QS and main minimises TT probe locking {1 thread sanity check} (+0.3, +/-3.5, 20000) PCS1
+2025x{4 threads} v 2025x{1 thread} {new probe locking in main and QS} (-33.7 {i.e. 4 threads worse!!! :O}, +/-10.1, 2298) PCS2
+2025x{4 threads, old probe locking} v 2025x{4 threads, simplified new locking} (-12.5, +/-6.0, 6772) PCS2
+2025x{4 threads, old probe locking} v 2025x{4 threads, simplified new locking with separate read/write locks} (-52.6, +/-10.7, 2177) PCS2
+TT 4 entries per bucket (-0.3, +/-3.4, 20000) PCS2
+TT 4 entries per bucket #2 (+3.0, +/-3.4, 20000) PCS2
+TT 4 entries per bucket {4 threads} (+1.8, +/-14.1, 1186) PCS2
+TT 4 entries per bucket - early lock release in QS {4 threads} (-1.6, +/-3.5, 20000) PCS2
+TT 4 entries per bucket - early lock release in QS and main {4 threads} (-0.7, +/-3.5, 20000) PCS2
+4TH vs 1TH (-49.0, +/-18.5, 664) PCS2
+24b-4TH vs 24b-1TH (-62.3, +/-21.8, 507) PCS2 :O 24b seems to be worse MT!!!
+22a-4TH vs 22a-1TH (+156.6, +/-30.3, 310) PCS2
+24a-4TH {MT bug fixed} vs 24a-1TH (-123.6, +/-25.3, 445) PCS2
+Latest vs 24b (+14.4, +/-3.5, 20000) PCS2
+2022a-4TH vs 2022a-1TH sanity check (+153.3, +/-11.9, 2158) PCS2
+Latest vs 24b {equal core speed} (+5.7, +/-3.4, 20000) PCS2
+Latest vs 24b - KRS etc persisted {equal core speed} (+9.4, +/-3.5, 20000) PCS2
+Latest vs 24b - KRS etc persisted {equal core speed} slight mod re countermovehistory (+9.8, +/-3.5, 20000) PCS2
+Lockless transposition table  (+2.8, +/-3.5, 20000) PCS2
+4TH vs 1TH (+13.9, +/-9.1, 2867) PCS2
+TT probes touch aged entries (+5.0, +/-3.4, 20000) PCS2
+TT probes touch aged entries in QS (+5.0, +/-3.4, 20000) PCS2
+TT probes touch aged entries in QS (+0.6, +/-3.5, 20000) PCS1
+TT probes touch aged entries in main and QS (-0.8, +/-3.5, 20000) PCS2
+TT probes touch aged entries in main and QS (-1.3, +/-3.5, 20000) PCS1
+TT aged entries always replaced (-9.8, +/-4.0, 14810) PCS2
+Latest vs 24b {equal core speed} (-42.1, +/-15.9, 995) PCS2 - :O WTF!!!!
+Latest vs 24b {equal core speed} undid everything and put back except SearchNormal :D (+7.0, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} killers etc made non-static (???, +/-3.5, 20000) PCS2 - crashed twice!
+Latest vs 24b {equal core speed} killers etc made static again but not Clear* routines (+9.2, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} killers/cm/fum made non-static again but not CMH (+10.5, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} killers/cm/fum AND CMH again non-static {crashed twice above} (-7.1, +/-7.0, 5014) PCS2 - crashed
+Latest vs 24b {equal core speed} killers/cm/fum AND CMH again non-static {added some OutputError statements} (-8.0, +/-9.4, 2734) PCS2 - crashed but no error output
+Latest vs 24b {equal core speed} killers/cm/fum BUT CMH allocated on heap {still with some OutputError statements} (+9.2, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} TimeUp called less often. SFSTep10 not called at root. KRS etc updated on all threads. KRS etc copied to MT. Fixed bug clearing CMH (+13.3, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} ARGH! Noticed wasn't using the Engine instance of Normal! (11.7, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} Tidied lots of ST and MT stuff (+15.2, +/-3.5, 20000) PCS2
+4TH vs 1TH {same version as above} (+164.2, +/-9.5, 3229) PCS2
+Latest vs 24b {equal core speed} Lockless TT (-44.6, +/-10.0, 2420) PCS2 - BUG IN LOCKLESS THEREFORE???
+Latest vs 24b {equal core speed} Lockless TT - bug fixed (+14.3, +/-3.5, 20000) PCS2
+Latest vs 24b {equal core speed} as above but PGO build (+22.1, +/-3.5, 20000) PCS2
+TT candidate replacement logic uses DR equal but aged (-1.0, +/-3.4, 20000) PCS2
+TT exact entries always replace (+1.0, +/-3.4, 20000) PCS2
+TT candidate replacement logic uses DR equal but oldest age (-5.8, +/-3.5, 20000) PCS2 - BIZARRE!
+TT QS always sets DR to zero (-1.1, +/-3.5, 20000) PCS2
+TT always replaces entry of oldest age {iffy logic though!} (+3.4, +/-3.4, 20000) PCS2
+TT always replaces entry of oldest age {fixed logic} (+3.0, +/-3.4, 20000) PCS2
+4TH vs 1TH {same version as above} (+130.2, +/-5.4, 9133) PCS2
+Latest{non-PGO} vs 24b {equal core speed} (+17.1, +/-3.5, 20000) PCS2
+25a vs 24a (+38.8, +/-7.4, 4645) PCS2
+25a vs 24b (+18.6, +/-3.5, 20000) PCS2
+25a vs 24b FRC {16MB hash} (+12.7, +/-12.1, 1920) PCS2
+25a vs 24b FRC {8MB hash} (+17.9, +/-12.1, 1920) PCS2
+Round robin (10s+0.1s) PCS2 ...
+Rank Name                          Elo     +/-   Games   Score    Draw
+   1 2025a                          62       4   13203   58.9%   46.6%
+   2 2024b                          24       4   13202   53.4%   47.3%
+   3 2024a                           8       4   13202   51.2%   45.7%
+   4 2022a                         -10       4   13201   48.5%   46.4%
+   5 2021b                         -17       4   13202   47.5%   45.3%
+   6 2021a                         -67       5   13202   40.5%   42.6%
+Round robin (10s+0.1s) PCS1 ...
+Rank Name                          Elo     +/-   Games   Score    Draw
+   1 2025a                          43       4   20000   56.2%   45.7%
+   2 2024a                          25       4   20000   53.5%   44.9%
+   3 2024b                          14       4   20000   52.1%   45.3%
+   4 2022a                          -1       4   20000   49.8%   45.6%
+   5 2021b                         -17       4   20000   47.5%   44.4%
+   6 2021a                         -64       4   20000   40.9%   41.6%
+
+
+---------------------------------------------------------------------------------------------------------
+2024b
+=====
+
+Timeup divisor relaxed by 10% {15s+0.25s} (-0.9, +/-3.4, 20000) PCS1
+Timeup calculations done as floats {15s+0.25s} (+2.9, +/-4.3, 12141) PCS1
+P moves to 7th not futility pruned (+1.7, +/-3.5, 20000) PCS2
+P moves to 7th not reduced (+0.1, +/-3.5, 20000) PCS2
+Null moves even if FMTP (+1.6, +/-3.5, 20000) PCS2
+Null moves even if O1M (+2.5, +/-3.6, 20000) PCS1
+Node level futility pruning even if O1M or FMTP (+1.9, +/-3.5, 20000) PCS2
+Null move tests beta>LosingBaseScore (-2.2, +/-3.5, 20000) PCS2
+Reduces quiet moves at cut nodes (???, +/-3.5, 20000) PCS2 CRASHED AFTER ABOUT 14000 GAMES WITH ABOUT -0.5
+Null moves set R=2 (-30.2, +/-5.5, 8730) PCS1
+20NNx{nearly 2024b} vs 2024a (+12.9, +/-3.5, 20000) PCS2
+2024b vs 2024a (+14.6, +/-3.5, 20000) PCS2
+FRC 24b vs 24a (-1.3, +/-11.2, 1920) PCS1
+FRC 24b vs 24a (+5.1, +/-11.9, 1920) PCS2
+
+
+---------------------------------------------------------------------------------------------------------
+2024a
+=====
+
+Forced lines #1 (-9.3, +/-3.9, 17320) ASUS1
+Forced lines #2 (-5.8, +/-3.6, 20000) ASUS1
+Transposition table type-2 errors tested for #1 (-1.4, +/-3.6, 20000) ASUS1
+Transposition table type-2 errors tested for #2 (+0.3, +/-3.6, 20000) ASUS1
+Transposition table type-2 errors tested for #3 {tteBestMove set in QS} (-1.4, +/-5.0, 10312) ASUS1
+Transposition table type-2 errors tested for #4 {tteBestMove set in main} (-3.0, +/-3.6, 20000) ASUS1
+Passed pawn runners bug fix (-1.1, +/-3.6, 20000) ASUS1
+History vs Random (+12.9, +/-3.6, 20000) PCS1
+History 'zeroes' ordered randomly (-7.4, +/-4.1, 15524) ASUS1
+Multi threading - TT locks also checked in QS! (-3.7, +/-5.0, 10458) ASUS1
+Node level futility pruning taken out (-10.8, +/-6.0, 7140) ASUS1
+Node level futility pruning at every ply (+0.8, +/-3.6, 20000) ASUS1
+Node level futility pruning not done if O1M (-1.5, +/-3.6, 20000) PCS1
+Node level futility pruning not done if FMTP (+0.6, +/-3.6, 20000) ASUS1
+Null move not done if TWM or O1M or FMTP (-3.3, +/-3.6, 20000) PCS1
+Null move not done if ZLKM (-8.0, +/-5.1, 10028) ASUS1
+Null move not done if being forced (-10.7,  +/-3.6, 20000) ASUS1
+Node level pruning margin halved (-1.4, +/-3.6, 20000) ASUS1
+'forcingline' just uses ZLKM as checks/O1M already extend (+6.2, +/-3.6, 20000) ASUS1
+Favour keeping mating TT entries (-0.2, +/-3.6, 20000) ASUS1
+Favour keeping exact TT entries (+0.4, +/-3.6, 20000) PCS1
+Favour keeping mating TT entries only at PV and Cut nodes (+3.0, +/-3.6, 20000) ASUS1
+Pruning not allowed under certain 'winning' conditions (+0.7, +/-3.6, 20000) ASUS1
+Winning scores cut immediately (+1.7, +/-3.6, 20000) PCS1
+Node level pruning always returns beta (-6.5, +/-3.6, 20000) ASUS1
+Reduce more if winning captures available (+3.5, +/-3.6, 20000) ASUS1
+Don't store 'winning' scores in TT at 'All' type nodes (-3.2, +/-3.6, 20000) ASUS1
+Don't prune or reduce if O1M (-1.0, +/-3.6, 20000) ASUS1
+Favour keeping winning TT entries at PV and Cut nodes until we get a winning score at the root (-2.9, +/-3.6, 20000) ASUS1
+Don't store EGTB results in TT (+0.4, +/-3.6, 20000) ASUS1
+Fixed bug in king and rook 'irreversible' move status when they affect castling (Windows update restarted the PC automatically so not completed. Score was 4841.5-4897.5/9739 so a slight plus to the bug fixed version) ASUS1
+QS does MDP (-1.6, +/-3.6, 20000) ASUS1 : IS IT EVEN VALID TO DO MDP IN QS???
+QS does MWS {may search exactly the same tree?} (-2.0, +/-3.6, 20000) ASUS1
+QS tries ALL checks at 1st ply (-5.2, +/-3.6, 20000) ASUS1
+QS tries ALL checks at 1st ply REVERSEDPARANOIACHECK(-10.4, +/-4.9, 10832) ASUS1
+PV Extensions #1 (-100.1, +/-23.6, 474) ASUS1
+PV Extensions #2 (-19.6, +/-18.8, 712) ASUS1
+'KeepScanning' turned off after 1st history move (+8.1, +/-3.6, 20000) ASUS1
+Don't defer -ve SEE moves after KeepScanning' turned off (+4.5, +/-3.6, 20000) ASUS1
+Don't search any checks at 1st ply of QS (-8.3, +/-3.6, 20000) ASUS1
+Search checks at 1st 2 plies of QS (-0.5, +/-3.6, 20000) ASUS1
+Don't set keepScanning to false at PV nodes (-1.4, +/-3.6, 20000) ASUS1
+QS uses simplified ScoreMoves #1 {just TT and MVVLVA} (-3.0, +/-3.6, 20000) ASUS1
+QS uses simplified ScoreMoves #2 {just TT and MVVLVA and killers} (-2.8, +/-3.6, 20000) ASUS1
+QS uses simplified ScoreMoves #3 {just TT and MVVLVA when not in check} (+2.6, +/-3.6, 20000) ASUS1
+Extensions test limited to ID*2 (-1.4, +/-3.6, 20000) ASUS1
+QS TT respects depthRemaining {rather than using zero all the time} (+3.3, +/-3.6, 20000) ASUS1
+Use IID at expected 'CUT' nodes (-12.6, +/-5.1, 10278) ASUS1
+4-threads vs 2-threads vs 1-thread (+116,-14,-100, +/-8, 3840) ASUS1
+Root window tidied when 'winning' (+4.9, +/-3.6, 20000) ASUS1 - WHY such an improvement??? :O
+TT used at PV nodes {in main} (-8.7, +/-4.0, 16445) ASUS1
+TT not used at PV nodes {in QS} (-10.6, +/-6.5, 6100) ASUS1 - BIZARRE THAT IT GAINS ELO IN MAIN BUT LOSES ELO IN QS?!?!
+TT doesn't update killers (-5.5, +/-3.6, 20000) ASUS1
+IID uses -INF lower bound (+1.9, +/-3.6, 20000) ASUS1
+Sees through EGTB to mates (0.0, +/-3.6, 20000) ASUS1
+Root fail high immediately uses +INF if winning score achieved #1 (+0.9, +/-3.6, 20000) ASUS1
+Root fail high immediately uses +INF if winning score achieved #2 (+1.2, +/-3.6, 20000) ASUS1
+TT 'age' updated on read in main (+2.4, +/-3.6, 20000) ASUS1 ***SLIGHTLY BUGGY***
+TT 'age' updated on read in main AND QS (-0.7, +/-3.6, 20000) ASUS1 ***SLIGHTLY BUGGY***
+Use larger mating scores range (+3.8, +/-3.6, 20000) ASUS1 
+TT updates killers at 'ALL' type nodes (+1.2, +/-3.6, 20000) ASUS1
+Threatening mate in 1 extends #1 (-14.9, +/-5.6, 8528) ASUS1
+EGTB uses Nv1 (+0.4, +/-3.6, 20000) ASUS1
+EGTB uses heavy tables near leaves (-13.3, +/-3.6, 20000) PCS1 (hard drive)
+EGTB uses heavy tables near leaves (+2.3, +/-3.6, 20000) ASUS1 (SSDD)
+TT uses 'mate in 1' entries regardless of depthRemaining comparison (+0.8, +/-3.6, 20000) ASUS1
+TT 'winning' replacement clause removed (-6.0, +/-3.6, 20000) ASUS1
+TT doesn't overwrite existing winning entries just because of greater depthRemaining (-4.7, +/-3.6, 20000) ASUS1
+TT doesn't overwrite existing winning entries just because of greater depthRemaining (-2.9, +/-3.6, 20000) ASUS1 (done again as sanity check)
+TT doesn't overwrite existing winning entries just because of greater depthRemaining (-2.8, +/-3.6, 20000) PCS1
+TT doesn't overwrite existing winning entries just because of greater depthRemaining {bug fixed} (+21.1, +/-3.6, 20000) ASUS1 (***SUSPICIOUS #1*** RECOMPILE AND TRY ON PCS1)
+TT doesn't overwrite existing winning entries just because of greater depthRemaining {bug fixed} (-1.3, +/-3.6, 20000) PCS1 (more in line with previous results)
+TT doesn't overwrite existing winning entries just because of greater depthRemaining {bug fixed} (+0.5, +/-3.6, 20000) ASUS1
+TT uses 'mate in 1' entries regardless of depthRemaining comparison {...by storing mate-in-1s with infinite DR} #2 (+10.0, +/-3.6, 20000) ASUS1 (***SUSPICIOUS #2*** TRY ON PCS1 WITHOUT(!!!) RECOMPILING) (ASUS1 now restarted)
+TT uses 'mate in 1' entries regardless of depthRemaining comparison {...by storing mate-in-1s with infinite DR} #2 (+4.1, +/-3.6, 20000) PCS1 (***NOW TRY WITH RECOMPILING!)
+TT stores mate-in-2s&1s with minimum DR (+1.6, +/-3.6, 20000) ASUS1
+TT replaces largest subtree not smallest (-11.2, +/-5.3, 9226) ASUS1
+TT also considers 'age' when deciding entry to replace (-7.8, +/-3.6, 20000) ASUS1
+TT reads touch 'age' (-26.5, +/-7.4, 4964) ASUS1 (Why does this have such an affect?!?! I thought it would have no effect as the position will get resaved {with the current age} to the TT at the end of the node anyway!)
+TT replacement favours 'exact' type nodes (-5.5, +/-3.6, 20000) ASUS1
+TT replacement requires at least age+2 (+0.7, +/-3.6, 20000) ASUS1
+TT replacement candidates also considers age (-5.3, +/-3.8, 18066) ASUS1
+TT candidates ignore 'exact' type (-3.8, +/-3.6, 20000) ASUS1
+TT replace favours 'cut' over 'all' type (-2.3, +/-3.6, 20000) ASUS1
+TT probing uses 'mated' scores as upper bound (+0.3, +/-3.6, 20000) ASUS1
+TT extended moves not reduced (+0.4, +/-3.6, 20000) ASUS1
+TT in QS doesn't store standPat scores at 'All' type nodes (+1.3, +/-3.6, 20000) ASUS1
+StandPat immediate cuts stored in TT (-1.2, +/-3.6, 20000) PCS1
+TT doesn't use unaged 'exact' entries for candidate replacement (-4.7, +/-3.6, 20000) ASUS1
+StandPat immediate cuts stored in TT WITH ANY EXISTING TTEBESTMOVE (+1.6, +/-3.6, 20000) ASUS1
+TT don't always replace exact over non-exact (+0.7, +/-3.6, 20000) ASUS1
+Null nove not done if it would go straight into QS (-48.1, +/-14.5, 1306) PCS1
+EGTB used even if in check (+2.6, +/-3.6, 20000) PCS1
+Futility pruning doesn't adjust fail-soft score (-1.2, +/-3.6, 20000) ASUS1
+QS futility pruning not done if has 'winning' score (+1.6, +/-3.6, 20000) ASUS1
+QS futility pruning doesn't adjust fail-soft score (+0.9, +/-3.6, 20000) PCS1
+Mate-in-1s break out of move loop immediately (+1.4, +/-3.6, 20000) ASUS1
+TT probing also uses EGTB scores {as well as mating scores} as bounds regardless of draft (+0.6, +/-3.6, 20000) ASUS1
+Null move done regardless of draft (+5.2, +/-3.6, 20000) ASUS1
+TT doesn't use unaged 'exact' entries for candidate replacement unless replacing with 'exact' (-8.5, +/-3.6, 20000) ASUS1
+Null move doesn't do verification search (+0.6, +/-3.6, 20000) ASUS1
+Null move allows winning scores to be returned (+1.4, +/-3.6, 20000) ASUS1
+TT allows 'exact' to replace 'upper' regardless of draft (-2.1, +/-3.6, 20000) ASUS1
+QS tests for DBR (+1.3, +/-3.6, 20000) ASUS1
+DBR requires two repeats (+0.3, +/-3.6, 20000) PCS1
+Forced to follow previous PV (-3.4, +/-3.6, 20000) ASUS1 ???bugged???
+TT doesn't store DBRs (-0.9, +/-3.6, 20000) PCS1
+Node level futility pruning done regardless of draft (+0.7, +/-3.6, 20000) ASUS1
+QS tests for non-quiet positions #1 {just at PV nodes before standPat test} (-0.3, +/-3.6, 20000) PCS1
+QS tests for non-quiet positions #2 {just at PV nodes within standPat test} (+1.1, +/-3.6, 20000) PCS1
+QS tests for non-quiet positions #3 {dr=0 within standPat test} (+1.0, +/-3.6, 20000) PCS1
+Extensions test limited to ID+6 (-1.0, +/-3.6, 20000) ASUS1
+Extensions test limited to ID (-3.8, +/-3.6, 20000) ASUS1
+2 for 1 slider (only Bs) moves reduced (-4.3, +/-3.6, 20000) ASUS1
+2 for 1 slider moves reduced if winning (+1.4, +/-3.6, 20000) ASUS1
+QS always entered at ID*2 (+1.2, +/-3.6, 20000) ASUS1
+QS always entered at ID*1.5 (-3.5, +/-3.6, 20000) ASUS1
+Reductions set to DR/2 (-0.3, +/-3.6, 20000) ASUS1 - ARE REDUCTIONS EVEN WORKING???
+History values reduced much more slowly (+2.7, +/-3.6, 20000) ASUS1
+CMH persists between moves (+1.2, +/-3.6, 20000) ASUS1
+Killers persist between moves (+7.2, +/-3.6, 20000) ASUS1 - AS THIS IS THE MOST PROFITABLE PERHAPS WE SHOULD TRY 3 KRS EACH PLY? OR KR+2 WHEN ORDERING
+Counter moves persist between moves (+2.7, +/-3.6, 20000) ASUS1
+Follow-up moves persist between moves (-1.0, +/-3.6, 20000) ASUS1
+Counter moves use both sides piece types (-1.1, +/-3.6, 20000) PCS1
+Uses first killer at ply+2 (-2.2, +/-3.6, 20000) ASUS1
+Follow-up moves removed (+0.6, +/-3.6, 20000) PCS1
+Counter moves removed (-15.9, +/-3.6, 20000) ASUS1
+Non-capture promotions scored before killers (+6.4, +/-3.6, 20000) ASUS1
+TMI1 extensions (-3.5, +/-3.5, 20000) ASUS1
+Non-capture promotions scored before killers - SANITY CHECK AS CODE SHOULD WORK IDENTICALLY?! (-1.7, +/-3.6, 20000) ASUS1
+Testing regime sanity check #1 (-2.1, +/-3.5, 20000) ASUS1
+Testing regime sanity check #2 (+0.6, +/-3.5, 20000) ASUS1
+Testing regime sanity check #3 (+7.1, +/-3.5, 20000) ASUS1 :O THIS SHOWS THAT NOTHING CAN BE TRUSTED! :D - CHECK THE PGN FILES FOR ANY SPURIOUS RESULTS
+Testing regime sanity check #4 (+4.8, +/-3.6, 20000) ASUS1
+Testing regime sanity check #5 (+4.2, +/-3.6, 20000) ASUS1
+Testing regime sanity check #6 (-1.1, +/-3.6, 20000) ASUS1
+Testing regime sanity check #1A (-0.8, +/-3.6, 20000) ASUS1 - RECOMPILED WITH ERROR MSG IN CASE TT MEMORY COULDN'T BE ALLOCATED
+Testing regime sanity check #2A (-0.7, +/-3.6, 20000) ASUS1
+Testing regime sanity check #3A (-2.0, +/-3.6, 20000) ASUS1
+Testing regime sanity check #4A (+0.1, +/-3.6, 20000) ASUS1
+Testing regime sanity check #5A (+0.9, +/-3.6, 20000) ASUS1
+All randoms have 32x1bits (+1.0, +/-3.6, 20000) ASUS1
+Testing regime sanity check #6A (+3.3, +/-3.5, 20000) ASUS1
+Testing regime sanity check #7A (-0.9, +/-3.6, 20000) ASUS1
+Testing regime sanity check #8A (-4.0, +/-3.6, 20000) ASUS1
+Testing regime sanity check #8A (+1.8, +/-3.6, 20000) ASUS1
+{***Changed CuteChess batch file to process the openings in order {rather than random} in case using 'random' actually resulted in the same openings being chosen multiple times!}
+Check extensions limited to MaximumIterationPly (-0.5, +/-3.4, 20000) PCS2
+Always enter QS if ply>=MaximumIterationPly and not in check (+1.5, +/-3.4, 20000) PCS2 {still occasionally reaches MaximumPly in QS though}
+Dont' check extend if pliesSinceIrreversible >= 50 (-1.7, +/-3.4, 20000) PCS2
+MT test (PCS2): 1 v 2 v 4 : failed with {White's connection stalls} (4 thread instance) which may be a bit different to 'disconnects'?
+(Also doesn't seem to give nearly as much gain as previous version's tests! (Maybe some TT changes have destroyed the advantage?))
+Rank Name                          Elo     +/-   Games   Score    Draw
+   1 20NNx4                         25       9    2751   53.6%   50.3%
+   2 20NNx2                          2       9    2749   50.3%   50.2%
+   3 20NNx1                        -27       9    2748   46.1%   49.6%
+Again crashed...
+   Rank Name                          Elo     +/-   Games   Score    Draw
+   1 20NNx4                         29      10    2206   54.2%   52.7%
+   2 20NNx2                          6      10    2206   50.9%   51.7%
+   3 20NNx1                        -35      10    2204   44.9%   51.8%
+Ran a test on PCS2 with no EGTB and allowed 1000000 yields. Didn't crash.
+Rank Name                          Elo     +/-   Games   Score    Draw
+   1 20NNx4                         35       5    7932   55.0%   49.5%
+   2 20NNx2                         -4       5    7932   49.4%   50.5%
+   3 20NNx1                        -30       5    7932   45.6%   50.9%
+Ran a test on ASUS1 with no extensions and allowed 1000000 yields. Didn't crash.
+Rank Name                          Elo     +/-   Games   Score    Draw
+   1 20NNx4                         20       8    4252   52.9%   46.7%
+   2 20NNx2                         -9       8    4250   48.7%   47.7%
+   3 20NNx1                        -11       8    4250   48.4%   47.2%
+Don't check extend if previous move wasn't a check (-4.9, +/-3.4, 20000) PCS2
+No extensions (-21.4, +/-4.8, 10162) PCS2
+Limit main to ID*2 (+0.7, +/-3.6, 20000) PCS2
+Root movelist ordering based on subtree size (-13.2, +/-5.9, 6615) PCS2 - BUGGY
+Root movelist ordering based on subtree size #2 (-7.6, +/-4.8, 10020) PCS2 - BUGGY
+Root movelist ordering based on subtree size #3 (-5.3, +/-4.1, 13930) PCS2 - BUGGY
+All moves >bestMoveScore bump to top of root list {trying to gleen useful info from fail lows} (-24.8, +/-9.8, 2277) PCS2
+Fail highs don't bump to top of root list (-4.5, +/-3.4, 20000) PCS2
+Root movelist ordering based on subtree size again (+1.8, +/-3.4, 20000) PCS2
+Root movelist ordering based on fail soft score (+1.4, +/-3.4, 20000) PCS2
+Root movelist ordering based on subtree size again #2 (-2.6, +/-3.4, 20000) PCS2
+Root movelist ordering based on fail soft score #2 (+0.4, +/-3.4, 20000) PCS2
+Don't test for DBRs in QS (-1.5, +/-3.4, 20000) PCS2
+Immediate DBR removed completely (-8.1, +/-5.5, 7769) PCS2
+Immediate DBR removed from QS (-1.4, +/-3.4, 20000) PCS2
+Immediate DBRs also change alpha (-1.4, +/-3.4, 20000) PCS2
+EGTB before TT (-0.3, +/-3.4, 20000) PCS2
+QS detects non-quiet positions (0.0, +/-3.4, 20000) PCS2
+TT considers oldest entries for replacement (-4.4, +/-3.4, 20000) PCS2
+TT allows only oldest entries for replacement (-8.7, +/-3.4, 20000) PCS2
+TT randoms NOT alternating odd/even (+2.4, +/-3.4, 20000) PCS2
+All randoms have 32x1bits {alleviates the odd/even problem} (+1.2, +/-3.4, 20000) PCS2
+QS doesn't use move count pruning (-1.3, +/-3.4, 20000) PCS2
+QS doesn't use futility pruning (-8.9, +/-5.2, 8922) PCS2
+QS doesn't prune -ve SEE (-64.1, +/-11.8, 1688) PCS2
+QS doesn't prune deep {<=-5} SEE (-2.7, +/-3.4, 20000) PCS2
+QS deep SEE pruning changed from 5 to 3 (-0.7, +/-3.4, 20000) PCS2
+QS only uses QS sort (-7.1, +/-3.4, 20000) PCS2
+QS sort routine uses MVVLVA of empty square {should only apply to checks} (-2.6, +/-3.4, 20000) PCS2
+QS only uses QS sort routine that uses killers and MVVLVA of empty square (-6.0, +/-3.6, 17729) PCS2
+No DBR detection in QS (-5.2, +/-4.4, 11662) PCS2
+DBR detection not done twice entering QS (+3.1, +/-3.4, 20000) PCS2
+TT uses 4 entries per bucket not 5 {32MB hash} (+2.6, +/-3.4, 20000) PCS2 {32MB probably too big for many collisions at 0.1s/move}
+TT uses 4 entries per bucket not 5 {4MB hash} (~-4 {PC restarted overnight GRRR}, ~+/-4, 18031) ASUS1
+DBR requires 3 repeats (~-2 {PC restarted overnight GRRR}, +/-3.4, 20000) PCS2
+TT always replaces regardless of current subtree depth (-3.1, +/-3.4, 20000) ASUS1
+TT always replaces if the same posn already in TT regardless of current subtree depth (-0.4, +/-3.4, 20000) PCS2
+Check extensions not limited by reversible count (+2.1, +/-3.4, 20000) ASUS1
+TT in QS ignored if PV node (-5.3, +/-3.4, 20000) PCS2
+TT in main not ignored if PV node (-9.1, +/-3.4, 20000) PCS2
+Main tests quiet before entering QS {multiple hanging pieces} (-2.4, +/-3.4, 20000) PCS2
+All TT mates have min subtreedepth of 1 (-0.2, +/-3.4, 20000) PCS2
+TT reads touch 'age' (-9.1, +/-3.5, 20000) PCS2
+QS non-check nodes don't use tteBestMove (+3.4, +/-3.4, 20000) PCS2
+QS non-check nodes don't try to order proms beyond MVVLVA (+1.4, +/-3.4, 20000) ASUS1
+QS passed P pushes to 7th and 8th not excluded from pruning (-4.2, +/-3.4, 20000) PCS2
+QS passed P pushes to 7th not excluded from pruning (+3.3, +/-3.4, 20000) PCS1
+Mate in 1 (#1) move loop breakout removed (+4.4, +/-3.4, 20000) ASUS1 - must be freak result as subsequently showed that code never kicks in! ?????
+Mate in 1 (#1) move loop breakout removed SANITY CHECK REVERSED COMPILE (-1.5, +/-4.2, 13487) PCS2
+QS doesn't generate checks at 1st ply (+3.0, +/-3.4, 20000) PCS2
+Killer moves and counter moves moved into Normal class (+3.8, +/-3.6, 20000) ASUS1
+Counter moves and FollowUp moves made dimensions multiple of 2 (-1.5, +/-3.4, 20000) PCS2
+Counter moves history moved into Normal class (+2.6, +/-3.4, 20000) PCS1
+Counter moves history moved into Normal class SPRT#1 (+12.4, +/-6.5, 5474) PCS2
+Counter moves history moved into Normal class SPRT#2 (+1.2, +/-3.5, 20000) PCS2
+Killers outside of Normal class so that they persist between moves (-0.6, +/-3.4, 20000) PCS2 - so persisting killers doesn't help or hinder
+QS updates killers (-3.5, +/-5.2, 9571 crashed) ASUS1
+CM,FUM,HISTORY REMOVED FOR TOURNEY OF NO-KILLERS vs 1-KILLER vs 2-KILLERS (2:+58, 1:+27, 0:-87, +/-3.0, 23167 crashed) PCS2
+Killers of ply-2 also used (+12.5, +/-3.5, 20000) ASUS1
+Killers not updated by TT probes (-6.4, +/-3.4, 20000) PCS2 - SANITY CHECK THIS WITH BOTH INSTANCES OF UPDATING KRS
+CMH - None vs >>8 vs >>16 (N:-20, 16:9, 8:11, +/-3, 23920) ASUS1
+TT killer updates {SANITY CHECK} - None vs Exact vs Cut vs Both (N:-1, E:-0, C:0, B:1, +/-4, 16682) PCS2
+CMH reductions - -1 vs half (+1.5, +/-3.4, 20000) PCS2
+MVVLVA distinguishes B and N (-0.2, +/-3.4, 20000) ASUS1
+'Recent' history (+17.4, +/-3.4, 20000) PCS1
+PV killers (+2.3, +/-3.4, 20000) PCS2
+CMH v RecentHistory (+15.0 {i.e. CMH better}, +/-3.5, 19013) PCS2
+'Incremental Recent' history (+17.4, +/-3.5, 20000) PCS1
+'+1 Recent' history (+11.2, +/-3.4, 20000) PCS2
+CMH 'Recent' (-3.6, +/-3.4, 20000) PCS2
+CMH tickle (+2.1, +/-3.5, 20000) ASUS1
+CMH AND Recent combined (-34.3, +/-14.5, 1117) PCS2
+CMH with Recent setting 0 to 1 (-2.5, +/-3.4, 20000) PCS2
+CMH vs Recent-with-piece-type (-18.4, +/-9.5, 2629) PCS1
+3 killers per ply (+1.9, +/-3.5, 20000) PCS1
+Counter moves (+11.7, +/-3.4, 20000) PCS
+Follow-up moves (+7.7, +/-3.5, 20000) PCS1
+FUM-CM vs CM-FUM (+0.4, +/-3.5, 20000) PCS2
+KR-CM-FUM vs CM-FUM-KR (+3.1, +/-3.6, 20000) ASUS1
+Node level futility pruning tests beta>-winning (-4.0, +/-3.5, 20000) PCS2
+CMH vs Recent-with-piece-type WITH CM&FUM (+10.6 {i.e. CMH better}, +/-6.1, 6517) PCS2
+Null move doesn't test forcing line (+1.8, +/-3.6, 20000) ASUS1
+KeepScanning turned off at zero (+3.7, +/-3.4, 20000) PCS2
+CMH vs Recent-with-piece-type WITH CM&FUM now that KeepScanning fixed (-30.1, +/-18.6, 705) PCS2
+QS uses one sort routine (-1.4, +/-3.5, 20000) PCS2
+Sort routine ignores promotions (-18.7, +/-4.9, 10717) ASUS1
+ScoreMovesMVVLVA also uses TT (-0.5, +/-3.6, 20000) PCS1
+ScoreMovesMVVLVA also does promotions (+0.5, +/-3.4, 20000) PCS2
+QS updates killers (-1.9, +/-3.6, 20000) ASUS1
+Pruning filters based on move scoring: None vs 'Not TT, MVVLVA, KR, CM, FUM' vs 'Not TT, MVVLVA, KR, CM, FUM, non-zero HISTORY' (+3, -3, 1, +/-3, 35082) PCS2
+LMP doesn't use SEE -ve filter (-41.7, +/-16.9, 845) PCS2
+LMP replaces SEE -ve filter with 'past special moves' (-26.8, +/-16.3, 896) PCS2
+LMP replaces SEE -ve filter with 'bestSortScore<=0' (-26.9, +/-16.6, 907) PCS2
+LMP replaces SEE -ve filter with 'bestSortScore<0' (-17.2, +/-9.6, 2409) PCS2
+LMP removed (-18.5, +/-9.8, 2485) PCS2
+LMP ALL quiet moves (-2.8, +/-3.5, 20000) PCS2
+LMP only when DR<=8 (-3.1, +/-3.6, 20000) ASUS1
+LMP also does captures (+5.1, +/-3.5, 20000) PCS1
+Futility margin increased (-4.1, +/-3.4, 20000) PCS2
+QS SEE pruning not done at PV nodes (+0.3, +/-3.6, 20000) ASUS1
+Immediate DBR doesn't tweak alpha in main (+2.9, +/-3.4, 20000) PCS2
+Immediate DBR doesn't tweak alpha in main & QS (-0.4, +/-3.4, 20000) PCS2
+keepScanning removed (-4.5, +/-3.5, 20000) PCS1
+Immediate DBR removed (-6.0, +/-5.7, 7228) PCS2
+Immediate DBR sets alpha to ds-1 (-6.2, +/-3.4, 20000) PCS2
+***ALL PRUNING/REDUCTIONS IN MAIN REMOVED TO TEST EXTENSIONS IN ISOLATION***
+No check extensions vs vanilla check extensions (+24.2, +/-3.9, 20000) ASUS1
+Vanilla check extensions limited by ply (-23.6, +/-3.9, 20000) PCS1  *** WTF!!! :O *** IS ONE OF THE ENGINES GOING REALLY SLOW??? CHECK THE .PGN FOR LOW SEARCH DEPTHS
+Vanilla check extensions limited by ply #2 {with restart=on} (-26.7, +/-10.8, 2464) PCS1
+Vanilla check extensions limited by ply #3 {engines reversed} (+27.1, +/-15.4, 1248) PCS1
+Vanilla check extensions limited by ply #4 {copied engines over again and put back to original order} (-1.9, +/-3.8, 20000) PCS1 - MAYBE FILES WERE CORRUPTED ON COPY SO HAVE ADDED CHECKSUM .BAT FILE
+Vanilla check extensions limited by ply (+2.7, +/-3.8, 20000) PCS2
+Check extensions only if to-sq safe (+7.0, +/-3.9, 20000) ASUS1
+O1M extensions (+1.7, +/-3.8, 20000) PCS2
+O1M extensions limited by ply (-2.5, +/-3.9, 20000) ASUS1
+O1M extensions ignore recaptures (+0.8, +/-3.8, 20000) PCS1
+Recapture extensions (+21.0, +/-3.8, 20000) PCS2
+Recapture extensions SANITY CHECK (+23.2, +/-5.6, 9623) ASUS1
+'soft' PVs saved and displayed (-0.0, +/-3.8, 20000) PCS2
+Recapture extensions vanilla (-50.3, +/-19.3, 793) PCS1
+Recapture extensions just tests previous toSquarePiece (-59.8, +/-10.3, 2798) PCS1
+Recapture extensions tests previous toSquarePiece AND equal exchange (-4.6, +/-3.9, 20000) ASUS1
+Recapture extensions consider N & B equal (+7.7, +/-3.8, 20000) PCS2
+P to 7th extensions vanilla (-0.6, +/-3.7, 20000) PCS2
+P to 7th extensions only if tosquare safe (+1.7, +/-3.8, 20000) ASUS1
+Doesn't defer moves (+1.7, +/-3.7, 20000) PCS2
+P to 7th extensions only if tosquare safe {KP database} (-6.1, +/-5.0, 8192) PCS1
+P to 7th extensions only if tosquare safe {KP database} (+0.2, +/-6.0, 8192) PCS2
+P to 7th extensions vanilla {KP database} (-2.2, +/-6.0, 8192) PCS2
+RootBestMove NOT updated when fail high (+5.1, +/-3.8, 20000) PCS1
+TT not updated at PV nodes (-18.4, +/-6.5, 6848) ASUS1
+TT doesn't store scores >=winning (-2.6, +/-3.8, 20000) ASUS1
+No aspiration window at root (-27.4, +/-13.3, 1599) PCS2
+TT in main, pvnode test also tests tteSubTreeDepth == MaximumPly (+2.2, +/-3.8, 20000) PCS2
+TT in main, pvnode test only applied to exact entries (+6.8, +/-3.8, 20000) PCS1
+TT in main, pvnode test only applied to exact entries (-1.0, +/-3.7, 20000) PCS2 - SANITY CHECK
+Root fail highs and lows immediately set window to +/-INF (+0.0, +/-3.8, 20000) ASUS1
+O1PCM extensions (-36.5, +/-7.5, 5037) PCS2
+O1PCM extensions (-27.4, +/-9.5, 3169) PCS1
+K attacks undefended P at leaf extensions (-11.5, +/-3.7, 20000) PCS2
+Futility pruning (+51.8, +/-4.2, 16104) PCS1
+Futility pruning done at PV nodes (+0.0, +/-3.8, 20000) ASUS1
+Futility pruning only done for history=0 moves (-4.7, +/-3.8, 20000) PCS1
+History never reduced (-1.6, +/-3.7, 20000) PCS2
+Futility pruning only for last 6 ply (-2.2, +/-3.8, 20000) ASUS1
+Futility pruning even when extended (-2.7, +/-3.7, 20000) PCS1
+CounterMove 13 vs 6 (+0.9 {i.e. 6 better}, +/-3.7, 20000) PCS2
+Nullmove skipped if previous move was SEE -ve (-16.0, +/-5.7, 8980) ASUS1
+Nullmove skipped when DR=1 (-14.4, +/-5.8, 8177) PCS1
+Nullmove forcing test removed (+5.6, +/-3.7, 20000) PCS2
+Root movelist sub-ordering by ID=1 scores only (+4.5, +/-3.8, 20000) ASUS1
+On 1st iteration, all searches use infinite window (-3.0, +/-3.7, 20000) PCS1
+On 1st iteration, all searches use infinite window at 1st ply (+1.4, +/-3.7, 20000) PCS1
+Main SEE pruning vanilla (+37.2, +/-11.1, 2196) PCS2
+Main SEE pruning only when DR<=6 (+5.9, +/-3.6, 20000) PCS2
+Main SEE pruning only when passed special moves (+0.2, +/-3.8, 20000) ASUS1
+Main SEE pruning only when DR<= 4vs6vs8 (1,2,-3, +/-4, 20000) PCS2
+Reductions #1 'Vanilla 1-ply reduction' (+24.1, +/-3.7, 20000) ASUS1
+Reductions #2 Don't reduce when dr=1 (-1.0, +/-3.6, 20000) ASUS1
+Reductions #2 Don't reduce when dr=1 (+1.8, +/-3.5, 20000) PCS2 - SANITY CHECK
+Reductions #3 1 vs 4 (-66.4, +/-7.7, 4435) PCS2
+Reductions #4 1 vs max(1,dr/2) (-4.0, +/-3.8, 16357) PCS2
+SEE winning moves not pruned (-2.2, +/-3.8, 20000) ASUS1
+SEE winning moves not reduced (+4.8, +/-3.5, 20000) PCS2
+Special moves not reduced unless SEE losing (+27.8, +/-7.0, 5432) ASUS1
+Zero history moves reduced one more (+26.4, +/-5.2, 9218) PCS2
+SEE losing moves reduced one more (+0.4, +/-3.6, 20000) ASUS1
+TT move being a capture reduces one more (very slightly +ve, 15308) PCS2 - CRASHED
+Null move reduction =3 (-2.5, +/-3.6, 20000) PCS2
+Null move tests if king can move (-5.9, +/-3.6, 20000) ASUS1
+Null move tests if king can move (-4.4, +/-3.5, 20000) PCS2 - SANITY CHECK
+Null move tests DR>1 (-18.5, +/-5.5, 8176) PCS2 - COULD JUST TRY TAKING THIS OUT OF 2022a!!!
+Null move tests if king can move in endgame (+1.0, +/-3.5, 20000) PCS2
+QS uses 6pc EGTB (-8.2, +/-4.9, 10651) ASUS1
+TT doesn't store static eval (-5.9, +/-3.6, 20000) ASUS1
+Reductions doubled (-4.6, +/-3.6, 20000) PCS1
+TT more move validation (-0.4, +/-3.5, 20000) PCS2
+QS doesn't store standpat in TT (+5.5, +/-3.6, 20000) ASUS1
+Reduces more if not improving (+0.1, +/-3.6, 20000) PCS1
+Node level futility pruning more if improving (-21.6, +/-7.7, 20000) PCS2
+Only reduce quiet moves (-2.4, +/-3.6, 20000) ASUS1
+Null move doesn't test TWM (-1.2, +/-3.6, 20000) ASUS1
+TT replacement doesn't prefer winning score (+0.2, +/-3.5, 20000) PCS1
+Node level futility pruning 5 rather than 7 (-5.8, +/-3.5, 20000) PCS2
+Node level futility pruning 9 rather than 7 (-1.9, +/-3.5, 20000) PCS2
+Reduces more if ZLKM (+1.8, +/-3.5, 20000) PCS2
+Only prune quiet moves (+6.1, +/-3.6, 20000) ASUS1
+TT replacement considers age for equal STD entries (-1.4, +/-3.6, 20000) ASUS1
+Node level futility pruning always returns beta (-6.8, +/-3.5, 20000) PCS2
+Reduces all moves after winning capture searched (-0.1, +/-3.5, 20000) PCS2
+Passed pawn runner code removed (-1.7, +/-3.5, 20000) PCS2
+QS simplest delta pruning based on Q value (+3.2, +/-3.6, 20000) ASUS1
+QS delta pruning based on largest opp piece (-5.3, +/-3.6, 20000) ASUS1
+Static eval from after null moves used {coz non-symetrical pawn runner code removed} (+2.4, +/-3.5, 20000) PCS2
+SEE -ve moves reduced by 2 (+2.3, +/-3.5, 20000) PCS2
+History reduces previous quiet moves (-10.7, +/-3.5, 20000) PCS2
+Traditional history scoring {dr*dr} (+2.8, +/-3.5, 20000) PCS1
+QS no move count pruning (-1.3, +/-3.5, 20000) PCS2
+ALL extensions limited (+2.1, +/-3.6, 20000) ASUS1
+TMI1 extensions (-51.0, +/-11.6, 1998) PCS1
+Reduces bestscore=0 moves more depending on how many legalmovesmade (+0.5, +/-3.5, 20000) PCS2
+Reduces if TT move isn't quiet {PV and Cut nodes} (-1.9, +/-3.5, 20000) PCS2
+History also uses -ve scores {and doesn't stop scanning} (-12.8, +/-3.6, 20000) ASUS1
+History also uses -ve scores {and does stop scanning} (-4.2, +/-3.5, 20000) PCS2
+Soft killer (-0.7, +/-3.5, 20000) PCS2
+Razoring (+11.0, +/-3.5, 20000) PCS2
+20NNx vs 2022a (+20.2, +/-3.6, 20000) PCS2
+Pruning allowed at PV nodes (0.0, +/-3.5, 20000) PCS2
+Late move pruning (-10.4, +/-3.6, 20000) PCS2
+Futility pruning tests bestMoveScore > LosingBaseScore (+3.1, +/-3.5, 20000) PCS2
+SEE -ve pruning tests bestMoveScore > LosingBaseScore (-2.6, +/-3.5, 20000) PCS2
+X vs PGOX (-8.2 {i.e. the PGO version wins}, +/-3.5, 20000) PCS2
+Extended moves can be pruned (-0.8, +/-3.5, 20000) PCS2
+Can prune when in check (+4.0, +/-3.5, 20000) PCS2
+FUMs not cleared between moves (+2.2, +/-3.5, 20000) PCS1
+20NNx{nearly 2024a} vs 2022a (+29.7, +/-3.6, 20000) PCS2
+20NNx{nearly 2024a} vs 2022a {1s/move} (+25.7, +/-7.5, 4057) PCS2
+20NNx{nearly 2024a} vs 2022a {2'+1"} (15.6, +/-7.3, 3896) PCS2 {was this actually a PGO build??? I don't think so!}
+20NNx{nearly 2024a} vs 2022a {40 moves in 40"} (+26.7, +/-9.1, 2720) PCS1
+Null moves ZLKM clause only when gamePhase>0 (-0.6, +/-3.6, 20000) PCS1
+No null moves when gamePhase=0 (-3.0, +/-3.6, 20000) PCS1
+Null move R set to 3 when gamePhase=0 (-1.5, +/-3.5, 20000) PCS2
+Null moves when gamePhase=0 also require legal K moves (-0.5, +/-3.6, 20000) PCS1
+Null moves when gamePhase=0 only when DR<=8 (+0.1, +/-3.6, 20000) PCS1
+FRC 24a vs 22a (+34.7, +/-12.3, 1920) PCS2 {some openings repeated}
+FRC 24a vs 22a (+37.4, +/-12.4, 1920) PCS2 {no openings repeated}
+
+
+2021x
+=====
+
+NON-TESTABLE CHANGES
+PERFT
+EGTB When in EGTB at root, don't query EGTB in main?
+
+Don't clear CMH between games (-20.8, +/-7.1, 5227) ASUS1
+Eval: Backward pawns {-16} (-0.3, +/-3.7, 20000) ASUS1 !FAULTY!
+(---
+Eval: Backward pawns {-8} (+1.8, +/-3.7, 20000) ASUS1 !FAULTY!
+Eval: Straggler pawns {-16} (+6.5, +/-3.6, 20000) ASUS1 !FAULTY!
+Eval: Rook endings drawish (+0.5, +/-3.6, 20000) !FAULTY!
+Eval: Straggler pawns don't count if have own piece ahead {-16} (+1.5, +/-3.6, 20000) ASUS1 !FAULTY!
+Eval: Mobility doesn't count captures (-7.1, +/-5.4, 8831) !FAULTY!
+Eval: Penalise pawns not part of chain (+8.3, +/-3.7, 20000) ASUS1 !FAULTY!
+Eval: Rooks penalised for zero moves (-4.4, +/-4.5, 13663) !FAULTY!
+Eval: No pawns penalty (-6.2, +/-4.9, 10767) ASUS1 :O WHY??? !FAULTY!
+---)
+Eval: Straggler pawns don't count if have own piece ahead {-16} FIXED (-0.3, +/-3.6, 20000)
+Eval: Straggler pawns {-16} (-1.4, +/-3.7, 20000) ASUS1
+Eval: Straggler pawns {-8} (-1.4, +/-3.7, 20000) ASUS1
+Eval: Backward pawns {0/-2/-8/-32} (+7/+1/+2/-10, +/-3, 31346) ASUS1
+Eval: No pawns penalty (-2.1, +/-3.6, 20000)
+Eval: Penalise pawns not part of chain {-8} (+6.5, +/-3.7, 20000) ***
+Eval: K safety: pawn shelter {4}(+0.2, +/-3.7, 20000) ASUS1
+Eval: K safety: pawn shelter {4/2/8} (+4/+8/-12, +/-3, 22744) ASUS1 ***
+Eval: open rooks {+8} (-0.7, +/-3.6, 20000)
+Eval: isolated pawns {-16: was -20} (+6.5, +/-6.1, 7298) DELL8 ***
+Generate all moves in one function (+2.2, +/-3.6, 20000) ASUS1 ***
+Move (nearly) immediately if only one root move (+1.0, +/-9.8, 2399) ***
+HASH TESTS BELOW DONE WITH 4MB TT WHICH GIVES 65536 BUCKETS (16 BITS)
+TT: 5 entries@32/bucket {was 4@64} (-1.5, +/-3.6, 20000)
+TT: sizes: 1/2/4/8/16/32/64/128 {0.1s/move} (-9/4/5/3/3/2/1/-8, 10700)
+TT: 48-bit hash {was 64-bit} (-0.4, +/-3.6, 20000) ASUS1 : should be equal because the index is 16 bits plus 48 bits in the key makes 64
+TT: 40-bit hash {was 64-bit} () ASUS1 : 16 bits index + 40 bits key = 56 bits
+TT: 32-bit hash {was 64-bit} (-9.2, +/-3.7, 20000) ASUS1 WAS WITH 32MB TT, REDO WITH 4MB
+TT: 4MB hash size: 48/40/32/24 bit hash match (+1/-4/+1/+2, +/-3, 22786) ASUS1
+TT: 32MB hash size: 48/40/32/24 bit hash match (+1/-2/+2/-1, +/-4, 20139) So... reducing the hash matching bits in the key does cause errors but NOT enough to lose any ELO : AH! BUT I WAS ALWAYS COMPARING 64-BITS WHEN STORING?! DOES THIS MATTER?!
+Maybe the two tests below didn't benefit because the hash table was big 'enough' ... would we get more benefit with a smaller hash table?
+TT: 3 entries/bucket {was 4} 4MB hash (+0.5, +/-3.6, 20000) ASUS1
+TT: 5 entries@32/bucket {was 4@64} 32MB hash (-1.7, +/-3.6, 20000)
+Ahah! As you can see from the two tests below, when you have a very small hash table, reducing/increasing the entries/bucket works as expected!
+TT: 3 entries/bucket {was 4} 1MB hash (-7.4, +/-4.4, 13678) ASUS1
+TT: 5 entries@32/bucket {was 4@64} 1MB hash (+6.4, +/-4.5, 12613) ***
+TT: always replace 'lower' entries (+3.1, +/-3.6, 20000) ***
+TT: always replace 'upper' entries (+1.0, +/-3.6, 20000)
+TT: 6 entries@32/bucket {was 5@32} 1MB hash (+4.0, +/-3.6, 20000) ASUS1 ***
+TT: 2 buckets of 3 entries per cache line {instead of 1x6} 1MB hash (-4.9, +/-3.8, 17705) :O
+Eval: KP shelter bonus treated as 'exposure' penalty (+1.9, +/-3.6, 20000) ASUS1 ***
+CMH: 0/1/2 idea (-17.7, +/-13.2, 1510)
+CMH: 0/1/2 idea #2 (-17.0, +/-11.7, 1939)
+CMH: single history table (-25.4, +/-12.2, 1779) ASUS1
+CMH: hash history table 256 (-14.6, +/-10.6, 2383) ASUS1
+CMH: hash history table 1024 (-24.2, +/-12.4, 1785) ASUS1
+IID: heavy touch (+0.7, +/-3.6, 20000) ASUS1 ***
+CMH: also increment after beta (-4.9, +/-5.7, 7929)
+CMH: after null consistently treated as Px0 (+1.6, +/-3.6, 20000) ***
+Don't do ScoreMoves in QS (-14.0, +/-13.9, 1395) DELL8
+QS: dedicated ScoreMoves #1 (-6.3, +/-6.3, 6708) ASUS1
+QS: dedicated ScoreMoves #2 (-12.1, +/-8.7, 3616) ASUS1
+QS: dedicated ScoreMoves #3 (-1.2, +/-3.6, 20000) ASUS1
+QS: dedicated ScoreMoves #4 (-1.4, +/-3.6, 20000) ASUS1
+IID: only do if idrem>2 (-0.9, +/-3.6, 20000)
+CMH: both sides have table (-2.7, +/-3.6, 20000)
+CMH: only reduce relevant part (+0.4, +/-3.6, 20000) ASUS1 ***
+ScoreMoves: killers use 'or' statement (-29.7, +/-14.9, 1218) DELL8
+IID: ignore tteBestMove if subtreedepth more than 2 ply short and do IID (-3.8, +/-3.6, 20000)
+CMH: halve values for moves that don't take over as best (+3.6, +/-3.6, 20000) ASUS1 ***
+CMH: incremement by 1 and double (-4.4, +/-5.6, 8579) ASUS1
+Stop scanning for best move once get a zero score (-4.1, +/-7.2, 5026)
+Stop scanning for best move once passed 9th move and half way along list (+5.3, +/-3.6, 20000) ***
+ScoreMoves also adds Centre value (-1.7, +/-3.6, 20000) ASUS1
+TT: found entries bring 'age' up to date (-1.6, +/-3.6, 20000) ASUS1
+Eval: Knight-Pawn endgame bonus/penalty (-2.0, +/-5.7, 8389) DELL8
+Eval: Bishop-Pawn endgame bonus/penalty (-2.2, +/-3.6, 20000)
+CMH: 0 - 255 (-9.5, +/-3.6, 20000) ASUS1
+CMH: 0 - 255 #2 (-5.7, +/-3.6, 20000) ASUS1
+Two counter moves (+7.7, +/-4.3, 14016) ***
+Scanning short-circuit more relevant (-3.1, +/-3.6, 20000) ASUS1
+Two follow up moves {cheap attempt using counter moves array} (-2.1, +/-5.1, 9941)
+Two follow up moves {own array} (+1.4, +/-3.6, 20000) ***
+Killers given equal merit in ScoreMoves (-7.9, +/-3.7, 20000) ASUS1
+Follow up moves after counter moves (-11.1, +/-6.7, 6076) ASUS1
+Follow up moves before counter moves (+7.3, +/-7.7, 4524) ***
+Follow up moves prioritised (-3.9, +/-3.8, 18975) ASUS1
+Counter moves after killers-2 (-1.8, +/-3.6, 20000)
+Follow up moves reverse prioritised (+1.3, +/-3.7, 20000) ASUS1 ***
+Counter moves reverse prioritised (-0.7, +/-3.6, 20000)
+Counter moves prioritised (+2.9, +/-3.6, 20000) ***
+Killer from ply+2 (-1.3, +/-3.6, 20000)
+2021x vs 2021b {0.1s/move} (+23.9, +/-3.6, 20000) ASUS1
+Only increment CMH if dr>1 (-6.6, +/-5.4, 8939)
+Eval: King attacks {2} (-8,2, +/-6.5, 6343) ASUS1
+QS: don't probe TT if dr<=-5 (-0.4, +/-3.6, 20000)
+CMH optimised (+3.3, +/-3.6, 20000) ***
+QS: use counter moves properly (-0.4, +/-3.6, 20000) ASUS1
+QS: add bestMove to TT at 'all' nodes if anything took over as best (-0.9, +/-3.6, 20000)
+Main: add bestMove to TT at 'all' nodes if anything took over as best (-17.9, +/-4.1, 15928) ASUS1
+Don't put 'bestMove' in TT at 'all' nodes (+2.9, +/-3.7, 20000) ASUS1 ***
+IID: use for all PVR terminators (-15.2, +/-10.8, 2241)
+IID: removed (-3.7, +/-4.1, 15604)
+Main: don't defer -ve SEE moves if keepScanning is false {i.e. a likely 'all' node} (-0.7, +/-3.6, 20000)
+CMH: auto-limit highest value (+5.7, +/-3.6, 20000) ASUS1 ***
+ScoreMovesQS #5 {tt/mvvlva/proms} (-6.8, +/-6.2, 6613)
+ScoreMovesQS #6 {tt/mvvlva/kr1/proms} (-3.1, +/-3.6, 20000)
+ScoreMovesQS #7 {tt/mvvlva/kr1/proms/cmh} (-2.9, +/-3.6, 20000) ASUS1
+QS: use follow up moves (+0.2, +/-3.6, 20000) ***
+ScoreMovesQS #7 {tt/mvvlva/kr1&2/proms/cmh} (-0.6, +/-3.6, 20000) ASUS1
+CMH initialised to 256 (-2.5, +/-3.6, 20000)
+CMH: reduce less (-9.0, +/-4.6, 12329)
+CMH: don't reduce 1st clause (-0.7, +/-3.6, 20000)
+CMH: don't reduce 1st clause (-3.4, +/-3.6, 20000)
+TC: tune use of time when repeating {less earlier, more later} (+10.8, +/-3.6, 18701) ASUS1 ***
+Fail low staged (-3.2, +/-3.6, 20000)
+Fail high NOT staged (-2.6, +/-3.6, 20000)
+TC: tune use of time when repeating {slightly less earlier again} (+4.0, +/-3.5, 20000) ASUS1 ***
+TC: 'all-the-moves' one move less cautious (-1.9, +/-4.5, 11724)
+TC: 'all-the-moves' one move more cautious (-1.5, +/-3.6, 17961) ASUS1
+EGTB: don't probe if in check (-3.4, +/-5.3, 9625) DELL8
+Don't raise alpha when fail high (+1.8, +/-3.6, 20000) ***
+TT: lower test only replaces upper (-2.1, +/-3.6, 20000)
+2021c v 2021b {0.1s/move} (+5.1, +/-3.8, 20000) ASUS1
+2021c v Prodeo 3.1 {1'+1"} (-18.0, +/-9.6, 3505) ASUS1
+TT: entryToReplace doesn't use 'age' (+3.0, +/-3.6, 20000) ***
+Update killers and CMH after beta test {15s+0.25s} (+0.1, +/-5.1, 9044) ASUS1
+Update killers and CMH after beta test {0.1s/move} (-0.7, +/-3.7, 20000) ASUS1
+Eval: King attacks {8} (-13.7, +/-3.8, 20000) ASUS1
+Eval: Passed pawn runner bug fix (+0.9, +/-3.7, 20000) ASUS1 ***
+Store eval in TT (+1.9, +/-3.6, 20000) ASUS1 ***
+EGTB: use 5pc right up to leaves in main {n.b. normal hard disc!} (-13.4, +/-6.3, 6497)
+EGTB: use 5pc one ply further away from leaves in main {n.b. normal hard disc!} {100ms/move} (+5.6, +/-3.6, 20000)
+EGTB: use 5pc one ply further away from leaves in main {n.b. SSD!} {100ms/move} (-0.8, +/-3.7, 20000) ASUS1 : So, unsurprisingly, it's ok to use SYZYGY more on an SSD!
+Node level futility pruning returns beta (-2.9, +/-3.7, 20000) ASUS1
+EGTB: don't probe if in check {again} (+0.5, +/-3.6, 20000) ***
+Node level futility pruning returns beta when have winning score (+2.8, +/-3.7, 20000) ASUS1 ***
+Don't clear killers between moves (-1.9, +/-3.6, 20000)
+Extensions only awarded if ply<=IterationPly (-7.2, +/-5.1, 9857)
+2021c v 2021b {1'+1"} (-7.0, +/-11.4, 1881) ASUS1 :(
+2021c v 2021b {0.1s/move} (+4.5, +/-3.8, 20000) ASUS1
+Recapture extensions underpromotion bug fix (-1.9, +/-3.6, 20000) ASUS1 *** (coz it's a bug fix)
+Null move reduction tweak (+8.4, +/-3.6, 20000) ***
+Don't extend reduced lines (-2.4, +/-3.6, 20000) ASUS1
+Don't prune below ID/2 (-3.1, +/-3.6, 20000)
+When first root move fails low restart search immediately (-2.1, +/-3.6, 20000) ASUS1
+SF style SEE pruning in main #1 (-1.8, +/-3.6, 20000) ASUS1
+SF style SEE pruning in main #2 (-4.7, +/-3.6, 20000) ASUS1
+2021c v 2021b {0.1s/move} (+34.1, +/-3.9, 18826) ASUS1
+2021c v Prodeo 3.1 {1'+1"} (+2.9, +/-11.9, 2261) MATCH ABORTED :O
+Don't query 4v1 & 5v1 EGTBs (+1.2, +/-3.6, 20000) ASUS1
+Don't query 4v1 & 5v1 EGTBs (+1.0, +/-3.6, 20000)
+
+Lazy SMP: 2022x
+[8] +110 +/-12 2066 (+61, +153, +227)
+[4]  +49 +/-11 2068 (+92, +166)
+[2]  -43 +/-11 2066 (+74)
+[1] -117 +/-12 2068
+
+2022x (PGO) v 2021b 0.1s/move (+23.0, +/-3.8, 20000) ASUS1
+2022x (PGO) v 2021b 40/15 (+30.7, +/-3.6, 20000) ASUS1
+
+2022x[4] v Prodeo 3.1 60+1s (+97.2, +/-20.7, 791) ASUS1 (2022x[4] DISCONNECTED!)
+
+R mobility: x-rays own Rs & Qs (-0.1, +/-3.6, 20000) ASUS1
+R mobility: Don't penalise zero moves (+1.1, +/-3.7, 20000) ASUS1
+R mobility: zero moves penalty improved (+1.4, +/-3.7, 20000) ASUS1 ***
+R mobility: x-rays ALL Rs & Qs (-0.5, +/-3.6, 20000) ASUS1
+B mobility: x-rays ALL Bs, Rs & Qs (-5.6, +/-3.6, 20000)
+B mobility: x-rays ALL Bs & Qs (+0.2, +/-3.6, 20000)
+Q mobility (-1.6, +/-3.6, 20000) ASUS1
+Mobility * 2 (-7.0, +/-3.7, 20000) ASUS1
+QS searches ALL winning caps (-1.0, +/-3.6, 20000) ASUS1
+
+Allow normally extended moves to be pruned (-9.9, +/-3.6, 20000) ASUS1
+Allow normally extended moves to be reduced (-0.6, +/-3.6, 20000) ASUS1
+Take TimeUp call out of QS (+6.5, +/-3.6, 20000) ASUS1 ***
+
+2022a (PGO) v 2021b 0.1s/move (+18.2, +/-3.7, 20000) ASUS1
+2022a (PGO) v 2021b 1'+1s (+11.2, +/-7.4, 4225) ASUS1
+
+2022a v Prodeo 3.1 {1'+1"} (-10.7, +/-14.0, 1684)
+2022a v 2021b {1'+1"} (+11.9, +/-9.0, 2774)
+2022a[4] v 2022a[1] {1'+1"} (+111.1, +/-21.7, 443)
+
+
+---------------------------------------------------------------------------------------------------------
+2021b
+=====
+
+Uses any previous PV move if no TT move available (-4.1, +/-4.0, 16402) {I am amazed that this is worse!?!?! Perhaps it promotes non-captures before captures unjustifiably?}
+Prioritise counter-move before killers (-11.7, +/-3.6, 20000)
+Prioritise counter-move after killers-2 (-0.2, +/-3.8, 17773)
+TT always adds 'exact' entries (+0.4, +/-3.6, 20000)
+TT doesn't replace 'exact' entries of current age with non-exact entries (-16.0, +/-8.0, 4161)
+2021a v Fruit 2.1 {1m+1s} (+93.6, +/-21.1, 867)
+TC: ConsistentBestMoves 5,1.5 {15s+0.25s} (-14.5, +/-8.9, 3001)
+TC: ConsistentBestMoves 9,1.08 {15s+0.25s} (-0.7, +/-4.2, 13502)
+TC: ConsistentBestMoves All,9,1.08 {15s+0.25s} (+0.1, +/-4.9, 10008)
+TC: Panic timeup {half of remaining time} {10s+0.1s} (+0.7, +/-4.4, 12699) {Kicked in just 4 times in 12699 games}
+TC: Allocate more time if fail low (+5.7, +/-4.2, 14268)
+TC: TimeUp(0.2F) changed to TimeUp(0.01F) (-5.8, +/-8.3, 3674)
+TC: movesLeft changed from 11 to 14 (-2.3, +/-4.6, 11530) {makes it use less time earlier}
+TC: movesLeft changed from 11 to 9 (-4.1, +/-4.8, 10653) {makes it use more time earlier}
+TT: use 'exact' entries at PV nodes, QS only (+4.8, +/-4.2, 14841)
+TT: use 'exact' entries at PV nodes, main + QS (-0.8, +/-3.6, 20000) MAYBE BECAUSE IT ALSO UPDATES KILLER? TEST WITHOUT DOING THAT?!
+TT: use 'exact' entries at PV nodes, QS only #2 (+5.3, +/-3.6, 20000)
+TT: remove 'PV' clause altogether, QS only (+5.8, +/-3.6, 20000)
+TT: remove 'PV' clause altogether, main only (-1.6, +/-3.9, 16763)
+TT: use 'exact' entries at PV nodes, main only and don't update killer (-8.3, +/-5.0, 10525)
+QS: Futility pruning 'break' not 'continue' (-3.4, +/-5.5, 8389)
+QS: Don't prune tteBestMove (-4.2, +/-6.8, 5731)
+TT: replace random entry in bucket (-5.8, +/-11.1, 2115)
+TT: replace in bucket ignores age (-3.8, +/-6.2, 6543)
+Eval: incrementally update PST values (+31.4, +/-6.0, 7263)
+Eval: Knight attacks into opponents half count double (+3.7, +/-3.6, 20000)
+Eval: Bishop attacks into opponents half count double (+1.9, +/-3.6, 20000) ASUS1
+Eval: Queen attacks into opponents half count (-1.0, +/-3.6, 20000) ASUS1
+Eval: Rook attacks into opponents half count (+6.3, +/-3.6, 20000) ASUS1
+Eval: use pawn structure cached value trick (+0.8, +/-3.6, 20000) ASUS1
+Eval: Queen attacks to opp K count (-0.3, +/-3.6, 20000)
+
+2021b v 2021a {1'+1"} (+60.4, +/-9.1, 2824) ASUS1
+2021b v Fruit 2.1 {1'+1"} (+117.0, +/-11.4, 3088) ASUS1
+2021b v Prodeo 3.1 {1'+1"} (-8.5, +/-10.1, 3185)
+
+---------------------------------------------------------------------------------------------------------
+2021a
+=====
+
+Added delta pruning to QS (+17, 60)
+Added SEE pruning to QS (+36, 410)
+Check extensions (+46, 312)
+PVS and NULLMOVE (+104, 434)
+Don't extend unsafe checks (+11, 418)
++1 for tempo (-4, 672)
+Futility pruning (+45, 582)
+LMR v1 (+36, 446)
+LMR v2 (+59, 514)
+Only allow null if eval>=beta (-7, 444)
+Allow null if >0 pieces for stm (was 1) (-1, 1000)
+Don't store draw scores in TT (+3, 1000)
+QS hard pruning limit to 2 moves (-14, 1000)
+QS move count pruning (+2, 1000)
+QS DELTA PRUNING IMPROVED (-1, 1000)
+QS treats 'in check' as normal if know not mated (+8, 1000) x
+QS no delta pruning (node level) (+40, 1000) :O Not sure I believe this!
+QS no delta pruning (node level) (+3, 1000)
+Don't use TT value at PV nodes (-12, 1000) x
+Futility in QS (+12, 1000)
+Null not near root [depthRemaining < 6] (-7, 1000) x
+Only one move extensions (-2, 1000)
+Null not near root [depthRemaining < 12] (-8, 1000) x
+KnownLowMaterialDraws in QS (-10, 1000) x
+KnownLowMaterialDraws in QS #2 (-9, 1044) x
+Tempo +9 (-6, 1000) x
+En prise reductions (-13, 1000) x
+Pawn extensions at leaf (+6, 1012)
+Non TT posn gets reduced (-96, 196) x
+Null when IDREM>1 [not 2] (+44, 1000)
+LMR at any IDREM (+1, 1000)
+No null if no K moves (+10, 1000)
+Don't use cut/all node TT values for cutoffs at a PV node (in main search) (+8, 1000)
+No null if have tteMove (-75, 174)
+Don't reduce if only one move (-12, 1000) X DELL8
+No null if fewer moves than pieces (+3, 1000)
+Extend if threatened with mate (+16, 1000) DELL8
+Traditional null R3/4 (-6, 1000)
+Don't use cut/all node TT values for cutoffs at a PV node in QS too (+7, 1000)
+Don't store draw scores in TT (0, 1000) DELL8
+Null in endgame (+11, 1000)
+NULL: don't reduce into QS (-49, 752)
+NULL: verification search (+8, 1000)
+NULL: removed idrem>1 test (-1, 1000) DELL8
+##### ON 14/5/2021 I NOTICED THAT CGM WASN'T USING A BOOK! SO MANY OF THE TESTS BELOW ARE INVALID :( {MARKED XXX} SOME WERE OK AS THEY WERE DONE ON DELL8. RE-DOING OTHERS #####
+KnownLowMaterialDraws in QS again! (now that slight bug fixed) (-1, 1000) XXX
+King JUST threatened undefended P at leaf NOT JUST AT PV NODES (+11, 1000) XXX
+NULL: pieces>0 rather than 1 (+2, 1000) DELL8
+Passed pawn to 7th at leaf extensions NOT JUST AT PV NODES (-10, 1000) XXX
+2008b V 2021x (2008b won) (-56, 1310)
+Reduce an extra ply for unsafe moves (+1, 1002) DELL8
+Extend O1M only if not in check (-14, 1000) {Always extending takes more nodes but must catch some critical positions} DELL8
+Variable reductions #1 (-3, 1000) XXX
+No reductions unless idrem>1 (0, 1000) XXX
+Detect lone king stalemates in QS (+6, 1246) DELL8
+Partial fail soft in QS (+8, 1000) XXX
+QS no pruning at PV nodes (+30, 1000) XXX
+QS no futility pruning if gives check (+12, 1000) XXX
+Promoting out of KP endgame reduces (-15, 1000) XXX
+Promoting out of KP endgame reduces #2 (-10, 1376) XXX
+QS don't prune tteBestMove (+7, 1000) XXX
+QS pruning reshuffle (+13, 1300) XXX
+QS pruning extra clause (-18, 691) XXX
+QS pruning simplified #1 [just filters out givesCheck moves from pruning] (+13, 1406) XXX
+QS pruning simplified #2 [strictly legalMovesMade > 2 are pruned] (-2, 1342) XXX
+QS removed highest mvv condition (-4, 1582) XXX
+Don't use TT in QS (-44, 1280) DELL8
+Recapture extensions (+29, 1000) XXX
+QS highest mvv condition excludes pawns (+0, 1070) XXX
+CRASHES STARTED ON 13/5/21 - fail soft in main? QS MVVLVA? a complete crash of the exe
+LONG TEST WITH JUST FAIL SOFT IN MAIN CODE DIDN'T CRASH AGAIN AND AS QS MVVLVA CODE IS REJECTED LET'S HOPE THAT WAS THE PROBLEM AND IS NOW IRRELEVANT
+Fail soft in main (+16, 1000) XXX
+QS MVV clause changed to MVVLVA (-7, 1076) DELL8
+Futility clauses re alpha moved into main loop (-5, 1000)
+##### PROBLEM WITH NOT USING BOOK SORTED AFTER THIS! #####
+2008b vs 2021xZ (+61, 2120)
+2008bTEXEL vs 2021xZ (+10, 1792)
+Don't fprune if extensions (+4, 1334) DELL8
+Passed pawn to 7th at leaf extensions NOT JUST AT PV NODES (-2, 1982)
+2008bTEXEL vs 2021xY (-9, 2454)
+Fail high tweaks (+0, 2052) DELL8
+Killers after alpha (+12, 1010)
+CMH after alpha (+6, 1030)
+TWM extensions only at PV nodes (+6, 1011)
+Futility pruning when idrem<=3 (+32, 1158)
+2008b vs 2008bTEXEL (+77, 1722)
+PVSReductionsTidy (-2, 1524)
+Futility pruning also at idrem=4 (+8, 1640)
+LMP #1 (-13, 1008)
+IID not just at PV nodes (-18, 582)
+2021x7 vs 2008bTEXEL (+41, 2020)
+QS removed highest mvv condition (-12, 1218) DELL8
+LMP #2 (-65, 856)
+LMP #3 (-4, 705) BUG?
+QS ExE tuned (+14, 1186)
+LMP #4 (-81, 252)
+LMP #5 (+1, 1224)
+Reduces more at 'all' type nodes (+1, 1086) DELL8
+LMP #6 (-2, 1040)
+QS no SEE pruning at PV nodes (+2, 1630)
+QS slightly more futility pruning (-4, 1402)
+QS futility base lower (-1, 1896)
+QS allow move count pruning if standpat score<=alpha (-14, 1012)
+2008b vs 2021xX (+37, 1483)
+Null move reduction (R3/((depthRemaining + 1) >> 1)/R4/R2 : +18/+15/+7/0, 4260) DELL8
+Reductions only at depth>2 (+12, 1016)
+PVS restructured (+18, 1100)
+Don't reduce if TWM (-3, 1019)
+Use full eval for futility pruning (+3, 1072)
+Allow futility if in check (+4, 2440)
+Reduce captures and promotions (+3, 1334)
+Bishop pair match +10/0/-10 (+14/+3/-17, 2376 each)
+Bishop pair match +20/+10/0 (+7/+6/-13, 2300 each)
+Rook on semi open in opening +10/0/-10 (+24/0/-24, 1636 each)
+Rook on semi open in opening +20/+10/0 (+18/+5/-22 2420 each)
+Rook on semi open in opening +30/+20/+10 (+4/+1/-5 2352 each)
+Don't allow DBR across null move (+3, 1776) DELL8
+Rook on semi open in endgame +30/+20/+10/0 (0/2/2/-4 1652 each)
+Doubled pawns in opening -15/-10/-5/0 (+25/-3/-11/-12 1950 each)
+Doubled pawns in endgame -15/-10/-5/0 (+4/+17/-3/-17 1642 each)
+Isolated pawns in opening -30/-20/-10/0 (-25/+20/-3/+8 1492 each)
+Isolated pawns in endgame -15/-10/-5/0 (-11/-9/8/9 882 each)
+Passed pawns in opening +20/+10/0/-10 (+12/+11/+1/-24 1720 each)
+Isolated pawns in endgame +10/+5/0 (-13/+9/+5 1184 each)
+Passed pawns in endgame +30/+20/+10/0 (+2/-8/0/+6 1344 each) ?????
+Fuller eval v PESTO eval (+51, 1306)
+K-side trapped rook in opening penalty -20/-10/0 (+5/0/-5 2284 each)
+KP shelter -15/-10/-5/0 (-22/+6/+5/+11 1934 each) presumably because PSTs cover this?
+50-move fold-in (-13, 1455)
+Manually fixed some crazy K-opening-PST values (-8, 3199)
+Fixed TT hash32 problem (+18.5, 1430)
+Auto-generate randoms (-1.3, 1941)
+2021x v 2008b (+1, 1073)
+Passed pawn runners in eval (+13.2, 1630)
+2021x v 2008b (-29, 1134)
+Do KnownLowMaterialDraws in eval (-0.1, 2414)
+No pawns in endgame 0/+10/-10/-20 (-2/+2/+1/-1 2134 each)
+EGTB3&4 in QS and removed KnownLowMaterialDraws (-6.7, 2194)
+Don't fut-prune P moves to 7th (-2.3, 1332)
+PESTO tables flattened (-63.7, 862)
+Don't reduce P moves to 7th (+4.5, 1616)
+PESTO N tables flattened (+7.1, 1118)
+PESTO B tables flattened (-8.2, 2751)
+PESTO R tables flattened (-1.1, 2589)
+PESTO tables mirrored Q (-8.5, 2115)
+PESTO tables flattened Q (-18.7, 1696)
+Q tables statistical (-33.4, 3357)
+PESTO tables mirrored ONBR (-1/-8/-0/10, 3650)
+(So... we want N flattened, B&R mirrored) *** TRY SF N/B/R!!!
+Q tables SF (-4.9, 2040)
+IID uses alpha=-MateBaseScore (-5.05, 1584) DELL8
+'STOP' bug fixed (-4.1, 2044) TOSHIBA1
+Search checks before other quiets (-12.41, 1036) DELL8
+Opposite coloured Bishop endings drawish (+9.6, 2216)
+R+P endings drawish 240/256ths (-2.1, 3318)
+King PSTs-Original-Flattened-Mirrored-Statistical-Stockfish (16/12/24/-67/14, 2870)
+(So... we want mirrored K)
+R+P endings drawish 192/256ths (-6.9, 1908)
+Use PSTs to order movelist quiets (-5.53, 2638) DELL8
+Use killers in QS (-2.7, 2344) TOSHIBA1
+Queen PSTs-Original-Zero-Simplified (124/82/-228, 1845)
+Don't use MDP in QS (+2.4, 3965)
+Don't futility prune P moves to 7th in QS (+0.4, 3262)
+Pawn PSTs-Original-Flattened-Mirrored-Statistical (57/25/11/-95, 1786)
+QS alway movecount prune (-8.7, 1842)
+Only do recaptures in QS after 5 captures: NO TT (-1.1, 916)
+Only do recaptures in QS after 5 captures: Use TT (-5.5, 2394)
+Only do recaptures in QS after 5 captures: Use TT#2 (-7.0, 2676)
+Only do recaptures in QS after 7 captures (-18.4, 2834)
+Store EGTB in TT: Neither/QS-only/both (+2/+6/-9, 4016)
+Don't futility prune or movecount prune P moves to 7th/8th in QS (-0.1, 5712)
+Passed P runners fixed (+4.6, 2794)
+Extra SEE pruning clause in QS (+2.7, 2090)
+Only search winning captures after 5 ply of QS (-1.3, 5030)
+Only search first winning capture after 5 ply of QS (+5.5, 4038)
+Recapture extensions (+23, 2964)
+SF 'step 10' reduction (-14.3, 1142)
+No '5 ply QS' malarkey/Only search first winning capture after 5 ply of QS/Only search first equal or winning capture after 5 ply of QS (-2/5/-3, 3500)
+Reduce captures and promotions [longer test!] (was +3, 1334) (-4.7, 2870)
+Recapture extensions only at PV nodes (-5.4, 2452)
+QS movecount pruning: 1:with mvv/2:always/3:only if SEE<=0 (1/-23/22, 2488) DELL8
+Fixed QS SEE bug (+40, 1292)
+LMP bad SEE moves (+8.2, 2506)
+Fix check extension 'bug' (-4.7, 3658)
+Recapture extensions Always/SEE>=0/SEE>0 (8/-1/-7, 2048)
+LMR more if SEEResult<0 (+4.8, 3530) TOSHIBA1
+QS: ALWAYS prune all but winning SEE captures (-59.4, 786)
+Check extension variants: Always/!SEETargetPieceUnsafe/SEEResult>=0/SEEResult>0 (-7/26/16/-35, 2044)
+Allow futility pruning of captures and promotions in main (+5.1, 2908)
+Tempo bonus 0/1/5/15 (10/6/6/-22, 3478) DELL8
+2021xTEST(A) vs 2008b (+94, 834)
+Futility pruning sets bestMove in main (-1.7, 2644)
+Don't use TT value at PV node (-8, 2384) {Also tested above}
+QS: search all moves if in check [no standpat] (-87.3, 1174)
+Updated eval: NfBmRmKm (-20.5, 2252) TOSHIBA1
+2021xTEST(A) vs Fruit2.1 (+49.2, 2048)
+Always extend P moves to 7th (not just at leaf) (+7.4, 2732)
+Extend passed P moves to 6th (-1.83, 3802) DELL8
+2021xTEST(B) vs 2008b (+32, 1226)
+2021xTEST(B) vs Fruit2.1 (+48.6, 834)
+2021xTEST(A) vs 2008b (+54, 1820)
+Don't LMP extended moves (+4.24 +/-7.92, 4096) DELL8
+Tune MVVLVA to treat K as lowest valued attacker (+6.4 +/-8.6 LOS 92.7%, 3438) TOSHIBA1
+Use PV moves to order movelists (-7.8 +/-8.8, 3134)
+Use PV moves to order movelists #2 (-5.7, 2786)
+QS sets bestMove to standpat (+0.4, 1806) TOSHIBA1
+LMP more moves {>>1} (+5.9, 6350)
+CMH taken out (-33.7, 848) :) OK... at least we know it does something!
+QS move count pruning >1 {was 2} (-2.9, 2744)
+QS futility base score variants: +Pawn/+Pawn>>1/+0 (11/10/-22, 4288) DELL8
+QS varying depths for 'just SEE winners' 1/2/3/4/5/6 (-6/3/-7/7/1/3, 2066) Wow! Did not expect them to be so close! Try just 5v4 as they were the best odd/even.
+Eval: ceiling/floor for low mat endings (-18.62, 2522) DELL8 :O WTF?! it shouldn't make a noticable difference!
+Eval: ceiling/floor AND KRminor for low mat endings (-34.3, 1516) :O WTF CONFIRMED! :) Must be a bug???
+QS 'deep' test now 4 {normally 5} (0, 4214)
+Eval: JUST KRminor for low mat endings (-24, 4200) I DO NOT UNDERSTAND HOW THESE EVAL TERMS HAVE SUCH A BAD EFFECT
+Eval: ceiling/floor for low mat endings AGAIN (-3.1, 4194)
+Sanity check TEST(A) vs LATEST (+3.5, 4278)
+QS always starts at depthRemaining = zero (-0.5, 3756)
+Don't reduce if TMI1 (+8.4, 3550) IMPLEMENT THIS FULLY WITH KILLER MOVES
+2021xTEST(C) vs 2008b (+44, 2608)
+Main futility pruning sets bestMove (-4.9, 2810) ALSO SEE ABOVE
+TWM extensions: only if PVNode/always/never/don't reduce or prune (-3/-1/+2/+3, 3366) DELL8
+Don't reduce if opp K has no legal moves (-8.8, 1382)
+EVAL: king attacks (-9.3, 1376)
+LMP if bestSortScore==0 (-63, 1058) DELL8
+Only test TMI1 if enemy K on edge (-7.5, 3056)
+Pinned pieces penalty in eval (-7.3, 1804) TOSHIBA1
+Reduce more if bestSortScore==0 (-1.45, 3350) DELL8
+ReduceCounterMoveHistory between moves not iterations (+3, 5542)
+ReduceCounterMoveHistory between games only (+9.3, 4054)
+CMH gives big bonus to mating moves (+8.46, 3038) DELL8
+In QS if in check allow TT move even if non-capture (+1.4, 1501)
+Don't reduce P moves to 7th {again} (-4.31, 2820) DELL8
+50-move fold in after 36 ply (+2.8, 3222) DELL8
+CMH more if givesCheck (+8.5, 4281)
+In QS in check, search all moves (+0.8, 4136)
+Update killers and CMH after >beta test (-10.7, 2006)
+Non capture promotions to queen scored after killers (-7.3, 1146)
+Non capture promotions to queen given more CMH (-3, 3762)
+Don't reduce if STM K has no legal moves (-2.5, 2788)
+Don't reduce if STM has pinned piece (-9.1, 1302)
+EVAL: Knight mobility 0/*1/*2/*4 (-8/-4/11/0, 2484)
+EVAL: Bishop mobility 0/*1/*2/*4 (-2/6/1/-4, 2426)
+EVAL: Rook mobility 0/*1/*2/*4 (17/-6/0/-10, 1958) DELL8
+EVAL: Rook mobility endgame only 0/*1/*2/*4 (13/-10/3/-6, >2000) DELL8
+EVAL: Queen mobility 0/*1/*2/*4 (5/-6/0/1, 2114)
+EVAL: King mobility 0/*1/*2/*4 (10/1/-2/-9, 1680)
+EVAL: Weak squares 0/*1/*4/*16 (20/20/20/-61)
+EVAL: Knight & Bishop mobility (+7.1, 3682)
+Immediate DBR doesn't set alpha (0, 3032)
+QS: no pruning at PV nodes (-18.1, 1116)
+Extend O1M only if not in check {done before above} (-5.2, 3552)
+Futility pruning in main dr<=6 (was 4) (+9.7, 2532)
+Futility pruning in main dr<=8 {may not kick in much at bullet speeds :)} (was 4) (+11.1, 3046)
+Only futility prune SEE<=0 moves (-0.7, 3024)
+Futility pruning in main dr<=10 {may not kick in much at bullet speeds :)} (was 4) (+10.3, 3532)
+Futility margins reduced (+10.4, 2112)
+Don't prune/reduce if fewerMovesThanPieces (-4.8, 2150)
+TMI1 updates killers (+4.2, 996) FAILED WITH "BLACK'S CONNECTION STALLS"??? POSSIBLY COZ CGM WAS RUNNING TOO???
+2021xTEST(D) vs 2008b (+57, 2276)
+Always replace in TT if have mating score (-4.2, 2786)
+Null move pruning doesn't trust EGTB/mate scores (approx +8, 1700) PC CRASHED DURING TEST
+Losing SEE Moves Searched Last (-5.9, 2628)
+Losing SEE Moves Searched Last only at PV nodes (+0.3, 1998)
+ScoreMoves uses PV move only at PV nodes (-6.9, 3010)
+Don't extend at 'all' nodes (+1.9, 2178) NEED TO TUNE NODETYPE STUFF THOUGH
+Move list sorting prioritises recaptures (-16.8, 1098)FAILED WITH "WHITE'S CONNECTION STALLS"??? BUT NOTHING ELSE WAS RUNNING. MAY HAVE BEEN AN OVERHEATING THROTTLE???
+Generate pawn moves after pieces (-0.9, 3112)
+Don't 'allow null' after a losing SEE move (-0.6, 2962)
+Only update PV at PV nodes (should be slightly more efficient) (+8.8, 2242)
+Update bestMove after alpha test (-4.9, 788)
+Double CMH at PV nodes (-1.8, 2828)
+PotentialEnPrisePieceSquare used for sorting (-5.1, 1849)
+At leaf nodes prune extensively at 'all' nodes (-64.6, 713)
+Don't extend at 'all' nodes #2 (-8.6, 2943)
+QS staged movegen (+0.9, 2226) MAKES SENSE AS WOULD ONLY BE MARGINALLY FASTER
+MVVLVA Q proms higher {set victim=Q} (-6.5, 3626)
+Main staged movegen #1 {had to get rid of O1M exensions} (-0.7, 4884)
+Generate all 'out of check' moves in one function (-0.9, 5635)
+3 killers #1 (+2.2, 2098)
+Removed some MFPawnMove {affects node count because of killer 'reuse' by different pieces} (+0.3, 3174)
+Removed some more MFPawnMove {affects node count because of killer 'reuse' by different pieces} (-6.9, 3428)
+Original killer piece checked before using them (+4, 4376)
+Uses killer of two ply lower (+6.6, 5472)
+2021xTEST(E) vs 2008b (+42, 1392)
+Generate all 'out of check' moves in one function #2 {sanity check after MFCapture and MFPawnMove removed} (+3, 4303)
+Losing SEE moves searched last #3 (+18.2, 3682)
+LMP always (-23, 1438)
+LMP caps&proms (-10.2, 1260)
+Don't LMP at all {check if it still works} (-30, 1960)
+Don't defer -ve SEE moves if potential discovered check (+0.3, 5162)
+2021xTEST(F) vs 2008b (+65, 1398)
+Don't store QS standpat in TT (+5.5, 4515)
+Don't store QS standpat in TT #2 (+2.5, 2501)
+Evaluation grain=8 (-6.6, 795)
+Don't store QS 'all' node result in TT (-6.3, 2522)
+IID uses depthRemaining-2 (-1, 1090)
+LMP after so many moves but now also if have searchedWinningCapture (+8.0, +/-9.1, 3094) BUGGED!!! TAKEN OUT FOR MOMENT! NEED TO IMPROVE/CORRECT AND RETRY
+QS: more pruning if searchedWinningCapture (-2.5, +/-8.0, 4090)
+QS: no LMP/futility pruning if isPVNode (again? see above) (+10.2, +/-6.1, 6642)
+QS restructured to allow -ve SEE moves if they give check (-198, 392) ASUS1 :O Probably so bad because there are loads of stupid spite checks? Unless it's a bug?
+QS: deep into QS search ALL winning SEE captures not just first (-3.4, 6560)
+QS: no SEE pruning if isPVNode (-8.7, 4244) ASUS1
+Don't do null move if have TT move (-11.9, 2366)
+Don't do null move if have TT move and it's a capture! (-3.4, 3110) ASUS1
+'alpha > MatedScore' changed to 'bestMoveScore > MatedScore' {false mate bug fix} (+2.2, 6582) ASUS1
+NULL: try putting 'depthRemaining > 1' test back in (+6.28, 3928) DELL8
+LMP offset changed from 3 to 1 (-0.8, 5824)
+LMP offset changed from 3 to 2 (-1.2, 5620)
+2021x v Fruit21 (+73.1, 2984) 0.1s/move
+2021x v Fruit21 (+56, 2734) 10s/+0.1s
+LMP count reduced more the more winningCapturesSearched (-2.8, 4722) ASUS1
+Use TT upper/lower values at PV nodes (-1.3, 2622) ASUS1
+Use TT upper/lower values at PV nodes if they are mate scores (-4.9, 3388) ASUS1
+Singular extensions (-78.1, 662) {I suspect this implementation isn't right! e.g. it doesn't set up the variables (like score) if it doesn't have the subtree depth}
+Fixed minor SEE en-passant bug (+2.1, 8753) ASUS1
+Reduce more as moves searched increases (-7.2, 2324)
+Engine.cpp MakeMove EP tidy sanity check (-3.5, 4386)
+Engine.cpp MakeMove EP tidy sanity check #2 (-1.4, 4592)
+QS: Removed special SEE<0 but prom threat clause (+2.1, 16200)
+Don't use TT 'exact' entries at PV nodes (+1.1, +/-3.5, 20000) ASUS1
+Don't reduce moves by passed pawns (+17.7, +/-6.8, 5598)
+Don't prune moves by passed pawns (-1, 9078) ASUS1
+50-move fold-in deferred to ply 68 (+1, 6330)
+Defer going into QS for some KP endgames with movable passed pawns (-8.4, 4457) BUGGED!
+Remove 50-move fold-in (-0.1, +/-3.6, 20000) ASUS1
+Don't store EGTB results in TT in QS (-1.3, +/-3.6, 20000) ASUS1
+Defer going into QS for some KP endgames with passed pawns (-14.3, 2160)
+Defer going into QS for some KP endgames with movable passed pawns only at PV nodes (+9.6, +/-5.8, 7856) DELL8
+Defer going into QS for some KP endgames with movable passed pawns only at PV nodes (KP endgame EPD: +0.7, 10000) ASUS1
+Defer going into QS for some KP endgames with movable passed pawns (KP endgame EPD: -61.8, 2958) ASUS1
+Defer going into QS if SNTM has promotable P only at PV nodes (+1.3, 20000) ASUS1
+Defer going into QS if multiple threats only at PV nodes (+3.4, +/-5.7, 8032)
+Defer going into QS if single threat only at PV nodes (-10.5, 1986)
+Defer going into QS for some KP endgames if hanging P only at PV nodes (-0.3, +/-4.0, 16400) ASUS1 {Not enough KP endgames to differentiate?}
+Defer going into QS for some KP endgames if hanging P only at PV nodes (KP endgame EPD: -2.4, +/-5.6, 10000) ASUS1
+Leaf PV nodes extended (-5, 7964) ASUS1
+Store EGTB results in TT in main (+0.8, 16378)
+Defer going into QS for some KP endgames with movable passed pawns only at PV nodes #2 (+3.6, +/-3.8, 18480) ASUS1 STILL CRASHES EVENTUALLY!!!
+Defer going into QS for some KP endgames with movable passed pawns only at PV nodes #3 limited to IterationPly+6 (+0.9, 20000) ASUS1
+QS: KP endgame: also search moves by passed pawns (KP endgame EPD: +8.4, +/-11.3, 2432)
+QS: KP endgame: also search moves by passed pawns IDREM>-5 (KP endgame EPD: +6.2, +/-5.6, 10000)
+QS: KP endgame: also search moves by passed pawns IDREM>-5 (-2.7, 11150)
+Don't reduce knight forks (-0.3, 8820) DELL8
+Don't reduce pawn forks (+1.2, 20000) ASUS1
+Defer going into QS in KP endgames with stm runners (-4.9, 20000) ASUS1 {affects depth reached badly}{is this redundant as the eval does it anyway?}
+Null move: no pieces endgame clause removed (-0.9, 12674) ASUS1
+Don't put EGTB results in TT in QS (+1.6, +/-4.6, 12404) {STALLED AGAIN! :O AND THERE WAS NO QS DEFERRAL STUFF! Hmmm... on a DBR posn again... maybe it's a ID120 repeating problem?(Coz the NPS drops off to nearly zero! WHY?) Maybe the code that tests timeup isn't being called in good time!!! NodeCount & 0x3FF thing?! But why doesn't (ply == 1) test catch it??? ADDED ID=120 TEST TO SEE IF THAT FIXES IT!}
+Remove O1M extensions (-3.2, +/-3.6, 20000) ASUS1
+QS: search knight unperproms if they give check (-3.0, +/-3.6, 20000) ASUS1
+QS: KP endgame: also search moves by passed pawn runners IDREM>-5 (KP endgame EPD: -1.7, 8154) DOES THIS REALLY DO ANYTHING IF a)OPP CAN JUST STAND PAT NEXT PLY b)EVAL DOES KP RUNNERS ANYWAY
+Allow reductions if in check (+0.6, +/-3.6, 20000)
+2021x vs Fruit 2.1 (+91.6, 1836) ASUS1 0.5s/move
+Slightly different NBQ material values (-4.8, +/-3.6, 20000) ASUS1
+Eval: material incrementally updated in MakeMove (+4.5, +/-3.6, 20000) ASUS1
+2021x v Fruit 2.1 (+28.7, 1648) ASUS1 1m+1s
+2021xTEST(G) vs 2008b (+63, 1675)
+EVAL: Runners only require opp to have no pieces {not both!} (-0.4, 11954) DELL8
+Don't tweak proms in ScoreMoves {slightly faster but arguably worse ordering} (-0.2, +/-3.6, 20000) ASUS1
+Doubled Ps don't count as two passed Ps (-1.1, 6960)
+Connected passed Ps bonus (-1.7, 9458) ASUS1 {Stalled again!}
+Don't futility prune if GamePhase=0 (-2.1, 9726) ASUS1
+Don't futility prune if GamePhase=0 (KP endgame EPD: -11.6, 8248)
+Limit all extensions to ID*2 (-3.5, +/-3.6, 20000) ASUS1
+ScoreMoves utilises Q proms for MVVLVA (+1.77, +/-4.55, 12736) DELL8
+O1M extensions allow recaptures if not in check (-3.3, +/-5.6, 8104) ASUS1 {Stalled again!}
+Main: Only one piece can move extensions (-44.8, 1310)
+QS: BUG in stalemate code fixed! (-2.8, +/-4.4, 13686) ASUS1 {May be worse because it slows the search down now that it is actually kicking in??? [it wasn't doing anything before]}
+QS: stalemate code removed (+5.6, +/-3.6, 20000) ASUS1
+Main: Perpetual check code added (+1.08, +/-6.63, 6120) DELL8
+QS: search checks at dr=0 (+4.8, +/-3.6, 20000) ASUS1
+QS: search P moves to 7th at dr=0 (-1, +/-6.5, 6548) LOADS OF LOSSES ON TIME NOW :(
+QS: search P moves to 7th at dr=0 (KP endgame EPD: -2.3, +/-5.5, 10000)
+EVAL: phase '64' rather than '24' (+1.9, +/-4.5, 12718) ASUS1 {Stalled after ID=120 search again}
+QS: search checks at dr=-1 also (-1.3, +/-4.5, 12670) ASUS1
+EVAL: zero P moves in KP endgames penalised (KP endgame EPD: +2.03, +/-8.55, 4284) DELL8 {Stalled}
+QS: also some discovered checks at dr=0 (-0.9, +/-4.9, 10438) {STALLED}
+EVAL: zero P moves in KP endgames penalised (-0.6, +/-3.6, 20000) ASUS1
+Extend passed P runner moves in endgame (KP endgame EPD: -17.4, 4522) ASUS1 {Expensive! Be more particular e.g. it includes many P proms}
+Only test DBR if draw-score > alpha {allows winning side to play through a drawn position} (-10.9, +/-4.2, 14440) ASUS1 {but this allows it to play through it for the 3rd occurence too!?!}
+EGTB '150' scores fine tuned (+2.6, +/-4.1, 15572) ASUS1
+EVAL: penalise knights and bishops for having zero viable moves (+2.1, +/-4.7, 12114)
+DBR stickiness (+5.1, +/-6.8, 5688)
+MAIN: Update killer after beta test {not alpha test} (-1.4, +/-4.4, 13600) ASUS1
+MAIN: Update killer in TT if lower limit #1 (+1.9, +/-9.5, 2884)
+MAIN: Update killer in TT if lower limit#2 (+1.2, +/-5.5, 8846) ASUS1
+MAIN: When storing EGTB results in TT, use DR+6 (-0.9, +/-10.7, 2286)
+MAIN: Update killer in TT if exact (+11.1, +/-6.3, 6736) ASUS1
+MAIN: adjust EGTB win/loss scores for ply when storing in TT (+0.6, 4362)
+MAIN: futility pruning at node level before moves loop #1 (-8.7, +/-7.0, 5560) ASUS1
+MAIN: futility pruning at node level before moves loop #2 (+2.2, +/-9.0, 3228) ASUS1
+MAIN: futility pruning at node level before moves loop #3 (+3.4, +/-3.6, 20000) ASUS1
+MAIN: only update killers in TT exact clause if score>=beta (-9.6, +/-9.6, 2998) DELL8
+MAIN: use 'improving' to reduce futility margin (-25.1, 1912) ASUS1
+MAIN: use 'improving' to reduce futility margin sanity check (-3.7, 10050) ASUS1 {coz a bit slower to call eval at every node}
+MAIN: update CMH in TT in exact clause (+0.9, +/-3.7, 20000) ASUS1
+MAIN: update CMH in TT in lower-limit clause (-2.5, +/-5.2, 9846) ASUS1
+MAIN: use eval as futilitybase #1 (+11.8, +/-5.5, 9130)
+MAIN: use eval as futilitybase #2 (+17.1, +/-3.7, 20000) ASUS1
+MAIN: futility pruning doesn't increase bestMoveScore (-3.6, +/-6.3, 6770)
+MAIN: Don't LMP if GamePhase=0 (KP endgame EPD: +0.4, +/-7.9, 4867)
+2021xTEST v 2008b {0.25s} (+102.1, 5858) ASUS1
+2021xTEST v Fruit2.1 {0.25s} (+140.8, 2344) ASUS1 {I suspect Fruit can't play fixed time games well? Perhaps a bug??}
+2021xTEST v Fruit2.1 {30s+0.5s} (+80.0, +/- 11.9, 2774) ASUS1
+QS: Futility pruning doesn't set bestMove (-0.6, +/-3.7, 20000)
+QS: don't ScoreMoves when dr<=-5 {because you only search the first SEE winning move} (-3, +/-4.8, 11901) ASUS1
+MAIN: TT mating score saved with massive draft (-2.2, 5637) ASUS1
+MAIN: Don't prune if TMI1 (-36.2, 4854) ASUS1 {needs refining!}
+MAIN: if dr>2 call IsThreateningMateInOne before movegen (-65.1, 6681) ASUS1
+QS: use TT prefetch (+3.1, +/-3.6, 20000) ASUS1
+BOTH: use TT prefetch (+15.7, +/-3.6, 20000) ASUS1 :O THIS SEEMS LIKE ONE OF THOSE ANOMALOUS RESULTS! BUT I'LL TAKE IT ANYWAY! :D
+TT fetch always uses mating scores even if it doesn't have the draft (-7.49, 2134) DELL8
+TT replacement scheme also tests 'winning' scores (+2.6, +/-4.5, 12890)
+Reduce more if not improving #1 (+2.2, +/-3.9, 17220) ASUS1
+Reduce more if not improving #2 (+1.2, +/-5.6, 8418) ASUS1
+MAIN: Don't futility prune caps/proms (-1.9, 20000) ASUS1
+MAIN: don't do node level futility pruning if TWM (+5.3, +/-3.7, 20000) ASUS1
+MAIN: don't do node level futility pruning if fewer-moves-than-pieces (+1.0, +/-3.8, 18080) ASUS1
+MAIN: node level futility pruning 'depthRemaining < 7' {was <9} (+0.4, +/-3.6, 20000) ASUS1
+MAIN: more TWM recognised (-5.8, +/-5.6, 8303) {bugged code?}
+MAIN: use mating table to return immediately after TT test (-1.4, +/-4.0, 16830) ASUS1
+MAIN: node level pruning returns beta (-1.4, +/-9.4, 3080)
+TT saves slightly more TWM flags (-0.5, +/-4.6, 12849) ASUS1
+TT replacement scheme also tests 'losing' scores (-1.4, +/-3.6, 20000) ASUS1
+Removed TMI1 test from reductions (+2.9, +/-3.6, 20000) ASUS1
+MatingPositionsTable provides TWM info (+1.4, +/-3.8, 18308) ASUS1 {stalled for first time in a while!}
+Node level futility pruning also checks TWM-2 (-0.6, +/-4.9, 10938)
+No pruning/reducing if threateningMate (-2.3, +/-3.6, 20000) ASUS1
+SF step 10 again (-5.2, +/-10.2, 2492)
+2021xTEST v 2008b {0.25s} (+115.4, 6846) ASUS1
+MAIN: don't node level prune if was just TWM and gave spite check (-1.1, +/-3.6, 20000) ASUS1
+MAIN: don't node level prune if was just TWM and gave spite check #2 (-3.2, +/-3.7, 20000) ASUS1
+MAIN: Counter moves used for ordering (+4.2, +/-4.4, 13904)
+isInDanger flags rationalised and used more {O1M/FMTP} (-3.4, +/-3.8, 18422) ASUS1 :(
+No node level futility pruning if TWM (+3.2, +/-3.7, 20000) ASUS1
+No null move if TWM (-5.9, +/-5.2, 9585)
+No pruning if TWM (-0.7, +/-3.6, 20000) ASUS1
+No reductions if TWM (+11.4, +/-8.2, 4001)
+2021xTEST v 2008b {0.25s} (+115.2, 11834) ASUS1
+No node level futility pruning if O1M (-1.6, +/-3.7, 20000) ASUS1
+No null move if O1M (+0.37, 5612)
+No pruning if O1M {shouldn't make any difference but let's check!} (+0.9, +/-3.6, 20000) ASUS1
+No node level futility pruning if FMTP (+1.7, +/-3.7, 20000) ASUS1
+No null move if FMTP (+0.6, +/-5.3, 9248)
+No pruning if FMTP (-1.3, +/-3.6, 20000) ASUS1
+No reductions if FMTP (+0.7, +/-3.6, 20000) ASUS1
+LMP includes caps/proms but excludes moves where mat balance > alpha (-0.0, +/-3.7, 20000) ASUS1
+LMP more if winning capture searched (-12.8, +/-9.2, 3149) ASUS1
+EVAL: K mirrored (-3.2, +/-3.7, 20000) ASUS1
+EVAL: K flattened (-12.5, +/-3.7, 20000) ASUS1
+EVAL: K nudged towards mirror (+1.7, +/-3.7, 20000) ASUS1
+EVAL: Q nudged towards mirror (-1.3, +/-3.7, 20000) ASUS1
+EVAL: R nudged towards mirror (+0.2, +/-3.7, 20000) ASUS1
+EVAL: B nudged towards mirror (-0.5, +/-3.7, 20000) ASUS1
+EVAL: N nudged towards mirror (-0.5, +/-3.6, 20000)
+EVAL: P nudged towards mirror (+0.4, +/-3.6, 20000)
+MAIN: CMH bonus higher with movesCount (-5.1, +/-3.6, 20000)
+Don't prune move if it can now give direct check {N,B,R,Q} (-13.4, +/-8.3, 3750)
+Don't prune move if it can now give direct check and SEE>=0 (-7.2, +/-4.7, 11733)
+Don't reduce move if it can now give direct check and SEE>=0 (-15.0, +/-9.9, 2650)
+Don't reduce move if it can now give direct check and SEE>=0 {excludes Qs now} (-9.0, +/-5.8, 7567)
+Don't reduce move if it can now give NEW direct check and SEE>=0 {excludes Qs now} (-4.4, +/-4.1, 15726)
+Don't prune move if it can now give NEW direct check and SEE>=0 {excludes Qs now} (-2.4, +/-3.6, 20000)
+Don't use null move AT ALL when gamephase=0 (-5.5, +/-4.8, 11323)
+Don't use null move AT ALL when gamephase=0 {reversed the engines in CuteChess as a sanity check} (-2.3, +/-4.5, 12502)
+When an extended line goes beyond ID, go straight into QS when it is no longer being extended {only in non-reduced clause} (-0.8, +/-3.6, 20000)
+When an extended line goes beyond ID, go straight into QS when it is no longer being extended {in non-reduced & reduced clause} (-25.0, +/-6.3, 6437)
+Only prune if DR<=ID/2 (-2.0, +/-3.6, 20000)
+Only prune if DR<=ID/2 {repeated} (+1.5, +/-3.6, 20000)
+Only reduce if DR<=ID/2 (-38.5, +/-9.3, 3179)
+Don't prune if 'new check' TMI1 knights only (-2.4, +/-3.6, 20000)
+Don't reduce if 'new check' TMI1 knights only (-1.1, +/-3.6, 20000)
+When storing EGTB values in TT in main, use better EUL values (+2.0, +/-3.6, 20000)
+Don't store EGTB results in TT in main {again :)} (-0.5, +/-3.6, 20000)
+2021a v 2008b {1m+1s} (+132.7, +/-13.4, 2316)
+CMH bumps move to top (-1.7, +/-3.6, 20000)
+Only reduce relevant section of CMH (+2.0, +/-8.4, 3658)
+
+2021a v Fruit 2.1 {1m+1s} (+80.2, +/-17.7, 1199)
+2021a v ProDeo 3.1 {1m+1s} (-49.1, +/-13.5, 1810) {ProDeo had a 128MB TT as opposed to 32MB for Colossus}
+
+---------------------------------------------------------------------------------------------------------
+2019x
+=====
+
+Don't do TT in QS (-45 [256])
+In QS, remove delta pruning minimal window test (virtually identical after >600 games: taken out for simplicity)
+eval returns positionalScore/2 (-38, 598)
+limit the QS to maximum of 8 ply (+16!, 816) WOW! still reluctant to just put it in though! :)...
+limit the QS to maximum of 8 ply and not just standing pat but also using SEE a la Cyrus? Bizarre! (-20, 576 games)
+removed iffy null move clause when probing TT (-5, 629)
+fixed futility to up bestscore (+9, 639)
+removed eval short circuit (-32, 464)
+use non-capture TT moves in QS (does it very occasionally crash?!!!) (-8, 376)
+QS SEE pruning if evasionPrunable a la Stockfish (-4, 510)
+use SEE when quiescenceDepth > iterationDepth rather than QS (+17, 583)
+tempo bias increased from 1 to 9 (+11, 728)
+recapture extensions also include NxB and BxN (-1, 658)
+piece-type/to-square history about 2% fewer nodes than from-square/to-square history on testset (+16, 330)
+enpriseextensions (-4, 524) - keeping in anyway coz helpful in some endgames
+extensions hard limit not applied at pv nodes (+13, 490)
+immediatedbr removed (-8, 854)
+threatenedwithmate extensions (-11, 920)
+null move 3/4 (instead of 4/5) (-41, 482)
+Do null move verification always (i.e. not just in the endgame) (+3, 454)
+A=validate killers, B=don't validate killers (0, 460) - 'proves' killer validation code 'correct'
+'countermove' adopted coz provided good node count reduction on test set
+try nolegalmovesextenions vs not - very similar
+try nullmoveverificationreduction same as nullmovereduction (-12, 700)
+do checks at 1st ply of QS (+3, 550)
+No LMR if move threatens (slightly buggy!) something (+14, 694)
+2008b v 2008bWithoutLMRAtAll (-93, 216)
+2008b v 2008bLMRWithoutThreatening (+0, 600)
+
+
+---------------------------------------------------------------------------------------------------------
+2008c
+=====
+
+Exchange down (+4 [4413] 150ms{dell7}, +5 [6382] 100ms{blackley1}) *
+Pawns on both wings (-4 [5807] 100ms{dell8}, +2 [2639] 200ms{dell3})
+Pawns on both wings #2 (+11 [6214] 100ms{dell8}, +4 [2806] 200ms{dell3}) *
+Passed pawn blocked by K or N (+0 [5718] 200ms{nec1}, +5 [6508] 150ms{dellwork}) *
+Passed pawns on both wings (-1 [6095] 150ms{dell5})
+Rayed piece mobility counts to own piece type or Q (+9 [4684] 100ms{dell8}, -2 [3664] 200ms{dell3}) *
+Fianchetto bishops (+10 [4756] 150ms{dell5}, +10 [3804] 200ms{nec1}) *
+Q in enemy territory in opening penalised (+0 [3600] 100ms{dell8}, +10 [2112] 150ms{dellwork}) *
+Backward pawns (+1 [6666] 100ms{dell8}, -6 [7545] 150ms{dell5})
+Lazy eval 250 (+6 [3569] 200ms{nec1}, -9 [4638] 150ms{dellwork})
+No killers (-11 [2202] 200ms{dell3})
+LMR rules less #1 (-24 [10000] 100ms{blackley1})
+No 'only 1 move' extensions (-3 [10000] 100ms{dell8}, -4 [7918] 200ms{dell3})
+No immediate mates (-5 [4688] 200ms{nec1}, -10 [2522] 150ms{dellwork}, +7 [5372] 150ms{dell5})
+Bad bishops (-2 [3656] 100ms{dell8})
+Bad bishops #2 (+3 [9046] 100ms{dell8}, -10 [4018] 200ms{dell3})
+Larger tempo value=5 (+9 [6922] 100ms{blackley1}, +7 [5303] 150ms{blackley2}) *
+Rook pawn less in endgame (-11 [3526] 200ms{nec1}, -7 [3086] 150ms{dellwork}, -11 [2376] 150ms{dell5})
+Rook behind passed pawn (-1 [4972] 100ms{dell8}, -2 [3452] 200ms{dell3}, +3 [4664] 150ms{dell5})
+LMR rules less #2 (-9 [3174] 100ms{dell8}, -3 [5770] 100ms{blackley1}, -2 [3364] 150ms{blackley2})
+Larger tempo value=15 (+32 [4500] 200ms{nec1}, +11 [4106] 150ms{dellwork}) *
+Friendly rook behind passed pawn (-1 [4026] 100ms{dell8}, +5 [1906] 200ms{dell3}, -0 [2504] 150ms{dell5})
+No TT-99 stuff (-0 [3324] 100ms{dell8}, -4 [2798] 100ms{blackley1}, -3 [10000] 150ms{blackley2})
+No TT move in QS (? [?] 200ms{dell3}, -4 [5640] 150ms{dell5})
+QS TT tests depth (-8 [3328] 200ms{nec1}, -2 [4220] 150ms{dellwork}, -5 [3610] 150ms{dell7})
+Always stores 'best' move in TT even if <= alpha (-13 [5461] 150ms{dellwork})
+QS own TT (-14 [2189] 100ms{dell8})
+Exact QS evaluations stored as such in TT (-5 [3710] 100ms{dell8})
+Don't store ALL node values in TT (-13 [1142] 200ms{dell3}, -8 [1410] 150ms{dell5})
+Fail soft TT fixed (-14 [2024] 200ms{dell3}, -14 [3048] 150ms{dell5})
+No futility in endgame (-2 [7717] 100ms{dell8}, -6 [3406] 200ms{dell3}, +7 [4290] 150ms{dell5})
+Killer updated only if >= beta (+1 [10000] 100ms{dell8}, -7 [4496] 200ms{dell3}, +20 [5630] 150ms{dell5})
+Doesn't LMR if material balance >= alpha (-30 [5090] 100ms{dell8}, -26 [1393] 150ms{dell5})
+In QS, TT move not searched 1st (+13 [4963] 200ms{dell3}, +3 [4571] 200ms{nec1}, -3 [5467] 150ms{dellwork})
+In QS, KR stored but not searched (+1 [2472] 100ms{dell8}, -4 [4428] 150ms{dell5}, ? [?] 100ms{XXXXX})
+In QS, KR stored and searched (-18 [8825] 100ms{dell8}, -16 [3601] 150ms{dell5}, -4 [1126] 200ms{dell3})
+LMR Uses Stand Pat Delta #1 (about -30)
+LMR Uses Stand Pat Delta #2 (about -18)
+LMR Uses Stand Pat Delta #3 (-6, -14, -9)
+LMR Uses Stand Pat Delta #4 (-lots)
+LMR includes killer stage (-5 [5367] 100ms{dell8}, +6 [2374] 200ms{dell3})
+LMR doesn't use stage (+4 [3132] 150ms{dell5}, -2 [3010] 200ms{dell3})
+No ordering at ALL nodes (-20, -48)
+LMR prune > ID (+1 [4574] 100ms{dell8}, -2 [2026] 200ms{dell3})
+LMR less lower down(-9, -9)
+LMR only when depth>3 (-40, -40)
+LMR only 1 per side per line (-30, -13)
+LMR Uses Stand Pat Delta #5 (-12, -4)
+order pv nodes restof by standpat (-14, -9, -14)
+order pv nodes restof by quiesce (-25, -42)
+1st move uses minimal window too (-4, -2)
+Don't use TT value at PV nodes (-2 [3984] 100ms{dell8}, +2 [2328] 150ms{dell5})
+Move null threatened piece earlier #1 (+1 [6679] 100ms{dell8}, +24 [10000] 150ms{dell5})
+Move null threatened piece earlier #2 (-1 [8707] 100ms{dell8})
+TT mods limits (-3 [8109] 100ms{dell8}, -2 [3470] 200ms{dell3})
+No recapture extensions (-22 [4296] 150ms{dellwork}, -30 [6511] 150ms{dell5})
+PV nodes extended #1 (-50 [9603] 100ms{dell8}, -59 [4195] 200ms{dell3})
+PV nodes extended #2 (-88 [2212] 100ms{dell8})
+TT replacement traditional (-9 [10000] 200ms{dell3}, -1 [9116] 100ms{dell8})
+Null beta test (-2 [9898] 100ms{dell8}, -4 [9687] 150ms{dell5})
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX (? [?] 100ms{XXXXX}, ? [?] 100ms{XXXXX}, ? [?] 100ms{XXXXX})
+
+---------------------------------------------------------------------------------------------------------
+2008b
+=====
+
+IID Reduction tourney (3/+9,5/+7,0/+5,2/+4,4/+3,1/+0 [2420] 100ms{blackley1})
+Null move R=4 (-0 [3534] 200ms{dell3})
+No TT in QS (-66 [1740] 100ms{dell8})
+No TWM extensions at ALL nodes (-9 [2829] 100ms{dell8}, -9 [4234] 200ms{nec1}, +4 [4488] 150ms{dell5}) ALSO SEE OLD TOURNEY BELOW
+No K safety term (-34 [2265] 150ms{dell5})
+Don't use IID (-4 [3270] 150ms {dellwork})
+No TWM extensions if IDREM <= 2 (-3 [2408] 100ms{dell8}, +4 [5226] 200ms{dell3})
+Checks castling statuses before probing EGTB (50-50 determinant)
+Null move eval>=beta clause (+1 [3528] 150ms{dellwork}, -3 [2254] 150ms{dell5})
+Null move mate clause removed (-4 [1388] 100ms{blackley1}, +1 [1648] 100ms{dell8}, +4 [1012] 150ms{dellwork}, -5[878] 200ms{nec1})
+No lazy eval (-33 [1446] 200ms{dell3}, -33 [1498] 200ms{nec1}, -32 [1914] 150ms{dell5})
+Limit eval to lazy margin (+0 [1978] 200ms{dell3}, +3 [2738] 150ms{dell5})
+Dynamic lazy eval margin (-7 [2002] 200ms{nec1}, -16 [2650] 150ms{dellwork})
+All PP count (-? [?] 100ms{dell8})
+No delta pruning in QS (-14 [2023] 100ms{blackley1})
+QS delta ups best value (+9 [1280] 200ms{nec1}, +3 [4976] 100ms{blackley1}, +9 [3484] 150ms{dellwork})
+Threats extended (-122 [208] 200ms{nec1}, another bad one...)
+LMR more (+31 [2424] 200ms{dell3}, +15 [3358] 150ms{dell5}, +5 [1760] 100ms{dell8})
+LMR more fixed (+32 [1512] 200ms{nec1}, +63 [1812] 200ms{dellwork})
+Clears TT between moves (-18 [420] FD8{dell8})
+Do -ve captures before non-capts (-7 [2239] 100ms{dell8})
+No LMR at PV nodes (-26 [1123] 200ms{dell3}, -25 [1531] 150ms{dell5})
+No LMR -ve captures (-10 [3506] 200ms{nec1}, +1 [4462] 150ms{dellwork})
+No history (-66 [546] 100ms{dell8})
+Replace history with pawn threat (-40 [372] 100ms{dell8})
+Replace history with MVVLVA (-50 [3314] 100ms{dell8})
+LMR '3 moves' clause removed (-4 [1484] 100ms{dell8})
+History reduced not cleared (-1 [1620] 200ms{dell3}, =0 [2190] 150ms{dell5})
+
+
+---------------------------------------------------------------------------------------------------------
+2008a
+=====
+Removed "tryNullMove" clause (-16 [2448])
+Deterministic changes only (-13 [6006] 150ms{Blackley2}, -1 [2710] 150ms{Blackley2/NoEGTB}, =0 [4384] 100ms{Blackley1/NoEGTB})
+FullWidthWindow (-7 [4035] 100ms)
+FullWidthWindowAbove (-11 [4928] 100ms)
+Only do nulls at CUT nodes (+1 [6114] 150ms{dell5}, +8 [4372] 200ms{dell3}, -1 [4148] 150ms{dellwork})
+Fail to infinity (+0 [4406] 150ms{dell5}, -7 [3376] 200ms{dell3}, -0 [2858] 200ms{nec1}, -5 [4214] 150ms{dellwork})
+Null move revamp #3 [bug fixed] (+8 [3498] 100ms{dell8}, -0 [1855] 100ms{blackley1})
+Fixed two bugs (LK material adjustment and KP only endgames) in evaluation symmetry (+23 [1000], -6 [2876] FD5, -2 [3178] 250ms)
+Passed pawns check rear is clear (+8 [1000], -5 [3156] FD5, +1 [2850] 100ms)
+Added PP blocked specifically by king or knight bonus (+5 [1000], +2 [3628] 100ms)
+Endgame K advancement bonus (-1 [1000], +2 [5647] FD5)
+Don't store null moves in TT (+1 [1000], +1 [4942] 100ms)
+DBR given +/-1 value depending on who has most material (+2 [1000], +1 [2650] FD6)
+Removed "-389" clause from IID section (-3 [1000], +10 [3702] 150ms{dellwork}, +11 [1208] 150ms)
+Swap material if ahead (+3 [1000], +14 [3736] 150ms, +20 [602] 150ms, +1 [2390] {blackley1})
+Only do IID re-search at PV nodes (+5 [4188] 100ms{DELL8})
+Don't do IID at ALL nodes (+1 [2844] 200ms{NEC1}, +9 [3154] 150ms{DELL5})
+Don't allow nulls in IID (+2 [1000], -0 [5096] 100ms{dell8}, +6 [2914] 200ms{dell3})
+Tidied 'winValue' code (-2 [2286] 100ms, -10 [1306] 150ms)
+Improved EGTB throttle (-0 [3534] 150ms)
+Only IID at PV nodes (-4 [1430] 150ms, +1 [2026] 100ms, +0 [1500] 150ms, +10 [1212] 200ms)
+All IID stuff together (-1 [6030] 100ms{dell8})
+Time Control Simplified (BIG improvement!!! 30-40-50 ELO)
+Reduces BadLines (+13 [5272] 150ms{dellwork}, ? [?] 100ms{dell8})
+Only do 'threatened with mate' extensions <=ID (-5 [6120] 150ms)
+Get rid of 'threatened with mate' extensions (-12 [1000])
+Don't do 'threatened with mate' extensions at ALL nodes (+1 [4256] 200ms{nec1})
+Passed pawn runners improved (+1 [1000]) *
+Fixed null move verify (+1 [1000]) *
+Fixed null move verify #2 [verify reduction 2 ply less] (-3 [1000]) *
+Only one null per side (+6 [1000], -2 [4510] 150ms) *
+STM specific KP runner routines (-9 [1000], -6 [5710] 250ms)
+EGTB Pawn Runners (+1 [1000])
+Tried R=2 adaptive null move only in endgame (+3 [1000])
+Changed KP shelter code (+3 [1000])
+Changed KP shelter code2 (-14 [1000])
+Changed KP shelter code3 (-13 [1000])
+New K attack (prox >= 6) ( [])
+New K attack (prox >= 5) (-40 [523])
+No r=2 at all (-5 [2222])
+'Reduce nulls' code removed (-5 [1000])
+No K Attack (-3 [1000])
+No consecutive nulls for 3 ply (-6 [1000])
+Doubly blocked backward pawns penalised double (+3 [1000], -7 [4326] FD5)
+Increase 'rook behind passed pawn' from 20 to 35 (+11 [1000], -8 [5486] FD5)
+Increase 'rook behind passed pawn' from 20 to 50 (-13 [1000]) Too high???
+Removed fianchetto evaluation stuff (+27 [1000], +9 [1000], -24 [3722] FD5, +0 [3034] 200ms, +0 [5144] 200ms)
+Doesn't LMR p moves to 7th (-3 [1000], -7 [3498] 200ms)
+RP Endings Drawish (75%) (-4 [4516] 100ms{dell8})
+Don't do immediate mates in qs (-6 [1000], +2 [5556] 100ms{blackley1}, -4 [1881] 150ms{blackley2})
+RP Endings Drawish (87.5%) (-8 [3732] 150ms{dell5})
+Null moves only when eval>=beta (-13 [2802] 150ms{dellwork}, +2 [2316] 200ms{nec1})
+Extensions limited to 1.5 * ID (-14 [1000])
+Extensions limited to 2 * ID - 2 (-9 [1000])
+Swap queens (-20cp) if ahead (-12 [1000])
+Supported passed pawn endgame bonus (-9 [1000])
+Tried R=2 adaptive null move again (-11 [1000])
+Don't do any non-profitable captures in QS (-29 [1000])
+No TT when ep capture possible (-4 [2709])
+IID No389 v IID No389 and Research (-5 [3652] 100ms{dell8})
+IID No389 v IID No389 and Reduce3 (+4 [8754] 100ms{blackley1}, -6 [4532] 150ms{blackley2})
+Nulls at PV nodes too (-2 [1000], +2 [1000])
+Always replace in main TT (+0 [1000])
+When down to a lone king go straight into qs (-1 [2902] 100ms, -7 [1836] 200ms)
+Rook pawns worth less (+4 [5080] FD8, -6 [5854] FD7, +5 [1958] FD6)
+EGTB in QS (-13 [980] 200ms, -5 [1684] 100ms)
+QS tests for stalemate even when not on edge (+9 [2290] 150ms, -5 [4056] 200ms{nec1})
