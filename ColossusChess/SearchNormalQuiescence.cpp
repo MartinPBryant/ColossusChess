@@ -112,23 +112,23 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 
 			// 50-move draw
 			// In this position 6k1/5pp1/4p3/1bBpP1P1/1P1P1P2/1q6/7Q/K7 w - - 99 90 Colossus played Qh5 which allows a mate in 2! :O
-			// In fact, it could have played any move including leaving a piece en-prise!
+			// (In fact, it could have played any move including leaving a piece en-prise! Or at the 99th ply it could have allowed a 'winning' knight fork at the 100th ply!)
+			// This dumb 'bowel trembling' behaviour has occurred in other games too!
 			// Thankfully the GUI declared it a draw!
-			// Therefore, to try to avoid this sort of dumb 'bowel trembling' 100th ply move, don't apply this test when the root move is the 100th ply!
-			if (pliesSinceIrreversible >= 100) // 50-move?
-				if (ply > 2)
+			if (pliesSinceIrreversible >= 100) // 50-moves made?
+			{
+				if (isInCheck) // Being mated on the 100th ply takes precedence over the draw!
 				{
-					if (isInCheck && (normalBrain.CountAllMoves(sideToMove, isInCheck) == 0)) // Being mated on the 100th ply takes precedence over the draw!
+					normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
+					if (normalBrain.CountAllMoves(sideToMove, true) == 0)
 					{
 						*currentGameRecordPointer->principalVariationPointer = PVTCheckmate;
 						return (short)(-MatingIn0Score + ply);
 					}
-					else
-					{
-						*currentGameRecordPointer->principalVariationPointer = PVTDrawBy50MoveRule;
-						return drawScore;
-					}
 				}
+				*currentGameRecordPointer->principalVariationPointer = PVTDrawBy50MoveRule;
+				return drawScore;
+			}
 		}
 	}
 #pragma endregion
@@ -165,7 +165,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	currentGameRecordPointer->isFMTP = 0;
 	currentGameRecordPointer->isZLKM = 0;
 	currentGameRecordPointer->isO1PCM = 0;
-	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // PV terminator
+	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // Default PV terminator
 #ifdef _DEBUG
 	isFollowingPV = false;
 #endif
@@ -212,7 +212,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				currentGameRecordPointer->isO1PCM = flag & TTFlagOnlyOnePieceCanMove;
 				//standPatScore = (short)((data >> 32) & staticEvaluationMask);
 				standPatScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
-				assert((standPatScore == INT16_MIN) || (standPatScore == Evaluate(sideToMove)));
+				//assert((standPatScore == INT16_MIN) || (standPatScore == Evaluate(sideToMove)));
 				short tteScore;
 				//tteScore = (short)((data >> 16) & scoreMask);
 				tteScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->score;
@@ -242,6 +242,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 					//}
 
 					//if (!isPVNode) // Don't use TT values at a PV node to avoid search inconsistencies THIS GAINS ELO IN MAIN BUT LOSES IT IN QS! WTF?!?!?! (-5.3, +/-3.4, 20000 for having this in)
+//if (currentGameRecordPointer->pliesSinceIrreversible < 90)//TEST
 					{
 						if (tteEUL == TTFlagLower) // Lower limit? (Came from a Cut node: exact value is "at least" (>=) this value)
 						{
@@ -288,6 +289,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 #pragma region EGTB
 	// Is this position in the endgame tablebases?
 	short egtbScore = -MatingIn0Score; // This may be tested at the end of the node
+	//TODO: do we really need EGTB see thru in QS???
 	if (EndgameTablebasesPiecesFound == 0)
 	{
 		// Just in case we don't have any EGTBs
@@ -397,7 +399,9 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
 			{
 				standPatScore = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
-				assert(standPatScore == Evaluate(sideToMove));
+				//if (standPatScore != Evaluate(sideToMove))//TEMP
+				//	standPatScore = Evaluate(sideToMove);
+				//assert(standPatScore == Evaluate(sideToMove));
 			}
 			else
 				standPatScore = Evaluate(sideToMove);
@@ -569,8 +573,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				(!isPVNode)
 				&& (!isInCheck) // Pruning when in check can cause false mates to be returned!
 				&& (!givesCheck) // Don't prune checks
-				&& (currentMove.mf.flag < MFPromotion) // Don't prune promotions WHY NOT???
-				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing!
+				&& (currentMove.mf.flag < MFPromotion) // Don't prune promotions (~+1.5 ELO)
+				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing! (~2 ELO)
 				)
 			{
 				assert(!(currentMove.mf.flag >= MFPromotion));

@@ -28,7 +28,7 @@ Normal::NormalTranspositionTableBucket_Struct* Normal::NormalTranspositionTableP
 uint32_t Normal::NormalTranspositionTableBuckets = 0;
 uint32_t Normal::NormalTranspositionTableBucketsMask;
 
-std::string Normal::ThreadResults[ThreadsMax];
+//std::string Normal::ThreadResults[ThreadsMax];
 
 int Normal::CrashLocation;
 
@@ -507,7 +507,7 @@ void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 
 #pragma region Root move list handling
 
-// Called after each root move has been searched to save its subtree size and fail-soft score
+// Called after each root move has been searched on the first iteration to save its subtree size and fail-soft score
 void Normal::SaveRootMoveData(uint32_t move, uint64_t totalNodes, short score)
 {
 	bool found = false;
@@ -566,6 +566,7 @@ int Normal::RetrieveRootMoveWDLStatus(uint32_t move)
 	for (int index = 0; index < RootMovesCount; index++)
 		if (RootMoveList[index].mws.ui32 == move)
 			return RootMoveList[index].EGTBWDL;
+	OutputError("RetrieveRootMoveWDLStatus failed to find " + MoveNotation(move));
 	return 1; // Should never get here but return 'win' just in case so that the move doesn't get discarded in the search!
 }
 
@@ -576,16 +577,19 @@ int Normal::RetrieveRootMoveDTZStatus(uint32_t move)
 	for (int index = 0; index < RootMovesCount; index++)
 		if (RootMoveList[index].mws.ui32 == move)
 			return RootMoveList[index].EGTBDTZ;
+	OutputError("RetrieveRootMoveDTZStatus failed to find " + MoveNotation(move));
 	return -MAXINT; // Should never get here but return -INF just in case so that the move doesn't get discarded in the search!
 }
 
 // Called after the moves have been generated at the root in the tree to assign a simple sequential value to each root move based on its fail-soft score (or subtree size) and the last time it took over as best
+// For the second iteration the moves are ordered by the failsoft score from the first iteration
+// For subsequent iterations the moves are ordered by priority (which is based on when they last took over as best)
 void Normal::ScoreRootMoveList(MoveWithScore_Struct* mlp)
 {
 	// Make a copy of the root move list
 	RootMoveList_Struct RootMoveListTemp[220];
-	for (int index1 = 0; index1 < RootMovesCount; index1++)
-		RootMoveListTemp[index1] = RootMoveList[index1];
+	for (int index = 0; index < RootMovesCount; index++)
+		RootMoveListTemp[index] = RootMoveList[index];
 
 	for (int index1 = 0; index1 < RootMovesCount; index1++)
 	{
@@ -607,6 +611,7 @@ void Normal::ScoreRootMoveList(MoveWithScore_Struct* mlp)
 		assert(highestIndex >= 0);
 		RootMoveListTemp[highestIndex].priority = -1;
 
+		// The moves are given values from 1000 downwards
 		mlp[highestIndex].score = 1000 - index1;
 	}
 }
@@ -904,6 +909,10 @@ void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, sho
 		//	return;
 
 		//normalStores++;
+
+		//// Don't store positions where we are nearly at the 50-move draw because they are path dependent - SEEMS TO BE A SLIGHT ELO LOSS - AND CAUSES WEIRD PVs TO BE RETURNED NEAR 50-MOVES
+		//if (normalBrain.gameRecordPointer->pliesSinceIrreversible >= 90)
+		//	return;
 
 		NormalTranspositionTableEntry_Struct* tte0;
 		uint64_t hash64 = normalBrain.gameRecordPointer->transpositionTableHash64WithEP;
@@ -1425,23 +1434,23 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 				// 50-move draw
 				// In this position 6k1/5pp1/4p3/1bBpP1P1/1P1P1P2/1q6/7Q/K7 w - - 99 90 Colossus played Qh5 which allows a mate in 2! :O
-				// In fact, it could have played any move including leaving a piece en-prise!
+				// (In fact, it could have played any move including leaving a piece en-prise! Or at the 99th ply it could have allowed a 'winning' knight fork at the 100th ply!)
+			// This dumb 'bowel trembling' behaviour has occurred in other games too!
 				// Thankfully the GUI declared it a draw!
-				// Therefore, to try to avoid this sort of dumb 'bowel trembling' 100th ply move, don't apply this test when the root move is the 100th ply!
-				if (pliesSinceIrreversible >= 100) // 50-move?
-					if (ply > 2)
+				if (pliesSinceIrreversible >= 100) // 50-moves made?
+				{
+					if (isInCheck) // Being mated on the 100th ply takes precedence over the draw!
 					{
-						if (isInCheck && (normalBrain.CountAllMoves(sideToMove, isInCheck) == 0)) // Being mated on the 100th ply takes precedence over the draw!
+						normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
+						if (normalBrain.CountAllMoves(sideToMove, true) == 0)
 						{
 							*currentGameRecordPointer->principalVariationPointer = PVTCheckmate;
 							return (short)(-MatingIn0Score + ply);
 						}
-						else
-						{
-							*currentGameRecordPointer->principalVariationPointer = PVTDrawBy50MoveRule;
-							return drawScore;
-						}
 					}
+					*currentGameRecordPointer->principalVariationPointer = PVTDrawBy50MoveRule;
+					return drawScore;
+				}
 			}
 		}
 
@@ -1561,14 +1570,6 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 			if (hash == hash64)
 			{
-				if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries todo: TRY THIS EARLIER!!!
-				{
-					data = data & ~(3ULL << 48);
-					data = data | ((uint64_t)TranspositionTableAge << 48);
-					tte0[entry].data = data;
-					tte0[entry].hash64 = hash64 ^ data;
-				}
-
 				// Get the entry's data
 				//tteBestMove.ui32 = MGUnCompressMove((uint16_t)(data & bestMoveMask));
 				tteBestMove.ui32 = MGUnCompressMove(((NormalTranspositionTableEntryDataFields_Struct*)&data)->bestMove);
@@ -1584,7 +1585,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				currentGameRecordPointer->isO1PCM = flag & TTFlagOnlyOnePieceCanMove;
 				//currentGameRecordPointer->staticEvaluation = (short)((data >> 32) & staticEvaluationMask);
 				currentGameRecordPointer->staticEvaluation = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
-				assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove)));
+				//assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove)));
 				//tteScore = (short)((data >> 16) & scoreMask);
 				tteScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->score;
 
@@ -1636,7 +1637,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				{
 					tteFound = entry;
 
-					//if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries todo: TRY THIS EARLIER!!!
+					//if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries
 					//{
 					//	data = data & ~(3ULL << 48);
 					//	data = data | ((uint64_t)TranspositionTableAge << 48);
@@ -1647,6 +1648,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 					if (!isPVNode) // Don't use TT values at a PV node to avoid search inconsistencies {bizarrely this is an ELO gain in main but an ELO loss in QS?!?!} (-9.1, +/-3.4, 20000 for taking this out)
 					//if (!isPVNode || (tteSubTreeDepth == MaximumPly)) // Don't use TT values at a PV node to avoid search inconsistencies {bizarrely this is an ELO gain in main but an ELO loss in QS?!?!} (-9.1, +/-3.4, 20000 for taking this out)
 						//WHAT IF IT'S >=WINNING?!?! THEN IT'S PROVEN AND SHOULD BE USED? TEST tteSubTreeDepth=MaximumPly
+if (currentGameRecordPointer->pliesSinceIrreversible < 90) // Don't probe the TT when we're very close to the 50 move draw
 					{
 						if (tteEUL == TTFlagLower) // Lower limit? (Came from a Cut node: exact value is "at least" (>=) this value)
 						{
@@ -1684,14 +1686,16 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 					}
 				}
 
+				isCutNode = (tteEUL == TTFlagLower); // Try to make isCutNode more accurate for IIR
+
 				break;
 			}
 		}
 
-		if (MatingPositionsTablePointer[~hash64 & MatingPositionsTableMask] == ~hash64)
-		{
-			currentGameRecordPointer->isTWM |= TTFlagThreatenedWithMate;
-		}
+		//if (MatingPositionsTablePointer[~hash64 & MatingPositionsTableMask] == ~hash64)
+		//{
+		//	currentGameRecordPointer->isTWM |= TTFlagThreatenedWithMate;
+		//}
 	}
 #pragma endregion
 
@@ -1818,13 +1822,14 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	//----------------------------------------------------------------------------------------------------
 	CRASHLOCATION(180);
 
+#pragma region StaticEvaluation
 	// Get the 'static' evaluation
 	if (currentGameRecordPointer->staticEvaluation == INT16_MIN) // The value may already have been retrieved from the TT
 	{
 		if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
 		{
 			currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
-			assert(currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove));
+			//assert(currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove));
 		}
 		else
 			currentGameRecordPointer->staticEvaluation = Evaluate(sideToMove);
@@ -1833,6 +1838,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	int improving = 0; // Used in LMP and reductions
 	if ((ply > 2) && (currentGameRecordPointer->staticEvaluation > (normalBrain.gameRecordPointer - 2)->staticEvaluation))
 		improving = 1;
+#pragma endregion
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -1966,6 +1972,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			int R;
 			R = 3 + (depthRemaining / 5) + std::min(9, ((bestKnownScore - beta) / 128));
 			short nullMoveScore = (short)-TreeSearchNormal((short)-beta, (short)(-beta + 1), ply + 1, depthRemaining - R - 1, sideToMove ^ 1, false, false, !isCutNode);
+			//short nullMoveScore = (short)-TreeSearchNormal((short)-beta, (short)(-beta + 1), ply + 1, depthRemaining - R - 1, sideToMove ^ 1, false, false, false);//TEMP
+			//TODO: shouldn't this ALWAYS be a cut node? but SF says no! GET SOME COUNTS! seems that !isCutNode predicts best?
 
 			// About 89% of nodes after a null move are 'all' nodes
 
@@ -2029,7 +2037,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				if (nullMoveScore < MatedScore)
 					currentGameRecordPointer->isTWM |= TTFlagThreatenedWithMate;//WHY NOT JUST '=' ??? ALSO, DOES THIS GET SET AFTER NORMAL SEARCH BELOW RETURNS MATED SCORE? SHOULD IT???
 			}
-			// SET THE NODETYPE TO 'ALL' NOW AS THE NULL MOVE DIDN'T CAUSE A CUTOFF??? GATHER SOME STATS TO SUPPORT THIS
+			// TODO: SET THE NODETYPE TO 'ALL' NOW AS THE NULL MOVE DIDN'T CAUSE A CUTOFF??? GATHER SOME STATS TO SUPPORT THIS
+			// do after all the 'likely' moves e.g. TT, captures, checks etc
 		}
 	}
 	// About 53% of nodes don't get cutoff by the null move
@@ -2037,19 +2046,32 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 	//----------------------------------------------------------------------------------------------------
 
-	// SF step 10
-	if (ply > 1)
-		if (tteBestMove.ui32 == 0)
-		{
-			if (isPVNode)
-			{
-				depthRemaining -= 1;// +(tteSubTreeDepth >= depthRemaining);
-				if (depthRemaining <= 0)
-					return TreeSearchNormalQuiescence(alpha, beta, ply, 0, sideToMove, isInCheck); // N.B. always enter the QS with depthRemaining=0
-			}
-			if (isCutNode && (depthRemaining >= 8))
-				depthRemaining -= 1;
-		}
+	// Internal Iterative Reductions - https://chessprogramming.org/Internal_Iterative_Reductions
+	//if (ply > 1)
+	//	if (tteBestMove.ui32 == 0)
+	//	{
+	//		//if (isPVNode)
+	//		//{
+	//		//	depthRemaining -= 1;// +(tteSubTreeDepth >= depthRemaining);
+	//		//	if (depthRemaining <= 0)
+	//		//		return TreeSearchNormalQuiescence(alpha, beta, ply, 0, sideToMove, isInCheck); // N.B. always enter the QS with depthRemaining=0
+	//		//}
+	//		//if (isCutNode && (depthRemaining >= 8))
+	//		//if (isCutNode)
+	//		if (!isPVNode)
+	//		{
+	//			//if (isPVNode)
+	//			//	AC1++;
+	//			depthRemaining -= 1;
+	//		}
+	//	}
+	if (!isPVNode
+		&& isCutNode
+		&& (tteBestMove.ui32 == 0)
+		&& (depthRemaining > 2)
+		)
+		depthRemaining -= 2;
+
 
 	//----------------------------------------------------------------------------------------------------
 	CRASHLOCATION(210);
@@ -2173,7 +2195,13 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 			// Give up scanning for highest scoring move when we've hit the minimum bestSortScore
 			if ((bestSortScore <= 0) && (ply > 1)) // Past 'special' moves? (TT, captures, killers, counter-moves, follow-up-moves and non-zero history moves) WILL WE EVER HAVE MULTIPLE MOVES AT 0 AT THE ROOT???
+			{
 				keepScanning = false;
+				// Updating isCutNode here improves the %age accuracy of the node type
+				// Without it we get about 71% cut/76% all correct
+				// With it we get about 74% cut/98% all correct
+				isCutNode = false;//TODO: A GOOD PLACE TO SET THE NODE TYPE TO 'ALL' v71 - used by iir
+			}
 		}
 		//assert((bestSortScore >= 0) && (bestSortIndex >= 0) && (bestSortIndex < movesCount));
 		assert((bestSortIndex >= 0) && (bestSortIndex < movesCount));
@@ -2217,7 +2245,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				else
 				{
 					//if ((LastPrincipalVariation[ply - 1] & 0xFFFF) != 0)
-					AC9++;
+					AC9++;//TEMP
 					//assert(0);
 					isFollowingPV = false;
 				}
@@ -2592,7 +2620,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				}
 
 			if (IterationPly == 1)
-				SaveRootMoveData(currentMove.ui32, NodeCount + NodeCountQuiescenceSearch, currentMoveScore);//TODO: SAVING SUBTREE SIZE NOT USED AND ALSO REDUNDANT IF ONLY DOING AT ID=1
+				SaveRootMoveData(currentMove.ui32, NodeCount + NodeCountQuiescenceSearch, currentMoveScore); // On the first iteration, save every root moves fail-soft score and subtree size
 
 			// Should we stop the search? (Sets a couple of flags internally which are tested elsewhere)
 			TimeUp(1.0f);
@@ -2661,6 +2689,12 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 					// This move has returned a score >= beta, therefore this is a 'Cut' node
 					// The currentMoveScore is a lower bound (floor) on the exact score of the node (i.e. the exact score might be greater than currentMoveScore, it is "at least" currentMoveScore)
 					CRASHLOCATION(294);
+					//if (!allowNull)
+					//{
+					//	AC2++;//TEMP
+					//	if (isCutNode)
+					//		AC5++;
+					//}
 					assert(currentMove.ui32 == currentGameRecordPointer->move.ui32);
 					assert((currentGameRecordPointer->isTWM == 0) || (currentGameRecordPointer->isTWM == TTFlagThreatenedWithMate));
 					assert((currentGameRecordPointer->isO1M == 0) || (currentGameRecordPointer->isO1M == TTFlagOnlyOneLegalMove));
@@ -2675,7 +2709,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 						//SEE *** COMMENT! RootBestMove SHOULD BE UPDATED WHEN WE GET A FAIL HIGH!!! OTHERWISE IT COULD STOP SEARCH BEFORE RE-SEARCH COMPLETE AND STILL USE THE PREVIOUS BEST MOVE :o
 						//BUT WHAT IF IT THEN FAILS LOW??? :o
 						RootBestMove = currentMove; // ELO loss if take this out!
-						//SHOULD/CAN WE REMAIN IN THIS FUNCTION AND DO THE RESEARCH FROM HERE??? RATHER THAN HANDLING OUTSIDE???
+						//TODO: SHOULD/CAN WE REMAIN IN THIS FUNCTION AND DO THE RESEARCH FROM HERE??? RATHER THAN HANDLING OUTSIDE???
 					}
 
 					PRINTTREE(PrintTree2(IterationPly, ply, "Cut"););
@@ -2733,15 +2767,35 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	// Update transposition table
 	if (alpha == originalAlpha)
 	{
+		//if (!allowNull)
+		//{
+		//	AC3++;//TEMP
+		//	if (!isCutNode)
+		//		AC6++;
+		//}
 		// No move has returned a score > alpha, therefore this is an 'All' node (all legal moves have been searched)
 		// The bestMoveScore is an upper bound (ceiling) on the exact score of the node (i.e. the exact score might be less than bestMoveScore, it is "at most" bestMoveScore)
 		// The children of an All node are Cut nodes. The parent of an All node is a Cut node. The ply distance of an All node to its PV ancestor is even.
 		//assert((bestMoveScore > -MateBaseScore) && (bestMoveScore <= alpha));
 		PRINTTREE(PrintTree2(IterationPly, ply, "All"););
 		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation);// , tteFound); // Keep any existing TT move even though it didn't raise alpha
+		//if (!isPVNode)
+		//{
+		//	AC4++;
+		//	if (!isCutNode)//TEMP
+		//		AC5++;
+		//	else
+		//		AC6++;
+		//}
 	}
 	else
 	{
+		//if (!allowNull)
+		//{
+		//	AC1++;//TEMP
+		//	if (isPVNode)
+		//		AC4++;
+		//}
 		// A move has returned a score > (the original) alpha but < beta, therefore this is a 'PV' node (all legal moves have been searched)
 		// The bestMoveScore is the EXACT score of the node
 		// The root node and the leftmost nodes are always PV-nodes. All siblings of a PV node are expected Cut nodes.
@@ -2821,10 +2875,14 @@ std::string Normal::ComputeNormal()
 	(normalBrain.gameRecordPointer - 1)->staticEvaluation = Evaluate(SideToMove ^ 1);
 
 	// Root move list stuff
-	// Generated once here and the moves stay in the same physical order in which they are generated so that they correspond with the same moves in the tree generated move list
-	// The .nodes property is used to generate .score values for move ordering in the tree
+	// Generated once here before the first iteration and the moves stay in the same physical order in which they are generated so that they correspond with the same moves in the tree generated move list
+	// All moves in the RootMoveList have their 'priority' set to zero before the first iteration
+	// During the first iteration we update every root move with its fail-soft score and subtree size
+	// After the first iteration we use the fail-soft score to order the moves for the second iteration
+	// For the second and subsequent iterations we increase the priority value of any move that takes over as best and use that for ordering on the next iteration
+	// In every iteration at the root we score the root move list (for move ordering) with ScoreRootMoveList
 	MoveWithScore_Struct moveList[220];
-	RootMoveList[0].mws.ui32 = 0;
+	RootMoveList[0].mws.ui32 = 0; //WHY???
 	normalBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
 	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(BitScanForwardX(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 	if (RootMovesCount == 0) // Sometimes the GUI or the user provide positions with zero legal moves! (e.g. checkmates/stalemates in chess)
@@ -2837,12 +2895,13 @@ std::string Normal::ComputeNormal()
 		RootMoveList[moveListIndexIterator].mws = moveList[moveListIndexIterator];
 		RootMoveList[moveListIndexIterator].mws.score = 0;
 		RootMoveList[moveListIndexIterator].nodes = 0;
-		RootMoveList[moveListIndexIterator].priority = 0;
+		RootMoveList[moveListIndexIterator].priority = 0; 
 		RootMoveList[moveListIndexIterator].EGTBWDL = -1;
 		RootMoveList[moveListIndexIterator].EGTBDTZ = -1;
 		RootMoveList[moveListIndexIterator].EGTBRank = -1;
 		//RootMoveList[moveListIndexIterator].EGTBCandidate = false;
 	}
+	RootPriority = 1;
 
 	// EGTB stuff
 	EndgameTablebasesProbes = 0;
@@ -2965,7 +3024,6 @@ std::string Normal::ComputeNormal()
 	// Do the search
 	RootScore = 0;
 	RootBestMove.ui32 = 0;
-	RootPriority = 1;
 	IterationPly = 0;
 	int backedOffIterationPly = 0;
 	PVExtended = false;
@@ -3073,8 +3131,8 @@ std::string Normal::ComputeNormal()
 		if (!StopImmediately)
 		{
 
-			if (IterationPly == 1)
-				UpdateRootMovePriority(RootBestMove.ui32); // Ensure the best move is flagged as such in the root move list ***WHY HERE WHEN WE DO IT IN THE TREE???
+			//if (IterationPly == 1)//TESTING taking this out
+			//	UpdateRootMovePriority(RootBestMove.ui32); // Ensure the best move is flagged as such in the root move list ON THE FIRST ITERATION!
 
 
 
@@ -3293,14 +3351,16 @@ std::string Normal::ComputeNormal()
 
 void Normal::ComputeNormalMTLaunchHelperThread(int threadId)
 {
-	Normal ts;
-	ts.ThreadId = threadId;
+	Normal* ts;
+	ts = new Normal;
+	ts->ThreadId = threadId;
 	// Initialise killers etc from the persisted Normal class
-	memcpy(ts.KillerMoves, EngineNormal.KillerMoves, sizeof(EngineNormal.KillerMoves));
-	memcpy(ts.CounterMoves, EngineNormal.CounterMoves, sizeof(EngineNormal.CounterMoves));
-	memcpy(ts.FollowUpMoves, EngineNormal.FollowUpMoves, sizeof(EngineNormal.FollowUpMoves));
-	memcpy(&ts.CounterMoveHistory->CMH[0][0], &EngineNormal.CounterMoveHistory->CMH[0][0], sizeof(CounterMoveHistory_Struct));
-	ts.ComputeNormal();
+	memcpy(ts->KillerMoves, EngineNormal.KillerMoves, sizeof(EngineNormal.KillerMoves));
+	memcpy(ts->CounterMoves, EngineNormal.CounterMoves, sizeof(EngineNormal.CounterMoves));
+	memcpy(ts->FollowUpMoves, EngineNormal.FollowUpMoves, sizeof(EngineNormal.FollowUpMoves));
+	memcpy(&ts->CounterMoveHistory->CMH[0][0], &EngineNormal.CounterMoveHistory->CMH[0][0], sizeof(CounterMoveHistory_Struct));
+	ts->ComputeNormal();
+	delete ts;
 }
 
 void Normal::ComputeNormalMT()
@@ -3333,14 +3393,16 @@ void Normal::ComputeNormalMT()
 
 	// Compute the result in this main thread which uses the Normal class instance declared in Engine
 	EngineNormal.ThreadId = 0;
-	ThreadResults[0] = EngineNormal.ComputeNormal();
+	//ThreadResults[0] = EngineNormal.ComputeNormal();
+	std::string bestMoveMessage = EngineNormal.ComputeNormal();
 
 	// Wait for helper threads to finish
 	for (int threadId = 1; threadId < Threads; threadId++)
 		threads[threadId].join();
 
 	// Display best move found
-	Output(ThreadResults[0]);
+	//Output(ThreadResults[0]);
+	Output(bestMoveMessage);
 
 	DisplayAnalysisCounters();
 

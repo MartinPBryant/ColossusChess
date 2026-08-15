@@ -1,0 +1,7 @@
+Sat Aug 15 12:43:37 2026
+
+Command received:
+setoption name SyzygyPath value c:\_Chess\EndgameTablebases\Syzygy\3456
+
+Result:
+6-piece endgame tablebases found at c:\_Chess\EndgameTablebases\Syzygy\3456 (510 .rtbw {win/draw/loss} files, 510 .rtbz {distance to zero} files)

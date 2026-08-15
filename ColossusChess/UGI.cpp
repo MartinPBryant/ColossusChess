@@ -593,7 +593,7 @@ std::string ProcessInput(std::string currentLine)
 				Quit = true;
 
 				FreeAnyTranspositionTableMemory();
-				FreeMatingPositionsTableMemory();
+				//FreeMatingPositionsTableMemory();
 
 				// SYZYGY EGTBs
 				tb_free();

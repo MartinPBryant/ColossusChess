@@ -212,10 +212,10 @@ void AlignedFreeMemory(void* p);
 void FreeAnyTranspositionTableMemory();
 uint64_t GenerateTranspositionTableHash64(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer);
 
-extern uint32_t MatingPositionsTableEntries;
-extern uint32_t MatingPositionsTableMask;
-extern uint64_t* MatingPositionsTablePointer;
-void FreeMatingPositionsTableMemory();
+//extern uint32_t MatingPositionsTableEntries;
+//extern uint32_t MatingPositionsTableMask;
+//extern uint64_t* MatingPositionsTablePointer;
+//void FreeMatingPositionsTableMemory();
 
 void ClearEverythingForDeterminancy();
 void NewGame(bool wipeEverything);

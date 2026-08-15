@@ -251,7 +251,81 @@ CC47 v CC58 {main touches found TT entry age} (-0.16) PCS2
 CC47 v CC58 {main touches found TT entry age} (3.07) ASUS1
 CC47 v CC58 {main touches found TT entry age} (2.88) NIPOGI1
 
-CC47 v CC59 {main touches found TT entry age (as soon as possible)} (?) ASUS1
+CC47 v CC59 {main touches found TT entry age (as soon as possible)} (12.31, +/-7.19, 4864) ASUS1
+
+RESTRUCTURED DEV FOLDERS AND MOVED TO A NEW SOLUTION HERE
+
+60(1 thread) v 60(4 threads) (-159.39, +/-11.13, 2263) PCS2
+
+47 v 61 {MatingPositionsTable stuff removed} (-0.40) PCS2
+47 v 61 {MatingPositionsTable stuff removed} (-0.16) PCS1
+47 v 61 {MatingPositionsTable stuff removed} (4.45) ASUS1 - Anomaly?
+47 v 61 {MatingPositionsTable stuff removed} (-1.74) NIPOGI1
+
+61 v 1 (12.88) PCS2
+
+61 v 62 {QS allows pruning of promotions} (2.48) ASUS1
+61 v 62 {QS allows pruning of promotions} (1.02) NIPOGI1
+
+61 v 63 {SF step 10(IIR) removed} (7.31) PCS2
+61 v 63 {SF step 10(IIR) removed} (3.53) PCS1
+
+61 v 64 {QS pruning doesn't test '&& (bestMoveScore > EGTBLosingScore)'} (3.77) PCS2
+61 v 64 {QS pruning doesn't test '&& (bestMoveScore > EGTBLosingScore)'} (3.02) PCS1
+61 v 64 {QS pruning doesn't test '&& (bestMoveScore > EGTBLosingScore)'} (-0.33) ASUS1
+61 v 64 {QS pruning doesn't test '&& (bestMoveScore > EGTBLosingScore)'} (2.33) NIPOGI1
+
+61 v 65 {IIR only done at PV nodes} (8.51) PCS2 - so the PV part is redundant? And might be bad?
+
+61 v 66 {IIR only done at cut nodes} (0.21) PCS2
+61 v 66 {IIR only done at cut nodes} (-1.30) PCS1
+61 v 66 {IIR only done at cut nodes} (1.49) NIPOGI1
+
+66 v 67 {IIR only done at cut nodes and no longer tests DR>=8} (-1.58) PCS2
+
+61 v 68 {IIR done at cut&all nodes} (5.66) ASUS1
+*REJECTED
+
+61 v 69 {IIR only done at cut nodes, tidied, and reduces by 2 not 1} (-15.98) PCS2
+61 v 69 {IIR only done at cut nodes, tidied, and reduces by 2 not 1} (-13.82) ASUS1
+61 v 69 {IIR only done at cut nodes, tidied, and reduces by 2 not 1} (-17.16) NIPOGI1
+
+69 v 70 {doesn't store to TT if pliesSinceIrreversible>=90} (2.47) PCS1 - this change causes weird PVs near 50-moves!
+*REJECTED
+
+69 v 71 {node type changed to 'all' after promising moves searched} (2.45) PCS2
+69 v 71 {node type changed to 'all' after promising moves searched} (1.79) PCS1
+69 v 71 {node type changed to 'all' after promising moves searched} (-1.96) ASUS1
+
+72 v 1 (28.59) NIPOGI1
+
+72 v 73 {IIR uses -3 not -2} (38.02, +/-12.02, 1639) PCS2
+*REJECTED
+
+72 v 74 {opp coloured Bs: scaleFactor=64[instead of 192]} (3.44) PCS2
+72 v 74 {opp coloured Bs: scaleFactor=64[instead of 192]} (2.85) NIPOGI1
+*REJECTED
+
+72 v 75 {TT probe not used if pliesSinceIrreversible>=90} (0.17) PCS2
+72 v 75 {TT probe not used if pliesSinceIrreversible>=90} (-1.13) PCS1
+72 v 75 {TT probe not used if pliesSinceIrreversible>=90} () ASUS1
+72 v 75 {TT probe not used if pliesSinceIrreversible>=90} () NIPOGI1
+
+72 v 76 {TT probe updates isCutNode} (-1.22) PCS2
+72 v 76 {TT probe updates isCutNode} (-2.08) PCS1
+72 v 76 {TT probe updates isCutNode} (0.05) ASUS1
+72 v 76 {TT probe updates isCutNode} (-1.34) NIPOGI1
+
+72 v 77 {opp coloured Bs: scaleFactor=128[instead of 192]} (0.52) PCS2
+72 v 77 {opp coloured Bs: scaleFactor=128[instead of 192]} (0.78) NIPOGI1
+*REJECTED
+
+72 v 78 {best root move after 1st iter not given priority bump} (-1.70) PCS2
+
+*ACCEPTED 75/76/78 --> 79
+
+79 v 1 () PCS2
+
 
 
 

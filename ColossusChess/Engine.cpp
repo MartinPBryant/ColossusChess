@@ -140,9 +140,9 @@ bool ShowPVTerminators;
 bool BlankLines;
 //std::string ThreadResults[ThreadsMax];
 
-uint32_t MatingPositionsTableEntries = 1024;
-uint32_t MatingPositionsTableMask = MatingPositionsTableEntries - 1;
-uint64_t* MatingPositionsTablePointer = nullptr;
+//uint32_t MatingPositionsTableEntries = 1024;
+//uint32_t MatingPositionsTableMask = MatingPositionsTableEntries - 1;
+//uint64_t* MatingPositionsTablePointer = nullptr;
 
 const int PawnMoveOffset[Sides] = { 8, -8 };
 const int BackRankBaseSquareIndex[Sides] = { 0, 56 };
@@ -805,18 +805,18 @@ void InitialiseGamePhase(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
 	}
 }
 
-void AllocateMatingPositionsTableMemory()
-{
-	MatingPositionsTablePointer = (uint64_t*)AlignedAllocateMemory(MatingPositionsTableEntries * 8, 64);
-	for (uint32_t entry = 0; entry < MatingPositionsTableEntries; entry++)
-		MatingPositionsTablePointer[entry] = 0;
-}
+//void AllocateMatingPositionsTableMemory()
+//{
+//	MatingPositionsTablePointer = (uint64_t*)AlignedAllocateMemory(MatingPositionsTableEntries * 8, 64);
+//	for (uint32_t entry = 0; entry < MatingPositionsTableEntries; entry++)
+//		MatingPositionsTablePointer[entry] = 0;
+//}
 
-void FreeMatingPositionsTableMemory()
-{
-	AlignedFreeMemory(MatingPositionsTablePointer);
-	MatingPositionsTablePointer = NULL;
-}
+//void FreeMatingPositionsTableMemory()
+//{
+//	AlignedFreeMemory(MatingPositionsTablePointer);
+//	MatingPositionsTablePointer = NULL;
+//}
 
 void InitialiseOneOffStuff()
 {
@@ -865,7 +865,7 @@ void InitialiseOneOffStuff()
 	for (int i = 0; i < EngineBrain.gameRecordSize; i++)
 		EngineBrain.gameRecord[i].excludedMove = 0;
 
-	AllocateMatingPositionsTableMemory();
+	//AllocateMatingPositionsTableMemory();
 
 	//init_tables(); //TEXEL/PESTO PST STUFF
 
@@ -890,7 +890,7 @@ bool MakeMove(std::string move)
 	// Get the from square, to square and flag
 	EngineBrain.gameRecordPointer->move.mf.fromSquare = (SquaresEnum)((move[0] - 'A') + 8 * (move[1] - '1'));
 	EngineBrain.gameRecordPointer->move.mf.toSquare = (SquaresEnum)((move[2] - 'A') + 8 * (move[3] - '1'));
-	EngineBrain.gameRecordPointer->move.mf.flag = MFNothing;
+	EngineBrain.gameRecordPointer->move.mf.flag = MFNormal;
 
 	// Pawn promotion?
 	if (move.length() > 4)

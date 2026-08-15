@@ -183,7 +183,7 @@ int Normal::EvaluateInner(int sideToMove)
 
 	// N.B. these must be 'int' NOT 'uint32_t' else it screws up the signed multiplication in the final formula below!!!
 	int gamePhase = normalBrain.gameRecordPointer->gamePhase[0] + normalBrain.gameRecordPointer->gamePhase[1];
-	int scaleFactor = 0;
+	int scaleFactor = 0; // The lower scaleFactor is, the closer to zero the score will be pulled
 	//int ceilingMaterial = MateBaseScore, floorMaterial = -MateBaseScore;
 	
 	whiteMovesToPromote = 9, blackMovesToPromote = 9;
@@ -791,6 +791,8 @@ int Normal::EvaluateInner(int sideToMove)
 			scaleFactor = 248;
 			if ((normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight] | normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[1][Rook] | normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen]) == 0)
 				scaleFactor = 192;
+			//scaleFactor = 64;
+			//scaleFactor = 128;
 			goto exitScaleFactor;
 		}
 
@@ -840,10 +842,10 @@ int Normal::EvaluateInner(int sideToMove)
 	}
 exitScaleFactor:
 
-	assert((openingScore[0] < MatingIn0Score) && (openingScore[0] > -MatingIn0Score));
-	assert((openingScore[1] < MatingIn0Score) && (openingScore[1] > -MatingIn0Score));
-	assert((endgameScore[0] < MatingIn0Score) && (endgameScore[0] > -MatingIn0Score));
-	assert((endgameScore[1] < MatingIn0Score) && (endgameScore[1] > -MatingIn0Score));
+	assert((openingScore[0] < EGTBWinningScore) && (openingScore[0] > -EGTBWinningScore));
+	assert((openingScore[1] < EGTBWinningScore) && (openingScore[1] > -EGTBWinningScore));
+	assert((endgameScore[0] < EGTBWinningScore) && (endgameScore[0] > -EGTBWinningScore));
+	assert((endgameScore[1] < EGTBWinningScore) && (endgameScore[1] > -EGTBWinningScore));
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -882,7 +884,7 @@ exitScaleFactor:
 	//		result = result / 2;
 	//}
 
-	assert((result < MatingIn0Score) && (result > -MatingIn0Score));
+	assert((result < EGTBWinningScore) && (result > -EGTBWinningScore));
 	return result;
 }
 
@@ -1026,6 +1028,22 @@ short Normal::Evaluate(int sideToMove)
 
 	// Get the simple symmetrical part
 	int result = EvaluateInner(sideToMove);
+
+
+	//int result;
+	//int kingSquare;
+	//
+	////THIS MAY BE SLIGHTLY ASSYMETRICAL BECAUSE OF EP CAPTURES!!!
+	//kingSquare  = BitScanForwardX(normalBrain.piecesBB[sideToMove][King]);
+	//normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
+	//result = normalBrain.CountAllMoves(sideToMove, normalBrain.IsEnemyKingAttacked(kingSquare, sideToMove ^ 1));
+
+	//kingSquare = BitScanForwardX(normalBrain.piecesBB[sideToMove ^ 1][King]);
+	//normalBrain.CalculatePinnedPieces(sideToMove ^ 1); // Required for legal move generation
+	//result -= normalBrain.CountAllMoves(sideToMove ^ 1, normalBrain.IsEnemyKingAttacked(kingSquare, sideToMove));
+
+
+
 
 	//// Add in any passed pawn runners
 	//int passedPawnRunnerBonus = sideToMove ? -600 : 600;

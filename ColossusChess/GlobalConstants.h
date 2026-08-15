@@ -5,10 +5,9 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx59"
+#define VersionX "20NNx80"
 //#define EXPERIMENTAL
 //#define TB_NO_HW_POP_COUNT // Use the same directive name as defined in Ronald de Man's probing code!
-//#define TTMASK 0xFFFFFFFF00000000
 
 #define Sides 2
 
@@ -19,7 +18,7 @@
 #define MVRook 500
 #define MVQueen 975
 #define MVKing 1000
-// The maximum number of 'points' of material for one side in a legal position is 9(Q)+10(Rs)+12(B+Ns)+8*9(promoted Ps)=103 ... so a score of ~10000
+// The maximum number of 'points' of material for one side in a legal position is 9(Q)+10(Rs)+12(B+Ns)+8*9(promoted Ps)=103 ... so a score of ~10300cp or 103.00
 
 enum PiecesEnum {
 	AllPieces = 0, // For bitboards
@@ -48,7 +47,7 @@ const int SimplePieceValues[7] = { 0, 1, 3, 3, 5, 9, 999 };
 // Four bits (maximum possible when we compress the move into 16 bits in the TT {from-sq:6 bits, to-sq:6 bits, flag:4 bits})
 // 0-1: 0=normal move, 1=EP, 2=castling, 3=pawn promotion
 // 2-3: if pawn promotion: 0=Q, 1=R, 2=B, 3=N
-#define MFNothing 0
+#define MFNormal 0
 #define MFEnPassant 1
 #define MFCastling 2
 #define MFPromotion 3
@@ -76,7 +75,7 @@ const int PromotedPieces[4] = { Queen, Rook, Bishop, Knight };
 #define PVTTTExact (12 << 16)
 #define PVTFailedMateCondition (13 << 16)
 
-// Node types - See https://www.chessprogramming.org/Node_Types
+// Node types (not used!) - See https://www.chessprogramming.org/Node_Types
 #define NTAll -1
 #define NTPV 0
 #define NTCut 1
