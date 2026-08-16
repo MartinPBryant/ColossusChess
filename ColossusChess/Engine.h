@@ -31,7 +31,6 @@ extern bool UCI_Chess960;
 
 // Endgame tablebases
 //extern bool UseEndgameTablebases;
-//extern int EndgameTablebasePieceLimit;
 extern int EndgameTablebasesPiecesFound;
 extern bool EndgameTablebasesInitialised;
 extern char EndgameTablebasesPath[256];
@@ -115,9 +114,10 @@ extern bool ReplyImmediately;
 extern uint8_t SideToMove;
 extern bool StopImmediately;
 extern bool StopWhenIterationComplete;
+
+// Output formatting
 extern bool ShowPVTerminators;
-extern bool BlankLines;
-//extern std::string ThreadResults[ThreadsMax];
+extern bool ShowBlankLines;
 
 
 #define MFSfromSquare(i) (i & 0xFF)

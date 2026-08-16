@@ -96,8 +96,6 @@ extern const uint64_t FilesBB[8];
 
 //----------------------------------------------------------------------------------------------------
 
-// Basic population count and bitscan routines (64-bit and 32-bit)
-
 //#define x64
 
 #if defined _WIN64 && !defined TB_NO_HW_POP_COUNT

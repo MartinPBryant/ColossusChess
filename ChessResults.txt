@@ -308,8 +308,8 @@ RESTRUCTURED DEV FOLDERS AND MOVED TO A NEW SOLUTION HERE
 
 72 v 75 {TT probe not used if pliesSinceIrreversible>=90} (0.17) PCS2
 72 v 75 {TT probe not used if pliesSinceIrreversible>=90} (-1.13) PCS1
-72 v 75 {TT probe not used if pliesSinceIrreversible>=90} () ASUS1
-72 v 75 {TT probe not used if pliesSinceIrreversible>=90} () NIPOGI1
+72 v 75 {TT probe not used if pliesSinceIrreversible>=90} (-2.24) ASUS1
+72 v 75 {TT probe not used if pliesSinceIrreversible>=90} (-1.82) NIPOGI1
 
 72 v 76 {TT probe updates isCutNode} (-1.22) PCS2
 72 v 76 {TT probe updates isCutNode} (-2.08) PCS1
@@ -324,7 +324,23 @@ RESTRUCTURED DEV FOLDERS AND MOVED TO A NEW SOLUTION HERE
 
 *ACCEPTED 75/76/78 --> 79
 
-79 v 1 () PCS2
+79 v 1 (31.37) PCS2
+
+79 v 80 {QS always orders by MVVLVA regardless of in check} (4.93) PCS2
+*REJECTED
+
+79 v 81 {node level futility pruning always returns beta} (11.05, +/-9.14, 2719) PCS2
+*REJECTED
+
+79 v 82 {node level futility pruning tests isO1M} (-3.23) PCS2
+79 v 82 {node level futility pruning tests isO1M} (0.16) PCS1
+79 v 82 {node level futility pruning tests isO1M} (0.71) ASUS1
+79 v 82 {node level futility pruning tests isO1M} (-2.21) NIPOGI1
+
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} (0.99) PCS2
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} () PCS1
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} () ASUS1
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} () NIPOGI1
 
 
 

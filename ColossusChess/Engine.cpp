@@ -134,15 +134,12 @@ bool Ponder = false;
 bool Pondering;
 bool ReplyImmediately;
 
-bool StopImmediately; // Make these 'volatile' to avoid some optimising compiler craziness!!
+bool StopImmediately;
 bool StopWhenIterationComplete;
-bool ShowPVTerminators;
-bool BlankLines;
-//std::string ThreadResults[ThreadsMax];
 
-//uint32_t MatingPositionsTableEntries = 1024;
-//uint32_t MatingPositionsTableMask = MatingPositionsTableEntries - 1;
-//uint64_t* MatingPositionsTablePointer = nullptr;
+// Output formatting
+bool ShowPVTerminators;
+bool ShowBlankLines;
 
 const int PawnMoveOffset[Sides] = { 8, -8 };
 const int BackRankBaseSquareIndex[Sides] = { 0, 56 };
@@ -821,6 +818,13 @@ void InitialiseGamePhase(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
 void InitialiseOneOffStuff()
 {
 	IsDebug = false;
+#ifdef _DEBUG
+	ShowPVTerminators = true;
+	ShowBlankLines = true;
+#else
+	ShowPVTerminators = false;
+	ShowBlankLines = false;
+#endif
 
 	// Initialise the time controls
 	TC.CurrentType = TCTWholeGame;
@@ -845,9 +849,6 @@ void InitialiseOneOffStuff()
 	TC.MateMaximumReversibleMoves = 100;
 	TC.MateFixedPieces = "";
 
-	// Clear PV array (to ensure any bug doesn't run past the end of the array!)
-	//ClearPrincipalVariation(); HOW CAN WE DO THIS NOW IT'S WRAPPED IN 'NORMAL' CLASS WHICH MAY NOT EXIST!???
-
 	// Initialise data structures
 
 	// Initialise transposition table (N.B. can't 'clear' it here because it won't have been allocated yet!)
@@ -864,10 +865,6 @@ void InitialiseOneOffStuff()
 	EngineBrain.gameRecordPointer = &EngineBrain.gameRecord[0];
 	for (int i = 0; i < EngineBrain.gameRecordSize; i++)
 		EngineBrain.gameRecord[i].excludedMove = 0;
-
-	//AllocateMatingPositionsTableMemory();
-
-	//init_tables(); //TEXEL/PESTO PST STUFF
 
 	// NNUE
 	//nnue_init("nn-62ef826d1a6d.nnue");

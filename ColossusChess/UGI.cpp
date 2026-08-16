@@ -61,7 +61,7 @@ void SendOptionValues()
 	Output("info string MateMinimumAttackerMaterial: " + MyITOA(TC.MateMinimumAttackerMaterial));
 	Output("info string MateFixedPieces: " + TC.MateFixedPieces);
 	Output("info string ShowPVTerminators: " + MyBooleanTOA(ShowPVTerminators));
-	Output("info string BlankLines: " + MyBooleanTOA(BlankLines));
+	Output("info string BlankLines: " + MyBooleanTOA(ShowBlankLines));
 }
 
 // Sets an engine option to a specified value
@@ -191,12 +191,6 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 		Output("info string SyzygyProbe7PieceInTree set to " + MyBooleanTOA(SyzygyProbe7PieceInTree));
 	}
 
-	//else if (name == "EGTBPIECELIMIT")
-	//{
-	//	EndgameTablebasePieceLimit = atoi(value.c_str());
-	//	Output("info string EGTBPieceLimit set to " + MyITOA(EndgameTablebasePieceLimit) + " pieces");
-	//}
-
 	else if (nameUpperCase == "UCI_CHESS960")
 	{
 		UCI_Chess960 = (UpperCase(value) == "TRUE");
@@ -299,11 +293,11 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 		Output("info string ShowPVTerminators set to " + MyBooleanTOA(ShowPVTerminators));
 	}
 
-	else if (nameUpperCase == "BL")
+	else if (nameUpperCase == "SBL")
 	{
-		BlankLines = (UpperCase(value) == "TRUE");
+		ShowBlankLines = (UpperCase(value) == "TRUE");
 		//if (IsDebug)
-		Output("info string BlankLines set to " + MyBooleanTOA(BlankLines));
+		Output("info string ShowBlankLines set to " + MyBooleanTOA(ShowBlankLines));
 	}
 
 	else

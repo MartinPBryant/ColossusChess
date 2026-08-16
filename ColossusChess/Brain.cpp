@@ -152,12 +152,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 			mlp++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToQueen << 16);
 			//if (GenerateUnderPromotions)
 			//{
-			//	MLP++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToRookNew << 16);
-			//	MLP++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToBishopNew << 16);
-			//	MLP++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
+			//	mlp++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToRookNew << 16);
+			//	mlp++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToBishopNew << 16);
+			//	mlp++->ui32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
 			//}
 			//else if (KnightAttacksBBList[toSquare] & piecesBB[sideToMove ^ 1][King])
-			//	MLP++->i32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToKnightNew << 16); // Knight promotions that give check (-3.0, +/-3.6, 20000)
+			//	mlp++->i32 = (toSquare - pmo) | (toSquare << 8) | (MFPromoteToKnightNew << 16); // Knight promotions that give check (-3.0, +/-3.6, 20000)
 		}
 		ClearLS1B(pawnPromotionsBB);
 	}
@@ -175,12 +175,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 				mlp++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToQueen << 16);
 				//if (GenerateUnderPromotions)
 				//{
-				//	MLP++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToRookNew << 16);
-				//	MLP++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToBishopNew << 16);
-				//	MLP++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
+				//	mlp++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToRookNew << 16);
+				//	mlp++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToBishopNew << 16);
+				//	mlp++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
 				//}
 				//else if (KnightAttacksBBList[toSquare] & piecesBB[sideToMove ^ 1][King])
-				//	MLP++->i32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
+				//	mlp++->i32 = (toSquare - (pmo + 1)) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
 			}
 			else
 			{
@@ -203,12 +203,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 				mlp++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToQueen << 16);
 				//if (GenerateUnderPromotions)
 				//{
-				//	MLP++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToRookNew << 16);
-				//	MLP++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToBishopNew << 16);
-				//	MLP++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
+				//	mlp++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToRookNew << 16);
+				//	mlp++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToBishopNew << 16);
+				//	mlp++->ui32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToKnightNew << 16);
 				//}
 				//else if (KnightAttacksBBList[toSquare] & PiecesBB[sideToMove ^ 1][King])
-				//	MLP++->i32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToKnight << 16);
+				//	mlp++->i32 = (toSquare - (pmo - 1)) | (toSquare << 8) | (MFPromoteToKnight << 16);
 			}
 			else
 			{
@@ -3080,6 +3080,7 @@ uint64_t Brain::DiagonalDiscovereesBB(int enemyKingSquare, int sideToMove)
 // Changed the MVVLVA table to make the king the 'lowest' valued attacker as its legal captures must all be SEE 'winning'. (+6.4 +/-8.6 LOS 92.7%, 3438)
 // The largest entry in here (i.e. (30 << 26) + 1 = 2,013,265,921) is less than INT_MAX (2^31-1 = 2,147,483,647) which is used for the transposition table best move
 // The smallest entry in here (i.e. (25 << 26) - 3 = 1,677,721,597) must be greater than the values used for killers, history etc
+// Indexed by [toSquarePiece][fromSquarePiece]
 alignas(64) const int MVVLVA[8][8] =
 {
 	//{0,  5 << 26,  4 << 26,  4 << 26,  3 << 26,  2 << 26,  (5 << 26) + 1, 0}, // Capture of empty square: not used
@@ -3175,53 +3176,11 @@ void Brain::ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMov
 				else if ((ply > 2) && (mlp->ui32 == killerMoves[ply - 2].m2.ui32) && (killerMoves[ply - 2].m2.piece == fromSquarePiece))
 					score = INT_MAX - 110;
 
-				//else if ((mlp->ui32 == killerMoves[ply + 2].m1.ui32) && (killerMoves[ply + 2].m1.piece == fromSquarePiece)) // Killer+2 moves
-				//	score = INT_MAX-109(24 << 26) - 9;
-
-				//else if ((mlp->ui32 == pvkillerMoves[ply].m1.ui32) && (pvkillerMoves[ply].m1.piece == fromSquarePiece)) // Killer moves
-				//	score = INT_MAX - 111;// (24 << 26) - 1;//was 1<<23 - NOW CHANGE TO INT_MAX-101 {REMEMBER TO DO SOERT/PRUNE SCORES TOO!}
-				//else if ((mlp->ui32 == pvkillerMoves[ply].m2.ui32) && (pvkillerMoves[ply].m2.piece == fromSquarePiece))
-				//	score = INT_MAX - 112;// (24 << 26) - 2;
-
-				//else if ((mlp->ui32 == softKillerMoves[ply].m1.ui32) && (softKillerMoves[ply + 2].m1.piece == fromSquarePiece)) // Soft killer moves
-				//	score = INT_MAX - 111;
-
 				else
-				{
-					//if (flag == MFPromoteToQueenNew) // Treat non-capturing promotions to queen (+Q-P=8) as slightly better than capture of rook
-					//	score = MVVLVA[Rook][Pawn] + 1;
-					//else
-					{
-						//score = 0;
-
-						//score = RecentHistory[abs(fromSquarePiece) - 1][fromSquare][toSquare];
-						
-						//score = CounterMoveHistory
-						//	//score = CounterMoveHistory[sideToMove]
-						//	[abs((gameRecordPointer - 1)->move.fromSquarePiece) - 1]
-						//[(gameRecordPointer - 1)->move.mf.toSquare]
-						////[abs(fromSquarePiece) - 1]
-						//.History[abs(fromSquarePiece) - 1]
-						//	[toSquare];
-
-						score = gameRecordPointer->historyPointer->History[fromSquarePiece - 1][toSquare];
-						
-						//if (score == 0)
-						//	if (RecentHistory[fromSquare][toSquare] > 0)
-						//		score = 1;
-
-						//if (score == 0)
-						//	score += Random64() & 15;//TEMP
-
-						//assert((score >= 0) && (score <= 255));
-						//score += Centre[toSquare] - Centre[fromSquare] + 3;//0 - 6
-						//score = HashHistory[gameRecordPointer->transpositionTableHash64WithEP & 1023].History[abs(fromSquarePiece) - 1][toSquare];
-					}
-				}
+					score = gameRecordPointer->historyPointer->History[fromSquarePiece - 1][toSquare];
 			}
 		}
 
-		//assert(score >= 0);
 		mlp++->score = score;
 	}
 }

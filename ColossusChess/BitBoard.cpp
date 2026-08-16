@@ -18,11 +18,6 @@
 
 #if defined _WIN64 && !defined TB_NO_HW_POP_COUNT
 
-// 64-bit hardware based routines
-//#define PopulationCountX(ui64) PopulationCountHardware(ui64)
-//#define BitScanForwardX(ui64) BitScanForwardHardwarePOPCNT(ui64)
-//#define BitScanReverseX(ui64) BitScanReverseBSR(ui64)
-
 __forceinline uint32_t PopulationCountHardware(uint64_t ui64) // Fastest
 {
 #ifdef _WIN32

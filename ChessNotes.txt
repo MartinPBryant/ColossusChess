@@ -193,7 +193,24 @@ To get all the TT entry data in one go...
 ALL
 ===
 
-in QS, if we have a TT move and it's a legal capture, search it before gen moves? get some stats!
+tte0 changes
+-have i been adding entries in 2 separate places??? when entries have aged
+in addtott - RE-USE TTE0!!! THEN WE CAN AVOID THIS SCAN ALTOGETHER
+CAN tte0 BE PASSED IN TO ADDTOtt LIKE IN PERFT??? TEST!
+crap, buggy, can have duplicates, but plays worse when bug fixed!
+-having duplicates isn't the end of the world as entries are constantly being replaced/aged - speed is more important!
+
+
+
+if we are mating and looking for a shorter mate, randomly don't prune at a ply to allow potentially shorter mating moves to be found
+
+
+test the action mentioned on line below!
+					currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;//DOES THIS GET SET AFTER NORMAL SEARCH BELOW RETURNS MATED SCORE? SHOULD IT???
+
+
+add a GATHERSTATS def like PRINTTREE to enclose things like normalProbesSuccessful++ and EGTB stuff
+
 
 
 check this node type article to make sure we're doing it right - https://chessprogramming.org/Node_Types
@@ -206,6 +223,7 @@ check this node type article to make sure we're doing it right - https://chesspr
 
 is it producing errors sometimes? check folders on all PCs
 -only on PCS2 when testing those 50move posns in CGM - see if can reproduce
+-is it because we are accessing memory before the start of the GR because we are using a FEN posn with a high halfmove count?
 
 
 
@@ -222,13 +240,6 @@ eval: mobility
 -various asserts taken out! (because of EP capts) put back if don't use!
 -can we just use the LAST mob counts from the tree!? ... so slightly out of date ... ah! but not available in the QS :(
 -use the last two values from main... save in the GR
-
-
-tte0 changes
--have i been adding entries in 2 separate places??? when entries have aged
-in addtott - RE-USE TTE0!!! THEN WE CAN AVOID THIS SCAN ALTOGETHER
-CAN tte0 BE PASSED IN TO ADDTOtt LIKE IN PERFT??? TEST!
-crap, buggy, can have duplicates, but plays worse when bug fixed!
 
 
 singular extensions

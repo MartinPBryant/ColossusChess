@@ -2462,7 +2462,6 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	ClearKillerMoves();
 	ClearCounterMoves();
 	ClearFollowUpMoves();
-	//ClearPrincipalVariation();// SHOULDN'T EVER NEED TO DO THIS??? CHECK CODE AND TEST
 	ClearCounterMoveHistory();
 	ClearMateTranspositionTable(); // Have to do this as noticed in testing that previous position's entries screwed up the solution! WHAT ABOUT BACKTRACING???
 

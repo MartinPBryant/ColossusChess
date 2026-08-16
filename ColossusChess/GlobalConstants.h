@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx80"
+#define VersionX "20NNx84"
 //#define EXPERIMENTAL
 //#define TB_NO_HW_POP_COUNT // Use the same directive name as defined in Ronald de Man's probing code!
 
@@ -60,7 +60,7 @@ const int PromotedPieces[4] = { Queen, Rook, Bishop, Knight };
 #define NullMove 0
 
 // Principal variation terminators (all have the bottom 16-bits zero)
-#define PVTUnknown (0 << 16)
+#define PVTUnknown (0 << 16) // Should only ever appear at the end of a failed high root move PV
 #define PVTStandPat (1 << 16)
 #define PVTDrawByRepetition (2 << 16)
 #define PVTDrawBy50MoveRule (3 << 16)

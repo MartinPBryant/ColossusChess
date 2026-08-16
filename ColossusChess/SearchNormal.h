@@ -153,8 +153,7 @@ private:
 	uint32_t PrincipalVariation[MaximumPly * MaximumPly];
 	uint32_t LastPrincipalVariation[MaximumPly];
 
-	short RootAlpha, RootAlphaUpdated, RootBeta, RootBetaOld, RootScore;
-	int RootPliesFullWidth;
+	short RootAlpha, RootBeta, RootBetaOld, RootScore;
 	int RootFailHighs, RootFailLows;
 	RootMoveList_Struct RootMoveList[220];
 	RootMoveList_Struct RootMoveListBackup[220];
@@ -204,7 +203,5 @@ private:
 	static std::string ThreadResults[ThreadsMax];
 
 	int lateMovePruningMargins[2][9] = { 2,2,2,3,3,3,3,3,3, 4,4,5,8,10,14,18,22,27 };
-
-	//bool pathDependentDraw;
 
 };
