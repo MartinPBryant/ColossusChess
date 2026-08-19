@@ -19,6 +19,13 @@ extern FILE *ErrorFile;
 #define PRINTTREE(s)
 #endif
 
+//#define GATHERSTATSDEF // Gathers statistics about TT/EGTB usage
+#ifdef GATHERSTATSDEF
+#define GATHERSTATS(s) {s}
+#else
+#define GATHERSTATS(s)
+#endif
+
 extern int LastPrintTreePly;
 
 //#define SEARCHINGFORLINE

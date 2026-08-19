@@ -336,11 +336,43 @@ RESTRUCTURED DEV FOLDERS AND MOVED TO A NEW SOLUTION HERE
 79 v 82 {node level futility pruning tests isO1M} (0.16) PCS1
 79 v 82 {node level futility pruning tests isO1M} (0.71) ASUS1
 79 v 82 {node level futility pruning tests isO1M} (-2.21) NIPOGI1
+*ACCEPTED
 
 79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} (0.99) PCS2
-79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} () PCS1
-79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} () ASUS1
-79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} () NIPOGI1
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} (3.16) PCS1
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} (-0.69) ASUS1
+79 v 83 {TTFlagThreatenedWithMate may be set after normal move searched} (2.52) NIPOGI1
+*REJECTED
+
+79 v 84 {AddToNormalTranspositionTable - removed '|| ((score >= EGTBWinningScore) && (flagEUL != TTFlagUpper))' clause} (5.65) PCS2
+*REJECTED
+
+79 v 85 {AddToNormalTranspositionTable - removed '|| (flagEUL == TTFlagExact)' clause} (3.96) PCS2
+79 v 85 {AddToNormalTranspositionTable - removed '|| (flagEUL == TTFlagExact)' clause} (-2.07) NIPOGI1
+*REJECTED
+
+79 v 86 {fail-hi-lo restores previous RootBestMove} (2.99) PCS2
+
+82 v 87 {AddToNormalTranspositionTable - oldest entries still search for exact} (1.08) PCS2
+82 v 87 {AddToNormalTranspositionTable - oldest entries still search for exact} (-6.55) PCS1
+82 v 87 {AddToNormalTranspositionTable - oldest entries still search for exact} (-2.55) ASUS1
+82 v 87 {AddToNormalTranspositionTable - oldest entries still search for exact} (-0.61) NIPOGI1
+
+87 v 88 {AddToNormalTranspositionTable - 0th entry preloaded - should just be more efficient} (1.84) PCS2
+87 v 88 {AddToNormalTranspositionTable - 0th entry preloaded - should just be more efficient} (-18.48) ASUS1
+87 v 88 {AddToNormalTranspositionTable - 0th entry preloaded - should just be more efficient} (-6.55) NIPOGI1
+***WTF???
+
+ADDED 'RESTART=ON' TO FASTCHESS .BAT FILES IN CASE THESE ANOMOLOUS RESULTS ARE DUE TO NOT RELOADING THE ENGINE (ALTHOUGH I SEEM TO CLEAR EVERYTHING ON A 'UCINEWGAME' COMMAND)
+
+87 v 88 {AddToNormalTranspositionTable - 0th entry preloaded - should just be more efficient} (-1.23) PCS2
+87 v 88 {AddToNormalTranspositionTable - 0th entry preloaded - should just be more efficient} (-1.27) ASUS1
+87 v 88 {AddToNormalTranspositionTable - 0th entry preloaded - should just be more efficient} (0.89) NIPOGI1
+
+88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (0.19) PCS2
+88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (-2.76) PCS1
+88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} () ASUS1
+88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (-1.60) NIPOGI1
 
 
 

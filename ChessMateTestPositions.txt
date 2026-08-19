@@ -798,7 +798,7 @@ qrb5/b1Pp3p/1pkB4/1p2P3/1P1KPp2/R4P1p/P3pP1P/4N1n1 w - - dm #17; c0 "K2/P4/M8 Pa
 % Mate in 19
 1n2k3/3p4/p1pPpK2/P1P1P3/2P2P2/8/5P2/8 w - - dm 19; bm Kg7; c0 "Hangs on ID20. 1.Kg7 Kd8{O1M} 2.Kf7 Kc8 {O1M} 3.Ke8! Kb7{O1M} 4.Ke7 or f5 See https://www.talkchess.com/viewtopic.php?p=850987&hilit=1n2k3+p1pPpK2#p850987";
 8/kn6/8/1K6/8/8/8/7R w - - dm 19; bm Rd1; c0 "{4-pc EGTB KRvKN} 1.Rd1 Kb8 2.Ka6 Nc5+ 3.Kb6 Na4+ 4.Kc6 Nc3 5.Re1 Ka7 6.Re3 Nd1"
-k7/Pp6/1Pp5/2Pp4/3Pp3/4P3/4KP2/8 w - - dm 19; bm f4 f3; c0 "Finds #20 quickly on ID12 but takes ages on ID14 to find #19. Tests stalemate"
+k7/Pp6/1Pp5/2Pp4/3Pp3/4P3/4KP2/8 w - - dm 19; bm f4 f3
 
 % Mate in 20
 B2k4/KPpP4/n1Pb4/P5p1/5p2/5P2/8/8 b - - dm 20; bm Nb8; c0 "lots of checks, O1M and ZLKM"

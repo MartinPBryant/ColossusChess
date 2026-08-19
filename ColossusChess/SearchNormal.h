@@ -124,8 +124,7 @@ public:
 	static void AllocateNormalTranspositionTable();
 	uint32_t HashfullNormalTranspositionTable();
 	void DisplayStatisticsNormalTranspositionTable();
-	void AddToNormalTranspositionTable(int8_t depthRemaining, short ply, short score, uint8_t flag, uint32_t bestMove, short tteStaticEvaluation);
-	//void AddToNormalTranspositionTable(int8_t depthRemaining, short ply, short score, uint8_t flag, uint32_t bestMove, short tteStaticEvaluation, int tteFound);
+	void AddToNormalTranspositionTable(int8_t depthRemaining, short ply, short score, uint8_t flag, uint32_t bestMove, short tteStaticEvaluation, int tteFound);
 	short TreeSearchNormalQuiescence(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck);
 	short TreeSearchNormal(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck, bool allowNull, bool isCutNode);
 	std::string ComputeNormal();
@@ -134,7 +133,8 @@ public:
 	static uint32_t ComputeNormalWrapperInner();
 	static void ComputeNormalWrapper();
 
-	int ThreadId;
+	int ThreadId = -1;
+
 	static NormalTranspositionTableBucket_Struct* NormalTranspositionTablePointer;
 	static uint32_t NormalTranspositionTableBuckets;
 	static uint32_t NormalTranspositionTableBucketsMask;
@@ -159,7 +159,7 @@ private:
 	RootMoveList_Struct RootMoveListBackup[220];
 	MoveWithScore_Struct InitialRootMoveList[220];
 	int RootMovesCount;
-	Move_Struct RootBestMove;
+	Move_Struct RootBestMove, CurrentIterationsPreviousRootBestMove;
 	int RootPriority; // Set to 1 before the search starts and incremented every time a root move exceeds alpha
 	int ConsistentBestMoves; // Counts the number of iterations a best move has matched the best move from the previous iteration. The 1st iteration cannot be matched to anything so after ID=2 it may be set to 1. Used to reduce the search time for 'obvious' moves.
 	PawnScore_Struct lastPawnScoreWhite, lastButOnePawnScoreWhite, lastPawnScoreBlack, lastButOnePawnScoreBlack;
@@ -204,4 +204,5 @@ private:
 
 	int lateMovePruningMargins[2][9] = { 2,2,2,3,3,3,3,3,3, 4,4,5,8,10,14,18,22,27 };
 
+	uint64_t TranspositionTableStores, TranspositionTableStoresSuccessful, TranspositionTableProbes, TranspositionTableProbesSuccessful;
 };

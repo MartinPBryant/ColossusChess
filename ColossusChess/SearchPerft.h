@@ -53,7 +53,7 @@ public:
 	void static Perft::ComputePerftUnique();
 	void static Perft::ComputePerftUnique2();
 
-	int ThreadId;
+	int ThreadId = -1;
 
 	static PerftTranspositionTableBucket_Struct* PerftTranspositionTablePointer;
 	static uint32_t PerftTranspositionTableBuckets;

@@ -127,7 +127,7 @@ void Normal::ClearCounterMoveHistory()
 	//			for (int ts2i = 0; ts2i < 64; ts2i++)
 	//				CounterMoveHistory[pt1i][ts1i].History[pt2i][ts2i] = 0;
 
-	memset(&CounterMoveHistory->CMH[0][0], 0, sizeof(CounterMoveHistory_Struct));
+	memset(CounterMoveHistory, 0, sizeof(CounterMoveHistory_Struct));
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -457,7 +457,7 @@ void Normal::ScoreRootMoveList(MoveWithScore_Struct* mlp)
 	for (int index1 = 0; index1 < RootMovesCount; index1++)
 	{
 		uint64_t highestSortScore = 0;
-		int highestIndex;
+		int highestIndex = 219;
 		for (int index2 = 0; index2 < RootMovesCount; index2++)
 			if (RootMoveListTemp[index2].priority >= 0)
 			{
@@ -736,75 +736,80 @@ void Normal::DisplayStatisticsNormalTranspositionTable()
 	Output("info string TT Statistics: Total = " + MyITOA(total) + ", Unused = " + MyITOA(unused) + "(" + MyFTOA((unused * 100) / (float)total) + "%)" + ", Exact = " + MyITOA(exact) + "(" + MyFTOA((exact * 100) / (float)total) + "%)" + ", Lower = " + MyITOA(lower) + "(" + MyFTOA((lower * 100) / (float)total) + "%)" + ", Upper = " + MyITOA(upper) + "(" + MyFTOA((upper * 100) / (float)total) + "%)");
 }
 
-void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, short score, uint8_t flag, uint32_t bestMove, short tteStaticEvaluation)//, int tteFound)
+void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, short score, uint8_t flag, uint32_t bestMove, short tteStaticEvaluation, int tteFound)
 {
+	// tteFound is an attempt to speed up the selection of which entry within the bucket to replace
+	// It may be set when we probe this node soon after entry
+	// N.B.
+	// If tteFound==-1: (i.e. we didn't find this position in the TT when we entered this node) a reduced search might have added an entry for it anyway!
+	// If tteFound>0: if the STD of the found entry is small (it may be less than the current depthRemaining) it might have been replaced!
+	// Blindly reusing any tteFound entry (i.e. assuming it's still for the current position) MAY lead to duplicate entries for the current position. However the constant replacement will overwrite these anyway and it actually seems beneficial to speed up the replacement rather than worry about occasional duplicates.
+
 	if (NormalTranspositionTableBuckets > 0)
 	{
-		// Aged entries will get replaced if DR>=STD or they are 'oldest'
-
-		//normalStores++;
+		GATHERSTATS(TranspositionTableStores++;);
 
 		NormalTranspositionTableEntry_Struct* tte0;
 		uint64_t hash64 = normalBrain.gameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (NormalTranspositionTableEntry_Struct*)(NormalTranspositionTablePointer + (hash64 & NormalTranspositionTableBucketsMask));
 
 		// Find candidate entry for replacement
-		int entryToReplace = 999;
-		int shallowestSubTreeDepth = 999;
-		uint8_t flagEUL = flag & TTFlagEULMask;
+		int entryToReplace, shallowestSubTreeDepth;
+		uint64_t tteHash, tteData;
 
-		//if (tteFound != -1)
-		//	AC2++;
-		//else
-		//	AC1++;
-		//if (tteFound != -1)
-		//{
-		//	shallowestSubTreeDepth = -128;
-		//	entryToReplace = tteFound;
-		//	AC1++;
-		//}
-		//else
+		if (tteFound != -1)
 		{
-			uint8_t oldestTranspositionTableAge = (TranspositionTableAge + 1) & TTFlagAgeMask;
+			shallowestSubTreeDepth = -128;
+			entryToReplace = tteFound;
+		}
+		else
+		{
+			shallowestSubTreeDepth = -128;
+			entryToReplace = 0;
+			tteHash = tte0[0].hash64;
+			tteData = tte0[0].data;
 
-			for (int entry = 0; entry < NormalTranspositionTableEntriesPerBucket; entry++)
+			if ((tteHash ^ tteData) != hash64) // Is the 0th entry not an exact match?
 			{
-				uint64_t tteHash = tte0[entry].hash64;
-				uint64_t tteData = tte0[entry].data;
-				//int8_t tteSubTreeDepth = (uint8_t)((tteData >> 56) & subTreeDepthMask);
-				//uint8_t tteAge = (tteData >> 48) & TTFlagAgeMask;
-
-				// Even if tteFound==-1 (i.e. we didn't find this position in the TT when we entered this node) a reduced search might have added an entry for it! So we still have to scan for it
-				// Also, if the STD of the found entry is small it might have been replaced! So tteFound is invalid! COULD TEST FOR THIS ABOVE BEFORE USING IT!
-				//IT DOESN'T SEEM TO BE THE END OF THE WORLD TO HAVE THE OCCASIONAL DUPLICATE! AND IF IT'S MUCH FASTER?!
-				if ((tteHash ^ tteData) == hash64) // Do we already have this position in the bucket? RE-USE TTE0!!! THEN WE CAN AVOID THIS SCAN ALTOGETHER
+				uint8_t oldestTranspositionTableAge = (TranspositionTableAge + 1) & TTFlagAgeMask;
+				uint8_t tteAge = ((NormalTranspositionTableEntryDataFields_Struct*)&tteData)->flag & TTFlagAgeMask;
+				if (tteAge != oldestTranspositionTableAge) // Has the 0th entry aged the maximum # of times? i.e. a really old entry
 				{
-					shallowestSubTreeDepth = -128;
-					entryToReplace = entry;
-					//AC2++;
-					break;
+					// Then use the 0th entry's STD
+					int8_t tteSubTreeDepth = ((NormalTranspositionTableEntryDataFields_Struct*)&tteData)->subTreeDepth;
+					shallowestSubTreeDepth = tteSubTreeDepth;
 				}
 
-				//if (shallowestSubTreeDepth != -128)
+				// Scan the entries in the bucket for the best entry to replace
+				for (int entry = 1; entry < NormalTranspositionTableEntriesPerBucket; entry++)
 				{
-					uint8_t tteAge = ((NormalTranspositionTableEntryDataFields_Struct*)&tteData)->flag & TTFlagAgeMask;
-					if (tteAge == oldestTranspositionTableAge) // Has the entry aged the maximum # of times?
+					tteHash = tte0[entry].hash64;
+					tteData = tte0[entry].data;
+
+					if ((tteHash ^ tteData) == hash64) // Exact match?
 					{
+						// If so, re-use it immediately
 						shallowestSubTreeDepth = -128;
 						entryToReplace = entry;
-						//if (tte0TEST != nullptr)
-						//	OutputError("tte0TEST != nullptr");
 						break;
 					}
 
-					int8_t tteSubTreeDepth = ((NormalTranspositionTableEntryDataFields_Struct*)&tteData)->subTreeDepth;
-					if (tteSubTreeDepth < shallowestSubTreeDepth)
+					if (shallowestSubTreeDepth != -128) // If we have found an 'oldest' entry then don't bother checking for another one or for an entry with a lower STD but do keep scanning for a position match
 					{
-						//THE VAST MAJORITY OF TIMES WE SCAN ALL 4 ENTRIES FOR THE SHALLOWEST
-						//CAN WE REDUCE THE # OF STORES IN QS??? E.G. DON'T STORE 'ALL' NODES, don't store below certain DR
-						shallowestSubTreeDepth = tteSubTreeDepth;
-						entryToReplace = entry;
-						//AC4++;
+						uint8_t tteAge = ((NormalTranspositionTableEntryDataFields_Struct*)&tteData)->flag & TTFlagAgeMask;
+						if (tteAge == oldestTranspositionTableAge) // Has the entry aged the maximum # of times? i.e. a really old entry
+						{
+							shallowestSubTreeDepth = -128;
+							entryToReplace = entry;
+							continue;
+						}
+
+						int8_t tteSubTreeDepth = ((NormalTranspositionTableEntryDataFields_Struct*)&tteData)->subTreeDepth;
+						if (tteSubTreeDepth < shallowestSubTreeDepth)
+						{
+							shallowestSubTreeDepth = tteSubTreeDepth;
+							entryToReplace = entry;
+						}
 					}
 				}
 			}
@@ -812,64 +817,29 @@ void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, sho
 
 		assert(entryToReplace < NormalTranspositionTableEntriesPerBucket);
 
-		//if (tteFound != -1)
-		//	if (tteFound != entryToReplace)
-		//		AC3++;
-
-		//uint64_t ttetrHash = tte0[entryToReplace].hash64;
-		//uint64_t ttetrData = tte0[entryToReplace].data;
-		//short ttetrScore = (uint16_t)((ttetrData >> 16) & scoreMask);
+		uint8_t flagEUL = flag & TTFlagEULMask;
 
 		if (
 			(depthRemaining >= shallowestSubTreeDepth)
-			|| ((score >= EGTBWinningScore) && (flagEUL != TTFlagUpper)) // Prefer 'winning' scores ONLY DO IF ROOT SCORE>=WINNING
-			|| (flagEUL == TTFlagExact)
+			|| ((score >= EGTBWinningScore) && (flagEUL != TTFlagUpper)) // Always save 'winning' scores - ~6 ELO
+			|| (flagEUL == TTFlagExact) // Always save PV entries
 			)
 		{
-			// 'Winning' scores have been 'proven' and as such should never be replaced by a score<Winning!
-			// 'Mating' scores have been 'proven' to their length and as such should never be replaced by a longer mate!
-			//if (!
-			//	(
-			//	((ttetrHash ^ ttetrData) == hash64) // Same position?
-			//		&& (flagEUL != TTFlagUpper) // Cut or exact?
-			//		&& (
-			//		((ttetrScore == WinningBaseScore) && (score < WinningBaseScore))
-			//			|| ((ttetrScore >= MatingScore) && (ttetrScore > score + ply)) // Winning?
-			//			)
-			//		)
-			//	)
 			{
-				// 'Correct' any mate scores for distance (because they are relative to the root position not to this position)
-				//if (score >= MatingScore)
+				// 'Correct' any 'winning' scores for distance (because they are relative to the root position not to this position)
 				if (score >= EGTBWinningScore)
-				{
 					score += ply;
-					//if (score >= MatingScore)
-					//{
-					//	if ((flag & TTFlagEULMask) != TTFlagUpper)
-					//	{
-					//		// If we have a mate at an 'exact' or 'cut' node then set its depthRemaining to at least 1. Useful in e.g. KRvKN and KBNvK as it helps with the ever increasing mate distance problem
-					//		depthRemaining = std::max(depthRemaining, (int8_t)1);
-
-					//		if (score == InfiniteBaseScore - 1) // If we have a #1 from here (15999) then ensure the flag is 'exact' as it can't be improved on!
-					//			flag = flag & ~TTFlagEULMask;
-					//	}
-					//}
-				}
-				//else if (score <= MatedScore)
 				else if (score <= EGTBLosingScore)
 				{
 					score -= ply;
 					if (score <= MatedScore)
-					{
 						flag |= TTFlagThreatenedWithMate;
-					}
 				}
 
 				uint64_t newData = (uint64_t)MGCompressMove(bestMove) | (((uint64_t)((uint16_t)score)) << 16) | (((uint64_t)((uint16_t)tteStaticEvaluation)) << 32) | (((uint64_t)(TranspositionTableAge | flag)) << 48) | (((uint64_t)((uint8_t)depthRemaining)) << 56);
 				tte0[entryToReplace].data = newData;
 				tte0[entryToReplace].hash64 = hash64 ^ newData;
-				//normalStoresSuccessful++;
+				GATHERSTATS(TranspositionTableStoresSuccessful++;);
 			}
 		}
 	}
@@ -1175,7 +1145,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		// Because EITHER alpha gets increased, OR beta gets decreased, but not BOTH, you can omit the alpha test to save a few cycles during most normal searches with NO change in node count when you are mating (because the beta test is always hit a ply sooner than the alpha test)
 		// In fact, I think that the alpha test only ever does something if alpha has been set to -INF
 		// Must NOT be used at the root
-		//alpha = std::max(-MateBaseScore + ply, (int)alpha); // If the worst possible score for the side to move in this position (i.e. being mated here) is > alpha, then increase alpha
+		//alpha = std::max(-MatingIn0Score + ply, (int)alpha); // If the worst possible score for the side to move in this position (i.e. being mated here) is > alpha, then increase alpha
 		beta = std::min(MatingIn0Score - ply - 1, (int)beta); // If the best possible score for the side to move in this position (i.e. giving mate in 1) < beta, then decrease beta
 		if (alpha >= beta)
 			return alpha;
@@ -1218,7 +1188,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	if ((NormalTranspositionTableBuckets > 0) && (ply > 1)) //TODO: is the ply>1 test for lazy SMP???
 	//if ((NormalTranspositionTableBuckets > 0))
 	{
-		//normalProbes++;
+		GATHERSTATS(TranspositionTableProbes++;);
 
 		uint64_t hash64 = currentGameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (NormalTranspositionTableEntry_Struct*)(NormalTranspositionTablePointer + (hash64 & NormalTranspositionTableBucketsMask));
@@ -1280,7 +1250,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 				if (tteSubTreeDepth >= depthRemaining)
 				{
-					//if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries
+					//if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries - NEVER SEEMS TO GIVE ANY ELO INCREASE
 					//{
 					//	data = data & ~(3ULL << 48);
 					//	data = data | ((uint64_t)TranspositionTableAge << 48);
@@ -1299,7 +1269,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 							{
 								PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -4, tteScore, currentGameRecordPointer->staticEvaluation););
 								*currentGameRecordPointer->principalVariationPointer = PVTTTLower; // Should NEVER see this on the end of a PV!!!
-								//normalProbesSuccessful++;
+								GATHERSTATS(TranspositionTableProbesSuccessful++;);
 								return tteScore; // We can exit because we know that at least one move will exceed current beta
 							}
 						}
@@ -1309,7 +1279,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 							{
 								PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -3, tteScore, currentGameRecordPointer->staticEvaluation););
 								*currentGameRecordPointer->principalVariationPointer = PVTTTUpper; // Should NEVER see this on the end of a PV!!!
-								//normalProbesSuccessful++;
+								GATHERSTATS(TranspositionTableProbesSuccessful++;);
 								return tteScore; // We can exit because we know that no move will exceed current alpha
 							}
 						}
@@ -1323,7 +1293,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 								*currentGameRecordPointer->principalVariationPointer = tteBestMove.ui32; // Return TT best move as part of pv
 								*(currentGameRecordPointer->principalVariationPointer + 1) = PVTTTExact;
 							}
-							//normalProbesSuccessful++;
+							GATHERSTATS(TranspositionTableProbesSuccessful++;);
 							return tteScore; // We can exit because we have an exact value
 						}
 					}
@@ -1365,9 +1335,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				&& ((alpha < EGTBWinningScore + 1000 - ply) && (beta > EGTBLosingScore - 1000 + ply)) // Is the current window such that no EGTB score can possibly be in it? If so, skip the EGTB probe. This allows us to 'see-thru' the EGTBs to find any mates in this subtree.
 				)
 			{
-				//EndgameTablebasesProbes++;
-				//if (totalPieces >= 6)
-				//	EndgameTablebasesHeavyProbes++;
+				GATHERSTATS(EndgameTablebasesProbes++; if (totalPieces >= 6) EndgameTablebasesHeavyProbes++;);
 
 				uint32_t result;
 				result = tb_probe_wdl(
@@ -2116,7 +2084,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		CRASHLOCATION(290);
 
 		//if (currentMoveScore < MatedScore)
-		//	currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;//TESTING
+		//	currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate; // Seems to lose a few ELO
 
 		// New best move?
 		if (currentMoveScore > bestMoveScore)
@@ -2180,11 +2148,13 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 					assert((currentGameRecordPointer->isTWM == 0) || (currentGameRecordPointer->isTWM == TTFlagThreatenedWithMate));
 					assert((currentGameRecordPointer->isO1M == 0) || (currentGameRecordPointer->isO1M == TTFlagOnlyOneLegalMove));
 					assert((currentGameRecordPointer->isFMTP == 0) || (currentGameRecordPointer->isFMTP == TTFlagFewerMovesThanPieces));
-					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, currentGameRecordPointer->move.ui32, currentGameRecordPointer->staticEvaluation);// , tteFound);
+					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, currentGameRecordPointer->move.ui32, currentGameRecordPointer->staticEvaluation, tteFound);
 
 					if (ply == 1) // Failed high at the root?
 					{
 						ShowBestLineMessage(currentMoveScore, TTFlagLower);
+						if (CurrentIterationsPreviousRootBestMove.ui32==0) // In case of multiple fail-highs
+							CurrentIterationsPreviousRootBestMove = RootBestMove; // Save this so that it can be restored in the case of a fail-high-low situation
 						RootBestMove = currentMove; // Save the RootBestMove immediately in case we don't get a chance to complete the research!
 					}
 
@@ -2232,7 +2202,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		assert((bestMoveScore > -MatingIn0Score) && (bestMoveScore <= alpha));
 		assert(*currentGameRecordPointer->principalVariationPointer == PVTUnknown);
 		PRINTTREE(PrintTree2(IterationPly, ply, "All"););
-		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation);// , tteFound); // Keep any existing TT move even though it didn't raise alpha
+		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation, tteFound); // Keep any existing TT move even though it didn't raise alpha
 	}
 	else
 	{
@@ -2243,7 +2213,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		assert(isPVNode);
 		assert(*currentGameRecordPointer->principalVariationPointer != PVTUnknown);
 		PRINTTREE(PrintTree2(IterationPly, ply, "Exact"););
-		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, *currentGameRecordPointer->principalVariationPointer, currentGameRecordPointer->staticEvaluation);// , tteFound);
+		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, *currentGameRecordPointer->principalVariationPointer, currentGameRecordPointer->staticEvaluation, tteFound);
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -2294,7 +2264,7 @@ std::string Normal::ComputeNormal()
 	MaximumPlyReached = 0;
 	MaximumPlyReachedBeforeQS = 0;
 	ConsistentBestMoves = 0;
-	uint32_t previousBestMove = 0;
+	uint32_t previousIterationsRootBestMove = 0;
 	ReplyImmediately = false;
 	InitialiseMaterialValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
 	InitialisePSTValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
@@ -2313,6 +2283,11 @@ std::string Normal::ComputeNormal()
 	lastPawnScoreBlack.pawnStructureOpeningScore = 0;
 	lastPawnScoreBlack.pawnStructureEndgameScore = 0;
 	(normalBrain.gameRecordPointer - 1)->staticEvaluation = Evaluate(SideToMove ^ 1);
+
+	TranspositionTableStores = 0;
+	TranspositionTableStoresSuccessful = 0;
+	TranspositionTableProbes = 0;
+	TranspositionTableProbesSuccessful = 0;
 
 	// Root move list stuff
 	// Generated once here before the first iteration and the moves stay in the same physical order in which they are generated so that they correspond with the same moves in the tree generated move list
@@ -2479,6 +2454,7 @@ std::string Normal::ComputeNormal()
 	do
 	{
 		CRASHLOCATION(35);
+
 		// Update iteration depth (ensuring it doesn't exceed maximum)
 		if (IterationPly < MaximumIterationPly)
 			IterationPly++;
@@ -2516,6 +2492,7 @@ std::string Normal::ComputeNormal()
 		RootFailHighs = 0;
 		RootFailLows = 0;
 		LastPrintTreePly = 1;
+		CurrentIterationsPreviousRootBestMove.ui32 = 0;
 #ifdef SEARCHINGFORLINE
 		//TargetLineLength = 1;
 		TargetLinePartial = "";
@@ -2529,7 +2506,7 @@ std::string Normal::ComputeNormal()
 		CRASHLOCATION(40);
 		//PVMessageChecked = false;
 
-		// Do the search
+		// Do the tree search
 		// N.B. RootScore is relative to the side-to-move so e.g. if black is moving and mating this will a large +ve score
 		RootScore = TreeSearchNormal(RootAlpha, RootBeta, 1, IterationPly, SideToMove, normalBrain.IsEnemyKingAttacked(BitScanForwardX(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), false, false);
 
@@ -2542,6 +2519,7 @@ std::string Normal::ComputeNormal()
 				//if (RootFailLows > 0)
 				//	OutputError("Fail-low-hi detected!");
 
+				RootFailLows = 0;
 				RootFailHighs++;
 				RootBetaOld = RootBeta;
 				if (RootScore >= EGTBWinningScore)
@@ -2560,14 +2538,17 @@ std::string Normal::ComputeNormal()
 			}
 			else if (RootScore <= RootAlpha) // Failed low? i.e. no root move took over as the new best
 			{
-				//if (RootFailHighs > 0)
-				//	OutputError("Fail-hi-low detected!");
+				if (RootFailHighs > 0)
+				{
+					//OutputError("Fail-hi-low detected!");
+					// Within this iteration we have failed high (at least once) and have now failed low so the RootBestMove is now in question so restore it to the last stable RootBestMove
+					assert(CurrentIterationsPreviousRootBestMove.ui32 != 0);
+					//RootBestMove = CurrentIterationsPreviousRootBestMove; // Seems to lose a few ELO
+				}
 
 				ShowFailedLowMessage(RootAlpha);
-				RootFailLows++; // DEBUGGING INFO ONLY
-				//if (RootFailLows == 1)
-				//	RootAlpha = (short)std::max(RootScore - 150, -MateBaseScore);
-				//else
+				RootFailHighs = 0;
+				RootFailLows++; // For debugging purposes only
 				RootAlpha = (short)(-MatingIn0Score);
 
 				goto retry;
@@ -2587,11 +2568,11 @@ std::string Normal::ComputeNormal()
 
 		if (ThreadId == 0)
 		{
-			if (RootBestMove.ui32 == previousBestMove)
+			if (RootBestMove.ui32 == previousIterationsRootBestMove)
 				ConsistentBestMoves++;
 			else
 				ConsistentBestMoves = 0;
-			previousBestMove = RootBestMove.ui32;
+			previousIterationsRootBestMove = RootBestMove.ui32;
 
 			// Show diagnostics
 			CRASHLOCATION(62);
@@ -2681,7 +2662,7 @@ void Normal::ComputeNormalMTLaunchHelperThread(int threadId)
 	memcpy(ts->KillerMoves, EngineNormal.KillerMoves, sizeof(EngineNormal.KillerMoves));
 	memcpy(ts->CounterMoves, EngineNormal.CounterMoves, sizeof(EngineNormal.CounterMoves));
 	memcpy(ts->FollowUpMoves, EngineNormal.FollowUpMoves, sizeof(EngineNormal.FollowUpMoves));
-	memcpy(&ts->CounterMoveHistory->CMH[0][0], &EngineNormal.CounterMoveHistory->CMH[0][0], sizeof(CounterMoveHistory_Struct));
+	memcpy(ts->CounterMoveHistory, EngineNormal.CounterMoveHistory, sizeof(CounterMoveHistory_Struct));
 	ts->ComputeNormal();
 	delete ts;
 }

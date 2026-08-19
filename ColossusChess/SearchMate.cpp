@@ -102,7 +102,7 @@ void Mate::ClearCounterMoveHistory()
 	//			for (int ts2i = 0; ts2i < 64; ts2i++)
 	//				CounterMoveHistory->CMH[pt1i][ts1i].History[pt2i][ts2i] = 0;
 
-	memset(&CounterMoveHistory->CMH[0][0], 0, sizeof(CounterMoveHistory_Struct));
+	memset(CounterMoveHistory, 0, sizeof(CounterMoveHistory_Struct));
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -721,7 +721,7 @@ void Mate::AddToMateTranspositionTable(int8_t depthRemaining, short ply, short s
 			{
 				if (!
 					(
-					(ttetrHash ^ ttetrData == hash64) // Same position?
+					((ttetrHash ^ ttetrData) == hash64) // Same position?
 						&& (flagEUL != TTFlagUpper) // Cut or exact?
 						&& (
 						((ttetrScore == EGTBWinningScore) && (score < EGTBWinningScore))
@@ -772,7 +772,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	assert(mateBrain.piecesBB[0][AllPieces] == (mateBrain.piecesBB[0][Pawn] | mateBrain.piecesBB[0][Knight] | mateBrain.piecesBB[0][Bishop] | mateBrain.piecesBB[0][Rook] | mateBrain.piecesBB[0][Queen] | mateBrain.piecesBB[0][King]));
 	assert(mateBrain.piecesBB[1][AllPieces] == (mateBrain.piecesBB[1][Pawn] | mateBrain.piecesBB[1][Knight] | mateBrain.piecesBB[1][Bishop] | mateBrain.piecesBB[1][Rook] | mateBrain.piecesBB[1][Queen] | mateBrain.piecesBB[1][King]));
 	assert(mateBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer)));
-	assert(mateBrain.gameRecordPointer->transpositionTableHash64WithEP == mateBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[mateBrain.gameRecordPointer->epSquare]);
+	assert(mateBrain.gameRecordPointer->transpositionTableHash64WithEP == (mateBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[mateBrain.gameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply <= MaximumPly));
 	assert(depthRemaining <= MaximumPly);
 	assert((sideToMove >= 0) && (sideToMove < Sides));
@@ -1340,7 +1340,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		// NOW THAT WE HAVE KICKED OUT PARAMETER PRUNED MOVES AND DETERMINED O1M ETC, DO THE TWM TEST ONLY IF NECC!
 		//UNLIKE CHECKS, TWMs CAN PERSIST SO WE NEED SO WAY TO LIMIT 'THE SAME' TWM ... COMPARE isThreateningMateInOne.ui32 ??? else that #39 explodes!
 		//setif (0)
-		if (!isInCheck & (movesCount > 1)) // *STILL* EXPLODES SOME POSNS E.G. 5R2/1pB3p1/2pP2P1/3p1p2/pr1P1NPk/qN3p1P/3P2p1/1Kn2r1R w - - 0 1 - also that #50 - *BUT* helps speed up go mate 6 file
+		if (!isInCheck && (movesCount > 1)) // *STILL* EXPLODES SOME POSNS E.G. 5R2/1pB3p1/2pP2P1/3p1p2/pr1P1NPk/qN3p1P/3P2p1/1Kn2r1R w - - 0 1 - also that #50 - *BUT* helps speed up go mate 6 file
 			//if ((currentGameRecordPointer - 2)->isTWM == TTFlagThreatenedWithMate)//OR TEST FORCINGLINE??? OR ONLY DO AT PV NODES??? ONLY DO IF ANOTHER CONDITION LIKE O1PCM/ZLKM
 				//if (isPVNode)
 				{
@@ -2660,9 +2660,11 @@ Mate::MateResult_Struct Mate::ComputeMate()
 
 void Mate::ComputeMateMTLaunchHelperThread(int threadId)
 {
-	Mate ts;
-	ts.ThreadId = threadId;
-	ts.ComputeMate();
+	Mate* ts;
+	ts = new Mate;
+	ts->ThreadId = threadId;
+	ts->ComputeMate();
+	delete ts;
 }
 
 Mate::MateResult_Struct Mate::ComputeMateMT()

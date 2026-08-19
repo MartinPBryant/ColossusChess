@@ -112,7 +112,6 @@ Config can be edited in config.yml
 To reload the config you have to interrupt the python shell with CTRL-C and restart it
 
 
-
 ---------------------------------------------------------------------------------------------------------
 
 Running Test Games Instructions
@@ -125,7 +124,7 @@ The game output file usually goes into the PGN subfolder (edit the .bat file bef
 
 Nowadays I use fastchess rather than cutechess.
 Use t.bat in D:\_Chess\GUIs\FastChess\fastchess-windows-x86-64\fastchess-windows-x86-64
-To resume a crashed fastchess session, run the command
+To resume a crashed fastchess session, run the command...
 fastchess.exe -config file=config.json
 
 
@@ -135,16 +134,16 @@ BEFORE RELEASING A NEW VERSION...
 =================================
 For future release versions it may be useful to keep a non-PGO version for testing against future versions!!!
 Set AC1=1 and do a long search to ensure we're not incrementing any other counters anywhere
-Make sure CRASHLOCATIONDEF is undefined
-Try it in several GUIs!
-Run debug version overnight on infinite search to see if any asserts fail (apart from assert(standPatScore == Evaluate(sideToMove)) and assert(normalBrain.gameRecordPointer->staticEvaluation == Evaluate(sideToMove)) - put back after testing!)
 Undefine EXPERIMENTAL (in GlobalConstants.h)
-Undefine ALL crashlocation stuff in the tree (in SearchNormal.h)
+Make sure CRASHLOCATIONDEF is undefined (in SearchNormal.h)
+Make sure PRINTTREEDEF is undefined (in Utilities.h)
+Do a go depth 9 to make sure we don't get any printtree files generated
+Check .ini file doesn't have 'logging' on!
+Try it in several GUIs! (Arena, ChessGUI, CuteChess, Banksia)
+Run debug version overnight on infinite search to see if any asserts fail (apart from assert(standPatScore == Evaluate(sideToMove)) and assert(normalBrain.gameRecordPointer->staticEvaluation == Evaluate(sideToMove)) - put back after testing!)
 Compile engine (PGO version!) into 'new' folder and rename ready to go and confirm it identifies itself correctly
 Verify complete Perft file for normal and FRC chess (in release AND debug modes) (e.g. go perft 6 file)
-Do a go depth 9 to make sure we don't get any printtree files generated
 Run -TS0, -TS1 & -TS2
-Check .ini file doesn't have 'logging' on!
 Run test tourneys for normal and FRC chess from the 'new' folder using 1'+1"{tc=60+1} AND 40/40s{tc=40/40}
 Run test tourney for normal with 4 threads v 1 thread to ensure we haven't got the 'StopImmediately slowdown' issue back! or messaging crashes!
 Run test tourney with ponder on
@@ -152,7 +151,7 @@ Watch it play as lichess bot for any oddities
 Set threads to 16 and go infinite to ensure multi-threading doesn't crash
 Run a quick tourney in Arena {against Ruffian} with EGTBs {can't... doesn't support SYZYGY} and multi-threads and ponder
 Give a copy to Thorsten to test briefly
-CHECK SYZYGY WORKS IN WINE ON LINUX (HOW EXACTLY??? :D)
+
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -160,6 +159,8 @@ LINUX COMPATIBILITY (if ever decide to do fully)
 ===================
 c++ threading!
 file handling
+CHECK SYZYGY WORKS IN WINE ON LINUX (HOW EXACTLY??? :D)
+
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -193,6 +194,10 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+tidy up mate mode - clearer messages re parameters
+
+
+use tteFound - TESTING
 tte0 changes
 -have i been adding entries in 2 separate places??? when entries have aged
 in addtott - RE-USE TTE0!!! THEN WE CAN AVOID THIS SCAN ALTOGETHER
@@ -200,36 +205,13 @@ CAN tte0 BE PASSED IN TO ADDTOtt LIKE IN PERFT??? TEST!
 crap, buggy, can have duplicates, but plays worse when bug fixed!
 -having duplicates isn't the end of the world as entries are constantly being replaced/aged - speed is more important!
 
+cpuid stuff
 
 
-if we are mating and looking for a shorter mate, randomly don't prune at a ply to allow potentially shorter mating moves to be found
-
-
-test the action mentioned on line below!
-					currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;//DOES THIS GET SET AFTER NORMAL SEARCH BELOW RETURNS MATED SCORE? SHOULD IT???
-
-
-add a GATHERSTATS def like PRINTTREE to enclose things like normalProbesSuccessful++ and EGTB stuff
-
-
-
-check this node type article to make sure we're doing it right - https://chessprogramming.org/Node_Types
--may affect other code! (e.g. IIR)
--but do we do anything different even if get it perfect? only IIR
--node type not used in QS
--can the node type be set from the TT probe?
-
-
-
-is it producing errors sometimes? check folders on all PCs
--only on PCS2 when testing those 50move posns in CGM - see if can reproduce
--is it because we are accessing memory before the start of the GR because we are using a FEN posn with a high halfmove count?
-
-
+if we are mating and looking for a shorter mate, randomly don't prune at a ply (use nodecount) to allow potentially shorter mating moves to be found
 
 
 CGM doesn't persist the halfmove count after an edit!
-
 
 
 try a mobility only eval
@@ -276,7 +258,6 @@ only keep at most the last 100 ply in the game record!? does the engine ever nee
 
 report all losing scores as above -5.0 :)
 
-When fail high, might then fail low -  Maybe keep 'previousRootBestMove' and replace it if fail low?
 
 download huge polyglot book and score with SF before doing a DOE pass
 
@@ -307,9 +288,8 @@ replace things like bb&=(bb-1) with a #define then can more easily test speed of
 
 
 search much faster (nps) without TT! :O try some tests with different hash table sizes including 0
--does auto-reusing the same entry (like that SF code?) give speed? THINKING ABOUT IT, IT CAN'T EVER HAVE BEEN OVERWRITTN BY A DEEPER ENTRY SURELY??? (yes it can) - TEST!
 
-
+after each iter, if TT usage<some%age, halve size used, if >some%age, redouble up to max allowed
 
 
 large pages (huge pages) - require user to enable them with secpol so a bit problematic - could just implement the code and then it's there if available
@@ -374,30 +354,11 @@ increase timeup divisor by 10% {by 20% if getting bonus time?}
 
 penalise (semi-)open files around K
 
-with 7-pc egtb sometimes get e.g. ...
-Wed Jun 25 10:21:07 2025
-*** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
-8/8/3n2K1/4k1N1/R7/8/8/3B2r1 w - - 11 85
-position startpos moves c2c4 g8f6 g1f3 g7g6 d2d4 f8g7 b1c3 e8g8 e2e4 d7d6 h2h3 b8d7 c1e3 e7e5 d4d5 d7c5 f3d2 a7a5 f1e2 f6e8 d1c2 c5a6 a2a3 f7f5 e4f5 g6f5 f2f3 g7h6 e3f2 c8d7 e1g1 g8h8 f1e1 f8g8 a1d1 h6f4 e2f1 d8g5 c3e2 f4e3 f3f4 e5f4 d2f3 e3f2 g1f2 g5h6 c2c1 a6c5 e2f4 d7a4 f4e6 h6g6 b2b3 a4b3 d1d4 b3a4 c1c3 c5e6 d5e6 e8f6 f2g1 g8g7 f3h4 g6g5 c3d2 a4c6 d2g5 g7g5 d4f4 c6e4 g2g4 f6h5 f4f2 h5g7 e6e7 h8g8 g1h2 f5g4 f2f8 a8f8 e7f8q g8f8 e1e4 g4h3 f1h3 b7b5 h4f3 g5c5 c4b5 c5b5 e4c4 b5b3 f3g5 h7h6 g5h7 f8g8 h7f6 g8f7 f6d5 b3a3 c4c7 f7g6 c7c2 h6h5 c2g2 g6h6 d5e7 h6h7 h3d7 a3c3 d7b5 g7e6 b5c6 e6c5 e7f5 c5d3 c6e4 d6d5 e4d5 d3e5 g2g7 h7h8 g7g8 h8h7 h2h1 e5g4 g8g5 g4f6 d5e6 c3c5 h1h2 c5c2 h2h3 c2e2 g5g7 h7h8 g7e7 e2e1 h3h4 e1g1 f5d6 g1g7 d6f7 h8g8 e7a7 g8f8 a7a8 f8e7 f7g5 f6e8 e6b3 e8d6 a8a5 e7f6 a5a6 f6e5 h4h5 g7b7 b3a2 b7b2 h5g6 b2g2 a2b3 g2g1 a6a4 g1g2 b3d1 g2g1
-TranspositionTableMemory=64
-Test whether the EGTB probe always returns a best move(s)!!!
-
-
-after this MT line...
-	memcpy(&ts.CounterMoveHistory->CMH[0][0], &EngineNormal.CounterMoveHistory->CMH[0][0], sizeof(CounterMoveHistory_Struct));
-...ensure that all the data has been copied over!
-
-
-run code analysis!!!
--complains about ComputeNormalMTLaunchHelperThread using too much stack to declare the Normal variable!!! :O
--should engine instances be on the heap not the stack??? test! why doesn't Perft complain? test in perft 1st! seems to work and much the same time
 
 pawn structure hash table
 
 
 rewrite move generators more efficiently
-
-can we search TT move before movegen??? i've been here before surely?!!!
 
 don't apply K safety if Qs off the board? well it does get scaled down?
 try taking K safety out completely! :O
@@ -612,10 +573,6 @@ LMP - are there any other tests we could apply? like standpat score really bad
 is keeping history per previous move counterproductive as the table is almost completely empty?
 -test by changing the indexes to point to a sole entry
 
-Allow ID>100 (127 max?)
--always go into QS when reach ply 100
--not needed now as we tighten null move as we go deeper??? REMOVED AS IT LOSES ELO
-
 
 K safety again
 
@@ -624,14 +581,10 @@ in endgames, passed Ps worth more if enemy K outside square
 don't reduce/prune passed P moves? unless SEE -ve
 -test on KP positions
 
-when it fails high, if it doesn't complete the research, it plays the previous best move. Is this expected?
-
 evaluate 'space' by counting P advancement (not Ps in front of K)
 
 TRY SOME EVAL TUNING AGAIN NOW WE HAVE ESTABLISHED TESTING REGIME E.G. IRONING OUT THOSE STUPID OCCUPATION VALUES
 
-
-REM: we have taken out the (beta > LosingBaseScore) tests in a couple of places!
 
 do lichess blunder analysis on lost games
 
@@ -639,8 +592,6 @@ code analysis!
 cpu profiling?
 
 
-
-flush message buffer at the end of every iter?
 
 are these crashes at location 60 when i interrupt a search (in CGM) when it has failed high/low???
 
@@ -676,12 +627,6 @@ at lower plies we can prune/reduce but as we go deeper {e.g. DR>=10} we should g
 -have bottom 1/8th plies as full width??? too few? 1/4? and offset by 2 ply?
 
 
-
-
-1Q6/3B4/k4bR1/8/n7/8/K7/8 w - - 0 1
--ply 1 reports #2 but pv is wrong!!! is it that soft pv thing??? NO! must be that wide window thing? but do i even do that any more???
--check the scores in the ply 1 movelist after 1st iter! they seem ok!
--check how i get multi-pv in mate mode
 
 
 a lot of stuff in Engine belongs in Brain

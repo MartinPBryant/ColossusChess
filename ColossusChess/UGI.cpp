@@ -571,7 +571,7 @@ std::string ProcessInput(std::string currentLine)
 				if (Logging)
 					logging = " Logging Enabled!";
 
-				Output("id name Colossus " + std::string(VersionX) + softwarePopulationCount + bitness + debug + logging);
+				Output("id name Colossus Chess " + std::string(VersionX) + softwarePopulationCount + bitness + debug + logging);
 				Output("id author Martin Bryant");
 				SendOptions();
 				Output("uciok");

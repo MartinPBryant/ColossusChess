@@ -182,7 +182,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	int tteFound = -1;
 	if (NormalTranspositionTableBuckets > 0)
 	{
-		//normalProbes++;
+		GATHERSTATS(TranspositionTableProbes++;);
 
 		uint64_t hash64 = currentGameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (NormalTranspositionTableEntry_Struct*)(NormalTranspositionTablePointer + (hash64 & NormalTranspositionTableBucketsMask));
@@ -228,7 +228,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 
 				if (tteSubTreeDepth >= depthRemaining)
 				{
-					//if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries
+					//if (((data >> 48) & ageMask) != TranspositionTableAge) // Touch the age for aged entries - NEVER SEEMS TO GIVE ANY ELO INCREASE
 					//{
 					//	data = data & ~(3ULL << 48);
 					//	data = data | ((uint64_t)TranspositionTableAge << 48);
@@ -244,7 +244,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 							if (tteScore >= beta)
 							{
 								*currentGameRecordPointer->principalVariationPointer = PVTTTLower; // Should NEVER see this on the end of a PV!!!
-								//normalProbesSuccessful++;
+								GATHERSTATS(TranspositionTableProbesSuccessful++;);
 								return tteScore; // We can exit because we know that at least one move will exceed current beta
 							}
 							tteLowerLimitScore = tteScore;
@@ -254,7 +254,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 							if (tteScore <= alpha)
 							{
 								*currentGameRecordPointer->principalVariationPointer = PVTTTUpper; // Should NEVER see this on the end of a PV!!!
-								//normalProbesSuccessful++;
+								GATHERSTATS(TranspositionTableProbesSuccessful++;);
 								return tteScore; // We can exit because we know that no move will exceed current alpha
 							}
 						}
@@ -267,7 +267,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 								*currentGameRecordPointer->principalVariationPointer = tteBestMove.ui32; // Return TT best move as part of pv
 								*(currentGameRecordPointer->principalVariationPointer + 1) = PVTTTExact;
 							}
-							//normalProbesSuccessful++;
+							GATHERSTATS(TranspositionTableProbesSuccessful++;);
 							return tteScore; // We can exit because we have an exact value
 						}
 					}
@@ -302,7 +302,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			&& ((alpha < EGTBWinningScore + 1000 - ply) && (beta > EGTBLosingScore - 1000 + ply)) // Is the current window such that no EGTB score can possibly be in it? If so, skip the EGTB probe. This allows us to 'see-thru' the EGTBs to find any mates in this subtree.
 			)
 		{
-			//EndgameTablebasesProbes++;
+			GATHERSTATS(EndgameTablebasesProbes++;);
 
 			uint32_t result;
 			result = tb_probe_wdl(
@@ -519,7 +519,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			}
 
 			//----------------------------------------------------------------------------------------------------
-			//PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, currentMove.ui32, bestSortScore, currentGameRecordPointer->staticEvaluation);)
+			//PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, currentMove.ui32, bestSortScore, currentGameRecordPointer->staticEvaluation););
 
 			// Up-date move
 			normalBrain.MakeMove(sideToMove); // N.B. MakeMove increments normalBrain.gameRecordPointer!
@@ -600,7 +600,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				{
 					// This move has returned a score >= beta, therefore this is a 'Cut' node
 					// The currentMoveScore is a lower bound (floor) on the exact score of the node (i.e. the exact score might be greater than currentMoveScore, it is "at least" currentMoveScore)
-					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, currentMove.ui32, standPatScore);// , tteFound);
+					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, currentMove.ui32, standPatScore, tteFound);
 					return currentMoveScore;
 				}
 
@@ -653,7 +653,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		// The children of an All node are Cut nodes. The parent of an All node is a Cut node. The ply distance of an All node to its PV ancestor is even.
 		assert((bestMoveScore > -MatingIn0Score) && (bestMoveScore <= alpha));
 		assert(*currentGameRecordPointer->principalVariationPointer == PVTUnknown);
-		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, standPatScore);// , tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
+		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, standPatScore, tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
 	}
 	else
 	{
@@ -663,7 +663,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		assert((originalAlpha < bestMoveScore) && (bestMoveScore == alpha) && (bestMoveScore < beta));
 		assert(isPVNode);
 		assert(*currentGameRecordPointer->principalVariationPointer != PVTUnknown);
-		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, *currentGameRecordPointer->principalVariationPointer == PVTStandPat ? tteBestMove.ui32 : *currentGameRecordPointer->principalVariationPointer, standPatScore);// , tteFound);
+		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, *currentGameRecordPointer->principalVariationPointer == PVTStandPat ? tteBestMove.ui32 : *currentGameRecordPointer->principalVariationPointer, standPatScore, tteFound);
 	}
 
 	//----------------------------------------------------------------------------------------------------

@@ -83,7 +83,8 @@ public:
 	static void ComputeMateFile(std::string filename);
 	static void ComputeMateWrapper();
 
-	int ThreadId;
+	int ThreadId = -1;
+
 	static MateTranspositionTableBucket_Struct* MateTranspositionTablePointer;
 	static uint32_t MateTranspositionTableBuckets;
 	static bool MateSilent;

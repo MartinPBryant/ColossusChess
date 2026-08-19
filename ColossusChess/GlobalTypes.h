@@ -80,12 +80,12 @@ struct RootMoveList_Struct
 
 struct History_Struct
 {
-	int History[6][64];
+	int History[6][64]; // 1536
 };
 
 struct CounterMoveHistory_Struct
 {
-	History_Struct CMH[6][64];
+	History_Struct CMH[6][64]; // 589824
 };
 
 // Castling statuses
