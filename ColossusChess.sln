@@ -7,7 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ColossusChess", "ColossusCh
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8B952DE5-705B-4358-9BB5-6DC6B6E920F4}"
 	ProjectSection(SolutionItems) = preProject
-		ChessMateTestPositions.txt = ChessMateTestPositions.txt
 		ChessNotes.txt = ChessNotes.txt
 		ChessResults.txt = ChessResults.txt
 		ChessScratchpad.txt = ChessScratchpad.txt

@@ -146,10 +146,10 @@ Verify complete Perft file for normal and FRC chess (in release AND debug modes)
 Run -TS0, -TS1 & -TS2
 Run test tourneys for normal and FRC chess from the 'new' folder using 1'+1"{tc=60+1} AND 40/40s{tc=40/40}
 Run test tourney for normal with 4 threads v 1 thread to ensure we haven't got the 'StopImmediately slowdown' issue back! or messaging crashes!
-Run test tourney with ponder on
+Run test tourney with ponder on!
 Watch it play as lichess bot for any oddities
 Set threads to 16 and go infinite to ensure multi-threading doesn't crash
-Run a quick tourney in Arena {against Ruffian} with EGTBs {can't... doesn't support SYZYGY} and multi-threads and ponder
+Run a quick tourney in Arena {against previous version} with EGTBs and multi-threads and ponder
 Give a copy to Thorsten to test briefly
 
 
@@ -194,16 +194,14 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+
+enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each?
+
+singular extensions
+
+
 tidy up mate mode - clearer messages re parameters
 
-
-use tteFound - TESTING
-tte0 changes
--have i been adding entries in 2 separate places??? when entries have aged
-in addtott - RE-USE TTE0!!! THEN WE CAN AVOID THIS SCAN ALTOGETHER
-CAN tte0 BE PASSED IN TO ADDTOtt LIKE IN PERFT??? TEST!
-crap, buggy, can have duplicates, but plays worse when bug fixed!
--having duplicates isn't the end of the world as entries are constantly being replaced/aged - speed is more important!
 
 cpuid stuff
 
@@ -222,9 +220,6 @@ eval: mobility
 -various asserts taken out! (because of EP capts) put back if don't use!
 -can we just use the LAST mob counts from the tree!? ... so slightly out of date ... ah! but not available in the QS :(
 -use the last two values from main... save in the GR
-
-
-singular extensions
 
 
 perft count overflows???
@@ -288,8 +283,9 @@ replace things like bb&=(bb-1) with a #define then can more easily test speed of
 
 
 search much faster (nps) without TT! :O try some tests with different hash table sizes including 0
-
-after each iter, if TT usage<some%age, halve size used, if >some%age, redouble up to max allowed
+-after each iter, if TT usage<some%age, halve size used, if >some%age, redouble up to max allowed - but have to clear each time change? no? just wouldn't find previous entries
+--so change after each move, not iter
+-use the number of stores/move as measure of how big the table should be
 
 
 large pages (huge pages) - require user to enable them with secpol so a bit problematic - could just implement the code and then it's there if available

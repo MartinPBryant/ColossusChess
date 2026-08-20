@@ -25,7 +25,7 @@ int main(int argc, char * argv[])
 	Logging = false;
 	SyzygyPathLogFileName = EXEName + ".SyzygyPathLog.txt";
 	ErrorFileName = EXEName + "." + UniqueID + ".error.txt";
-	INIPath = ApplicationPath.substr(0, index) + "\\Colossus.ini";
+	INIPath = ApplicationPath.substr(0, index) + "\\ColossusChess.ini";
 
 	// No I/O buffering on stdin and stdout (required to work with GUIs)
 	setvbuf(stdin, NULL, _IONBF, 0);

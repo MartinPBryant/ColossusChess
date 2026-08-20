@@ -371,8 +371,22 @@ ADDED 'RESTART=ON' TO FASTCHESS .BAT FILES IN CASE THESE ANOMOLOUS RESULTS ARE D
 
 88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (0.19) PCS2
 88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (-2.76) PCS1
-88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} () ASUS1
+88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (-3.96) ASUS1
 88 v 89 {AddToNormalTranspositionTable - uses tteFound from probing} (-1.60) NIPOGI1
+
+2026a v 2025b (27.43) PCS2
+2026a v 2025b (28.08) PCS1
+2026a v 2025b (25.34) NIPOGO1
+
+TT size experiment (100ms/move)
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess89-4              25.10       5.40      35.54       7.61       8000      53.6%      49.8%
+   2 ColossusChess89-1               6.34       5.39       8.97       7.61       8000      50.9%      50.0%
+   3 ColossusChess89-16             -3.52       5.38      -4.98       7.61       8000      49.5%      50.2%
+   4 ColossusChess89-64             -7.60       5.40     -10.73       7.61       8000      48.9%      49.8%
+   5 ColossusChess89-256           -20.30       5.40     -28.70       7.61       8000      47.1%      49.7%
+
+TT size experiment (400ms/move)
 
 
 

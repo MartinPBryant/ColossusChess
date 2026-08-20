@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "2026aNonPGO"
+#define VersionX "2026a"
 //#define EXPERIMENTAL
 //#define TB_NO_HW_POP_COUNT // Use the same directive name as defined in Ronald de Man's probing code!
 
