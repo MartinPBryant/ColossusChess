@@ -324,7 +324,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			// Even with this, we sometimes overstep at my standard 100ms/move testing. It's minimal with the 4pc but naturally increases as we move to the 5pc and 6pc.
 			TimeUp(0.2f);
 			if (StopImmediately)
-				return -MatingIn0Score;
+				return alpha;
 
 			if (result != TB_RESULT_FAILED)
 			{
@@ -589,7 +589,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 
 			// Stopping? (N.B. Must do this BEFORE the 'new best move' test below otherwise a partially searched move could take over as best or be added to the TT!)
 			if (StopImmediately)
-				return -MatingIn0Score;
+				return alpha;
 
 			//----------------------------------------------------------------------------------------------------
 

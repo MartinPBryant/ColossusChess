@@ -146,7 +146,8 @@ Verify complete Perft file for normal and FRC chess (in release AND debug modes)
 Run -TS0, -TS1 & -TS2
 Run test tourneys for normal and FRC chess from the 'new' folder using 1'+1"{tc=60+1} AND 40/40s{tc=40/40}
 Run test tourney for normal with 4 threads v 1 thread to ensure we haven't got the 'StopImmediately slowdown' issue back! or messaging crashes!
-Run test tourney with ponder on!
+Check pondering working manually!
+Run human test game in Arena with ponder on to ensure I can see it pondering while I'm thinking!
 Watch it play as lichess bot for any oddities
 Set threads to 16 and go infinite to ensure multi-threading doesn't crash
 Run a quick tourney in Arena {against previous version} with EGTBs and multi-threads and ponder
@@ -194,8 +195,13 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+use more time, especially when have increment!
 
-enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each?
+
+lichess - for classical games it doesn't use online openings? because of search depth?
+
+
+enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each? no... current move may be only a small fraction if <4 ages
 
 singular extensions
 

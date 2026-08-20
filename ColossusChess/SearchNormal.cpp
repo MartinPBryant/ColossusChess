@@ -879,7 +879,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		TimeUp(0.2f);
 	// Stopping? (N.B. Must do this here as well as below in the main move processing loop else it may go back up the tree after a reduced search!)
 	if (StopImmediately)
-		return -MatingIn0Score;
+		return alpha;
 
 	// Deepest so far this iteration?
 	if (ply > MaximumPlyReachedBeforeQS)
@@ -2055,7 +2055,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 		// Stopping? (N.B. Must do this BEFORE the 'new best move' test below otherwise a partially searched move could take over as best or be added to the TT!)
 		if (StopImmediately)
-			return -MatingIn0Score;
+			return alpha;
 
 		//----------------------------------------------------------------------------------------------------
 		CRASHLOCATION(280);
@@ -2444,8 +2444,6 @@ std::string Normal::ComputeNormal()
 	UseTTAndPruning = 0;
 	TMI1Extensions = 0;
 	nullMoveMinimumPly = 0;
-	//BestLineMessage = "";
-	//IterationFinishMessage = "";
 	PreviousIterationsMessages = "";
 	CurrentIterationsMessages = "";
 	LastTickCount = 1; // To avoid any divide by zero errors

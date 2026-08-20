@@ -178,7 +178,6 @@ private:
 	bool isFollowingPV;
 	std::string LongestLineWithQS;
 	std::string LongestLineWithoutQS;
-	std::string BestLineMessage;
 	std::string IterationFinishMessage;
 	std::string PreviousIterationsMessages;
 	std::string CurrentIterationsMessages;
