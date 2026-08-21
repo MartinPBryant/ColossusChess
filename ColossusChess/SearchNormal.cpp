@@ -572,7 +572,7 @@ void Normal::TimeUp(float divisor)
 		}
 
 		// 'Estimate' moves left to time control to give us a budget
-		// N.B. MovesToGo is provided by the GUI and is the actual # of moves to make before the time control
+		// N.B. MovesToGo is provided by the GUI and is either zero ('all the moves') or the actual # of moves to make before the time control ('repeating')
 		const int movesLeftBaseEstimate = 9;//11;
 		movesLeft = movesLeftBaseEstimate;
 		if (MovesToGo == 0) // 'All the moves'?
@@ -580,6 +580,14 @@ void Normal::TimeUp(float divisor)
 			movesLeft += 1;
 			if (WInc == 0) // If 'all the moves' AND no Fischer bonus then need to be VERY careful. It is assumed WInc and BInc will be the same!
 				movesLeft += 5;
+			else
+			{
+				if ((float)timeLeft / (float)movesLeft < (float)WInc)
+					movesLeft--;
+			}
+			// So... when playing 'all the moves'...
+			// Without increment: movesLeft=15 (9+1+5) : so at the start of a 10 min game the target would be 40s (600/15)
+			// With increment: movesLeft=10 (9+1) : so at the start of a 10 min game the target would be 60s (600/10)
 		}
 		else // Repeating
 		{
