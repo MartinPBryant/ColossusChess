@@ -573,7 +573,7 @@ void Normal::TimeUp(float divisor)
 
 		// 'Estimate' moves left to time control to give us a budget
 		// N.B. MovesToGo is provided by the GUI and is either zero ('all the moves') or the actual # of moves to make before the time control ('repeating')
-		const int movesLeftBaseEstimate = 9;//11;
+		const int movesLeftBaseEstimate = 8;// 9;//11;
 		movesLeft = movesLeftBaseEstimate;
 		if (MovesToGo == 0) // 'All the moves'?
 		{
