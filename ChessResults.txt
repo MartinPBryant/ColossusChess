@@ -1,10 +1,42 @@
 ---------------------------------------------------------------------------------------------------------
 FOR TESTING I TYPICALLY HAVE THE BASELINE ENGINE PLAY 1ST AND THE NEWLY MODIFIED ENGINE PLAY 2ND
 
-I RECORD THE RESULT RELATIVE TO THE NEWLY MODIFIED ENGINE (SO I NEGATE THE CUTECHESSCLI PRINTED RESULT)
-THEREFORE IF THE RESULT BELOW IS +ve IT'S A THUMBS UP FOR THE MODIFICATION (???IS ANY OF THIS TRUE???)
+I USED TO RECORD THE RESULT RELATIVE TO THE NEWLY MODIFIED ENGINE (SO I NEGATED THE CUTECHESSCLI PRINTED RESULT)
+HOWEVER I NOW RECORD THE FASTCHESS RESULT AS IS
+THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 
+---------------------------------------------------------------------------------------------------------
 20NNx
+=====
+
+2026aNonPGO v 1 {uses .75 of divisor for timeup} (21.85, +/-8.28, 3311) PCS2
+2026aNonPGO v 1 {uses .75 of divisor for timeup} (14.70, +/-11.99, 1656) PCS1
+2026aNonPGO v 1 {uses .75 of divisor for timeup} (18.28, 11.98, 1720) ASUS1
+
+2026aNonPGO v 2 {uses .90 of divisor for timeup} (3.30) PCS2
+2026aNonPGO v 2 {uses .90 of divisor for timeup} (11.87, +/-4.20, 13097) PCS1 - ANOMOLOUS?
+2026aNonPGO v 2 {uses .90 of divisor for timeup} (3.0, +/-4.42, 12272) ASUS1
+
+2026aNonPGO v 3 {10s+0.1s: one fewer moves divisor if large Fisher bonus} (1.91) PCS2
+2026aNonPGO v 3 {10s+0.1s: one fewer moves divisor if large Fisher bonus} (1.69) PCS1
+2026aNonPGO v 3 {10s+0.1s: one fewer moves divisor if large Fisher bonus} (0.23) ASUS1
+***I ASSUME THIS IS JUST VARIANCE
+
+2026aNonPGO v 3 {2s+0.1s: halve moves divisor if large Fisher bonus} (0.14) PCS2
+2026aNonPGO v 3 {2s+0.1s: halve moves divisor if large Fisher bonus} () PCS1
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------
+2026a
 =====
 
 CC1 v CC2 {Fixed bracketing bug in AddToTT} (-0.40) PCS2
@@ -387,20 +419,16 @@ Rank Name                             Elo        +/-       nElo        +/-      
    5 ColossusChess89-256           -20.30       5.40     -28.70       7.61       8000      47.1%      49.7%
 
 TT size experiment (400ms/move)
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess89-16             15.08       5.16      22.27       7.61       8000      52.2%      54.0%
+   2 ColossusChess89-4              13.38       5.11      19.95       7.61       8000      51.9%      54.9%
+   3 ColossusChess89-64              8.04       5.21      11.75       7.61       8000      51.2%      53.2%
+   4 ColossusChess89-256             0.96       5.14       1.41       7.61       8000      50.1%      54.4%
+   5 ColossusChess89-1             -37.58       5.19     -55.61       7.61       8000      44.6%      53.5%
+*** at the start of the game, a 2 minute search with a 256MB TT returns hashfull 1000, so this is only something to worry about on very fast time controls
 
-
-
-
-
-2026a v 2025b {ponderhit fixed} () PCS1
-2026a v 2025b {ponderhit fixed} () ASUS1
-
-
-
-
-
-
-
+2026a v 2025b {ponderhit fixed} (29.59) PCS1
+2026a v 2025b {ponderhit fixed} (25.20) ASUS1
 
 
 ---------------------------------------------------------------------------------------------------------

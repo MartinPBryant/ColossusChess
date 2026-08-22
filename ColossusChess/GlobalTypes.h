@@ -7,7 +7,8 @@
 //----------------------------------------------------------------------------------------------------
 
 // Square names corresponding to 0 - 63 indeces (a1=0, h8=63)
-enum SquaresEnum : int8_t {
+enum SquaresEnum : int8_t
+{
 	A1, B1, C1, D1, E1, F1, G1, H1,
 	A2, B2, C2, D2, E2, F2, G2, H2,
 	A3, B3, C3, D3, E3, F3, G3, H3,
@@ -19,7 +20,8 @@ enum SquaresEnum : int8_t {
 };
 
 // File names corresponding to 0 - 7 indeces (a-file=0, h-file=7)
-enum FilesEnum {
+enum FilesEnum
+{
 	A, B, C, D, E, F, G, H
 };
 
@@ -160,4 +162,9 @@ struct GameRecordEntry_Struct
 
 	uint64_t fixedPiecesAttackerBB;
 	uint64_t fixedPiecesDefenderBB;
+};
+
+enum CPUVendorIdEnum
+{
+	CPUVENDORINTEL, CPUVENDORAMD, CPUVENDORUNKNOWN
 };
