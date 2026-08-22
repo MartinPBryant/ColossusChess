@@ -195,10 +195,30 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+pruning: have random chance of not pruning (higher chance at lower ply, higher chance earlier in movelist)
+
+
+on lichess, still occasionally get an error file thus...
+*** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
+can we keep track of the last FEW inputs from the gui, not just the p startpos ... ? also if pondering and anything else!
+i think it's when it ponders a move... and the opp doesn't play it? also may be only when in egtb? are all moves discarded?
+e.g. Colossus v Caliban, maybyen v Colossus
+
+
+
+
+
+
 use more time, especially when have increment!
-
-
-lichess - for classical games it doesn't use online openings? because of search depth?
+-try movesLeftBaseEstimate init to 5
+-try reucing the divisor on entry
+-test with 10s+0.1 and 10s+0 repeating and not repeating
+-is timeup expensive because of the FP divides? scale up and use integers?
+-somtimes the target movetime will be <<<the increment!!!
+--it should take the size of the increment into account! how??? if timeleft/movesleft<inc then movesleft--
+outputerror just to check that new code is ever getting called!!!
+also check the obviousmove code!
+-TRY REDUCING movesLeftBaseEstimate
 
 
 enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each? no... current move may be only a small fraction if <4 ages
@@ -225,7 +245,7 @@ eval: mobility
 -much slower in middlegame because of greater # of moves!
 -various asserts taken out! (because of EP capts) put back if don't use!
 -can we just use the LAST mob counts from the tree!? ... so slightly out of date ... ah! but not available in the QS :(
--use the last two values from main... save in the GR
+-use the last two values from main... save in the GR? 2 class vars?
 
 
 perft count overflows???
