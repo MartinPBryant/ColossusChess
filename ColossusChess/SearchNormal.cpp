@@ -582,8 +582,12 @@ void Normal::TimeUp(float divisor)
 				movesLeft += 5;
 			else
 			{
-				if (((float)timeLeft / (float)movesLeft) <= (float)WInc)
-					movesLeft = movesLeft / 2;//IN 1'+5s STILL BUILDS UP HUGE CLOCK TIME AT START!!!
+				// If we have an increment, add it to the timeleft
+				// If it is huge then we will probably hit the panic timeup next call but then get given the increment for the next move
+				// If it is small then it will just encourage slightly longer think times
+				timeLeft += WInc;
+				//if (((float)timeLeft / (float)movesLeft) <= (float)WInc)
+				//	movesLeft = movesLeft / 2;//IN 1'+5s STILL BUILDS UP HUGE CLOCK TIME AT START!!!
 				//MAYBE ADD WINC TO timeLeft? THEN IF ITS HUGE IT WILL USE HALF OF ACTUAL TIME, IF ITS TINY, WON'T MAKE MUCH DIFFERENCE
 			}
 			// So... when playing 'all the moves'...
