@@ -582,12 +582,13 @@ void Normal::TimeUp(float divisor)
 				movesLeft += 5;
 			else
 			{
-				if ((float)timeLeft / (float)movesLeft < (float)WInc)
-					movesLeft--;
+				if (((float)timeLeft / (float)movesLeft) <= (float)WInc)
+					movesLeft = movesLeft / 2;//IN 1'+5s STILL BUILDS UP HUGE CLOCK TIME AT START!!!
+				//MAYBE ADD WINC TO timeLeft? THEN IF ITS HUGE IT WILL USE HALF OF ACTUAL TIME, IF ITS TINY, WON'T MAKE MUCH DIFFERENCE
 			}
 			// So... when playing 'all the moves'...
 			// Without increment: movesLeft=15 (9+1+5) : so at the start of a 10 min game the target would be 40s (600/15)
-			// With increment: movesLeft=10 (9+1) : so at the start of a 10 min game the target would be 60s (600/10)
+			// With increment: movesLeft=10 (9+1) : so at the start of a 10 min game the target would be 60s (600/10) except if the increment was huge (e.g. 10'+1') where the target would be 120s
 		}
 		else // Repeating
 		{
