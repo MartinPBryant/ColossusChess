@@ -187,6 +187,29 @@ extern double Reductions[256];
 extern const int SeeLowHighValues[7];
 extern const int SeeValues[7];
 
+
+extern std::string CPUVendor;
+extern CPUVendorIdEnum CPUVendorId;
+extern std::string CPUBrand;
+extern int CPUFamily;
+extern int CPUModel;
+extern uint64_t ThisCPUSupports;
+extern std::string ThisCPUSupportsEISNames;
+#define EISMMX (1 << 0)
+#define EISSSE (1 << 1)
+#define EISSSE2 (1 << 2)
+#define EISSSE3 (1 << 3)
+#define EISSSSE3 (1 << 4)
+#define EISAVX (1 << 5)
+#define EISAVX2 (1 << 6)
+#define EISAVX512 (1 << 7)
+#define EISBMI1 (1 << 8)
+#define EISBMI2 (1 << 9)
+#define EISPOPCNT (1 << 10)
+#define EISLZCNT (1 << 11)
+extern std::string EISNames[12];
+
+
 //----------------------------------------------------------------------------------------------------
 
 void ClearMailboxBoard64(int8_t mailboxBoard64[64]);

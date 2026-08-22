@@ -155,6 +155,15 @@ alignas(64) int8_t ManhattanDistance[64][64];
 //int MoveListIndex;
 double Reductions[256];
 
+std::string CPUVendor = "";
+std::string CPUBrand = "";
+CPUVendorIdEnum CPUVendorId;
+int CPUFamily;
+int CPUModel;
+uint64_t ThisCPUSupports;
+std::string ThisCPUSupportsEISNames;
+std::string EISNames[12] = {"MMX", "SSE", "SSE2", "SSE2", "SSSE3", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT"};
+
 //----------------------------------------------------------------------------------------------------
 
 // Side stuff

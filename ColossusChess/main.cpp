@@ -13,6 +13,9 @@
 // Program entry point
 int main(int argc, char * argv[])
 {
+	// Identify and display this computer's CPU information
+	CPUInfo();
+
 	// Get the application's path/filename and construct various utility file paths
 	std::string ApplicationPath = argv[0];
 	size_t index = ApplicationPath.rfind("\\");

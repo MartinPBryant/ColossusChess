@@ -386,13 +386,88 @@ int BoardRand0To63()
 }
 
 //----------------------------------------------------------------------------------------------------
-#include <array>
 
 void CPUInfo()
 {
-	std::array<int, 4> cpui;
+	int cpuInfo[4];
+	int count;
 
-	// Calling __cpuid with 0x0 as the function_id argument
-	// gets the number of the highest valid function ID.
-	__cpuid(cpui.data(), 0);
+	__cpuid(cpuInfo, 0);
+
+	char vendor[16];
+	memset(vendor, 0, sizeof(vendor));
+	memcpy(vendor, &cpuInfo[1], 4);
+	memcpy(vendor + 4, &cpuInfo[3], 4);
+	memcpy(vendor + 8, &cpuInfo[2], 4);
+
+	CPUVendor = std::string(vendor);
+	if (CPUVendor == "GenuineIntel")
+		CPUVendorId =  CPUVENDORINTEL;
+	else if (CPUVendor == "AuthenticAMD")
+		CPUVendorId = CPUVENDORAMD;
+	else
+		CPUVendorId = CPUVENDORUNKNOWN;
+
+	ThisCPUSupports = 0;
+
+	count = cpuInfo[0];
+	for (int i = 0; i <= count; i++)
+	{
+		__cpuid(cpuInfo, i);
+		
+		if (i == 1)
+		{
+			CPUFamily = ((cpuInfo[0] & (0xf << 8)) >> 8) + ((cpuInfo[0] & (0xff << 20)) >> 20);
+			CPUModel = ((cpuInfo[0] & (0xf << 16)) >> 12) + ((cpuInfo[0] & (0xf << 4)) >> 4);
+			if (cpuInfo[3] & (1 << 26))
+				ThisCPUSupports |= EISSSE2;
+			if (cpuInfo[2] & (1 << 23))
+				ThisCPUSupports |= EISPOPCNT;
+			if (cpuInfo[2] & (1 << 9))
+				ThisCPUSupports |= EISSSSE3;
+		}
+
+		if (i == 7)
+		{
+			if (cpuInfo[1] & (1 << 3))
+				ThisCPUSupports |= EISBMI1;
+			if (cpuInfo[1] & (1 << 8))
+				ThisCPUSupports |= EISBMI2;
+			if (cpuInfo[1] & (1 << 5))
+				ThisCPUSupports |= EISAVX2;
+			if (cpuInfo[1] & ((1 << 16) | (1 << 30)))
+				ThisCPUSupports |= EISAVX512;
+		}
+	}
+
+	char brand[64];
+	memset(brand, 0, sizeof(brand));
+
+	__cpuid(cpuInfo, 0x80000000);
+
+	count = cpuInfo[0];
+	for (int i = 0x80000000; i <= count; i++)
+	{
+		__cpuid(cpuInfo, i);
+		if (i == 0x80000001)
+			if (cpuInfo[2] & (1 << 5))
+				ThisCPUSupports |= EISLZCNT;
+		if (i == 0x80000002)
+			memcpy(brand, cpuInfo, sizeof(cpuInfo));
+		else if (i == 0x80000003)
+			memcpy(brand + 16, cpuInfo, sizeof(cpuInfo));
+		else if (i == 0x80000004)
+			memcpy(brand + 32, cpuInfo, sizeof(cpuInfo));
+	}
+
+	CPUBrand = std::string(brand);
+	trim(CPUBrand);
+
+	ThisCPUSupportsEISNames = "";
+	for (int i = 0; i <= 11; i++)
+		if (ThisCPUSupports & (1 << i))
+			ThisCPUSupportsEISNames += EISNames[i] + " ";
+	trim(ThisCPUSupportsEISNames);
+
+	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported: " + ThisCPUSupportsEISNames);
 }
