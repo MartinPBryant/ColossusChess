@@ -384,3 +384,15 @@ int BoardRand0To63()
 {
 	return BoardRand(0, 63);
 }
+
+//----------------------------------------------------------------------------------------------------
+#include <array>
+
+void CPUInfo()
+{
+	std::array<int, 4> cpui;
+
+	// Calling __cpuid with 0x0 as the function_id argument
+	// gets the number of the highest valid function ID.
+	__cpuid(cpui.data(), 0);
+}
