@@ -218,7 +218,7 @@ use more time, especially when have increment!
 --it should take the size of the increment into account! how??? if timeleft/movesleft<inc then movesleft--
 outputerror just to check that new code is ever getting called!!!
 also check the obviousmove code!
--TRY REDUCING movesLeftBaseEstimate
+-TRY REDUCING movesLeftBaseEstimate - UPDATE COMMENTS!
 
 
 enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each? no... current move may be only a small fraction if <4 ages

@@ -1840,6 +1840,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing!
 				&& (!((std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn) && ((currentMove.mf.toSquare >> 3) == SeventhRank[sideToMove]))) // P move to 7th?
 				&& (bestSortScore <= 0)
+				&& ((NodeCount & 255) != 0)//TESTING
 				)
 			{
 				PRINTTREE(PrintTree2(IterationPly, ply, "LMP");)
