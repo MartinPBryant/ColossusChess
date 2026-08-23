@@ -583,13 +583,13 @@ void Normal::TimeUp(float divisor)
 			else
 			{
 				// If we have an increment, add it to the timeleft
-				// If it is huge then we will probably hit the panic timeup next call but then get given the increment for the next move
+				// If it is huge then we will probably hit the panic timeup but then get given the increment for the next move
 				// If it is small then it will just encourage slightly longer think times
 				timeLeft += WInc;
 			}
 			// So... when playing 'all the moves'...
-			// Without increment: movesLeft=15 (9+1+5) : so at the start of a 10 min game the target would be 40s (600/15)
-			// With increment: movesLeft=10 (9+1) : so at the start of a 10 min game the target would be 60s (600/10)
+			// Without increment: movesLeft=14 (8+1+5) : so at the start of a 10 min game the target would be 42s (600/14)
+			// With increment: movesLeft=9 (8+1) : so at the start of a 10 min game the target would be 66s (600/9)
 		}
 		else // Repeating
 		{
