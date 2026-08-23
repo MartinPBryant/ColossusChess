@@ -572,14 +572,24 @@ void Normal::TimeUp(float divisor)
 		}
 
 		// 'Estimate' moves left to time control to give us a budget
-		// N.B. MovesToGo is provided by the GUI and is the actual # of moves to make before the time control
-		const int movesLeftBaseEstimate = 9;//11;
+		// N.B. MovesToGo is provided by the GUI and is either zero ('all the moves') or the actual # of moves to make before the time control ('repeating')
+		const int movesLeftBaseEstimate = 8;// 9;//11;
 		movesLeft = movesLeftBaseEstimate;
 		if (MovesToGo == 0) // 'All the moves'?
 		{
 			movesLeft += 1;
 			if (WInc == 0) // If 'all the moves' AND no Fischer bonus then need to be VERY careful. It is assumed WInc and BInc will be the same!
 				movesLeft += 5;
+			else
+			{
+				// If we have an increment, add it to the timeleft
+				// If it is huge then we will probably hit the panic timeup but then get given the increment for the next move
+				// If it is small then it will just encourage slightly longer think times
+				timeLeft += WInc;
+			}
+			// So... when playing 'all the moves'...
+			// Without increment: movesLeft=14 (8+1+5) : so at the start of a 10 min game the target would be 42s (600/14)
+			// With increment: movesLeft=9 (8+1) : so at the start of a 10 min game the target would be 66s (600/9)
 		}
 		else // Repeating
 		{
@@ -1830,6 +1840,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing!
 				&& (!((std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn) && ((currentMove.mf.toSquare >> 3) == SeventhRank[sideToMove]))) // P move to 7th?
 				&& (bestSortScore <= 0)
+				&& ((NodeCount & 255) != 0)//TESTING
 				)
 			{
 				PRINTTREE(PrintTree2(IterationPly, ply, "LMP");)
