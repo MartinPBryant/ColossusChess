@@ -23,14 +23,18 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 ***I ASSUME THIS IS JUST VARIANCE
 
 2026aNonPGO v 4 {2s+0.1s: halve moves divisor if large Fisher bonus} (0.14) PCS2
-2026aNonPGO v 4 {2s+0.1s: halve moves divisor if large Fisher bonus} () PCS1
-2026aNonPGO v 4 {2s+0.1s: halve moves divisor if large Fisher bonus} () ASUS1
+2026aNonPGO v 4 {2s+0.1s: halve moves divisor if large Fisher bonus} (1.04, +/-3.92, 15409) PCS1
+2026aNonPGO v 4 {2s+0.1s: halve moves divisor if large Fisher bonus} (-2.40, +/-4.17, 13599) ASUS1
 
-2026aNonPGO v 5 {2s+0.1s: add Fisher bonus to timeleft} () PCS2
-2026aNonPGO v 5 {2s+0.1s: add Fisher bonus to timeleft} () PCS1
-2026aNonPGO v 5 {2s+0.1s: add Fisher bonus to timeleft} () ASUS1
+2026aNonPGO v 5 {2s+0.1s: add Fisher bonus to timeleft} (-7.82) PCS2
+2026aNonPGO v 5 {2s+0.1s: add Fisher bonus to timeleft} (-4.08) PCS1
+2026aNonPGO v 5 {2s+0.1s: add Fisher bonus to timeleft} (-2.22) ASUS1
 
+5 v 6 {2s+0.1s: movesLeftBaseEstimate reduced to 8} (-4.53) PCS2
+5 v 6 {2s+0.1s: movesLeftBaseEstimate reduced to 8} (-5.61) PCS1
+5 v 6 {2s+0.1s: movesLeftBaseEstimate reduced to 8} (-7.45) ASUS1
 
+2026aNonPGO v 6 (-10.48) PCS2
 
 
 

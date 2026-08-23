@@ -206,19 +206,14 @@ e.g. Colossus v Caliban, maybyen v Colossus
 
 
 
+test ClearLS1B with blsr again (bitboard.h)
 
+try _pext_u64 instead of magics (see chatgpt code...)
+uint64_t index = (blockers * m.magic) >> m.shift;
+changes to
+uint64_t index = _pext_u64(occupancy, t.mask);
+see comment already in code! :D
 
-
-use more time, especially when have increment!
--try movesLeftBaseEstimate init to 5
--try reucing the divisor on entry
--test with 10s+0.1 and 10s+0 repeating and not repeating
--is timeup expensive because of the FP divides? scale up and use integers?
--somtimes the target movetime will be <<<the increment!!!
---it should take the size of the increment into account! how??? if timeleft/movesleft<inc then movesleft--
-outputerror just to check that new code is ever getting called!!!
-also check the obviousmove code!
--TRY REDUCING movesLeftBaseEstimate
 
 
 enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each? no... current move may be only a small fraction if <4 ages

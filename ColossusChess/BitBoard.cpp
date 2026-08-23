@@ -518,11 +518,23 @@ const uint64_t BishopMagicMultipliers[64] = {
 // This is used by the move generators
 uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
-	occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
-	occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
-	// I *THINK* that _pext_u64 (part of BMI2) does the above 3 instructions in one go??? TEST!
-	return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
+	//occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
+	//occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
+	//occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
+	//return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
+
+	uint64_t blockers, index1, index2,index3;
+	blockers = occupiedSquaresBB & RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
+	index1 = blockers * RookMagicMultipliers[square] >> RookBlockerPermutationBitsPreAdjusted[square];
+	//return *(RookAttacksFancyPointer[square] + index);
+
+	index2 = _pext_u64(occupiedSquaresBB, 64 - 12);
+	index3 = _pext_u64(occupiedSquaresBB, RookInnerRays[square]);
+	if (index1 != index2)
+		occupiedSquaresBB = 0;
+	if (index1 != index3)
+		occupiedSquaresBB = 0;
+	return *(RookAttacksFancyPointer[square] + index1);
 }
 
 // Return a bitboard containing all the squares attacked by the bishop on the provided square with the provided blockers
