@@ -162,7 +162,7 @@ int CPUFamily;
 int CPUModel;
 uint64_t ThisCPUSupports;
 std::string ThisCPUSupportsEISNames;
-std::string EISNames[12] = {"MMX", "SSE", "SSE2", "SSE2", "SSSE3", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT"};
+std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE42", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT"};
 
 //----------------------------------------------------------------------------------------------------
 
@@ -331,7 +331,7 @@ void WritePiecesBBAddPieces(int8_t mailboxBoard64[64], uint64_t bb, int8_t piece
 {
 	while (bb)
 	{
-		int square = BitScanForwardX(bb);
+		int square = GetLS1BIndex(bb);
 		mailboxBoard64[square] = pieceType;
 		ClearLS1B(bb);
 	}
@@ -364,8 +364,8 @@ void ConvertMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesB
 		if (piece != Empty)
 		{
 			int sideToMove = (piece < 0 ? 1 : 0);
-			piecesBB[sideToMove][abs(piece)] |= UINT64SetBit(square);
-			piecesBB[sideToMove][AllPieces] |= UINT64SetBit(square);
+			piecesBB[sideToMove][abs(piece)] |= CreateBitboardFromSquare(square);
+			piecesBB[sideToMove][AllPieces] |= CreateBitboardFromSquare(square);
 		}
 	}
 }
@@ -380,7 +380,7 @@ void ConvertPiecesBBToMailboxBoard64(uint64_t piecesBB[Sides][King + 2], int8_t 
 			uint64_t bb2 = piecesBB[side][piece];
 			while (bb2)
 			{
-				int square = BitScanForwardX(bb2);
+				int square = GetLS1BIndex(bb2);
 				mailboxBoard64[square] = (side == 0 ? piece : -piece);
 				ClearLS1B(bb2);
 			}

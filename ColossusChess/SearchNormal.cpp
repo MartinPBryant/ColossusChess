@@ -59,7 +59,7 @@ void Normal::TestSEE()
 
 	MoveWithScore_Struct moveList[220];
 	normalBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-	int movesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(BitScanForwardX(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	int movesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 
 	for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 	{
@@ -1673,7 +1673,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	// Loop through move list
 	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // Default PV terminator (setting this again here as razoring can disturb it!)
 	legalMovesMade = 0;
-	int enemyKingSquare = BitScanForwardX(normalBrain.piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(normalBrain.piecesBB[sideToMove ^ 1][King]);
 	int winningCaptureIndex = 999;
 	//uint64_t passedPawnsBB = (sideToMove == 0) ? passedSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]) : passedSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
 	//uint64_t passedPawnRunnersBB = 0;
@@ -1840,11 +1840,11 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing!
 				&& (!((std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn) && ((currentMove.mf.toSquare >> 3) == SeventhRank[sideToMove]))) // P move to 7th?
 				&& (bestSortScore <= 0)
-				&& ((NodeCount & 255) != 0)//TESTING
+				//&& ((int)(NodeCount & 255) > (IterationPly - ply))//TESTING
 				)
 			{
 				PRINTTREE(PrintTree2(IterationPly, ply, "LMP");)
-				normalBrain.UnMakeMove(sideToMove);
+					normalBrain.UnMakeMove(sideToMove);
 				continue;
 			}
 
@@ -1885,7 +1885,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				passedBB = passedSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]);
 			else
 				passedBB = passedSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
-			passedPawnMove = (passedBB & UINT64SetBit(currentGameRecordPointer->move.mf.toSquare));
+			passedPawnMove = (passedBB & CreateBitboardFromSquare(currentGameRecordPointer->move.mf.toSquare));
 		}
 
 		
@@ -2310,7 +2310,7 @@ std::string Normal::ComputeNormal()
 	MoveWithScore_Struct moveList[220];
 	RootMoveList[0].mws.ui32 = 0; //WHY???
 	normalBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(BitScanForwardX(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 	if (RootMovesCount == 0) // Sometimes the GUI or the user provide positions with zero legal moves! (e.g. checkmates/stalemates in chess)
 	{
 		Output("info string *** Error! There are zero moves in the position provided!");
@@ -2517,7 +2517,7 @@ std::string Normal::ComputeNormal()
 
 		// Do the tree search
 		// N.B. RootScore is relative to the side-to-move so e.g. if black is moving and mating this will a large +ve score
-		RootScore = TreeSearchNormal(RootAlpha, RootBeta, 1, IterationPly, SideToMove, normalBrain.IsEnemyKingAttacked(BitScanForwardX(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), false, false);
+		RootScore = TreeSearchNormal(RootAlpha, RootBeta, 1, IterationPly, SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), false, false);
 
 		CRASHLOCATION(50);
 

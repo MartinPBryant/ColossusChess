@@ -1215,7 +1215,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	uint32_t movesCount = perftBrain.GenerateAllMoves(sideToMove, isInCheck, moveList);
 
 	// Loop through move list
-	int enemyKingSquare = BitScanForwardX(perftBrain.piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(perftBrain.piecesBB[sideToMove ^ 1][King]);
 
 	// Try to get any extra threads working on different moves in the list by offsetting and reversing
 	int start = 0;
@@ -1339,10 +1339,10 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	{
 		// An optimisation in the TreeSearchPerft routine stops 'go perft 1' working! So that is handled uniquely here
 		perftBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-		perftNodes += perftBrain.CountAllMoves(SideToMove, perftBrain.IsEnemyKingAttacked(BitScanForwardX(perftBrain.piecesBB[SideToMove][King]), SideToMove ^ 1));
+		perftNodes += perftBrain.CountAllMoves(SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.piecesBB[SideToMove][King]), SideToMove ^ 1));
 	}
 	else
-		TreeSearchPerft(1, SideToMove, perftBrain.IsEnemyKingAttacked(BitScanForwardX(perftBrain.piecesBB[SideToMove][King]), SideToMove ^ 1));
+		TreeSearchPerft(1, SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.piecesBB[SideToMove][King]), SideToMove ^ 1));
 
 	ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startClock).count();
 

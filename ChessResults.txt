@@ -36,7 +36,20 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 
 2026aNonPGO v 6 (-10.48) PCS2
 
-6 v 7 {LMP not done 1/256} () PCS2
+6 v 7 {LMP not done 1/256} (-0.59) PCS2
+6 v 7 {LMP not done 1/256} (-2.03) PCS1
+6 v 7 {LMP not done 1/256} (1.67) ASUS1
+
+6 v 8 {LMP not done 1/256 && ply<=ID} (0.83) PCS2
+
+6 v 9 {LMP not done (ID-ply)/256 so more likely at lower ply} (2.26) PCS2
+6 v 9 {LMP not done (ID-ply)/256 so more likely at lower ply} (0.80) PCS2
+6 v 9 {LMP not done (ID-ply)/256 so more likely at lower ply} (0.57) ASUS1
+
+10 v 12 {BitScanForwardPOPCNT v BitScanForwardTZCNT} () PCS2
+
+
+
 
 
 

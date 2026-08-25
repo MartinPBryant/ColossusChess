@@ -1,53 +1,48 @@
-#ifdef _WIN32
-#include <intrin.h>
-#endif
 #include <assert.h>
-//#include <cstring>
-//#include <bitset>
 
-//#include "GlobalConstants.h"
 #include "GlobalTypes.h"
 #include "BitBoard.h"
-//#include "Engine.h"
 
 //----------------------------------------------------------------------------------------------------
 
-// Basic population count and bitscan routines (64-bit and 32-bit)
+// Basic population count and bitscan routines
 
-//#define x64
-
-#if defined _WIN64 && !defined TB_NO_HW_POP_COUNT
-
-__forceinline uint32_t PopulationCountHardware(uint64_t ui64) // Fastest
+__forceinline uint32_t BitScanForwardPOPCNT(uint64_t bb)
 {
-#ifdef _WIN32
-	return (uint32_t)__popcnt64(ui64);
-#else
-	return __builtin_popcountll(ui64);
-#endif
+	assert(bb != 0);
+	return (uint32_t)__popcnt64((bb & (0 - bb)) - 1);
 }
 
-__forceinline unsigned long BitScanForwardHardwareBSF(uint64_t ui64) // Marginally slower than BitScanForwardHardwarePOPCNT
+__forceinline uint32_t BitScanForwardBSF(uint64_t bb)
 {
+	assert(bb != 0);
 	unsigned long _Index;
-	_BitScanForward64(&_Index, ui64);
-	return _Index;
-}
-
-__forceinline uint32_t BitScanForwardHardwarePOPCNT(uint64_t ui64) // Fastest
-{
-	return (uint32_t)__popcnt64((ui64 & (0 - ui64)) - 1);
-}
-
-__forceinline uint32_t BitScanReverseBSR(uint64_t ui64) // Fastest
-{
-	unsigned long _Index;
-	_BitScanReverse64(&_Index, ui64);
+	_BitScanForward64(&_Index, bb);
 	return (uint32_t)_Index;
 }
 
+__forceinline uint32_t BitScanForwardTZCNT(uint64_t bb)
+{
+	assert(bb != 0);
+	return (uint32_t)_tzcnt_u64(bb);
+}
+
+__forceinline uint32_t BitScanReverseBSR(uint64_t bb)
+{
+	assert(bb != 0);
+	unsigned long _Index;
+	_BitScanReverse64(&_Index, bb);
+	return (uint32_t)_Index;
+}
+
+__forceinline uint32_t BitScanReverseLZCNT(uint64_t bb)
+{
+	assert(bb != 0);
+	return (uint32_t)_lzcnt_u64(bb);
+}
+
 __forceinline int poplsb(uint64_t *bb) {
-	int lsb = BitScanForwardX(*bb);
+	int lsb = GetLS1BIndex(*bb);
 	*bb &= *bb - 1;
 	return lsb;
 }
@@ -57,104 +52,14 @@ __forceinline int poplsb(uint64_t *bb) {
 //	return __builtin_ctzll(bb);
 //}
 
-#else
-
-// Software based routines (used for 32-bit or very old 64-bit processors)
-#define PopulationCountX(ui64) PopulationCountByArray(ui64)
-#define BitScanForwardX(ui64) BitScanForwardDeBruijn(ui64)
-#define BitScanReverseX(ui64) BitScanReverseMs1b(ui64)
-
-__forceinline int PopulationCountBrianKernighan(uint64_t ui64) // Slowest but simplest s/w
-{ // Brian Kernighan's method
-	int count = 0;
-	while (ui64) {
-		count++;
-		ClearLS1B(ui64);
-	}
-	return count;
-}
-
-// Faster to declare constants outside of functions!
-const uint64_t k1 = 0x5555555555555555; /*  -1/3   */
-const uint64_t k2 = 0x3333333333333333; /*  -1/5   */
-const uint64_t k4 = 0x0f0f0f0f0f0f0f0f; /*  -1/17  */
-const uint64_t kf = 0x0101010101010101; /*  -1/255 */
-__forceinline uint64_t PopulationCountSWAR(uint64_t ui64) // Nearly fastest s/w
-{  // SWAR (SIMD (Single Instructions on Multiple Data) Within A Register) method
-	ui64 = ui64 - ((ui64 >> 1)  & k1); /* put count of each 2 bits into those 2 bits */
-	ui64 = (ui64 & k2) + ((ui64 >> 2)  & k2); /* put count of each 4 bits into those 4 bits */
-	ui64 = (ui64 + (ui64 >> 4)) & k4; /* put count of each 8 bits into those 8 bits */
-	ui64 = (ui64 * kf) >> 56; /* returns 8 most significant bits of x + (x<<8) + (x<<16) + (x<<24) + ...  */
-	return ui64;
-}
-
-extern uint8_t PopulationCount16[1 << 16];
-__forceinline uint64_t PopulationCountByArray(uint64_t ui64) // Fastest (just) s/w
-{
-	union
-	{
-		uint64_t bb;
-		uint16_t ui16[4];
-	} v = { ui64 };
-	return PopulationCount16[v.ui16[0]] + PopulationCount16[v.ui16[1]] + PopulationCount16[v.ui16[2]] + PopulationCount16[v.ui16[3]];
-}
-
-// Faster to declare constants outside of functions!
-const int DeBruijnIndex64[64] = {
-	0, 47,  1, 56, 48, 27,  2, 60,
-   57, 49, 41, 37, 28, 16,  3, 61,
-   54, 58, 35, 52, 50, 42, 21, 44,
-   38, 32, 29, 23, 17, 11,  4, 62,
-   46, 55, 26, 59, 40, 36, 15, 53,
-   34, 51, 20, 43, 31, 22, 10, 45,
-   25, 39, 14, 33, 19, 30,  9, 24,
-   13, 18,  8, 12,  7,  6,  5, 63
-};
-const uint64_t DeBruijnui64 = 0x03f79d71b4cb0a89;
-__forceinline int BitScanForwardDeBruijn(uint64_t ui64) // Fastest s/w
-{
-	return DeBruijnIndex64[((ui64 ^ (ui64 - 1)) * DeBruijnui64) >> 58];
-}
-
-__forceinline int BitScanReverseDeBruijn(uint64_t ui64)
-{
-	ui64 |= ui64 >> 1;
-	ui64 |= ui64 >> 2;
-	ui64 |= ui64 >> 4;
-	ui64 |= ui64 >> 8;
-	ui64 |= ui64 >> 16;
-	ui64 |= ui64 >> 32;
-	return DeBruijnIndex64[(ui64 * DeBruijnui64) >> 58];
-}
-
-extern int Ms1b[256];
-__forceinline int BitScanReverseMs1b(uint64_t ui64) // Fastest s/w
-{
-	int result = 0;
-	if (ui64 > 0xFFFFFFFF) {
-		ui64 >>= 32;
-		result = 32;
-	}
-	if (ui64 > 0xFFFF) {
-		ui64 >>= 16;
-		result += 16;
-	}
-	if (ui64 > 0xFF) {
-		ui64 >>= 8;
-		result += 8;
-	}
-	return result + Ms1b[ui64];
-}
-
-#endif
 
 //----------------------------------------------------------------------------------------------------
 
 // Bitboard manipulation routines (compass points are from white's perspective)
-inline uint64_t Rank(int square) { return  CUINT64(0xff) << (square & 56); }
-inline uint64_t File(int square) { return CUINT64(0x0101010101010101) << (square & 7); }
-inline uint64_t LeftDiagonal(int square) { const uint64_t longDiagonal = CUINT64(0x0102040810204080); int diagonal = 56 - 8 * (square & 7) - (square & 56); int north = -diagonal & (diagonal >> 31); int south = diagonal & (-diagonal >> 31); return (longDiagonal >> south) << north; }
-inline uint64_t RightDiagonal(int square) { const uint64_t longDiagonal = CUINT64(0x8040201008040201); int diagonal = 8 * (square & 7) - (square & 56); int north = -diagonal & (diagonal >> 31); int south = diagonal & (-diagonal >> 31); return (longDiagonal >> south) << north; }
+inline uint64_t Rank(int square) { return  0xffULL << (square & 56); }
+inline uint64_t File(int square) { return 0x0101010101010101ULL << (square & 7); }
+inline uint64_t LeftDiagonal(int square) { const uint64_t longDiagonal = 0x0102040810204080ULL; int diagonal = 56 - 8 * (square & 7) - (square & 56); int north = -diagonal & (diagonal >> 31); int south = diagonal & (-diagonal >> 31); return (longDiagonal >> south) << north; }
+inline uint64_t RightDiagonal(int square) { const uint64_t longDiagonal = 0x8040201008040201ULL; int diagonal = 8 * (square & 7) - (square & 56); int north = -diagonal & (diagonal >> 31); int south = diagonal & (-diagonal >> 31); return (longDiagonal >> south) << north; }
 
 inline uint64_t North(uint64_t bb) { return  bb << 8; }
 inline uint64_t South(uint64_t bb) { return  bb >> 8; }
@@ -230,7 +135,7 @@ inline uint64_t halfOpenFile(uint64_t bb1, uint64_t bb2) { return halfOpenOrOpen
 
 inline uint8_t fileSet(uint64_t bb) { return (uint8_t)SouthFill(bb); }
 
-inline bool Aligned(int square1, int square2, int square3) { return LineListBB[square1][square2] & UINT64SetBit(square3); }
+inline bool Aligned(int square1, int square2, int square3) { return LineListBB[square1][square2] & CreateBitboardFromSquare(square3); }
 
 //----------------------------------------------------------------------------------------------------
 
@@ -518,23 +423,23 @@ const uint64_t BishopMagicMultipliers[64] = {
 // This is used by the move generators
 uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	//occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
-	//occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
-	//occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
-	//return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
+	occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
+	occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
+	occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
+	return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
 
-	uint64_t blockers, index1, index2,index3;
-	blockers = occupiedSquaresBB & RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
-	index1 = blockers * RookMagicMultipliers[square] >> RookBlockerPermutationBitsPreAdjusted[square];
-	//return *(RookAttacksFancyPointer[square] + index);
+	//uint64_t blockers, index1, index2,index3;
+	//blockers = occupiedSquaresBB & RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
+	//index1 = blockers * RookMagicMultipliers[square] >> RookBlockerPermutationBitsPreAdjusted[square];
+	////return *(RookAttacksFancyPointer[square] + index);
 
-	index2 = _pext_u64(occupiedSquaresBB, 64 - 12);
-	index3 = _pext_u64(occupiedSquaresBB, RookInnerRays[square]);
-	if (index1 != index2)
-		occupiedSquaresBB = 0;
-	if (index1 != index3)
-		occupiedSquaresBB = 0;
-	return *(RookAttacksFancyPointer[square] + index1);
+	//index2 = _pext_u64(occupiedSquaresBB, 64 - 12);
+	//index3 = _pext_u64(occupiedSquaresBB, RookInnerRays[square]);
+	//if (index1 != index2)
+	//	occupiedSquaresBB = 0;
+	//if (index1 != index3)
+	//	occupiedSquaresBB = 0;
+	//return *(RookAttacksFancyPointer[square] + index1);
 }
 
 // Return a bitboard containing all the squares attacked by the bishop on the provided square with the provided blockers
@@ -629,7 +534,7 @@ uint64_t PermutationIndexToBB(int permutationIndex, int blockerPermutationBits, 
 	int i, j;
 	uint64_t result = 0ULL;
 	for (i = 0; i < blockerPermutationBits; i++) { // e.g. 0 .. 11
-		j = BitScanForwardX(innerRays);
+		j = GetLS1BIndex(innerRays);
 		ClearLS1B(innerRays);
 		if (permutationIndex & (1 << i)) result |= (1ULL << j);
 	}
@@ -637,8 +542,8 @@ uint64_t PermutationIndexToBB(int permutationIndex, int blockerPermutationBits, 
 }
 
 inline uint64_t FlipVertical(uint64_t bb) {
-	const uint64_t k1 = CUINT64(0x00FF00FF00FF00FF);
-	const uint64_t k2 = CUINT64(0x0000FFFF0000FFFF);
+	const uint64_t k1 = 0x00FF00FF00FF00FFULL;
+	const uint64_t k2 = 0x0000FFFF0000FFFFULL;
 	bb = ((bb >> 8) & k1) | ((bb & k1) << 8);
 	bb = ((bb >> 16) & k2) | ((bb & k2) << 16);
 	bb = (bb >> 32) | (bb << 32);
@@ -669,7 +574,7 @@ void InitialiseBitBoardLists()
 	int bishopFancyIndex = 0;
 	for (int square = A1; square <= H8; square++)
 	{
-		uint64_t squareBB = UINT64SetBit(square);
+		uint64_t squareBB = CreateBitboardFromSquare(square);
 
 		if (square < A8)
 			PawnAttacksBBList[0][square] = Side0PawnAttacksBB(squareBB);
@@ -720,7 +625,7 @@ void InitialiseBitBoardLists()
 
 		int kingRank = square >> 3;
 		int movesToPromotionRank = 7 - kingRank;
-		uint64_t bb = UINT64SetBit(square);
+		uint64_t bb = CreateBitboardFromSquare(square);
 		for (int i = 0; i < movesToPromotionRank; i++)
 			bb |= West(bb) | East(bb); // The king can catch pawns to either side by the same number of moves to the promotion rank
 		if (kingRank < 2) // If the king is on the 1st or 2nd rank it can't catch any pawns so clear the bitboard BUG FIX!
@@ -747,11 +652,11 @@ void InitialiseBitBoardLists()
 		if (square < 56)
 			square2 += 8; // If it's not already on the promotion rank then it can advance
 		// Now it can capture the union of the current square and the squares to each side
-		PassedPawnCatchableByKing[1][1][square] = PassedPawnCatchableByKing[0][1][square2] | UINT64SetBit(square2); // Also have to 'or' in the square itself to handle when the king is on the 1st rank
+		PassedPawnCatchableByKing[1][1][square] = PassedPawnCatchableByKing[0][1][square2] | CreateBitboardFromSquare(square2); // Also have to 'or' in the square itself to handle when the king is on the 1st rank
 		if (square % 8 > 0)
-			PassedPawnCatchableByKing[1][1][square] |= PassedPawnCatchableByKing[0][1][square2 - 1] | UINT64SetBit(square2 - 1);
+			PassedPawnCatchableByKing[1][1][square] |= PassedPawnCatchableByKing[0][1][square2 - 1] | CreateBitboardFromSquare(square2 - 1);
 		if (square % 8 < 7)
-			PassedPawnCatchableByKing[1][1][square] |= PassedPawnCatchableByKing[0][1][square2 + 1] | UINT64SetBit(square2 + 1);
+			PassedPawnCatchableByKing[1][1][square] |= PassedPawnCatchableByKing[0][1][square2 + 1] | CreateBitboardFromSquare(square2 + 1);
 
 		PassedPawnCatchableByKing[0][0][square ^ 56] = FlipVertical(PassedPawnCatchableByKing[1][1][square]);
 	}
@@ -769,15 +674,15 @@ void InitialiseBitBoardLists()
 		{
 			LineListBB[squareIndex1][squareIndex2] = 0;
 			BetweenListBB[squareIndex1][squareIndex2] = 0;
-			if ((squareIndex1 != squareIndex2) && ((LeftDiagonalsListBB[squareIndex1] | RightDiagonalsListBB[squareIndex1]) & UINT64SetBit(squareIndex2)))
+			if ((squareIndex1 != squareIndex2) && ((LeftDiagonalsListBB[squareIndex1] | RightDiagonalsListBB[squareIndex1]) & CreateBitboardFromSquare(squareIndex2)))
 			{
-				LineListBB[squareIndex1][squareIndex2] = (BishopAttacksBB(squareIndex1, 0) & BishopAttacksBB(squareIndex2, 0)) | UINT64SetBit(squareIndex1) | UINT64SetBit(squareIndex2);
-				BetweenListBB[squareIndex1][squareIndex2] = BishopAttacksBB(squareIndex1, UINT64SetBit(squareIndex2)) & BishopAttacksBB(squareIndex2, UINT64SetBit(squareIndex1));
+				LineListBB[squareIndex1][squareIndex2] = (BishopAttacksBB(squareIndex1, 0) & BishopAttacksBB(squareIndex2, 0)) | CreateBitboardFromSquare(squareIndex1) | CreateBitboardFromSquare(squareIndex2);
+				BetweenListBB[squareIndex1][squareIndex2] = BishopAttacksBB(squareIndex1, CreateBitboardFromSquare(squareIndex2)) & BishopAttacksBB(squareIndex2, CreateBitboardFromSquare(squareIndex1));
 			}
-			if ((squareIndex1 != squareIndex2) && ((RanksListBB[squareIndex1] | FilesListBB[squareIndex1]) & UINT64SetBit(squareIndex2)))
+			if ((squareIndex1 != squareIndex2) && ((RanksListBB[squareIndex1] | FilesListBB[squareIndex1]) & CreateBitboardFromSquare(squareIndex2)))
 			{
-				LineListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, 0) & RookAttacksBB(squareIndex2, 0) | UINT64SetBit(squareIndex1) | UINT64SetBit(squareIndex2);
-				BetweenListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, UINT64SetBit(squareIndex2)) & RookAttacksBB(squareIndex2, UINT64SetBit(squareIndex1));
+				LineListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, 0) & RookAttacksBB(squareIndex2, 0) | CreateBitboardFromSquare(squareIndex1) | CreateBitboardFromSquare(squareIndex2);
+				BetweenListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, CreateBitboardFromSquare(squareIndex2)) & RookAttacksBB(squareIndex2, CreateBitboardFromSquare(squareIndex1));
 			}
 		}
 	}
@@ -795,7 +700,7 @@ void InitialiseBitBoardLists()
 				case Pawn:
 					break;
 				case Knight:
-					if (KnightAttacksBBList[square] & UINT64SetBit(attackedSquare))
+					if (KnightAttacksBBList[square] & CreateBitboardFromSquare(attackedSquare))
 						v = 2;
 					break;
 				case Bishop:
@@ -805,7 +710,7 @@ void InitialiseBitBoardLists()
 				case Queen:
 					break;
 				case King:
-					if (KingAttacksBBList[square] & UINT64SetBit(attackedSquare))
+					if (KingAttacksBBList[square] & CreateBitboardFromSquare(attackedSquare))
 						v = 2;
 					break;
 				}

@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx7"
+#define VersionX "20NNx12"
 //#define EXPERIMENTAL
 //#define TB_NO_HW_POP_COUNT // Use the same directive name as defined in Ronald de Man's probing code!
 

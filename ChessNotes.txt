@@ -195,18 +195,25 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+in 1'+5" games it still accumulates loads of time
+1'+3" too"
+maybe add movesleft*inc to target?
+
+
+test various instructions again carefully
+
+
 pruning: have random chance of not pruning (higher chance at lower ply, higher chance earlier in movelist)
+-use nodecount&255<ID-ply
 
 
 on lichess, still occasionally get an error file thus...
 *** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
 can we keep track of the last FEW inputs from the gui, not just the p startpos ... ? also if pondering and anything else!
-i think it's when it ponders a move... and the opp doesn't play it? also may be only when in egtb? are all moves discarded?
+i think it's when it ponders a move... and the opp doesn't play it? also may be only when in egtb? are all moves discarded? is it because it doesn't have complete 7pc???
 e.g. Colossus v Caliban, maybyen v Colossus
 
 
-
-test ClearLS1B with blsr again (bitboard.h)
 
 try _pext_u64 instead of magics (see chatgpt code...)
 uint64_t index = (blockers * m.magic) >> m.shift;

@@ -54,7 +54,7 @@
 //#define PYRRHIC_KING_ATTACKS(sq)         (kingAttacks(sq))
 
 #define PYRRHIC_POPCOUNT(x)              (((uint64_t)PopulationCountX(x)))
-#define PYRRHIC_LSB(x)                   (BitScanForwardX(x))
+#define PYRRHIC_LSB(x)                   (GetLS1BIndex(x))
 #define PYRRHIC_POPLSB(x)                (poplsb(x))
 
 #define PYRRHIC_PAWN_ATTACKS(sq, c)      (PawnAttacksBBList[!c][sq])

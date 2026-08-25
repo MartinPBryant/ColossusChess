@@ -419,12 +419,26 @@ void CPUInfo()
 		{
 			CPUFamily = ((cpuInfo[0] & (0xf << 8)) >> 8) + ((cpuInfo[0] & (0xff << 20)) >> 20);
 			CPUModel = ((cpuInfo[0] & (0xf << 16)) >> 12) + ((cpuInfo[0] & (0xf << 4)) >> 4);
+
+			if (cpuInfo[3] & (1 << 23))
+				ThisCPUSupports |= EISMMX;
+			if (cpuInfo[3] & (1 << 25))
+				ThisCPUSupports |= EISSSE;
 			if (cpuInfo[3] & (1 << 26))
 				ThisCPUSupports |= EISSSE2;
-			if (cpuInfo[2] & (1 << 23))
-				ThisCPUSupports |= EISPOPCNT;
+			
+			if (cpuInfo[2] & (1 << 0))
+				ThisCPUSupports |= EISSSE3;
 			if (cpuInfo[2] & (1 << 9))
 				ThisCPUSupports |= EISSSSE3;
+			if (cpuInfo[2] & (1 << 19))
+				ThisCPUSupports |= EISSSE41;
+			if (cpuInfo[2] & (1 << 20))
+				ThisCPUSupports |= EISSSE42;
+			if (cpuInfo[2] & (1 << 23))
+				ThisCPUSupports |= EISPOPCNT;
+			if (cpuInfo[2] & (1 << 28))
+				ThisCPUSupports |= EISAVX;
 		}
 
 		if (i == 7)
@@ -464,7 +478,7 @@ void CPUInfo()
 	trim(CPUBrand);
 
 	ThisCPUSupportsEISNames = "";
-	for (int i = 0; i <= 11; i++)
+	for (int i = 0; i < std::size(EISNames); i++)
 		if (ThisCPUSupports & (1 << i))
 			ThisCPUSupportsEISNames += EISNames[i] + " ";
 	trim(ThisCPUSupportsEISNames);

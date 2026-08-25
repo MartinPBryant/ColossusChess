@@ -200,14 +200,16 @@ extern std::string ThisCPUSupportsEISNames;
 #define EISSSE2 (1 << 2)
 #define EISSSE3 (1 << 3)
 #define EISSSSE3 (1 << 4)
-#define EISAVX (1 << 5)
-#define EISAVX2 (1 << 6)
-#define EISAVX512 (1 << 7)
-#define EISBMI1 (1 << 8)
-#define EISBMI2 (1 << 9)
-#define EISPOPCNT (1 << 10)
-#define EISLZCNT (1 << 11)
-extern std::string EISNames[12];
+#define EISSSE41 (1 << 5)
+#define EISSSE42 (1 << 6)
+#define EISAVX (1 << 7)
+#define EISAVX2 (1 << 8)
+#define EISAVX512 (1 << 9)
+#define EISBMI1 (1 << 10)
+#define EISBMI2 (1 << 11)
+#define EISPOPCNT (1 << 12)
+#define EISLZCNT (1 << 13)
+extern std::string EISNames[14];
 
 
 //----------------------------------------------------------------------------------------------------

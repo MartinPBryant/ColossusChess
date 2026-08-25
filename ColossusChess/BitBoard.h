@@ -96,55 +96,40 @@ extern const uint64_t FilesBB[8];
 
 //----------------------------------------------------------------------------------------------------
 
-//#define x64
+// Rough dates/instruction sets for various instructions. Varies for Intel/AMD.
+// popcnt: 2008, SSE4.2
+// bsfq, bsrq: 2003/4
+// lzcnt, tzcnt: 2013, BMI1
+// blsr: 2013, BMI1
 
-#if defined _WIN64 && !defined TB_NO_HW_POP_COUNT
-
-// 64-bit hardware based routines
-#define PopulationCountX(ui64) PopulationCountHardware(ui64)
-#define BitScanForwardX(ui64) BitScanForwardHardwarePOPCNT(ui64)
-#define BitScanReverseX(ui64) BitScanReverseBSR(ui64)
-
-extern uint32_t PopulationCountHardware(uint64_t ui64); // Fastest
-
-extern unsigned long BitScanForwardHardwareBSF(uint64_t ui64); // Marginally slower than BitScanForwardHardwarePOPCNT
-
-extern uint32_t BitScanForwardHardwarePOPCNT(uint64_t ui64); // Fastest
-
-extern uint32_t BitScanReverseBSR(uint64_t ui64); // Fastest
+extern uint32_t BitScanForwardPOPCNT(uint64_t bb);
+extern uint32_t BitScanForwardBSF(uint64_t bb);
+extern uint32_t BitScanForwardTZCNT(uint64_t bb);
+extern uint32_t BitScanReverseBSR(uint64_t bb);
+extern uint32_t BitScanReverseLZCNT(uint64_t bb);
 
 extern int poplsb(uint64_t *bb);
 
 //extern int getlsb(uint64_t bb);
 
-#else
+// Counts the number of set bits in the provided bitboard
+#define PopulationCountX(bb) ((uint32_t)__popcnt64(bb))
 
-// Software based routines (used for 32-bit or very old 64-bit processors)
-#define PopulationCountX(ui64) PopulationCountByArray(ui64)
-#define BitScanForwardX(ui64) BitScanForwardDeBruijn(ui64)
-#define BitScanReverseX(ui64) BitScanReverseMs1b(ui64)
+// Gets the index (corresponding to a square) of the least significant set bit in the provided bitboard
+//#define GetLS1BIndex(bb) BitScanForwardPOPCNT(bb)
+//#define GetLS1BIndex(bb) BitScanForwardBSF(bb) // Variable speed compared to BitScanForwardPOPCNT on all 4 of my AMD PCs
+#define GetLS1BIndex(bb) BitScanForwardTZCNT(bb) // Comparable or slightly faster than BitScanForwardPOPCNT and BitScanForwardBSF on all 4 of my AMD PCs
 
-extern int PopulationCountBrianKernighan(uint64_t ui64); // Slowest but simplest s/w
+// Gets the index (corresponding to a square) of the most significant set bit in the provided bitboard
+#define GetMS1BIndex(bb) BitScanReverseBSR(bb)
+//#define GetMS1BIndex(bb) BitScanReverseLZCNT(bb) // Not tested against BitScanReverseBSR
 
-extern uint64_t PopulationCountSWAR(uint64_t ui64); // Nearly fastest s/w
+// Creates a bitboard with a set bit corresponding to the provided square index
+#define CreateBitboardFromSquare(square) (1ULL << (square))
 
-extern uint64_t PopulationCountByArray(uint64_t ui64); // Fastest (just) s/w
-
-extern int BitScanForwardDeBruijn(uint64_t ui64); // Fastest s/w
-
-extern int BitScanReverseDeBruijn(uint64_t ui64);
-
-extern int BitScanReverseMs1b(uint64_t ui64); // Fastest s/w
-
-#endif
-
-//----------------------------------------------------------------------------------------------------
-
-// Commonly used 64-bit macros
-#define CUINT64(constantUINT64) constantUINT64##ULL
-#define UINT64SetBit(i) (1ULL << (i))
+// Clears the least significant set bit in the provided bitboard
 #define ClearLS1B(bb) (bb &= (bb - 1))
-//#define ClearLS1B(bb) (bb = _blsr_u64(bb)) // This BMI instruction is no better than the above
+//#define ClearLS1B(bb) (bb = _blsr_u64(bb)) // This BMI1 instruction is no faster than the above on any of my 4 AMD PCs
 
 //----------------------------------------------------------------------------------------------------
 

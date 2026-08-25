@@ -465,7 +465,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		// Loop through move list
 		int SEEResult;
 		legalMovesMade = 0;
-		int enemyKingSquare = BitScanForwardX(normalBrain.piecesBB[sideToMove ^ 1][King]);
+		int enemyKingSquare = GetLS1BIndex(normalBrain.piecesBB[sideToMove ^ 1][King]);
 		int winningCapturesSearched = 0; // N.B. only increments this if not in check
 
 		for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)

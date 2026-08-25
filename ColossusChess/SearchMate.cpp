@@ -458,7 +458,7 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 
 	if (isInCheck) // Attacker in check?
 	{
-		int defenderKingSquare = BitScanForwardX(mateBrain.piecesBB[sideToMove ^ 1][King]);
+		int defenderKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove ^ 1][King]);
 		int attackerMovesCount = (int)(mateBrain.GenerateAllMovesOutOfCheck(sideToMove, attackerMoveList, true) - attackerMoveList);
 
 		for (int moveListIndexIterator = 0; moveListIndexIterator < attackerMovesCount; moveListIndexIterator++)
@@ -504,7 +504,7 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 			else
 			{
 				anyMoves = false;
-				int attackerKingSquare = BitScanForwardX(mateBrain.piecesBB[sideToMove][King]);
+				int attackerKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove][King]);
 				uint32_t defenderMovesCount = mateBrain.GenerateAllMoves(sideToMove ^ 1, true, defenderMoveList);
 				if (defenderMovesCount <= 1)
 				{
@@ -807,7 +807,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 
 	int standPatScore = mateBrain.gameRecordPointer->totalMaterial[sideToMove] - mateBrain.gameRecordPointer->totalMaterial[sideToMove ^ 1];
-	int kingDistance = ManhattanDistance[BitScanForwardX(mateBrain.piecesBB[0][King])][BitScanForwardX(mateBrain.piecesBB[1][King])];
+	int kingDistance = ManhattanDistance[GetLS1BIndex(mateBrain.piecesBB[0][King])][GetLS1BIndex(mateBrain.piecesBB[1][King])];
 	if (ply & 1)
 		standPatScore -= kingDistance; // Give small bonus for the attacking K approaching the defending K
 	else
@@ -1250,13 +1250,13 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	if ((ply & 1) == 0) // At even ply? (Defender's move)
 	{
 		// Calculate the number of king moves, whether only one piece can move and whether fixed pieces have been released
-		int defenderKingSquare = BitScanForwardX(mateBrain.piecesBB[sideToMove][King]);
+		int defenderKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove][King]);
 		int defenderMoveablePieces = 0;
 		uint64_t defenderMoveablePiecesBB = 0;
 
 		for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 		{
-			uint64_t fromSquareBB = UINT64SetBit(moveList[moveListIndexIterator].mf.fromSquare);
+			uint64_t fromSquareBB = CreateBitboardFromSquare(moveList[moveListIndexIterator].mf.fromSquare);
 
 			if (currentGameRecordPointer->fixedPiecesDefenderBB & fromSquareBB) // Have we allowed a defender's 'fixed' piece (specified in the MateFixedPieces option) to move?
 			{
@@ -1267,7 +1267,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 			if (moveList[moveListIndexIterator].mf.fromSquare == defenderKingSquare)
 				defenderKingMoves++;
 
-			defenderMoveablePiecesBB |= UINT64SetBit(moveList[moveListIndexIterator].mf.fromSquare);
+			defenderMoveablePiecesBB |= CreateBitboardFromSquare(moveList[moveListIndexIterator].mf.fromSquare);
 		}
 		
 		defenderMoveablePieces = PopulationCountX(defenderMoveablePiecesBB);
@@ -1463,7 +1463,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	assert((fupt1 >= 0) && (fupt1 <= 5));
 	futs1 = (currentGameRecordPointer - 2)->move.mf.toSquare;
 
-	int enemyKingSquare = BitScanForwardX(mateBrain.piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove ^ 1][King]);
 
 	if (ply == 1)
 		ScoreRootMoveList(moveList);
@@ -1535,8 +1535,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		mateBrain.MakeMove(sideToMove); // N.B. MakeMove increments mateBrain.gameRecordPointer!
 		mateBrain.gameRecordPointer->fixedPiecesAttackerBB = (mateBrain.gameRecordPointer - 1)->fixedPiecesAttackerBB;
 		mateBrain.gameRecordPointer->fixedPiecesDefenderBB = (mateBrain.gameRecordPointer - 1)->fixedPiecesDefenderBB;
-		mateBrain.gameRecordPointer->fixedPiecesAttackerBB = mateBrain.gameRecordPointer->fixedPiecesAttackerBB & ~(UINT64SetBit(currentMove.mf.fromSquare) | UINT64SetBit(currentMove.mf.toSquare));
-		mateBrain.gameRecordPointer->fixedPiecesDefenderBB = mateBrain.gameRecordPointer->fixedPiecesDefenderBB & ~(UINT64SetBit(currentMove.mf.fromSquare) | UINT64SetBit(currentMove.mf.toSquare));
+		mateBrain.gameRecordPointer->fixedPiecesAttackerBB = mateBrain.gameRecordPointer->fixedPiecesAttackerBB & ~(CreateBitboardFromSquare(currentMove.mf.fromSquare) | CreateBitboardFromSquare(currentMove.mf.toSquare));
+		mateBrain.gameRecordPointer->fixedPiecesDefenderBB = mateBrain.gameRecordPointer->fixedPiecesDefenderBB & ~(CreateBitboardFromSquare(currentMove.mf.fromSquare) | CreateBitboardFromSquare(currentMove.mf.toSquare));
 		//if (mateBrain.gameRecordPointer->fixedPiecesBB != (mateBrain.gameRecordPointer - 1)->fixedPiecesBB)
 		//	AC8++;
 
@@ -1630,7 +1630,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 			//}
 
 			// Move by a 'fixed' attacker piece?
-			uint64_t fromSquareBB = UINT64SetBit(currentMove.mf.fromSquare);
+			uint64_t fromSquareBB = CreateBitboardFromSquare(currentMove.mf.fromSquare);
 			// DON'T PRUNE IF IS A CHECK WHICH DELIVERS MATE!!!
 			//if (RootFixedPiecesAttackerBB & fromSquareBB)
 			//if ((RootFixedPiecesAttackerBB & fromSquareBB) && !givesCheck && (toSquarePiece == Empty))
@@ -2400,7 +2400,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	MoveWithScore_Struct moveList[220];
 	RootMoveList[0].mws.ui32 = 0;
 	mateBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-	RootMovesCount = mateBrain.GenerateAllMoves(SideToMove, mateBrain.IsEnemyKingAttacked(BitScanForwardX(mateBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	RootMovesCount = mateBrain.GenerateAllMoves(SideToMove, mateBrain.IsEnemyKingAttacked(GetLS1BIndex(mateBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 	for (int moveListIndexIterator = 0; moveListIndexIterator < RootMovesCount; moveListIndexIterator++)
 	{
 		RootMoveList[moveListIndexIterator].mws = moveList[moveListIndexIterator];
@@ -2412,7 +2412,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	int movesCount;
 	movesCount = mateBrain.GenerateAllMoves(SideToMove ^ 1, false, moveList); // Generate defender's moves
 
-	int kingSquare = BitScanForwardX(mateBrain.piecesBB[SideToMove ^ 1][King]);
+	int kingSquare = GetLS1BIndex(mateBrain.piecesBB[SideToMove ^ 1][King]);
 	int kingMoves = 0;
 	for (int square = A1; square <= H8; square++) // Mark all SNTM pieces as fixed
 	{
@@ -2427,7 +2427,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 	{
 		RootZLMPiecesMailboxBoard64[moveList[moveListIndexIterator].mf.fromSquare] = false;
-		(mateBrain.gameRecordPointer - 1)->zLMPiecesBB &= !UINT64SetBit(moveList[moveListIndexIterator].mf.fromSquare);
+		(mateBrain.gameRecordPointer - 1)->zLMPiecesBB &= !CreateBitboardFromSquare(moveList[moveListIndexIterator].mf.fromSquare);
 		if (moveList[moveListIndexIterator].mf.fromSquare == kingSquare)
 			kingMoves++;
 	}
@@ -2443,9 +2443,9 @@ Mate::MateResult_Struct Mate::ComputeMate()
 		std::string sq = s.substr(0, 2);
 		int squareIndex = sq[0] - 'a' + ((sq[1] - '1') * 8);
 		if (mateBrain.mailboxBoard64[squareIndex] > 0)
-			RootFixedPiecesAttackerBB ^= UINT64SetBit(squareIndex);
+			RootFixedPiecesAttackerBB ^= CreateBitboardFromSquare(squareIndex);
 		else if (mateBrain.mailboxBoard64[squareIndex] < 0)
-			RootFixedPiecesDefenderBB ^= UINT64SetBit(squareIndex);
+			RootFixedPiecesDefenderBB ^= CreateBitboardFromSquare(squareIndex);
 		s = s.substr(2);
 	}
 	mateBrain.gameRecordPointer->fixedPiecesAttackerBB = RootFixedPiecesAttackerBB;
@@ -2519,7 +2519,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 		PVMessageChecked = false;
 
 		// Do the search
-		RootScore = TreeSearchMate(RootAlpha, RootBeta, 1, IterationPly, SideToMove, mateBrain.IsEnemyKingAttacked(BitScanForwardX(mateBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), freeMoves);// , false, false, 0);
+		RootScore = TreeSearchMate(RootAlpha, RootBeta, 1, IterationPly, SideToMove, mateBrain.IsEnemyKingAttacked(GetLS1BIndex(mateBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), freeMoves);// , false, false, 0);
 
 		if (autoTune)
 		{

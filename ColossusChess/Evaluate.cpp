@@ -361,12 +361,12 @@ int Normal::EvaluateInner(int sideToMove)
 		{
 			// USING THIS PassedPawnCatchableByKing[STM] MAKES EVAL NON-SYMETRICAL!!!
 			//USE PAWN-SQUARE BITBOARDS??? AND JUST CHECK IF THE OPP K IS INSIDE
-			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][1][BitScanForwardX(normalBrain.piecesBB[1][King])];
+			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][1][GetLS1BIndex(normalBrain.piecesBB[1][King])];
 			if (passedBB)
 			{
 				//endgameScore[0] += 16 * passed;
-				whitePassedPawnSquare = (int)BitScanReverseX(passedBB);//TEMP
-				whiteMovesToPromote = std::min((7 - ((int)BitScanReverseX(passedBB) >> 3)), 5); // At most 5 moves to promote as the first move can be two squares
+				whitePassedPawnSquare = (int)GetMS1BIndex(passedBB);//TEMP
+				whiteMovesToPromote = std::min((7 - ((int)GetMS1BIndex(passedBB) >> 3)), 5); // At most 5 moves to promote as the first move can be two squares
 			}
 		}
 	}
@@ -387,12 +387,12 @@ int Normal::EvaluateInner(int sideToMove)
 		if (normalBrain.gameRecordPointer->gamePhase[0] == 0) // Opponent has no pieces to stop a runner?
 		//if (normalBrain.gameRecordPointer->gamePhase[0] < 9) // Opponent has less than a Q to stop a runner?
 		{
-			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][0][BitScanForwardX(normalBrain.piecesBB[0][King])];
+			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][0][GetLS1BIndex(normalBrain.piecesBB[0][King])];
 			if (passedBB)
 			{
 				//endgameScore[1] += 16 * passed;
-				blackPassedPawnSquare = (int)BitScanForwardX(passedBB);//TEMP
-				blackMovesToPromote = std::min((int)BitScanForwardX(passedBB) >> 3, 5); // At most 5 moves to promote as the first move can be two squares
+				blackPassedPawnSquare = (int)GetLS1BIndex(passedBB);//TEMP
+				blackMovesToPromote = std::min((int)GetLS1BIndex(passedBB) >> 3, 5); // At most 5 moves to promote as the first move can be two squares
 			}
 		}
 	}
@@ -471,7 +471,7 @@ int Normal::EvaluateInner(int sideToMove)
 	uint32_t kingSquare, pawnShelter;
 	
 	pawnShelter = 0;
-	kingSquare = BitScanForwardX(normalBrain.piecesBB[0][King]);
+	kingSquare = GetLS1BIndex(normalBrain.piecesBB[0][King]);
 	//if (kingSquare <= H2)
 	{
 		if ((kingSquare & 7) >= 6)
@@ -482,7 +482,7 @@ int Normal::EvaluateInner(int sideToMove)
 	openingScore[0] -= 3 * (6 - pawnShelter);
 	
 	pawnShelter = 0;
-	kingSquare = BitScanForwardX(normalBrain.piecesBB[1][King]);
+	kingSquare = GetLS1BIndex(normalBrain.piecesBB[1][King]);
 	//if (kingSquare >= A7)
 	{
 		if ((kingSquare & 7) >= 6)
@@ -588,7 +588,7 @@ int Normal::EvaluateInner(int sideToMove)
 	knightsBB = normalBrain.piecesBB[0][Knight];
 	while (knightsBB)
 	{
-		fromSquare = BitScanForwardX(knightsBB);
+		fromSquare = GetLS1BIndex(knightsBB);
 		attacksBB = KnightAttacksBBList[fromSquare];
 		//if (attacksBB & kingPerimeterBBSide1)
 		//{
@@ -605,7 +605,7 @@ int Normal::EvaluateInner(int sideToMove)
 	knightsBB = normalBrain.piecesBB[1][Knight];
 	while (knightsBB)
 	{
-		fromSquare = BitScanForwardX(knightsBB);
+		fromSquare = GetLS1BIndex(knightsBB);
 		attacksBB = KnightAttacksBBList[fromSquare];
 		//if (attacksBB & kingPerimeterBBSide0)
 		//{
@@ -625,7 +625,7 @@ int Normal::EvaluateInner(int sideToMove)
 	bishopsBB = normalBrain.piecesBB[0][Bishop];
 	while (bishopsBB)
 	{
-		fromSquare = BitScanForwardX(bishopsBB);
+		fromSquare = GetLS1BIndex(bishopsBB);
 		attacksBB = BishopAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[0][Bishop] ^ normalBrain.piecesBB[0][Queen] ^ normalBrain.piecesBB[1][Bishop] ^ normalBrain.piecesBB[1][Queen]);
 		//if (attacksBB & kingPerimeterBBSide1)
 		//{
@@ -642,7 +642,7 @@ int Normal::EvaluateInner(int sideToMove)
 	bishopsBB = normalBrain.piecesBB[1][Bishop];
 	while (bishopsBB)
 	{
-		fromSquare = BitScanForwardX(bishopsBB);
+		fromSquare = GetLS1BIndex(bishopsBB);
 		attacksBB = BishopAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[0][Bishop] ^ normalBrain.piecesBB[0][Queen] ^ normalBrain.piecesBB[1][Bishop] ^ normalBrain.piecesBB[1][Queen]);
 		//if (attacksBB & kingPerimeterBBSide0)
 		//{
@@ -662,7 +662,7 @@ int Normal::EvaluateInner(int sideToMove)
 	rooksBB = normalBrain.piecesBB[0][Rook];
 	while (rooksBB)
 	{
-		fromSquare = BitScanForwardX(rooksBB);
+		fromSquare = GetLS1BIndex(rooksBB);
 		//attacksBB = RookAttacksBB(fromSquare, occupiedBB);
 		attacksBB = RookAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[0][Rook] ^ normalBrain.piecesBB[0][Queen] ^ normalBrain.piecesBB[1][Rook] ^ normalBrain.piecesBB[1][Queen]); // Allow mobility through own Rs & Qs
 		//if (attacksBB & kingPerimeterBBSide1)
@@ -680,7 +680,7 @@ int Normal::EvaluateInner(int sideToMove)
 	rooksBB = normalBrain.piecesBB[1][Rook];
 	while (rooksBB)
 	{
-		fromSquare = BitScanForwardX(rooksBB);
+		fromSquare = GetLS1BIndex(rooksBB);
 		//attacksBB = RookAttacksBB(fromSquare, occupiedBB);
 		attacksBB = RookAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[1][Rook] ^ normalBrain.piecesBB[1][Queen] ^ normalBrain.piecesBB[0][Rook] ^ normalBrain.piecesBB[0][Queen]);
 		//if (attacksBB & kingPerimeterBBSide0)
