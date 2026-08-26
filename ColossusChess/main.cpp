@@ -16,6 +16,23 @@ int main(int argc, char * argv[])
 	// Identify and display this computer's CPU information
 	CPUInfo();
 
+	// Test for compatibility
+	if (((ThisCPUSupports & EISPOPCNT) != 0) || ((ThisCPUSupports & EISLZCNT) == 0))
+	{
+		Output("This executable uses the POPCNT and TZCNT instructions which are not both supported by this CPU.");
+		Output("Exiting.");
+		return EXIT_FAILURE;
+	}
+#ifdef PEXT
+	if ((CPUVendorId == CPUVENDORAMD) && (CPUFamily < 25))
+	{
+		Output("This version of the executable uses the PEXT instruction which will not run efficiently on AMD CPUs prior to the Zen 3 (Family>=25) architecture.");
+		Output("Please use the correct executable.");
+		Output("Exiting.");
+		return EXIT_FAILURE;
+	}
+#endif
+
 	// Get the application's path/filename and construct various utility file paths
 	std::string ApplicationPath = argv[0];
 	size_t index = ApplicationPath.rfind("\\");

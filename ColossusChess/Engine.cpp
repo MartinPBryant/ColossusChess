@@ -162,7 +162,7 @@ int CPUFamily;
 int CPUModel;
 uint64_t ThisCPUSupports;
 std::string ThisCPUSupportsEISNames;
-std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE42", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT"};
+std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE42", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT/TZCNT"};
 
 //----------------------------------------------------------------------------------------------------
 

@@ -5,9 +5,10 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx12"
+#define VersionX "20NNx19"
 //#define EXPERIMENTAL
 //#define TB_NO_HW_POP_COUNT // Use the same directive name as defined in Ronald de Man's probing code!
+//#define PEXT // N.B. the PEXT instruction is VERY slow on AMD Zen2 architecture!
 
 #define Sides 2
 

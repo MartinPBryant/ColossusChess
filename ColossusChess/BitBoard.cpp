@@ -2,6 +2,7 @@
 
 #include "GlobalTypes.h"
 #include "BitBoard.h"
+#include "Utilities.h"
 
 //----------------------------------------------------------------------------------------------------
 
@@ -226,8 +227,8 @@ inline uint64_t Side1PawnAttacksBB(uint64_t pawnSquareBB)
 
 // 'Fancy' magic bitboards (862208 bytes : About 2.74 times smaller and about 2.5% faster than 'plain')
 // I tried putting the AttacksPointer, InnerRay, MagicMultiplier and BlockerPermutationBitsPreAdjusted into a struct (to try to save array indexing) but it was slower! :O
-alignas(64) uint64_t RookAttacksFancyBB[102400]; // 819200 = 800KB
-alignas(64) uint64_t BishopAttacksFancyBB[5248]; // 41984 = 41KB
+alignas(64) uint64_t RookAttacksFancyBB[102400]; // 8x102400 = 819200 = 800KB
+alignas(64) uint64_t BishopAttacksFancyBB[5248]; // 8x5248 = 41984 = 41KB
 alignas(64) uint64_t* RookAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the RookAttacksFancyBB array above
 alignas(64) uint64_t* BishopAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the BishopAttacksFancyBB array above
 
@@ -419,38 +420,45 @@ const uint64_t BishopMagicMultipliers[64] = {
   0x10140848044010ULL,
 };
 
+// An example of how the magic multiply and shift (or the PEXT instruction) works...
+//  Source : 1 0 1 1 0 1 1 0  (0xB6)
+//    Mask : 1 0 0 1 0 0 1 1  (0x93)
+// Extract : 1     1     1 0
+//  Result : 0 0 0 0 1 1 1 0  (0x0E)
+
 // Return a bitboard containing all the squares attacked by the rook on the provided square with the provided blockers
 // This is used by the move generators
-uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
+#ifdef PEXT
+inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
+{
+	return *(RookAttacksFancyPointer[square] + _pext_u64(occupiedSquaresBB, RookInnerRays[square]));
+}
+#else
+inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
 	occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
 	occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
 	occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
 	return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
-
-	//uint64_t blockers, index1, index2,index3;
-	//blockers = occupiedSquaresBB & RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
-	//index1 = blockers * RookMagicMultipliers[square] >> RookBlockerPermutationBitsPreAdjusted[square];
-	////return *(RookAttacksFancyPointer[square] + index);
-
-	//index2 = _pext_u64(occupiedSquaresBB, 64 - 12);
-	//index3 = _pext_u64(occupiedSquaresBB, RookInnerRays[square]);
-	//if (index1 != index2)
-	//	occupiedSquaresBB = 0;
-	//if (index1 != index3)
-	//	occupiedSquaresBB = 0;
-	//return *(RookAttacksFancyPointer[square] + index1);
 }
+#endif
 
 // Return a bitboard containing all the squares attacked by the bishop on the provided square with the provided blockers
 // This is used by the move generators
-uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
+#ifdef PEXT
+inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
+{
+	return *(BishopAttacksFancyPointer[square] + _pext_u64(occupiedSquaresBB, BishopInnerRays[square]));
+}
+#else
+inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
 	occupiedSquaresBB &= BishopInnerRays[square]; // Get the relevant blockers for the bishop on 'square'
 	occupiedSquaresBB *= BishopMagicMultipliers[square];
 	occupiedSquaresBB >>= BishopBlockerPermutationBitsPreAdjusted[square];
 	return *(BishopAttacksFancyPointer[square] + occupiedSquaresBB);
 }
+#endif
 
 // Generate the inner rays bitboard for a rook on the given square, e.g. for f6 ...
 // . . . . . . . .
@@ -486,6 +494,7 @@ uint64_t GenerateBishopInnerRay(int square)
 	return resultBB;
 }
 
+// 'Manually' generate a bitboard containing the moves by a rook on 'square' with given blockers
 uint64_t GenerateRookAttacks(int square, uint64_t blockersBB) {
 	uint64_t resultBB = 0ULL;
 	int rank = square / 8, file = square % 8, r, f;
@@ -508,6 +517,7 @@ uint64_t GenerateRookAttacks(int square, uint64_t blockersBB) {
 	return resultBB;
 }
 
+// 'Manually' generate a bitboard containing the moves by a bishop on 'square' with given blockers
 uint64_t GenerateBishopAttacks(int square, uint64_t blockersBB) {
 	uint64_t resultBB = 0ULL;
 	int rank = square / 8, file = square % 8, r, f;
@@ -572,10 +582,20 @@ void InitialiseBitBoardLists()
 
 	int rookFancyIndex = 0;
 	int bishopFancyIndex = 0;
+
+	// Ensure we write to every entry
+	for (int count = 0; count < 102400; count++)
+		RookAttacksFancyBB[count] = -1;
+	for (int count = 0; count < 5248; count++)
+		BishopAttacksFancyBB[count] = -1;
+
 	for (int square = A1; square <= H8; square++)
 	{
+		// Attack lists
+
 		uint64_t squareBB = CreateBitboardFromSquare(square);
 
+		// Pawns
 		if (square < A8)
 			PawnAttacksBBList[0][square] = Side0PawnAttacksBB(squareBB);
 		else
@@ -585,32 +605,52 @@ void InitialiseBitBoardLists()
 		else
 			PawnAttacksBBList[1][square] = 0;
 
+		// Knights
 		KnightAttacksBBList[square] = KnightAttacksBB(squareBB);
 		AttacksByPieceBBList[Knight][square] = KnightAttacksBBList[square];
 
+		// Kings
 		KingAttacksBBList[square] = KingAttacksBB(squareBB);
 		AttacksByPieceBBList[King][square] = KingAttacksBBList[square];
 
-		RookInnerRays[square] = GenerateRookInnerRay(square);
-		RookAttacksFancyPointer[square] = &RookAttacksFancyBB[rookFancyIndex];
+		// Rooks
+		RookInnerRays[square] = GenerateRookInnerRay(square); // Create a bitboard showing the moves by a rook on 'square' on an empty board excluding edges
+		RookAttacksFancyPointer[square] = &RookAttacksFancyBB[rookFancyIndex]; // Save the address within the RookAttacksFancyBB table of the 0th entry for this 'square'
+		// Initialise all permutations of blockers for the current square
 		for (int permutationIndex = 0; permutationIndex < (1 << RookBlockerPermutationBits[square]); permutationIndex++) // 1 << (max)12 = 4096
 		{
 			uint64_t blockersBB;
 			blockersBB = PermutationIndexToBB(permutationIndex, RookBlockerPermutationBits[square], RookInnerRays[square]);
 			int keyIndex;
+#ifdef PEXT
+			keyIndex = (int)_pext_u64(blockersBB, RookInnerRays[square]);
+#else
 			keyIndex = (int)((blockersBB * RookMagicMultipliers[square]) >> (64 - RookBlockerPermutationBits[square]));
+#endif
+			assert((keyIndex >= 0) && (keyIndex < (1 << RookBlockerPermutationBits[square])));
+			if (*(RookAttacksFancyPointer[square] + keyIndex) != -1)
+				OutputError("RookAttacksFancyBB entry initialised more than once!");
 			*(RookAttacksFancyPointer[square] + keyIndex) = GenerateRookAttacks(square, blockersBB);
 			rookFancyIndex++;
 		}
 
+		// Bishops
 		BishopInnerRays[square] = GenerateBishopInnerRay(square);
 		BishopAttacksFancyPointer[square] = &BishopAttacksFancyBB[bishopFancyIndex];
+		// Initialise all permutations of blockers for the current square
 		for (int permutationIndex = 0; permutationIndex < (1 << BishopBlockerPermutationBits[square]); permutationIndex++) // 1 << (max)9 = 512
 		{
 			uint64_t blockersBB;
 			blockersBB = PermutationIndexToBB(permutationIndex, BishopBlockerPermutationBits[square], BishopInnerRays[square]);
 			int keyIndex;
+#ifdef PEXT
+			keyIndex = (int)_pext_u64(blockersBB, BishopInnerRays[square]);
+#else
 			keyIndex = (int)((blockersBB * BishopMagicMultipliers[square]) >> (64 - BishopBlockerPermutationBits[square]));
+#endif
+			assert((keyIndex >= 0) && (keyIndex < (1 << BishopBlockerPermutationBits[square])));
+			if (*(BishopAttacksFancyPointer[square] + keyIndex) != -1)
+				OutputError("BishopAttacksFancyBB entry initialised more than once!");
 			*(BishopAttacksFancyPointer[square] + keyIndex) = GenerateBishopAttacks(square, blockersBB);
 			bishopFancyIndex++;
 		}
@@ -618,6 +658,8 @@ void InitialiseBitBoardLists()
 		AttacksByPieceBBList[Bishop][square] = BishopAttacksBB(square, 0);
 		AttacksByPieceBBList[Rook][square] = RookAttacksBB(square, 0);
 		AttacksByPieceBBList[Queen][square] = BishopAttacksBB(square, 0) | RookAttacksBB(square, 0);
+
+		// Passed pawns
 
 		// White to move, black king catching white pawns
 		// The black king can't catch any pawns on a higher rank
@@ -640,7 +682,14 @@ void InitialiseBitBoardLists()
 		// Black to move, white king catching black pawns is just a reflection
 		PassedPawnCatchableByKing[1][0][square ^ 56] = FlipVertical(bb);
 	}
-	
+	// Ensure we've written to every entry
+	for (int count = 0; count < 102400; count++)
+		if (RookAttacksFancyBB[count] == -1)
+			OutputError("RookAttacksFancyBB entry not initialised!");
+	for (int count = 0; count < 5248; count++)
+		if (BishopAttacksFancyBB[count] == -1)
+			OutputError("BishopAttacksFancyBB entry not initialised!");
+
 	// Passed pawn runners
 	for (int square = A1; square <= H8; square++)
 	{
@@ -681,7 +730,7 @@ void InitialiseBitBoardLists()
 			}
 			if ((squareIndex1 != squareIndex2) && ((RanksListBB[squareIndex1] | FilesListBB[squareIndex1]) & CreateBitboardFromSquare(squareIndex2)))
 			{
-				LineListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, 0) & RookAttacksBB(squareIndex2, 0) | CreateBitboardFromSquare(squareIndex1) | CreateBitboardFromSquare(squareIndex2);
+				LineListBB[squareIndex1][squareIndex2] = (RookAttacksBB(squareIndex1, 0) & RookAttacksBB(squareIndex2, 0)) | CreateBitboardFromSquare(squareIndex1) | CreateBitboardFromSquare(squareIndex2);
 				BetweenListBB[squareIndex1][squareIndex2] = RookAttacksBB(squareIndex1, CreateBitboardFromSquare(squareIndex2)) & RookAttacksBB(squareIndex2, CreateBitboardFromSquare(squareIndex1));
 			}
 		}

@@ -46,7 +46,23 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 6 v 9 {LMP not done (ID-ply)/256 so more likely at lower ply} (0.80) PCS2
 6 v 9 {LMP not done (ID-ply)/256 so more likely at lower ply} (0.57) ASUS1
 
-10 v 12 {BitScanForwardPOPCNT v BitScanForwardTZCNT} () PCS2
+10 v 12 {BitScanForwardPOPCNT v BitScanForwardTZCNT} (-2.74) PCS2
+
+12 v 13 {2s+0.1s: add movesLeft * Fischer bonus to timeleft} (-26.35, +/-4.03, 14135) PCS2
+12 v 13 {2s+0.1s: add movesLeft * Fischer bonus to timeleft} (-26.44, +/-4.66, 10937) PCS1
+12 v 13 {2s+0.1s: add movesLeft * Fischer bonus to timeleft} (-32.48, +/-4.79, 10639) ASUS1
+12 v 13 {2s+0.1s: add movesLeft * Fischer bonus to timeleft} (-31.37, +/-4.49, 11970) NIPOGI1
+
+Recompiled both as a sanity check
+14 v 15 {2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft} (-12.34) PCS2
+14 v 15 {2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft} (-11.84, +/-4.83, 10696) PCS1
+14 v 15 {2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft} (-12.27, +/-4.80, 11200) ASUS1
+14 v 15 {2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft} (-12.16, +/-4.08, 15793) NIPOGI1
+
+14 v 16 {20/2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft [repeating]} (-5.04) PCS2
+14 v 16 {20/2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft [repeating]} (-3.46) PCS1
+14 v 16 {20/2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft [repeating]} (-7.44) ASUS1
+14 v 16 {20/2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft [repeating]} (-4.03) NIPOGI1
 
 
 

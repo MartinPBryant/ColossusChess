@@ -97,10 +97,11 @@ extern const uint64_t FilesBB[8];
 //----------------------------------------------------------------------------------------------------
 
 // Rough dates/instruction sets for various instructions. Varies for Intel/AMD.
-// popcnt: 2008, SSE4.2
+// popcnt: 2008(SSE4.2)
 // bsfq, bsrq: 2003/4
-// lzcnt, tzcnt: 2013, BMI1
-// blsr: 2013, BMI1
+// lzcnt, tzcnt: 2013(BMI1)
+// blsr: 2013(BMI1)
+// pext: 2013(BMI2) n.b. was slow on pre 2020 AMD CPUs
 
 extern uint32_t BitScanForwardPOPCNT(uint64_t bb);
 extern uint32_t BitScanForwardBSF(uint64_t bb);

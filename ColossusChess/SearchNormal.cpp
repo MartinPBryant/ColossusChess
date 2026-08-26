@@ -579,27 +579,36 @@ void Normal::TimeUp(float divisor)
 		{
 			movesLeft += 1;
 			if (WInc == 0) // If 'all the moves' AND no Fischer bonus then need to be VERY careful. It is assumed WInc and BInc will be the same!
+			{
 				movesLeft += 5;
+				// Without increment: movesLeft=14 (8+1+5) : so at the start of a 10 min game the target would be 42s (600/14)
+			}
 			else
 			{
-				// If we have an increment, add it to the timeleft
+				// If we have an increment, add it to the timeleft in advance for every move
 				// If it is huge then we will probably hit the panic timeup but then get given the increment for the next move
 				// If it is small then it will just encourage slightly longer think times
-				timeLeft += WInc;
+				timeLeft += movesLeft * WInc;
+				// With increment: movesLeft=9 (8+1) : so at the start of a 10 min game with 1s increment the target would be 67s (609/9)
+				// With increment: movesLeft=9 (8+1) : so at the start of a 10 min game with 1m increment the target would be 126s (1140/9)
 			}
-			// So... when playing 'all the moves'...
-			// Without increment: movesLeft=14 (8+1+5) : so at the start of a 10 min game the target would be 42s (600/14)
-			// With increment: movesLeft=9 (8+1) : so at the start of a 10 min game the target would be 66s (600/9)
 		}
 		else // Repeating
 		{
-			if (MovesToGo < movesLeft)
+			if (MovesToGo < movesLeft) // Fewer than 8 moves left?
 				movesLeft = MovesToGo + 1; // (+10.8, +/ -3.6, 18701)
 			else
 				movesLeft += std::min(MovesToGo / 16, 2); // Add at most 2 extra moves near the start of each control (so it doesn't use too much time there) (+4.0, +/-3.5, 20000)
 
 			if (WInc == 0) // If no Fischer bonus then need to be more careful
 				movesLeft += 2;
+			else
+			{
+				// If we have an increment, add it to the timeleft in advance for every move
+				// If it is huge then we will probably hit the panic timeup but then get given the increment for the next move
+				// If it is small then it will just encourage slightly longer think times
+				timeLeft += movesLeft * WInc;
+			}
 		}
 
 		// Have we used enough time yet? (or only one move or done maximum ply search)
