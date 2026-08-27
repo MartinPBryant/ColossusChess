@@ -30,7 +30,6 @@ extern bool IsDebug;
 extern bool UCI_Chess960;
 
 // Endgame tablebases
-//extern bool UseEndgameTablebases;
 extern int EndgameTablebasesPiecesFound;
 extern bool EndgameTablebasesInitialised;
 extern char EndgameTablebasesPath[256];
@@ -211,12 +210,13 @@ extern std::string ThisCPUSupportsEISNames;
 #define EISLZCNT (1 << 13)
 extern std::string EISNames[14];
 
+extern bool LargePagesAvailable;
+extern size_t LargePageMinimum;
+
 
 //----------------------------------------------------------------------------------------------------
 
 void ClearMailboxBoard64(int8_t mailboxBoard64[64]);
-
-GameRecordEntry_Struct* ClearGameRecord(GameRecordEntry_Struct* gr);
 
 void InitialiseMaterialValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
 bool MaterialValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
@@ -236,11 +236,6 @@ void* AlignedAllocateMemory(size_t size, size_t alignment);
 void AlignedFreeMemory(void* p);
 void FreeAnyTranspositionTableMemory();
 uint64_t GenerateTranspositionTableHash64(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer);
-
-//extern uint32_t MatingPositionsTableEntries;
-//extern uint32_t MatingPositionsTableMask;
-//extern uint64_t* MatingPositionsTablePointer;
-//void FreeMatingPositionsTableMemory();
 
 void ClearEverythingForDeterminancy();
 void NewGame(bool wipeEverything);

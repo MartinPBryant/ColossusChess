@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "math.h"
 #include "time.h"
+#define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
+#include <windows.h>
 
 #include "GlobalConstants.h"
 #include "GlobalTypes.h"
@@ -112,8 +114,6 @@ int64_t killerMoveSearched, killerMoveCausedCutoff;
 #endif
 
 // Miscellaneous
-static std::string lastFEN = "";
-static int64_t pseudo1, pseudo2;
 
 //std::string PVMessage;
 bool PVMessageChecked;
@@ -163,6 +163,11 @@ int CPUModel;
 uint64_t ThisCPUSupports;
 std::string ThisCPUSupportsEISNames;
 std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE42", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT/TZCNT"};
+
+bool LargePagesAvailable = false;
+size_t LargePageMinimum = 0;
+
+
 
 //----------------------------------------------------------------------------------------------------
 
@@ -579,7 +584,10 @@ void* AlignedAllocateMemory(size_t size, size_t alignment)
 void AlignedFreeMemory(void* p)
 {
 #ifdef _WIN32
-	_aligned_free(p);
+	if (LargePagesAvailable)
+		VirtualFree(p, 0, MEM_RELEASE);
+	else
+		_aligned_free(p);
 #else
 	free(p);
 #endif

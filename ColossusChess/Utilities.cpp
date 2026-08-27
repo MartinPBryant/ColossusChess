@@ -108,6 +108,9 @@ void OutputError(std::string s)
 		ErrorFile << "TranspositionTableMemory=" + std::to_string(TranspositionTableMemory) << "\n";
 		ErrorFile << "StopImmediately=" + std::to_string(StopImmediately) << "\n";
 		ErrorFile << "StopWhenIterationComplete=" + std::to_string(StopWhenIterationComplete) << "\n";
+		ErrorFile << "Ponder=" + std::to_string(Ponder) << "\n";
+		ErrorFile << "Pondering=" + std::to_string(Pondering) << "\n";
+		ErrorFile << "ReplyImmediately=" + std::to_string(ReplyImmediately) << "\n";
 
 		ErrorFile << "\n";
 		ErrorFile.close();
@@ -483,5 +486,41 @@ void CPUInfo()
 			ThisCPUSupportsEISNames += EISNames[i] + " ";
 	trim(ThisCPUSupportsEISNames);
 
-	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported: " + ThisCPUSupportsEISNames);
+	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported: " + ThisCPUSupportsEISNames + "\n");
+}
+
+void LargePages()
+{
+	HANDLE TokenHandle{};
+	LUID luid{};
+
+	LargePageMinimum = GetLargePageMinimum(); // Typically 2MB
+
+	if (LargePageMinimum != 0)
+		if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &TokenHandle))
+			if (LookupPrivilegeValue(NULL, SE_LOCK_MEMORY_NAME, &luid))
+			{
+				TOKEN_PRIVILEGES NewState{};
+				TOKEN_PRIVILEGES PreviousState{};
+				DWORD ReturnLength = 0;
+
+				NewState.PrivilegeCount = 1;
+				NewState.Privileges[0].Luid = luid;
+				NewState.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+				// Try to enable 'Lock pages in memory'
+				if (AdjustTokenPrivileges(TokenHandle, FALSE, &NewState, sizeof(TOKEN_PRIVILEGES), &PreviousState, &ReturnLength))
+				{
+					// Was it actually enabled?
+					if (GetLastError() == ERROR_SUCCESS)
+						LargePagesAvailable = true;
+				}
+				CloseHandle(TokenHandle);
+			}
+	
+	
+	std::string s = "";
+	if (!LargePagesAvailable)
+		s = "NOT ";
+	Output("info string 'Large pages' " + s + "available\n");
 }

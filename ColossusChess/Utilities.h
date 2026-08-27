@@ -75,3 +75,4 @@ int BoardRand(int min, int max);
 int BoardRand0To63();
 
 void CPUInfo();
+void LargePages();

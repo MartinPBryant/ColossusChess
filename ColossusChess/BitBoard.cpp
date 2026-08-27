@@ -227,6 +227,22 @@ inline uint64_t Side1PawnAttacksBB(uint64_t pawnSquareBB)
 
 // 'Fancy' magic bitboards (862208 bytes : About 2.74 times smaller and about 2.5% faster than 'plain')
 // I tried putting the AttacksPointer, InnerRay, MagicMultiplier and BlockerPermutationBitsPreAdjusted into a struct (to try to save array indexing) but it was slower! :O
+
+struct Magic
+{
+	uint64_t InnerRay;
+	uint64_t MagicMultipler;
+	uint64_t* AttacksFancyPointer;
+	int BlockerPermutationBitsPreAdjusted;
+};
+
+alignas(64) Magic RookMagics[64];
+alignas(64) Magic BishopMagics[64];
+
+
+
+
+
 alignas(64) uint64_t RookAttacksFancyBB[102400]; // 8x102400 = 819200 = 800KB
 alignas(64) uint64_t BishopAttacksFancyBB[5248]; // 8x5248 = 41984 = 41KB
 alignas(64) uint64_t* RookAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the RookAttacksFancyBB array above
@@ -436,10 +452,15 @@ inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 #else
 inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
-	occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
-	occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
-	return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
+	//occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
+	//occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
+	//occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
+	//return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
+
+	occupiedSquaresBB &= RookMagics[square].InnerRay; // Get the relevant blockers for the rook on 'square'
+	occupiedSquaresBB *= RookMagics[square].MagicMultipler; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
+	occupiedSquaresBB >>= RookMagics[square].BlockerPermutationBitsPreAdjusted;
+	return *(RookMagics[square].AttacksFancyPointer + occupiedSquaresBB);
 }
 #endif
 
@@ -453,10 +474,15 @@ inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
 #else
 inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	occupiedSquaresBB &= BishopInnerRays[square]; // Get the relevant blockers for the bishop on 'square'
-	occupiedSquaresBB *= BishopMagicMultipliers[square];
-	occupiedSquaresBB >>= BishopBlockerPermutationBitsPreAdjusted[square];
-	return *(BishopAttacksFancyPointer[square] + occupiedSquaresBB);
+	//occupiedSquaresBB &= BishopInnerRays[square]; // Get the relevant blockers for the bishop on 'square'
+	//occupiedSquaresBB *= BishopMagicMultipliers[square];
+	//occupiedSquaresBB >>= BishopBlockerPermutationBitsPreAdjusted[square];
+	//return *(BishopAttacksFancyPointer[square] + occupiedSquaresBB);
+
+	occupiedSquaresBB &= BishopMagics[square].InnerRay; // Get the relevant blockers for the rook on 'square'
+	occupiedSquaresBB *= BishopMagics[square].MagicMultipler; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
+	occupiedSquaresBB >>= BishopMagics[square].BlockerPermutationBitsPreAdjusted;
+	return *(BishopMagics[square].AttacksFancyPointer + occupiedSquaresBB);
 }
 #endif
 
@@ -634,6 +660,16 @@ void InitialiseBitBoardLists()
 			rookFancyIndex++;
 		}
 
+
+
+		RookMagics[square].InnerRay = RookInnerRays[square];
+		RookMagics[square].MagicMultipler = RookMagicMultipliers[square];
+		RookMagics[square].AttacksFancyPointer = RookAttacksFancyPointer[square];
+		RookMagics[square].BlockerPermutationBitsPreAdjusted = RookBlockerPermutationBitsPreAdjusted[square];
+
+
+
+
 		// Bishops
 		BishopInnerRays[square] = GenerateBishopInnerRay(square);
 		BishopAttacksFancyPointer[square] = &BishopAttacksFancyBB[bishopFancyIndex];
@@ -654,6 +690,16 @@ void InitialiseBitBoardLists()
 			*(BishopAttacksFancyPointer[square] + keyIndex) = GenerateBishopAttacks(square, blockersBB);
 			bishopFancyIndex++;
 		}
+
+
+		BishopMagics[square].InnerRay = BishopInnerRays[square];
+		BishopMagics[square].MagicMultipler = BishopMagicMultipliers[square];
+		BishopMagics[square].AttacksFancyPointer = BishopAttacksFancyPointer[square];
+		BishopMagics[square].BlockerPermutationBitsPreAdjusted = BishopBlockerPermutationBitsPreAdjusted[square];
+
+
+
+
 
 		AttacksByPieceBBList[Bishop][square] = BishopAttacksBB(square, 0);
 		AttacksByPieceBBList[Rook][square] = RookAttacksBB(square, 0);

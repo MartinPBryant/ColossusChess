@@ -197,9 +197,10 @@ ALL
 
 R&B attack tables...
 -try standard 'magic' tables of 4096
--try using structs
+-try using structs - ADOPT AND TIDYUP
 
-can spvt use a lookup table for the strings on the end of the pv?
+
+-have bottom 1/8th plies as full width??? too few? 1/4? and offset by 2 ply?
 
 
 
@@ -215,17 +216,10 @@ e.g. Colossus v Caliban, maybyen v Colossus
 
 
 
-
-
-enhance DisplayStatisticsNormalTranspositionTable to break down by age as well! will it be about 1/4 each? no... current move may be only a small fraction if <4 ages
-
 singular extensions
 
 
 tidy up mate mode - clearer messages re parameters
-
-
-cpuid stuff
 
 
 if we are mating and looking for a shorter mate, randomly don't prune at a ply (use nodecount) to allow potentially shorter mating moves to be found
@@ -241,7 +235,7 @@ eval: mobility
 -much slower in middlegame because of greater # of moves!
 -various asserts taken out! (because of EP capts) put back if don't use!
 -can we just use the LAST mob counts from the tree!? ... so slightly out of date ... ah! but not available in the QS :(
--use the last two values from main... save in the GR? 2 class vars?
+-use the last two values from main... save in the GR? 2 class vars? WHAT IF WE'RE IN CHECK? NEED LAST NON-CHECK POSN. MAYBE AVERAGE LAST 4 PLY?
 
 
 perft count overflows???
@@ -252,6 +246,7 @@ e.g.
 k7/8/8/8/8/8/8/2B1K1N1 w - - 0 1
 need counters >64-bit!
 write multix64bit bigint class for perft
+-also need to be able to output them!
 
 
 in this posn 8/8/5K2/5N2/2p3k1/8/4N3/8 w - - 0 3
@@ -293,24 +288,10 @@ movegen: as in draughts, use an array of functions instead of ' >> (sideToMoveX 
 
 
 
-_pext_u64 can be used for slider movegen magic number stuff (see rubichess)
--need to (re-)understand how all the magic BB movegen stuff works! :D
-https://learn.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex?view=msvc-170
--see rubichess for how to ID cpus
--could stop 'lower' exes from running on 'higher' cpus
 mmx/simd - check SF/Rubichess code
 https://docs.oracle.com/cd/E18752_01/html/817-5477/eojdc.html
-bmi instructions also, e.g. BLSR  --> capturedBB = _blsr_u64(capturedBB);
-replace things like bb&=(bb-1) with a #define then can more easily test speed of alternative instruction sets
 
 
-search much faster (nps) without TT! :O try some tests with different hash table sizes including 0
--after each iter, if TT usage<some%age, halve size used, if >some%age, redouble up to max allowed - but have to clear each time change? no? just wouldn't find previous entries
---so change after each move, not iter
--use the number of stores/move as measure of how big the table should be
-
-
-large pages (huge pages) - require user to enable them with secpol so a bit problematic - could just implement the code and then it's there if available
 
 MT Perft sometimes stores the same posn in 2 or more different locations! as can be seen by looking at the 'unique' counts for single-thread vs multi-thread (see error trap in othello and draughts)
 would Perft be better off with bucketless TT?
@@ -368,13 +349,9 @@ branchless coding tricks???
 
 connected passed Ps
 
-increase timeup divisor by 10% {by 20% if getting bonus time?}
-
 penalise (semi-)open files around K
 
-
 pawn structure hash table
-
 
 rewrite move generators more efficiently
 
@@ -642,7 +619,6 @@ mate mode - don't we also need MateAllO1M and MateAllForced
 
 at lower plies we can prune/reduce but as we go deeper {e.g. DR>=10} we should gradually be more stringent on testing those discarded moves e.g. testing for threats, so that we don't miss anything
 -would help with the null move problems
--have bottom 1/8th plies as full width??? too few? 1/4? and offset by 2 ply?
 
 
 

@@ -65,7 +65,11 @@ Recompiled both as a sanity check
 14 v 16 {20/2s+0.022s(CCRL ratio): add movesLeft * Fischer bonus to timeleft [repeating]} (-4.03) NIPOGI1
 
 16 v 17 {PEXT} (-9.28) PCS2
+*** BECAUSE PEXT IS NOT USABLE ON ALL OF MY TEST PCs IT IS NOW DISABLED BY DEFAULT FOR TESTING
 
+18 v 19 {magic stuff put into structs} (-1.81) PCS2
+
+19 v 20 {'large pages'} () PCS2
 
 
 

@@ -681,7 +681,10 @@ void Normal::AllocateNormalTranspositionTable()
 	if (NormalTranspositionTableBuckets > 0)
 	{
 		NormalTranspositionTableBucketsMask = NormalTranspositionTableBuckets - 1;
-		NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)AlignedAllocateMemory(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), 64);
+		if (LargePagesAvailable)
+			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)VirtualAlloc(NULL, NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
+		else
+			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)AlignedAllocateMemory(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), 64);
 		if ((NormalTranspositionTablePointer == nullptr))
 		{
 			Output("info string *** Error! Normal transposition table memory could not be allocated!");
