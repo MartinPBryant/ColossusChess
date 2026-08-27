@@ -17,19 +17,32 @@ int main(int argc, char * argv[])
 	CPUInfo();
 
 	// Test for compatibility
-	if (((ThisCPUSupports & EISPOPCNT) != 0) || ((ThisCPUSupports & EISLZCNT) == 0))
+	if (((ThisCPUSupports & EISPOPCNT) == 0) || ((ThisCPUSupports & EISLZCNT) == 0))
 	{
+		Output("\n*****");
 		Output("This executable uses the POPCNT and TZCNT instructions which are not both supported by this CPU.");
-		Output("Exiting.");
+		Output("Press return to exit.");
+		std::string s;
+		std::getline(std::cin, s);
 		return EXIT_FAILURE;
 	}
 #ifdef PEXT
 	if ((CPUVendorId == CPUVENDORAMD) && (CPUFamily < 25))
 	{
+		Output("\n*****");
 		Output("This version of the executable uses the PEXT instruction which will not run efficiently on AMD CPUs prior to the Zen 3 (Family>=25) architecture.");
-		Output("Please use the correct executable.");
-		Output("Exiting.");
+		Output("Please use the correct baseline executable.");
+		Output("Press return to exit.");
+		std::string s;
+		std::getline(std::cin, s);
 		return EXIT_FAILURE;
+	}
+#else
+	if ((CPUVendorId == CPUVENDORAMD) && (CPUFamily >= 25))
+	{
+		Output("\ninfo string *****");
+		Output("info string This version of the executable does not use the PEXT instruction but this CPU is capable of using it.");
+		Output("info string Please use the correct PEXT executable.");
 	}
 #endif
 

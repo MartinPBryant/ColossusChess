@@ -1394,8 +1394,9 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 						egtbScore = -5;
 						break;
 					case TB_DRAW:
-						// Bias EGTB draw scores towards the side with the most material (so +1, 0 or -1)
-						egtbScore = (currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1]) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1]);
+						// Bias EGTB draw scores towards the side with the most material (so +4, 0 or -4)
+						// So it prefers a material up EGTB draw (+4) to other draws, e.g. DBR etc (+2...0...-2), to a material down EGTB draw (-4)
+						egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1]) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1]));
 						break;
 					case TB_CURSED_WIN:
 						egtbScore = 5;
