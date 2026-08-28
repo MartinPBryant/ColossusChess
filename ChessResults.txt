@@ -69,9 +69,11 @@ Recompiled both as a sanity check
 
 18 v 19 {magic stuff put into structs} (-1.81) PCS2
 
-19 v 20 {'large pages'} () PCS2
+19 v 20 {'large pages'} (-5.33) PCS2
 
+***20 tidied up --> 21
 
+21 v 22 {full width used gradually at lower plies} () PCS2
 
 
 

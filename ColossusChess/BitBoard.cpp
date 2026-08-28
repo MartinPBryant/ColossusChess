@@ -226,30 +226,22 @@ inline uint64_t Side1PawnAttacksBB(uint64_t pawnSquareBB)
 }
 
 // 'Fancy' magic bitboards (862208 bytes : About 2.74 times smaller and about 2.5% faster than 'plain')
-// I tried putting the AttacksPointer, InnerRay, MagicMultiplier and BlockerPermutationBitsPreAdjusted into a struct (to try to save array indexing) but it was slower! :O
 
 struct Magic
 {
 	uint64_t InnerRay;
-	uint64_t MagicMultipler;
 	uint64_t* AttacksFancyPointer;
+#ifndef PEXT
+	uint64_t MagicMultipler;
 	int BlockerPermutationBitsPreAdjusted;
+#endif
 };
 
 alignas(64) Magic RookMagics[64];
 alignas(64) Magic BishopMagics[64];
 
-
-
-
-
 alignas(64) uint64_t RookAttacksFancyBB[102400]; // 8x102400 = 819200 = 800KB
 alignas(64) uint64_t BishopAttacksFancyBB[5248]; // 8x5248 = 41984 = 41KB
-alignas(64) uint64_t* RookAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the RookAttacksFancyBB array above
-alignas(64) uint64_t* BishopAttacksFancyPointer[64]; // 512 // 64 pointers to the relevant part of the BishopAttacksFancyBB array above
-
-alignas(64) uint64_t RookInnerRays[64];
-alignas(64) uint64_t BishopInnerRays[64];
 
 // The sum of moves in all the rays (not counting the last step of the ray)
 // 2^12 = 4096 (i.e. the number of blocker permutations for a rook on e.g. A1) x 64 squares x 8 bytes (i.e. 1 uint64_t) = 2MB
@@ -264,17 +256,6 @@ const int RookBlockerPermutationBits[64] = {
   11, 10, 10, 10, 10, 10, 10, 11,
   12, 11, 11, 11, 11, 11, 11, 12
 };
-alignas(64)
-const int RookBlockerPermutationBitsPreAdjusted[64] = {
-  64 - 12, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 12,
-  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
-  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
-  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
-  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
-  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
-  64 - 11, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 10, 64 - 11,
-  64 - 12, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 11, 64 - 12
-};
 
 // 2^9 = 512 (i.e. the number of blocker permutations for a bishop on e.g. D4) x 64 squares x 8 bytes (i.e. 1 uint64_t) = 256KB
 alignas(64)
@@ -287,17 +268,6 @@ const int BishopBlockerPermutationBits[64] = {
   5, 5, 7, 7, 7, 7, 5, 5,
   5, 5, 5, 5, 5, 5, 5, 5,
   6, 5, 5, 5, 5, 5, 5, 6
-};
-alignas(64)
-const int BishopBlockerPermutationBitsPreAdjusted[64] = {
-  64 - 6, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 6,
-  64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5,
-  64 - 5, 64 - 5, 64 - 7, 64 - 7, 64 - 7, 64 - 7, 64 - 5, 64 - 5,
-  64 - 5, 64 - 5, 64 - 7, 64 - 9, 64 - 9, 64 - 7, 64 - 5, 64 - 5,
-  64 - 5, 64 - 5, 64 - 7, 64 - 9, 64 - 9, 64 - 7, 64 - 5, 64 - 5,
-  64 - 5, 64 - 5, 64 - 7, 64 - 7, 64 - 7, 64 - 7, 64 - 5, 64 - 5,
-  64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5,
-  64 - 6, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 5, 64 - 6
 };
 
 alignas(64)
@@ -447,16 +417,11 @@ const uint64_t BishopMagicMultipliers[64] = {
 #ifdef PEXT
 inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	return *(RookAttacksFancyPointer[square] + _pext_u64(occupiedSquaresBB, RookInnerRays[square]));
+	return *(RookMagics[square].AttacksFancyPointer + _pext_u64(occupiedSquaresBB, RookMagics[square].InnerRay));
 }
 #else
 inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	//occupiedSquaresBB &= RookInnerRays[square]; // Get the relevant blockers for the rook on 'square'
-	//occupiedSquaresBB *= RookMagicMultipliers[square]; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
-	//occupiedSquaresBB >>= RookBlockerPermutationBitsPreAdjusted[square];
-	//return *(RookAttacksFancyPointer[square] + occupiedSquaresBB);
-
 	occupiedSquaresBB &= RookMagics[square].InnerRay; // Get the relevant blockers for the rook on 'square'
 	occupiedSquaresBB *= RookMagics[square].MagicMultipler; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
 	occupiedSquaresBB >>= RookMagics[square].BlockerPermutationBitsPreAdjusted;
@@ -469,16 +434,11 @@ inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 #ifdef PEXT
 inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	return *(BishopAttacksFancyPointer[square] + _pext_u64(occupiedSquaresBB, BishopInnerRays[square]));
+	return *(BishopMagics[square].AttacksFancyPointer + _pext_u64(occupiedSquaresBB, BishopMagics[square].InnerRay));
 }
 #else
 inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
-	//occupiedSquaresBB &= BishopInnerRays[square]; // Get the relevant blockers for the bishop on 'square'
-	//occupiedSquaresBB *= BishopMagicMultipliers[square];
-	//occupiedSquaresBB >>= BishopBlockerPermutationBitsPreAdjusted[square];
-	//return *(BishopAttacksFancyPointer[square] + occupiedSquaresBB);
-
 	occupiedSquaresBB &= BishopMagics[square].InnerRay; // Get the relevant blockers for the rook on 'square'
 	occupiedSquaresBB *= BishopMagics[square].MagicMultipler; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
 	occupiedSquaresBB >>= BishopMagics[square].BlockerPermutationBitsPreAdjusted;
@@ -640,69 +600,57 @@ void InitialiseBitBoardLists()
 		AttacksByPieceBBList[King][square] = KingAttacksBBList[square];
 
 		// Rooks
-		RookInnerRays[square] = GenerateRookInnerRay(square); // Create a bitboard showing the moves by a rook on 'square' on an empty board excluding edges
-		RookAttacksFancyPointer[square] = &RookAttacksFancyBB[rookFancyIndex]; // Save the address within the RookAttacksFancyBB table of the 0th entry for this 'square'
+		RookMagics[square].InnerRay = GenerateRookInnerRay(square); // Create a bitboard showing the moves by a rook on 'square' on an empty board excluding edges
+		RookMagics[square].AttacksFancyPointer = &RookAttacksFancyBB[rookFancyIndex]; // Save the address within the RookAttacksFancyBB table of the 0th entry for this 'square'
+#ifndef PEXT
+		RookMagics[square].MagicMultipler = RookMagicMultipliers[square];
+		RookMagics[square].BlockerPermutationBitsPreAdjusted = 64 - RookBlockerPermutationBits[square];
+#endif
 		// Initialise all permutations of blockers for the current square
 		for (int permutationIndex = 0; permutationIndex < (1 << RookBlockerPermutationBits[square]); permutationIndex++) // 1 << (max)12 = 4096
 		{
 			uint64_t blockersBB;
-			blockersBB = PermutationIndexToBB(permutationIndex, RookBlockerPermutationBits[square], RookInnerRays[square]);
+			blockersBB = PermutationIndexToBB(permutationIndex, RookBlockerPermutationBits[square], RookMagics[square].InnerRay);
 			int keyIndex;
 #ifdef PEXT
-			keyIndex = (int)_pext_u64(blockersBB, RookInnerRays[square]);
+			keyIndex = (int)_pext_u64(blockersBB, RookMagics[square].InnerRay);
 #else
-			keyIndex = (int)((blockersBB * RookMagicMultipliers[square]) >> (64 - RookBlockerPermutationBits[square]));
+			keyIndex = (int)((blockersBB * RookMagics[square].MagicMultipler) >> RookMagics[square].BlockerPermutationBitsPreAdjusted);
 #endif
 			assert((keyIndex >= 0) && (keyIndex < (1 << RookBlockerPermutationBits[square])));
-			if (*(RookAttacksFancyPointer[square] + keyIndex) != -1)
+			if (*(RookMagics[square].AttacksFancyPointer + keyIndex) != -1)
 				OutputError("RookAttacksFancyBB entry initialised more than once!");
-			*(RookAttacksFancyPointer[square] + keyIndex) = GenerateRookAttacks(square, blockersBB);
+			*(RookMagics[square].AttacksFancyPointer + keyIndex) = GenerateRookAttacks(square, blockersBB);
 			rookFancyIndex++;
 		}
 
-
-
-		RookMagics[square].InnerRay = RookInnerRays[square];
-		RookMagics[square].MagicMultipler = RookMagicMultipliers[square];
-		RookMagics[square].AttacksFancyPointer = RookAttacksFancyPointer[square];
-		RookMagics[square].BlockerPermutationBitsPreAdjusted = RookBlockerPermutationBitsPreAdjusted[square];
-
-
-
-
 		// Bishops
-		BishopInnerRays[square] = GenerateBishopInnerRay(square);
-		BishopAttacksFancyPointer[square] = &BishopAttacksFancyBB[bishopFancyIndex];
+		BishopMagics[square].InnerRay = GenerateBishopInnerRay(square);
+		BishopMagics[square].AttacksFancyPointer = &BishopAttacksFancyBB[bishopFancyIndex];
+#ifndef PEXT
+		BishopMagics[square].MagicMultipler = BishopMagicMultipliers[square];
+		BishopMagics[square].BlockerPermutationBitsPreAdjusted = 64 - BishopBlockerPermutationBits[square];
+#endif
 		// Initialise all permutations of blockers for the current square
 		for (int permutationIndex = 0; permutationIndex < (1 << BishopBlockerPermutationBits[square]); permutationIndex++) // 1 << (max)9 = 512
 		{
 			uint64_t blockersBB;
-			blockersBB = PermutationIndexToBB(permutationIndex, BishopBlockerPermutationBits[square], BishopInnerRays[square]);
+			blockersBB = PermutationIndexToBB(permutationIndex, BishopBlockerPermutationBits[square], BishopMagics[square].InnerRay);
 			int keyIndex;
 #ifdef PEXT
-			keyIndex = (int)_pext_u64(blockersBB, BishopInnerRays[square]);
+			keyIndex = (int)_pext_u64(blockersBB, BishopMagics[square].InnerRay);
 #else
-			keyIndex = (int)((blockersBB * BishopMagicMultipliers[square]) >> (64 - BishopBlockerPermutationBits[square]));
+			keyIndex = (int)((blockersBB * BishopMagics[square].MagicMultipler) >> BishopMagics[square].BlockerPermutationBitsPreAdjusted);
 #endif
 			assert((keyIndex >= 0) && (keyIndex < (1 << BishopBlockerPermutationBits[square])));
-			if (*(BishopAttacksFancyPointer[square] + keyIndex) != -1)
+			if (*(BishopMagics[square].AttacksFancyPointer + keyIndex) != -1)
 				OutputError("BishopAttacksFancyBB entry initialised more than once!");
-			*(BishopAttacksFancyPointer[square] + keyIndex) = GenerateBishopAttacks(square, blockersBB);
+			*(BishopMagics[square].AttacksFancyPointer + keyIndex) = GenerateBishopAttacks(square, blockersBB);
 			bishopFancyIndex++;
 		}
 
-
-		BishopMagics[square].InnerRay = BishopInnerRays[square];
-		BishopMagics[square].MagicMultipler = BishopMagicMultipliers[square];
-		BishopMagics[square].AttacksFancyPointer = BishopAttacksFancyPointer[square];
-		BishopMagics[square].BlockerPermutationBitsPreAdjusted = BishopBlockerPermutationBitsPreAdjusted[square];
-
-
-
-
-
-		AttacksByPieceBBList[Bishop][square] = BishopAttacksBB(square, 0);
 		AttacksByPieceBBList[Rook][square] = RookAttacksBB(square, 0);
+		AttacksByPieceBBList[Bishop][square] = BishopAttacksBB(square, 0);
 		AttacksByPieceBBList[Queen][square] = BishopAttacksBB(square, 0) | RookAttacksBB(square, 0);
 
 		// Passed pawns

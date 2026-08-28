@@ -1003,7 +1003,10 @@ void Perft::AllocatePerftTranspositionTable()
 	if (PerftTranspositionTableBuckets > 0)
 	{
 		PerftTranspositionTableBucketsMask = PerftTranspositionTableBuckets - 1;
-		PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)AlignedAllocateMemory(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), 64);
+		if (LargePagesAvailable)
+			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)VirtualAlloc(NULL, PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
+		else
+			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)AlignedAllocateMemory(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), 64);
 		if (PerftTranspositionTablePointer == nullptr)
 		{
 			Output("info string *** Error! Perft transposition table memory could not be allocated!");

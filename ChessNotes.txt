@@ -195,10 +195,6 @@ To get all the TT entry data in one go...
 ALL
 ===
 
-R&B attack tables...
--try standard 'magic' tables of 4096
--try using structs - ADOPT AND TIDYUP
-
 
 -have bottom 1/8th plies as full width??? too few? 1/4? and offset by 2 ply?
 

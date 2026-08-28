@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx20"
+#define VersionX "20NNx22"
 //#define EXPERIMENTAL
 //#define PEXT // N.B. the PEXT instruction is VERY slow on AMD Zen2 architecture and Intel 'efficiency' cores!
 

@@ -4,6 +4,8 @@
 //#include <iostream>
 #include <thread>
 #include <map>
+#define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
+#include <windows.h>
 
 #include "GlobalConstants.h"
 #include "GlobalTypes.h"
@@ -631,7 +633,10 @@ void Mate::AllocateMateTranspositionTable()
 	if (MateTranspositionTableBuckets > 0)
 	{
 		MateTranspositionTableBucketsMask = MateTranspositionTableBuckets - 1;
-		MateTranspositionTablePointer = (MateTranspositionTableBucket_Struct*)AlignedAllocateMemory(MateTranspositionTableBuckets * sizeof(MateTranspositionTableBucket_Struct), 64);
+		if (LargePagesAvailable)
+			MateTranspositionTablePointer = (MateTranspositionTableBucket_Struct*)VirtualAlloc(NULL, MateTranspositionTableBuckets * sizeof(MateTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
+		else
+			MateTranspositionTablePointer = (MateTranspositionTableBucket_Struct*)AlignedAllocateMemory(MateTranspositionTableBuckets * sizeof(MateTranspositionTableBucket_Struct), 64);
 		if ((MateTranspositionTablePointer == nullptr))
 		{
 			Output("info string *** Error! Mate transposition table memory could not be allocated!");
