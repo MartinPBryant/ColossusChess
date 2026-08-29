@@ -39,13 +39,12 @@ extern const int EndgameTablebasesCumulativeExpectedFileCounts[8];
 
 // Material/positional scoring
 extern short Contempt;
-extern short Tempo;
+extern const short Tempo;
 
-// Castling statuses
+// Castling statuses - Introduced when implementing Chess960/FRC
 extern int8_t InitialKingFile;
 extern int8_t InitialKingSideRookFile;
 extern int8_t InitialQueenSideRookFile;
-
 
 // Time control types
 // Tournament mode: X moves in M seconds then Y moves in N seconds.
@@ -97,9 +96,6 @@ struct TimeControl_Struct
 };
 extern TimeControl_Struct TC;
 
-extern int FixedDepthPly;
-extern bool Infinite;
-
 extern int MinimumIterationPly;
 extern uint64_t WInc;
 extern uint64_t WTime;
@@ -129,7 +125,7 @@ extern bool PVMessageChecked;
 // Threads
 extern int Threads;
 
-// Transposition table stuff
+// Transposition table
 extern const int TranspositionTableMemoryDefault;
 extern const int TranspositionTableMemoryMin;
 extern const int TranspositionTableMemoryMax;
@@ -181,12 +177,11 @@ extern const int EigthRank[2];
 #define notOccupiedBB ~occupiedBB
 extern int8_t ChebyshevDistance[64][64];
 extern int8_t ManhattanDistance[64][64];
-//extern int MoveListIndex;
 extern double Reductions[256];
 extern const int SeeLowHighValues[7];
 extern const int SeeValues[7];
 
-
+// CPU identification
 extern std::string CPUVendor;
 extern CPUVendorIdEnum CPUVendorId;
 extern std::string CPUBrand;
@@ -210,6 +205,7 @@ extern std::string ThisCPUSupportsEISNames;
 #define EISLZCNT (1 << 13)
 extern std::string EISNames[14];
 
+// Large pages
 extern bool LargePagesAvailable;
 extern size_t LargePageMinimum;
 
@@ -224,7 +220,6 @@ void InitialisePSTValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
 bool PSTValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
 extern const int GamePhaseIncrement[8];
 void InitialiseGamePhase(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
-//std::string CurrentLine(int ply);
 
 //std::string ConvertPositionToFEN(int8_t mailboxBoard64[64]);
 std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber); // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
@@ -249,13 +244,13 @@ void WritePiecesBB(uint64_t piecesBB[Sides][King + 2]);
 void SetPositionAndMoves(std::string positionAndMoves);
 void SendOptions();
 
-//std::string BestLine();
-
 extern bool MessagesQueued;
 extern std::chrono::time_point<std::chrono::steady_clock> MessagesLastDisplayedClock;
 
 std::string MoveNotation(uint32_t move);
 
+
+#ifdef EXPERIMENTAL
 void KBNvK();
 
 //void StaticEvaluation();
@@ -268,3 +263,4 @@ void MaximumMoves(int inputFileNumber);
 void GenerateKP2();
 //void NNUETest();
 //void EGTB7Stats();
+#endif

@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx22"
+#define VersionX "20NNx27"
 //#define EXPERIMENTAL
 //#define PEXT // N.B. the PEXT instruction is VERY slow on AMD Zen2 architecture and Intel 'efficiency' cores!
 
@@ -19,6 +19,7 @@
 #define MVQueen 975
 #define MVKing 1000
 // The maximum number of 'points' of material for one side in a legal position is 9(Q)+10(Rs)+12(B+Ns)+8*9(promoted Ps)=103 ... so a score of ~10300cp or 103.00
+// EGTB winning scores are 140+, mating scores are 150+
 
 enum PiecesEnum {
 	AllPieces = 0, // For bitboards

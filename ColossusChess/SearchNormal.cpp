@@ -328,7 +328,12 @@ void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 		if (EndgameTablebasesRootMove != 0)
 		{
 			if (EndgameTablebasesRootWDL == 0) // Draw?
-				displayedScore = displayedScore / 8; // Reduce the range of displayed scores to avoid UIs adjudicating the game as a loss! See https://talkchess.com/viewtopic.php?t=84821
+			{
+				// Reduce the range of displayed scores to avoid UIs adjudicating the game as a loss! See https://talkchess.com/viewtopic.php?t=84821
+				//displayedScore = displayedScore / 8; // THIS CAUSED CONFUSION WHEN TRYING TO FIND A BUG AROUND SMALL DRAW SCORES!
+				displayedScore = std::min(displayedScore, (short)299); // Keep it in the range -299..299
+				displayedScore = std::max(displayedScore, (short)-299);
+			}
 			else if (EndgameTablebasesRootWDL == 1) // Win?
 				if (displayedScore < EGTBWinningScore)
 					displayedScore = displayedScore + 1000; // Ensure the score looks like a winning score! (It may be just a few centi-pawns according to the eval)
@@ -676,14 +681,22 @@ void Normal::AllocateNormalTranspositionTable()
 
 	// Free any previously allocated memory. If the pointer is nullptr it does nothing.
 	AlignedFreeMemory(NormalTranspositionTablePointer);
+	NormalTranspositionTablePointer = nullptr;
 
 	// Allocate transposition table memory
 	if (NormalTranspositionTableBuckets > 0)
 	{
 		NormalTranspositionTableBucketsMask = NormalTranspositionTableBuckets - 1;
 		if (LargePagesAvailable)
+		{
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)VirtualAlloc(NULL, NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
-		else
+			if (NormalTranspositionTablePointer == nullptr)
+			{
+				Output("info string *** Error! Normal 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
+				OutputError("Normal 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
+			}
+		}
+		if (NormalTranspositionTablePointer == nullptr)
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)AlignedAllocateMemory(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), 64);
 		if ((NormalTranspositionTablePointer == nullptr))
 		{
@@ -1484,6 +1497,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		&& (currentGameRecordPointer->isTWM == 0) // Not threatened with mate? (+5.3, +/-3.7, 20000)
 		&& (currentGameRecordPointer->isO1M == 0)
 		&& (beta > EGTBLosingScore) // Otherwise we always immediately cutoff (with no moves being searched) and the move at the previous ply (which might be a shorter mate) gets discarded - NEVER remove this!
+		//&& (ply > FullWidthPlies)
 		)
 	{
 		// If the side-to-move has got a winning score then alpha (and therefore beta) will be >=EGTBWinningScore and so the staticEvaluation will fall far short and this won't prune
@@ -1518,6 +1532,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		&& ((currentGameRecordPointer->gamePhase[sideToMove] > 0) || ((normalBrain.SafePawnMoves(sideToMove)) && normalBrain.HasOpposition(sideToMove))) // If no pieces, check for safe pawn moves and having the opposition
 		&& (beta > EGTBLosingScore) // Otherwise we will almost certainly assume a null move cutoff (with no moves being searched) and the move at the previous ply (which might be a shorter mating move) gets discarded (-2.2)
 		//&& (ply >= nullMoveMinimumPly) // Used if we do a verification search
+		//&& (ply > FullWidthPlies)
 		)
 	{ // About 54% of nodes (that get past the TT) perform a null move
 		// Unfortunately null move has several drawbacks
@@ -1533,7 +1548,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		else if (depthRemaining > 10)
 		{
 			normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
-			int count = normalBrain.CountAllMoves(sideToMove, isInCheck);
+			uint32_t count = normalBrain.CountAllMoves(sideToMove, isInCheck);
 			if (count == 1)
 				allowNull = false;
 			else if (count < PopulationCountX(normalBrain.piecesBB[sideToMove][AllPieces]))
@@ -1841,6 +1856,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			//&& (beta > EGTBLosingScore) // Never prune if we're 'losing' as we want to try EVERYTHING to find a way out! BUT IF BETA<=LosingBaseScore THEN SO TOO IS ALPHA AND THE TEST BELOW COULD NEVER KICK IN?!
 			//&& (alpha < WinningBaseScore) // If we have a 'winning' score then EVERY (non-special/quiet) move will be futility pruned and you could 'lose' the EGTB win or miss a better mate! So do NOT take this out!!!
 			//&& (currentGameRecordPointer->isTWM == 0)
+			//&& (ply > FullWidthPlies)
 			)
 		{
 			assert(currentMove.ui32 != tteBestMove.ui32);
@@ -2346,13 +2362,16 @@ std::string Normal::ComputeNormal()
 	EndgameTablebasesHeavyProbes = 0;
 	EndgameTablebasesHits = 0;
 	EndgameTablebasesPiecesRoot = PopulationCountX(normalBrain.piecesBB[0][AllPieces] | normalBrain.piecesBB[1][AllPieces]);
+
 	EndgameTablebasesTreeProbeLimitMain = EndgameTablebasesPiecesFound;
 	if (EndgameTablebasesTreeProbeLimitMain == 7)
 		if (!SyzygyProbe7PieceInTree)
 			EndgameTablebasesTreeProbeLimitMain = 6;
 	EndgameTablebasesTreeProbeLimitMain = std::min(EndgameTablebasesTreeProbeLimitMain, SyzygyProbeLimit);
-	EndgameTablebasesTreeProbeLimitQS = std::min(5, SyzygyProbeLimit);
-	EndgameTablebasesTreeProbeLimitQS = std::min(EndgameTablebasesTreeProbeLimitQS, EndgameTablebasesPiecesFound);
+	
+	EndgameTablebasesTreeProbeLimitQS = std::min(5, EndgameTablebasesPiecesFound); // Only probe a maximum of the 5pc in the QS
+	EndgameTablebasesTreeProbeLimitQS = std::min(EndgameTablebasesTreeProbeLimitQS, SyzygyProbeLimit);
+
 	EndgameTablebasesRootMove = 0; // This will be set to a valid move if we are in the EGTBs at the root
 	EndgameTablebasesRootWDL = -MAXINT;
 	EndgameTablebasesRootDTZ = 0;
@@ -2389,9 +2408,17 @@ std::string Normal::ComputeNormal()
 					&results
 				);
 
-				// If we couldn't get the DTZ info then try the WDL info (may happen e.g. if you have the 7-piece .rtbw files but not the .rtbz files)
-				if (result == 0)
+				if (result != 0)
 				{
+					// If we have the DTZ info then don't probe the EGTBs in the tree
+					EndgameTablebasesTreeProbeLimitMain = 0;
+					EndgameTablebasesTreeProbeLimitQS = 0;
+				}
+				else
+				{
+					// If we don't have the DTZ info then
+					// 1: allow EGTB probes in the tree so that hopefully it can force exchanges into a lower pieces win or avoid exchanges into a lower pieces loss
+					// 2: get the WDL info (may happen e.g. if you have the 7-piece .rtbw files but not the .rtbz files)
 					//EndgameTablebasesErrors = true;
 					EndgameTablebasesErrorCounts[0]++;
 					result = tb_probe_root_wdl(
@@ -2417,7 +2444,10 @@ std::string Normal::ComputeNormal()
 					for (uint32_t index = 0; index < results.size; index++)
 					{
 						TbRootMove move = results.moves[index];
-						uint32_t colossusMove = normalBrain.SYZYGYPYRRHICMoveToColossusMove(move.move, normalBrain.gameRecordPointer->epSquare);
+						// If we have the DTZ info (.rtbz files) : move.tbRank will be +262144-DTZ (0x40000) for wins, -262144+DTZ for losses and 0 for draws
+						// If we don't have the DTZ info (.rtbz files) : move.tbRank will be +262144 (0x40000) for wins, -262144 for losses and 0 for draws, so dtz will be 0 for all moves
+						Move_Struct colossusMove;
+						colossusMove.ui32 = normalBrain.SYZYGYPYRRHICMoveToColossusMove(move.move, normalBrain.gameRecordPointer->epSquare);
 						int wdl; // win=1, draw=0, loss=-1
 						int dtz;
 						if (move.tbRank > 0)
@@ -2435,14 +2465,14 @@ std::string Normal::ComputeNormal()
 							wdl = -1;
 							dtz = 0x40000 + move.tbRank;
 						}
-						bool found = UpdateRootMoveEGTBStatus(colossusMove, wdl, dtz, move.tbRank);
+						bool found = UpdateRootMoveEGTBStatus(colossusMove.ui32, wdl, dtz, move.tbRank);
 						if (!found)
-							OutputError("Did not find EGTB move in RootMoveList! " + MyUI64TOA(colossusMove));
+							OutputError("Did not find EGTB move in RootMoveList! " + MyUI64TOA(colossusMove.ui32));
 
 						// Save the move with the highest rank
 						if (move.tbRank > EndgameTablebasesRootRank)
 						{
-							EndgameTablebasesRootMove = colossusMove;
+							EndgameTablebasesRootMove = colossusMove.ui32;
 							EndgameTablebasesRootWDL = wdl;
 							EndgameTablebasesRootDTZ = dtz;
 							EndgameTablebasesRootRank = move.tbRank;
@@ -2480,6 +2510,8 @@ std::string Normal::ComputeNormal()
 		// Update iteration depth (ensuring it doesn't exceed maximum)
 		if (IterationPly < MaximumIterationPly)
 			IterationPly++;
+		FullWidthPlies = (IterationPly + 2) / 4; // So... ID1-3 --> 0, ID4-11 --> 1, ID12-19 --> 2, etc
+
 		isFollowingPV = (IterationPly > 1);
 
 		// Set the aspiration window
@@ -2613,7 +2645,6 @@ std::string Normal::ComputeNormal()
 			TimeUp(2.0f);
 
 #ifdef SEARCHINGFORLINE
-			ShowQueuedMessages();
 			if (TargetLinePartial != "")
 				Output("IterationPly: " + MyITOA(IterationPly) + ", TargetLinePartial: " + TargetLinePartial + ", TargetLineRefutedBy: " + MoveNotation(TargetLineRefutedBy.ui32) + " (" + MyITOA(TargetLinePartialDepthRemaining) + ", " + MyITOA(TargetLinePartialThreateningMate) + ")\n");
 #endif

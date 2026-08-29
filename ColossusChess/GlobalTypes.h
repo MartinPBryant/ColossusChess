@@ -94,6 +94,7 @@ struct CounterMoveHistory_Struct
 union GameRecordCastlingStatusUnion
 {
 	uint8_t ui8[Sides][2];
+	uint16_t ui16[Sides];
 	uint32_t ui32; // 0 = all castling possible, 0x01010101 = no castling possible
 };
 

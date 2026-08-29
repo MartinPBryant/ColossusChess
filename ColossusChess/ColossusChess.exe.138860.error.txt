@@ -1,0 +1,11 @@
+Fri Aug 28 23:47:24 2026
+*** Error!: Normal transposition table memory could not be allocated!
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

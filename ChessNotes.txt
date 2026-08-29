@@ -23,14 +23,16 @@ SHOULD REALLY CLEAR THIS VALUE OUT WHEN DONE!!! - DONE
 Board indeces
 =============
 
-56 57 58 59 60 61 62 63
-48 49 50 51 52 53 54 55
-40 41 42 43 44 45 46 47
-32 33 34 35 36 37 38 39
-24 25 26 27 28 29 30 31
-16 17 18 19 20 21 22 23
- 8  9 10 11 12 13 14 15
- 0  1  2  3  4  5  6  7
+56 57 58 59 60 61 62 63  8
+48 49 50 51 52 53 54 55  7
+40 41 42 43 44 45 46 47  6
+32 33 34 35 36 37 38 39  5
+24 25 26 27 28 29 30 31  4
+16 17 18 19 20 21 22 23  3
+ 8  9 10 11 12 13 14 15  2
+ 0  1  2  3  4  5  6  7  1
+
+ a  b  c  d  e  f  g  h
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -196,12 +198,36 @@ ALL
 ===
 
 
+dumb 50th move 'issue' again :D
+-on 50th move don't test 50 move? truncate PVs manually after search?
+
+
+don't reduce/prune passed P moves? unless SEE -ve
+-test on KP positions - test fully!
+
+code analysis!
+cpu profiling?
+
+
+
+if have got a TT move, use that instead of the null move, but still do the same reduced search!? that's not quite the same
+-however, if we don't have a TT move we should count the #ofmoves?
+-maybe just don't do null move if we have a TT move???
+-test it!
+
+
+compare the MWS section of code again with other engines. Always feels dodgy!
+-see https://www.chessprogramming.org/Principal_Variation_Search
+-don't do in QS though as SF and Rubichess don't seem to (doesn't anyway???)
+
+
+
 -have bottom 1/8th plies as full width??? too few? 1/4? and offset by 2 ply?
-
-
+-can try in several places: pruning within the movelist loop, node-level futility and nullmove
 
 pruning: have random chance of not pruning (higher chance at lower ply, higher chance earlier in movelist)
 -use nodecount&255<ID-ply
+
 
 
 on lichess, still occasionally get an error file thus...
@@ -314,10 +340,6 @@ send a windows toast alert if syzygypath finds any errors (actually any errors) 
 -write a separate toaster app that CC launches and it monitors for files containing toast messages - call it UCIErrors - add an option to INI file 'ReportUCIErrors'
 
 
-compare the MWS section of code again with other engines. Always feels dodgy!
--see https://www.chessprogramming.org/Principal_Variation_Search
--don't do in QS though as SF and Rubichess don't seem to (doesn't anyway???)
-
 
 This game against KnightX... why didn't it see the Rook skewer??? at move 47
 [Site "Forbidden Planet"]
@@ -358,11 +380,6 @@ Do KP shelter with a lookup table
 to analyse explosions... can we have plies>1 call ShowProgressMessage??? (and somehow print the current line not just the root move!) 
 
 tidy up
-
-if have got a TT move, use that instead of the null move, but still do the same reduced search!? that's not quite the same
--however, if we don't have a TT move we should count the #ofmoves?
--maybe just don't do null move if we have a TT move???
--test it!
 
 check efficacy of history table... is it mainly zeroes??? count automatically with AC1-9 and display
 
@@ -569,18 +586,12 @@ K safety again
 
 in endgames, passed Ps worth more if enemy K outside square
 
-don't reduce/prune passed P moves? unless SEE -ve
--test on KP positions
-
 evaluate 'space' by counting P advancement (not Ps in front of K)
 
 TRY SOME EVAL TUNING AGAIN NOW WE HAVE ESTABLISHED TESTING REGIME E.G. IRONING OUT THOSE STUPID OCCUPATION VALUES
 
 
 do lichess blunder analysis on lost games
-
-code analysis!
-cpu profiling?
 
 
 

@@ -39,7 +39,7 @@ bool ComputingMove;
 std::string LastPositionAndMoves = "";
 
 // UCI debug mode
-bool IsDebug;
+bool IsDebug = false;
 
 // Variants
 bool UCI_Chess960 = false;
@@ -54,27 +54,12 @@ const int EndgameTablebasesCumulativeExpectedFileCounts[8] = { 0, 0, 0, 5, 5 + 3
 
 // Material/positional scoring
 short Contempt = 0;
-short Tempo = 1;
+const short Tempo = 1;
 
-// Castling statuses
-int8_t InitialKingFile; // Introduced when implementing Chess960/FRC
+// Castling statuses - Introduced when implementing Chess960/FRC
+int8_t InitialKingFile;
 int8_t InitialKingSideRookFile;
 int8_t InitialQueenSideRookFile;
-
-//static const uint8_t FiftyMoveReduction[101] = // NOT USED
-//{
-//	0,
-//	0,0,0,0,0,0,0,0,0,0,
-//	0,0,0,0,0,0,0,0,0,0,
-//	0,0,0,0,0,0,0,0,0,0,
-//	0,0,0,0,0,0,0,0,0,0,
-//	0,0,0,0,0,0,0,0,0,0,
-//	0,0,0,0,0,0,0,0,0,0,
-//	  0,  1,  2,  3,  4,  6,  8, 10, 13, 16,
-//	 19, 23, 27, 31, 36, 41, 46, 52, 58, 64,
-//	 70, 77, 85, 92,100,108,117,125,135,144,
-//	154,164,174,185,196,207,219,231,243,255
-//};
 
 // Threads
 int Threads = ThreadsDefault;
@@ -85,12 +70,10 @@ const int TranspositionTableMemoryMin = 0;
 const int TranspositionTableMemoryMax = 16384;
 int TranspositionTableMemory = TranspositionTableMemoryDefault;
 
-//__declspec(align(8))
 uint64_t TranspositionTableRandoms[Sides][King + 2][64];
 uint64_t TranspositionTableRandomKingSideCastling[Sides];
 uint64_t TranspositionTableRandomQueenSideCastling[Sides];
 //uint64_t TranspositionTableRandomSideToMove;
-//__declspec(align(8))
 uint64_t TranspositionTableRandomsEnPassant[64] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -121,9 +104,6 @@ bool PVMessageChecked;
 // Time control stuff
 TimeControl_Struct TC;
 
-//int FixedDepthPly;
-bool Infinite;
-
 int MinimumIterationPly;
 uint64_t WInc;
 uint64_t WTime;
@@ -152,9 +132,9 @@ const int SeventhRank[Sides] = { 6, 1 };
 const int EigthRank[Sides] = { 7, 0 };
 alignas(64) int8_t ChebyshevDistance[64][64];
 alignas(64) int8_t ManhattanDistance[64][64];
-//int MoveListIndex;
 double Reductions[256];
 
+// CPU identification
 std::string CPUVendor = "";
 std::string CPUBrand = "";
 CPUVendorIdEnum CPUVendorId;
@@ -164,9 +144,9 @@ uint64_t ThisCPUSupports;
 std::string ThisCPUSupportsEISNames;
 std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE42", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT/TZCNT"};
 
+// Large pages
 bool LargePagesAvailable = false;
 size_t LargePageMinimum = 0;
-
 
 
 //----------------------------------------------------------------------------------------------------
@@ -819,19 +799,6 @@ void InitialiseGamePhase(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
 	}
 }
 
-//void AllocateMatingPositionsTableMemory()
-//{
-//	MatingPositionsTablePointer = (uint64_t*)AlignedAllocateMemory(MatingPositionsTableEntries * 8, 64);
-//	for (uint32_t entry = 0; entry < MatingPositionsTableEntries; entry++)
-//		MatingPositionsTablePointer[entry] = 0;
-//}
-
-//void FreeMatingPositionsTableMemory()
-//{
-//	AlignedFreeMemory(MatingPositionsTablePointer);
-//	MatingPositionsTablePointer = NULL;
-//}
-
 void InitialiseOneOffStuff()
 {
 	IsDebug = false;
@@ -896,7 +863,7 @@ void InitialiseOneOffStuff()
 bool MakeMove(std::string move)
 {
 	// Used outside the tree search
-	// TODO: Must validate?? Or is it the hosts responsibility?
+	// TODO: Must validate?? Or is it the hosts responsibility? Doing it here would protect the engine.
 	char promotionPiece;
 	int delta;
 

@@ -43,6 +43,7 @@ void Brain::ClearGameRecord()
 	gameRecord[0].sideToMove = 0;
 	gameRecord[0].moveNumber = 0;
 	gameRecord[0].transpositionTableHash64 = 0;
+	gameRecord[0].transpositionTableHash64WithEP = 0;
 	gameRecord[0].isInCheck = 0;
 	gameRecord[0].isTWM = TTFlagThreatenedWithMate;
 	gameRecord[0].isFMTP = TTFlagFewerMovesThanPieces;
@@ -74,6 +75,7 @@ void Brain::ClearGameRecord()
 	gameRecord[1].sideToMove = 1;
 	gameRecord[1].moveNumber = 0;
 	gameRecord[1].transpositionTableHash64 = 0;
+	gameRecord[1].transpositionTableHash64WithEP = 0;
 	gameRecord[1].isInCheck = 0;
 	gameRecord[1].isTWM = TTFlagThreatenedWithMate;
 	gameRecord[1].isFMTP = TTFlagFewerMovesThanPieces;
@@ -639,7 +641,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	return mlp;
 }
 
-uint64_t Brain::CountCapturesAndNonCaptures(int sideToMove)
+uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
@@ -1449,7 +1451,7 @@ king:
 	return mlp;
 }
 
-uint64_t Brain::CountAllMovesOutOfCheck(int sideToMove)
+uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
@@ -2616,7 +2618,7 @@ uint32_t Brain::GenerateMovesQuiescence(int sideToMove, int isInCheck, MoveWithS
 	return (uint32_t)(GenerateAllMovesOutOfCheck(sideToMove, initialMLP, false) - initialMLP);
 }
 
-uint64_t Brain::CountAllMoves(int sideToMove, int isInCheck)
+uint32_t Brain::CountAllMoves(int sideToMove, int isInCheck)
 {
 	if (!isInCheck)
 		return CountCapturesAndNonCaptures(sideToMove);
@@ -2813,10 +2815,11 @@ void Brain::MakeMove(int sideToMove)
 		// Update castling statuses
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 			hash64 ^= TranspositionTableRandomKingSideCastling[sideToMove];
-		gameRecordPointer->castlingStatus.ui8[sideToMove][0] = 1;
+		//gameRecordPointer->castlingStatus.ui8[sideToMove][0] = 1;
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 			hash64 ^= TranspositionTableRandomQueenSideCastling[sideToMove];
-		gameRecordPointer->castlingStatus.ui8[sideToMove][1] = 1;
+		//gameRecordPointer->castlingStatus.ui8[sideToMove][1] = 1;
+		gameRecordPointer->castlingStatus.ui16[sideToMove] = 0x0101;
 		// Was it a castling move?
 		if (currentMove->mf.flag == MFCastling)
 		{
@@ -2922,7 +2925,6 @@ void Brain::MakeMove(int sideToMove)
 	}
 
 	// Update '50-move' counter
-	assert(((gameRecordPointer-1)->pliesSinceIrreversible >= 0) && ((gameRecordPointer-1)->pliesSinceIrreversible <= 100));
 	if (
 		(abs(currentMove->fromSquarePiece) == Pawn) // Pawn move?
 		|| (currentMove->toSquarePiece) // Capture?
@@ -2998,7 +3000,6 @@ void Brain::UnMakeMove(int sideToMove)
 		if (currentMove->mf.flag >= MFPromotion) // Promotion
 		{
 			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
-
 			piecesBB[sideToMove][PromotedPieces[currentMove->mf.flag >> 2]] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 		}
 

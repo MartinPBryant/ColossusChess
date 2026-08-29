@@ -14,10 +14,10 @@ public:
 	bool AnyChecks(int sideToMove);
 	MoveWithScore_Struct* GenerateCapturesAndPromotions(int sideToMove, MoveWithScore_Struct *MLP);
 	MoveWithScore_Struct* GenerateCapturesAndNonCaptures(int sideToMove, MoveWithScore_Struct* MLP);
-	uint64_t CountCapturesAndNonCaptures(int sideToMove);
+	uint32_t CountCapturesAndNonCaptures(int sideToMove);
 	bool AnyCapturesAndNonCaptures(int sideToMove);
 	MoveWithScore_Struct* GenerateAllMovesOutOfCheck(int sideToMove, MoveWithScore_Struct* MLP, bool GenerateUnderPromotions);
-	uint64_t CountAllMovesOutOfCheck(int sideToMove);
+	uint32_t CountAllMovesOutOfCheck(int sideToMove);
 	bool AnyMovesOutOfCheck(int sideToMove);
 	MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int sideToMove, MoveWithScore_Struct* MLP);
 	MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Struct* MLP);
@@ -29,7 +29,7 @@ public:
 
 	uint32_t GenerateAllMoves(int sideToMove, int isInCheck, MoveWithScore_Struct* initialMLP);
 	uint32_t GenerateMovesQuiescence(int sideToMove, int isInCheck, MoveWithScore_Struct* initialMLP, int depthRemaining);
-	uint64_t CountAllMoves(int sideToMove, int isInCheck);
+	uint32_t CountAllMoves(int sideToMove, int isInCheck);
 	bool AnyMoves(int sideToMove, int isInCheck);
 	int CountAllQueenMovesMM(int sideToMove);
 	int CountAllMovesMM(int sideToMove);

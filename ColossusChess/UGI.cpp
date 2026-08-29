@@ -344,13 +344,12 @@ std::string ProcessInput(std::string currentLine)
 					bool validSubCommand = false;
 
 					Pondering = false;
-					Infinite = false;
 					MovesToGo = 0; // If MovesToGo is not sent, then assume 'whole game' mode
 					WInc = 0; // These are not sent as zero by GUI, only if non-zero
 					BInc = 0;
 					MinimumIterationPly = 0;
 
-					if (currentLine == "") // If the command is just "go", interprete it as go infinite
+					if (currentLine == "") // If the command is just "go", interpret it as go infinite
 						currentLine = "INFINITE";
 
 					while (currentLine != "")

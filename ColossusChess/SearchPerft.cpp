@@ -998,14 +998,22 @@ void Perft::AllocatePerftTranspositionTable()
 
 	// Free any previously allocated memory. If the pointer is nullptr it does nothing.
 	AlignedFreeMemory(PerftTranspositionTablePointer);
+	PerftTranspositionTablePointer = nullptr;
 
 	// Allocate transposition table memory
 	if (PerftTranspositionTableBuckets > 0)
 	{
 		PerftTranspositionTableBucketsMask = PerftTranspositionTableBuckets - 1;
 		if (LargePagesAvailable)
+		{
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)VirtualAlloc(NULL, PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
-		else
+			if (PerftTranspositionTablePointer == nullptr)
+			{
+				Output("info string *** Error! Perft 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
+				OutputError("Perft 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
+			}
+		}
+		if (PerftTranspositionTablePointer == nullptr)
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)AlignedAllocateMemory(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), 64);
 		if (PerftTranspositionTablePointer == nullptr)
 		{

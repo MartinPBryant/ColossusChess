@@ -1,0 +1,11 @@
+Sat Aug 29 09:37:08 2026
+*** Error!: No endgame tablebases found at c:\_Chess\EndgameTablebases\Syzygy\3456zzz
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

@@ -73,7 +73,19 @@ Recompiled both as a sanity check
 
 ***20 tidied up --> 21
 
-21 v 22 {full width used gradually at lower plies} () PCS2
+21 v 22 {full width used gradually [factor 4] at lower plies at pruning section when scanning movelist} (-1.37) PCS2
+21 v 22 {full width used gradually [factor 4] at lower plies at pruning section when scanning movelist} (-1.96) PCS1
+21 v 22 {full width used gradually [factor 4] at lower plies at pruning section when scanning movelist} (-0.94) ASUS1
+21 v 22 {full width used gradually [factor 4] at lower plies at pruning section when scanning movelist} (2.03) NIPOGI1
+
+***21 small EGTB draw score bug fix in QS --> 23
+
+23 v 24 {full width used gradually [factor 4] at lower plies at nullmove} (26.86, +/-6.85, 5228) PCS2
+
+23 v 25 {full width used gradually [factor 4] at lower plies at node-level futility pruning} (-0.05) PCS2
+
+***23 EGTB probing refinement --> 26
+
 
 
 

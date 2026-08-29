@@ -150,6 +150,8 @@ private:
 	int IterationPly;
 	int MaximumPlyReached;
 	int MaximumPlyReachedBeforeQS;
+	int FullWidthPlies;
+
 	uint32_t PrincipalVariation[MaximumPly * MaximumPly];
 	uint32_t LastPrincipalVariation[MaximumPly];
 

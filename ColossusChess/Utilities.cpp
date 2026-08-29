@@ -22,7 +22,7 @@ std::ofstream ErrorFile;
 int LastPrintTreePly;
 
 // In 'TargetLine' below, to specify a null move use a1a1
-std::string TargetLine = "c8b6 a7b6 a6a7 b6b5 a7a8b b5c4 a8e4 c4c3 e4d3 c3d2 d3c4 d2d1q a1d1 ";
+std::string TargetLine = "b4a6 b3c3 c7d8 c3c8 d8a5 c8c2 g2f3 c2a2 a6c5 e6d5 a5b4 d5c4 c5d7 c4b4 ";
 
 int TargetLineLength = (int)TargetLine.length() / 5;
 bool TargetLineContainsPromotions = false;
@@ -482,7 +482,7 @@ void CPUInfo()
 
 	ThisCPUSupportsEISNames = "";
 	for (int i = 0; i < std::size(EISNames); i++)
-		if (ThisCPUSupports & (1 << i))
+		if (ThisCPUSupports & (1ULL << i))
 			ThisCPUSupportsEISNames += EISNames[i] + " ";
 	trim(ThisCPUSupportsEISNames);
 
