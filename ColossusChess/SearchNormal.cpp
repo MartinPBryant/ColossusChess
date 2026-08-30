@@ -1638,6 +1638,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		}
 	}
 
+	//currentGameRecordPointer->legalMovesCount = movesCount;
+
 	if (movesCount == 1)
 		currentGameRecordPointer->isO1M = TTFlagOnlyOneLegalMove;
 
@@ -1815,7 +1817,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 		int newDepthRemaining = depthRemaining - 1;
 
-		// N.B. Sometimes it is an aspect of the move that makes it interesting (e.g. a P just moved to the 7th rank) and sometimes an aspect of the position (e.g. there is a P on the 7th rank)
+		//N.B. Sometimes it is an aspect of the move that makes it interesting (e.g. a P just moved to the 7th rank) and sometimes an aspect of the position (e.g. there is a P on the 7th rank)
 
 		// Extensions (about 1% of moves get extended)
 		int extensions = 0;
@@ -1910,10 +1912,11 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		if (std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn)
 		{
 			uint64_t passedBB;
-			if (sideToMove == 0) //TODO: THIS COULD BE REPLACED WITH A TABLE FN LOOKUP?
+			if (sideToMove == 0)
 				passedBB = passedSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]);
 			else
 				passedBB = passedSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
+			//passedBB = passedSTM[sideToMove](normalBrain.piecesBB[sideToMove][Pawn], normalBrain.piecesBB[sideToMove ^ 1][Pawn]);
 			passedPawnMove = (passedBB & CreateBitboardFromSquare(currentGameRecordPointer->move.mf.toSquare));
 		}
 

@@ -206,4 +206,6 @@ private:
 	int lateMovePruningMargins[2][9] = { 2,2,2,3,3,3,3,3,3, 4,4,5,8,10,14,18,22,27 };
 
 	uint64_t TranspositionTableStores, TranspositionTableStoresSuccessful, TranspositionTableProbes, TranspositionTableProbesSuccessful;
+
+	//uint64_t(*passedSTM[Sides])(uint64_t stmPpawns, uint64_t sntmPawns) = { passedSide1 , passedSide2 };
 };

@@ -163,6 +163,8 @@ struct GameRecordEntry_Struct
 
 	uint64_t fixedPiecesAttackerBB;
 	uint64_t fixedPiecesDefenderBB;
+
+	//int legalMovesCount;
 };
 
 enum CPUVendorIdEnum

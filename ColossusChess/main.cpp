@@ -14,6 +14,7 @@
 int main(int argc, char * argv[])
 {
 	// Determine if 'large pages' are available
+	// N.B. if you set fastchess to reload the engine every game when testing you can eventually get to a point where the memory is so fragmented that it cannot load large pages!
 	LargePages();
 
 	// Determine and display this computer's CPU information

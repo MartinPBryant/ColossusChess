@@ -197,23 +197,28 @@ To get all the TT entry data in one go...
 ALL
 ===
 
-
-dumb 50th move 'issue' again :D
--on 50th move don't test 50 move? truncate PVs manually after search?
+DO EXTENSIONS AFTER PRUNING?
 
 
 don't reduce/prune passed P moves? unless SEE -ve
 -test on KP positions - test fully!
+-extend once determined rather than just using to flag no reduction!
+
+
+a long fastchess tourney eventually is unable to allocate large pages???
+-test with no large pages?
+
 
 code analysis!
 cpu profiling?
 
 
+dumb 50th move 'issue' again :D
+-on 50th move don't test 50 move? truncate PVs manually after search?
+-the 'issue' may occur before the 50th move too, e.g. it might leave a mate in 3 on the 48th move
+-but it has to know about the 50th move else how can it see that it's a draw???
 
-if have got a TT move, use that instead of the null move, but still do the same reduced search!? that's not quite the same
--however, if we don't have a TT move we should count the #ofmoves?
--maybe just don't do null move if we have a TT move???
--test it!
+
 
 
 compare the MWS section of code again with other engines. Always feels dodgy!
@@ -258,6 +263,8 @@ eval: mobility
 -various asserts taken out! (because of EP capts) put back if don't use!
 -can we just use the LAST mob counts from the tree!? ... so slightly out of date ... ah! but not available in the QS :(
 -use the last two values from main... save in the GR? 2 class vars? WHAT IF WE'RE IN CHECK? NEED LAST NON-CHECK POSN. MAYBE AVERAGE LAST 4 PLY?
+--calculate the 'eval' before entering the QS!
+-how do we get staticeval in main though??? the eval fn just returns the diff of the previous plies move counts - in QS copy the mobility from 2 ply earlier
 
 
 perft count overflows???
@@ -268,7 +275,7 @@ e.g.
 k7/8/8/8/8/8/8/2B1K1N1 w - - 0 1
 need counters >64-bit!
 write multix64bit bigint class for perft
--also need to be able to output them!
+-also need to be able to output them! ask chatgpt! :)
 
 
 in this posn 8/8/5K2/5N2/2p3k1/8/4N3/8 w - - 0 3

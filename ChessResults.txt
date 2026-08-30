@@ -69,7 +69,7 @@ Recompiled both as a sanity check
 
 18 v 19 {magic stuff put into structs} (-1.81) PCS2
 
-19 v 20 {'large pages'} (-5.33) PCS2
+19 v 20 {'large pages'} (-5.33) PCS2 - ***WAS THIS PRODUCING ALLOCATION ERRORS? REDO WITHOUT FASTCHESS RELOADING THE ENGINE!
 
 ***20 tidied up --> 21
 
@@ -85,6 +85,22 @@ Recompiled both as a sanity check
 23 v 25 {full width used gradually [factor 4] at lower plies at node-level futility pruning} (-0.05) PCS2
 
 ***23 EGTB probing refinement --> 26
+
+26 v 27 {don't do nullmove if have a TT move} (20.71, +/-15.30, 1023) PCS2
+
+26 v 28 {passed P test done before pruning and doesn't prune if is a PP move} (1.29) PCS2
+
+26 v 29 {passed P move extends rather than just doesn't reduce} (154.60, +/-31.77, 307) PCS1
+26 v 29 {passed P move extends rather than just doesn't reduce} (221.14, +/-36.58, 312) ASUS1
+*** :O How can such a small change cause such a disaster?!!! Explosions in endgames???
+
+26 v 30 {extensions done after pruning} () PCS2
+26 v 30 {extensions done after pruning} (-2.07) PCS1
+26 v 30 {extensions done after pruning} (-2.80) ASUS1
+26 v 30 {extensions done after pruning} (-0.31) NIPOGI1
+
+
+
 
 
 
