@@ -1,0 +1,203 @@
+>>setoption name SBL value true
+info string ShowBlankLines set to true
+>>setoption name SyzygyPath value c:\_Chess\EndgameTablebases\Syzygy\3456
+info string 6-piece endgame tablebases found at c:\_Chess\EndgameTablebases\Syzygy\3456 (510 .rtbw {win/draw/loss} files, 510 .rtbz {distance to zero} files)
+>>setoption name UseLargePages value false
+info string UseLargePages set to false
+>>setoption name SPT value false
+info string ShowPVTerminators set to false
+>>go
+info depth 1
+info time 1 nodes 1 currmove a2a3 currmovenumber 1
+info depth 1 time 1 nodes 2 score cp 25 pv a2a3 
+info time 1 nodes 2 currmove b2b3 currmovenumber 2
+info time 2 nodes 3 currmove c2c3 currmovenumber 3
+info time 2 nodes 4 currmove d2d3 currmovenumber 4
+info depth 1 time 3 nodes 5 score cp 38 pv d2d3 
+info time 3 nodes 5 currmove e2e3 currmovenumber 5
+info depth 1 time 3 nodes 6 score cp 43 pv e2e3 
+info time 3 nodes 6 currmove f2f3 currmovenumber 6
+info time 4 nodes 7 currmove g2g3 currmovenumber 7
+info time 4 nodes 8 currmove h2h3 currmovenumber 8
+info time 4 nodes 9 currmove a2a4 currmovenumber 9
+info time 4 nodes 10 currmove b2b4 currmovenumber 10
+info time 4 nodes 11 currmove c2c4 currmovenumber 11
+info time 5 nodes 12 currmove d2d4 currmovenumber 12
+info depth 1 time 5 nodes 13 score cp 51 pv d2d4 
+info time 5 nodes 13 currmove e2e4 currmovenumber 13
+info time 6 nodes 14 currmove f2f4 currmovenumber 14
+info time 6 nodes 15 currmove g2g4 currmovenumber 15
+info time 6 nodes 16 currmove h2h4 currmovenumber 16
+info time 6 nodes 17 currmove b1a3 currmovenumber 17
+info time 7 nodes 18 currmove b1c3 currmovenumber 18
+info depth 1 time 7 nodes 19 score cp 62 pv b1c3 
+info time 7 nodes 19 currmove g1f3 currmovenumber 19
+info depth 1 time 7 nodes 20 score cp 65 pv g1f3 
+info time 7 nodes 20 currmove g1h3 currmovenumber 20
+info depth 1 time 8 nodes 21 nps 2625 hashfull 0
+
+info depth 2
+info time 8 nodes 22 currmove g1f3 currmovenumber 1
+info time 8 nodes 27 currmove b1c3 currmovenumber 2
+info time 9 nodes 29 currmove d2d4 currmovenumber 3
+info time 9 nodes 31 currmove e2e4 currmovenumber 4
+info time 9 nodes 35 currmove e2e3 currmovenumber 5
+info time 9 nodes 39 currmove d2d3 currmovenumber 6
+info time 9 nodes 41 currmove h2h3 currmovenumber 7
+info time 10 nodes 43 currmove g1h3 currmovenumber 8
+info time 10 nodes 45 currmove a2a3 currmovenumber 9
+info time 10 nodes 48 currmove b1a3 currmovenumber 10
+info time 10 nodes 50 currmove a2a4 currmovenumber 11
+info time 11 nodes 52 currmove b2b3 currmovenumber 12
+info time 11 nodes 54 currmove g2g3 currmovenumber 13
+info time 11 nodes 56 currmove c2c3 currmovenumber 14
+info time 11 nodes 58 currmove h2h4 currmovenumber 15
+info time 12 nodes 60 currmove c2c4 currmovenumber 16
+info time 12 nodes 62 currmove b2b4 currmovenumber 17
+info time 12 nodes 64 currmove g2g4 currmovenumber 18
+info time 12 nodes 66 currmove f2f3 currmovenumber 19
+info time 12 nodes 68 currmove f2f4 currmovenumber 20
+info depth 2 score cp 25 upperbound
+info time 13 nodes 71 currmove g1f3 currmovenumber 1
+info depth 2 time 13 nodes 96 score cp 1 pv g1f3 g8f6 
+info time 13 nodes 96 currmove b1c3 currmovenumber 2
+info time 14 nodes 119 currmove d2d4 currmovenumber 3
+info time 14 nodes 122 currmove e2e4 currmovenumber 4
+info time 14 nodes 125 currmove e2e3 currmovenumber 5
+info time 14 nodes 128 currmove d2d3 currmovenumber 6
+info time 15 nodes 129 currmove h2h3 currmovenumber 7
+info time 15 nodes 130 currmove g1h3 currmovenumber 8
+info time 15 nodes 131 currmove a2a3 currmovenumber 9
+info time 15 nodes 132 currmove b1a3 currmovenumber 10
+info time 15 nodes 134 currmove a2a4 currmovenumber 11
+info time 16 nodes 136 currmove b2b3 currmovenumber 12
+info time 16 nodes 138 currmove g2g3 currmovenumber 13
+info time 16 nodes 140 currmove c2c3 currmovenumber 14
+info time 16 nodes 142 currmove h2h4 currmovenumber 15
+info time 17 nodes 144 currmove c2c4 currmovenumber 16
+info time 17 nodes 146 currmove b2b4 currmovenumber 17
+info time 17 nodes 148 currmove g2g4 currmovenumber 18
+info time 17 nodes 150 currmove f2f3 currmovenumber 19
+info time 18 nodes 152 currmove f2f4 currmovenumber 20
+info depth 2 time 18 nodes 154 nps 8555 hashfull 0
+
+info depth 3
+info time 18 nodes 155 currmove g1f3 currmovenumber 1
+info depth 3 time 19 nodes 201 score cp 42 lowerbound pv g1f3 
+info time 19 nodes 202 currmove g1f3 currmovenumber 1
+info depth 3 time 19 nodes 288 score cp 62 pv g1f3 g8f6 b1c3 
+info time 19 nodes 288 currmove b1c3 currmovenumber 2
+info time 20 nodes 292 currmove d2d4 currmovenumber 3
+info time 20 nodes 294 currmove e2e4 currmovenumber 4
+info time 20 nodes 296 currmove e2e3 currmovenumber 5
+info time 20 nodes 298 currmove d2d3 currmovenumber 6
+info time 20 nodes 300 currmove h2h3 currmovenumber 7
+info time 21 nodes 302 currmove g1h3 currmovenumber 8
+info time 21 nodes 304 currmove a2a3 currmovenumber 9
+info time 21 nodes 306 currmove b1a3 currmovenumber 10
+info time 21 nodes 308 currmove a2a4 currmovenumber 11
+info time 21 nodes 310 currmove b2b3 currmovenumber 12
+info time 22 nodes 312 currmove g2g3 currmovenumber 13
+info time 22 nodes 314 currmove c2c3 currmovenumber 14
+info time 22 nodes 316 currmove h2h4 currmovenumber 15
+info time 22 nodes 318 currmove c2c4 currmovenumber 16
+info time 23 nodes 320 currmove b2b4 currmovenumber 17
+info time 23 nodes 322 currmove g2g4 currmovenumber 18
+info time 23 nodes 324 currmove f2f3 currmovenumber 19
+info time 24 nodes 326 currmove f2f4 currmovenumber 20
+info depth 3 time 24 nodes 328 nps 13666 hashfull 0
+
+info depth 4
+info time 24 nodes 329 currmove g1f3 currmovenumber 1
+info time 25 nodes 376 currmove b1c3 currmovenumber 2
+info time 25 nodes 415 currmove d2d4 currmovenumber 3
+info time 25 nodes 455 currmove e2e4 currmovenumber 4
+info time 26 nodes 487 currmove e2e3 currmovenumber 5
+info time 26 nodes 520 currmove d2d3 currmovenumber 6
+info time 26 nodes 566 currmove h2h3 currmovenumber 7
+info time 27 nodes 606 currmove g1h3 currmovenumber 8
+info time 27 nodes 643 currmove a2a3 currmovenumber 9
+info time 27 nodes 672 currmove b1a3 currmovenumber 10
+info time 28 nodes 696 currmove a2a4 currmovenumber 11
+info time 28 nodes 698 currmove b2b3 currmovenumber 12
+info time 28 nodes 700 currmove g2g3 currmovenumber 13
+info time 28 nodes 702 currmove c2c3 currmovenumber 14
+info time 29 nodes 704 currmove h2h4 currmovenumber 15
+info time 29 nodes 706 currmove c2c4 currmovenumber 16
+info time 29 nodes 708 currmove b2b4 currmovenumber 17
+info time 29 nodes 710 currmove g2g4 currmovenumber 18
+info time 29 nodes 712 currmove f2f3 currmovenumber 19
+info time 30 nodes 714 currmove f2f4 currmovenumber 20
+info depth 4 score cp 22 upperbound
+info time 30 nodes 717 currmove g1f3 currmovenumber 1
+info depth 4 time 31 nodes 815 score cp 1 pv g1f3 g8f6 b1c3 b8c6 
+info time 31 nodes 815 currmove b1c3 currmovenumber 2
+info time 32 nodes 868 currmove d2d4 currmovenumber 3
+info time 32 nodes 967 currmove e2e4 currmovenumber 4
+info time 33 nodes 1035 currmove e2e3 currmovenumber 5
+info time 33 nodes 1085 currmove d2d3 currmovenumber 6
+info time 33 nodes 1134 currmove h2h3 currmovenumber 7
+info time 34 nodes 1181 currmove g1h3 currmovenumber 8
+info time 34 nodes 1222 currmove a2a3 currmovenumber 9
+info time 34 nodes 1246 currmove b1a3 currmovenumber 10
+info time 35 nodes 1272 currmove a2a4 currmovenumber 11
+info time 35 nodes 1296 currmove b2b3 currmovenumber 12
+info time 35 nodes 1322 currmove g2g3 currmovenumber 13
+info time 35 nodes 1347 currmove c2c3 currmovenumber 14
+info time 36 nodes 1372 currmove h2h4 currmovenumber 15
+info time 36 nodes 1398 currmove c2c4 currmovenumber 16
+info time 36 nodes 1426 currmove b2b4 currmovenumber 17
+info time 36 nodes 1454 currmove g2g4 currmovenumber 18
+info time 36 nodes 1456 currmove f2f3 currmovenumber 19
+info time 37 nodes 1458 currmove f2f4 currmovenumber 20
+info depth 4 time 37 nodes 1460 nps 39459 hashfull 0
+
+info depth 5
+info time 37 nodes 1461 currmove g1f3 currmovenumber 1
+info depth 5 time 38 nodes 1847 score cp 41 lowerbound pv g1f3 
+info time 38 nodes 1848 currmove g1f3 currmovenumber 1
+info depth 5 time 40 nodes 2329 score cp 51 pv g1f3 g8f6 b1c3 b8c6 d2d4 
+info time 40 nodes 2329 currmove b1c3 currmovenumber 2
+info time 41 nodes 2378 currmove d2d4 currmovenumber 3
+info time 41 nodes 2411 currmove e2e4 currmovenumber 4
+info time 41 nodes 2413 currmove e2e3 currmovenumber 5
+info time 41 nodes 2415 currmove d2d3 currmovenumber 6
+info time 41 nodes 2417 currmove h2h3 currmovenumber 7
+info time 42 nodes 2419 currmove g1h3 currmovenumber 8
+info time 42 nodes 2421 currmove a2a3 currmovenumber 9
+info time 42 nodes 2423 currmove b1a3 currmovenumber 10
+info time 42 nodes 2425 currmove a2a4 currmovenumber 11
+info time 43 nodes 2427 currmove b2b3 currmovenumber 12
+info time 43 nodes 2429 currmove g2g3 currmovenumber 13
+info time 43 nodes 2431 currmove c2c3 currmovenumber 14
+info time 43 nodes 2433 currmove h2h4 currmovenumber 15
+info time 43 nodes 2435 currmove c2c4 currmovenumber 16
+info time 43 nodes 2437 currmove b2b4 currmovenumber 17
+info time 44 nodes 2439 currmove g2g4 currmovenumber 18
+info time 44 nodes 2441 currmove f2f3 currmovenumber 19
+info time 44 nodes 2443 currmove f2f4 currmovenumber 20
+info depth 5 time 44 nodes 2445 nps 55568 hashfull 0
+
+info depth 6
+info time 45 nodes 2446 currmove g1f3 currmovenumber 1
+info time 46 nodes 2674 currmove b1c3 currmovenumber 2
+info time 46 nodes 2723 currmove d2d4 currmovenumber 3
+info time 47 nodes 2783 currmove e2e4 currmovenumber 4
+info time 47 nodes 2839 currmove e2e3 currmovenumber 5
+info time 47 nodes 2890 currmove d2d3 currmovenumber 6
+info time 48 nodes 2932 currmove h2h3 currmovenumber 7
+info time 48 nodes 2997 currmove g1h3 currmovenumber 8
+info time 48 nodes 3052 currmove a2a3 currmovenumber 9
+info time 49 nodes 3099 currmove b1a3 currmovenumber 10
+info time 49 nodes 3133 currmove a2a4 currmovenumber 11
+info time 49 nodes 3178 currmove b2b3 currmovenumber 12
+info time 50 nodes 3213 currmove g2g3 currmovenumber 13
+info time 50 nodes 3249 currmove c2c3 currmovenumber 14
+info time 50 nodes 3284 currmove h2h4 currmovenumber 15
+info time 50 nodes 3286 currmove c2c4 currmovenumber 16
+info time 51 nodes 3288 currmove b2b4 currmovenumber 17
+info time 51 nodes 3290 currmove g2g4 currmovenumber 18
+info time 51 nodes 3292 currmove f2f3 currmovenumber 19
+info time 51 nodes 3294 currmove f2f4 currmovenumber 20
+info depth 6 score cp 11 upperbound
+info time 51 nodes 3297 currmove g1f3 currmovenumber 1

@@ -22,7 +22,7 @@ std::ofstream ErrorFile;
 int LastPrintTreePly;
 
 // In 'TargetLine' below, to specify a null move use a1a1
-std::string TargetLine = "b4a6 b3c3 c7d8 c3c8 d8a5 c8c2 g2f3 c2a2 a6c5 e6d5 a5b4 d5c4 c5d7 c4b4 ";
+std::string TargetLine = "e2e4 g8f6 e4e5 f6e4 d2d3 e4c5 ";
 
 int TargetLineLength = (int)TargetLine.length() / 5;
 bool TargetLineContainsPromotions = false;
@@ -315,7 +315,7 @@ bool PVSearchedFirst(int ply)
 	return result;
 }
 
-void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRemaining, int move, int bestSortScore, int staticEvaluation)
+void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRemaining, int move, int bestSortScore, int staticEvaluation, int bestMoveScore)
 {
 	if (ply <= 8)
 	{
@@ -334,7 +334,7 @@ void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRema
 		}
 
 		LastPrintTreePly = ply;
-		fprintf(f, "%d.%s (%d %d %d %d %d) ", ply, (move == -1 ? "Null" : (move == -2 ? "TTExact" : (move == -3 ? "TTUpper" : (move == -4 ? "TTLower" : MoveNotation(move).c_str())))), alpha, beta, depthRemaining, bestSortScore, staticEvaluation);
+		fprintf(f, "%d.%s (%d %d %d %d %d %d) ", ply, (move == -1 ? "Null" : (move == -2 ? "TTExact" : (move == -3 ? "TTUpper" : (move == -4 ? "TTLower" : MoveNotation(move).c_str())))), alpha, beta, depthRemaining, bestSortScore, staticEvaluation, bestMoveScore);
 		fclose(f);
 	}
 }
@@ -518,7 +518,7 @@ void LargePages()
 				CloseHandle(TokenHandle);
 			}
 	
-	
+	//LargePagesAvailable = false; //TEMP
 	std::string s = "";
 	if (!LargePagesAvailable)
 		s = "NOT ";

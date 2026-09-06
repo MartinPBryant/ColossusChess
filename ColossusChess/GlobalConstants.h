@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx30"
+#define VersionX "20NNx71"
 //#define EXPERIMENTAL
 //#define PEXT // N.B. the PEXT instruction is VERY slow on AMD Zen2 architecture and Intel 'efficiency' cores!
 
@@ -42,7 +42,7 @@ const int SimplePieceValues[7] = { 0, 1, 3, 3, 5, 9, 999 };
 #define EGTBWinningIn0Score 15000
 #define EGTBWinningScore (EGTBWinningIn0Score - 1000)
 #define EGTBLosingScore (-EGTBWinningScore)
-#define AspirationWindowDelta 50
+#define AspirationWindowDelta 40
 
 // Move flags
 // Four bits (maximum possible when we compress the move into 16 bits in the TT {from-sq:6 bits, to-sq:6 bits, flag:4 bits})

@@ -1029,16 +1029,15 @@ short Normal::Evaluate(int sideToMove)
 	// Get the simple symmetrical part
 	int result = EvaluateInner(sideToMove);
 
-
 	//int result;
 	//int kingSquare;
 	//
 	////THIS MAY BE SLIGHTLY ASSYMETRICAL BECAUSE OF EP CAPTURES!!!
-	//kingSquare  = BitScanForwardX(normalBrain.piecesBB[sideToMove][King]);
+	//kingSquare  = GetLS1BIndex(normalBrain.piecesBB[sideToMove][King]);
 	//normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
 	//result = normalBrain.CountAllMoves(sideToMove, normalBrain.IsEnemyKingAttacked(kingSquare, sideToMove ^ 1));
 
-	//kingSquare = BitScanForwardX(normalBrain.piecesBB[sideToMove ^ 1][King]);
+	//kingSquare = GetLS1BIndex(normalBrain.piecesBB[sideToMove ^ 1][King]);
 	//normalBrain.CalculatePinnedPieces(sideToMove ^ 1); // Required for legal move generation
 	//result -= normalBrain.CountAllMoves(sideToMove ^ 1, normalBrain.IsEnemyKingAttacked(kingSquare, sideToMove));
 

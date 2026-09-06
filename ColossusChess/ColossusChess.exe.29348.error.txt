@@ -1,0 +1,33 @@
+Fri Sep  4 18:20:22 2026
+*** Error!: Lichess: 0 0 0 0
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+Fri Sep  4 18:20:33 2026
+*** Error!: Lichess: 0 0 0 0
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+Fri Sep  4 18:20:43 2026
+*** Error!: Lichess: 0 0 0 0
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+p startpos
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

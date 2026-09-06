@@ -122,8 +122,8 @@ extern int poplsb(uint64_t *bb);
 #define GetLS1BIndex(bb) BitScanForwardTZCNT(bb) // Comparable or slightly faster than BitScanForwardPOPCNT and BitScanForwardBSF on all 4 of my AMD PCs
 
 // Gets the index (corresponding to a square) of the most significant set bit in the provided bitboard
-#define GetMS1BIndex(bb) BitScanReverseBSR(bb)
-//#define GetMS1BIndex(bb) BitScanReverseLZCNT(bb) // Not tested against BitScanReverseBSR
+//#define GetMS1BIndex(bb) BitScanReverseBSR(bb)
+#define GetMS1BIndex(bb) BitScanReverseLZCNT(bb)
 
 // Creates a bitboard with a set bit corresponding to the provided square index
 #define CreateBitboardFromSquare(square) (1ULL << (square))

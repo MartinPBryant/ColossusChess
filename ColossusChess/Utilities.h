@@ -26,6 +26,13 @@ extern FILE *ErrorFile;
 #define GATHERSTATS(s)
 #endif
 
+#define BREAKONCURRENTVARIATIONDEF // Gathers statistics about TT/EGTB usage
+#ifdef BREAKONCURRENTVARIATIONDEF
+#define BREAKONCURRENTVARIATION(s) {if (normalBrain.CurrentLine(ply) == s) __debugbreak();}
+#else
+#define BREAKONCURRENTVARIATION(s)
+#endif
+
 extern int LastPrintTreePly;
 
 //#define SEARCHINGFORLINE
@@ -68,7 +75,7 @@ void DisplayAnalysisCounters();
 bool NoDuplicateMoves(MoveWithScore_Struct* mlp, int movesCount);
 bool TranpositionTableMoveFound(MoveWithScore_Struct* mlp, int movesCount, uint32_t tteBestMove);
 bool PVSearchedFirst(int ply);
-void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRemaining, int move, int bestSortScore, int staticEvaluation);
+void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRemaining, int move, int bestSortScore, int staticEvaluation, int bestMoveScore);
 void PrintTree2(int iterationPly, int ply, std::string s);
 uint64_t Random64();
 int BoardRand(int min, int max);

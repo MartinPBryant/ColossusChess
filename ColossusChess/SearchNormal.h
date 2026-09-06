@@ -96,13 +96,15 @@ public:
 
 	void SaveRootMoveData(uint32_t move, uint64_t totalNodes, short score);
 	void UpdateRootMovePriority(uint32_t move);
-	bool UpdateRootMoveEGTBStatus(uint32_t move, int wdl, int dtz, int rank);
+	bool UpdateRootMoveEGTBStatus(uint32_t move, int wdl, int dtz);// , int rank);
 	int Normal::RetrieveRootMoveWDLStatus(uint32_t move);
 	int Normal::RetrieveRootMoveDTZStatus(uint32_t move);
 	void ScoreRootMoveList(MoveWithScore_Struct* mlp);
 
 	void ShowBestLineMessage(short alpha, uint8_t eul);
 	std::string BestLine();
+
+	static void LichessEGTBProbe(std::string fen);
 
 	void ClearKillerMoves();
 	void ClearCounterMoves();
@@ -170,7 +172,7 @@ private:
 	uint64_t EndgameTablebasesProbes, EndgameTablebasesHeavyProbes, EndgameTablebasesHits;
 	int EndgameTablebasesTreeProbeLimitMain, EndgameTablebasesTreeProbeLimitQS;
 	int EndgameTablebasesPiecesRoot; // The total number of pieces on the board at the root
-	uint32_t EndgameTablebasesRootMove;
+	Move_Struct EndgameTablebasesRootMove;
 	int EndgameTablebasesRootWDL; // win=1, draw=0, loss=-1
 	int EndgameTablebasesRootDTZ;
 	int EndgameTablebasesRootRank;
@@ -208,4 +210,6 @@ private:
 	uint64_t TranspositionTableStores, TranspositionTableStoresSuccessful, TranspositionTableProbes, TranspositionTableProbesSuccessful;
 
 	//uint64_t(*passedSTM[Sides])(uint64_t stmPpawns, uint64_t sntmPawns) = { passedSide1 , passedSide2 };
+
+	//bool SingularExtending;
 };

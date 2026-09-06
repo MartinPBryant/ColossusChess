@@ -1066,7 +1066,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							{
 								if (tteScore >= beta)
 								{
-									PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -4, tteScore, 0););
+									PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -4, tteScore, 0, bestMoveScore););
 									return tteScore; // We can exit because we know that at least one move will exceed current beta
 								}
 							}
@@ -1074,13 +1074,13 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							{
 								if (tteScore <= alpha)
 								{
-									PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -3, tteScore, 0););
+									PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -3, tteScore, 0, bestMoveScore););
 									return tteScore; // We can exit because we know that no move will exceed current alpha
 								}
 							}
 							else // Exact value? (Came from a PV node)
 							{
-								PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -2, tteScore, 0););
+								PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -2, tteScore, 0, bestMoveScore););
 								if (tteBestMove.ui32 != 0) // Sometimes there won't be a move stored as it might be a checkmate/stalemate/DBR position
 								{
 									*mateBrain.gameRecordPointer->principalVariationPointer = tteBestMove.ui32; // Return best move as part of pv
@@ -1407,7 +1407,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							*(uint64_t*)(&mateBrain.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(mateBrain.gameRecordPointer - 1)->gamePhase[0]);
 							*(uint32_t*)(&mateBrain.gameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(mateBrain.gameRecordPointer - 1)->totalOpeningPST[0]);
 							*(uint32_t*)(&mateBrain.gameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(mateBrain.gameRecordPointer - 1)->totalEndgamePST[0]);
-							PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation);)
+							PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore);)
 
 								//int R = std::max(3, ((depthRemaining + 1) >> 1));
 								int R = 0;// (depthRemaining / 5) + ((currentGameRecordPointer->staticEvaluation - beta) / 128) + (!isPVNode * 3);
@@ -1570,7 +1570,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		{
 			ShowProgressMessage(currentMove.ui32, moveListIndexIterator + 1, bestMoveScore, alpha, beta); // Display current root move (always display first move)
 		}
-		PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, currentMove.ui32, bestSortScore, 0););
+		PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, currentMove.ui32, bestSortScore, 0, bestMoveScore););
 
 		// Initiate the retrieval of the next transposition table cache line as soon as possible
 		_mm_prefetch((char*)(MateTranspositionTablePointer + (mateBrain.gameRecordPointer->transpositionTableHash64 & MateTranspositionTableBucketsMask)), _MM_HINT_T0);

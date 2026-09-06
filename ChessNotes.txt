@@ -197,16 +197,128 @@ To get all the TT entry data in one go...
 ALL
 ===
 
-DO EXTENSIONS AFTER PRUNING?
+in chessgui it seems to not provide a PV often! :O sometimes no move at all
+- v Pluto
+
+
+don't prune moves by threatened piece - but how to identify? from pv after null move? break and see if it's there!
+-won't be there if it's an 'all' node
+-it migth be in the TT
+-probably in normalBrain.gameRecordPointer->move
+
+
+look at those bestKnownScore adjustment lines again
+
+
+
+because bestKnownScore could be in the winning/losing range, should we test this before doing razoring/nodelevelfutpruning/nullmove???
+
+
+
+
+if have pruned at an all node return alpha?
+-surely near 100%?
+-maybe return staticeval(bestknownscore?) if < alpha?
+
+
+
+				
+don't prune if (bestKnownScore > alpha)
+
+
+
+
+don't do pruning when DR<=2
+
+
+run a match with 6pc egtb v 8pc lichess at root!
+-log some stuff about lichess move usage!
+-try a lichess match at 1s/move
+
+
+
+
+in this 7pc
+1R4k1/8/5KN1/6Pp/8/8/8/4r3 b - - 0 117
+it accepts just Kh7 #1 from Lichess ignoring Re8 #2 which had equal dtz
+really should process whole list from lichess!!!
+
+
+
+
+
+can we get rid of SEARCHINGFORLINE now we have BREAKONLINEDEF?
+
+
+
+
+fiddle with bestmovescore just before returning rather than at start of node?
+
+
+don't fut prune if bestMoveScore<staticEvaluation?
+init bestMoveScore to min(staticEvaluation,alpha)? use bestKnownScore from nullmove rather than staticEvaluation?
+
+never prune, just reduce to immediate QS?
+
+
+in this line...
+b1c3 b8c6 d2d4 d7d5 the next node returns -258!! because c3d5 loses N for P but everything else fut prunes
+
+e2e3 d7d5 f1b5 c7c6 also causes nonsesne to be returned because of complete pruning
+-294 gets put into the TT as an upper bound! :O written at ID=4, all other moves LMPed!
+
+
+
+
+
+
+
+
+returning bestMoveScore when you've done a load of LMP seems crazy especially if it's way out! tactical posns - return alpha if have done any LMP
+-e.g. e2e4 g8f6 e4e5 f6e4 d2d3 then e4c5 gets LMP coz it's way down the list!
+
+don't just LMP... do a 1-ply search? just the QS? : if bad score then prune else search with DR : basically reduce DR to 0!
+-do for all pruning?
+-only if bestMoveScore way down?
+-doing LMP in a non-quiet posn is crazy, i.e. when you've got a piece hanging [it may be a good posn if you just move the piece!] - can the null move tell you if you've got a piece hanging?
+
+discarding a move because of its posn in a list is dumb! at least fut and SEE pruning have some sort of eval!
+reduce all quiet moves (non-special? sort score <=0?) to just search QS and only research at DR if good score?
+
+can the nullmove tell you which piece is threatend then don't lmp moves by that piece?
+
+
+
+when scanning the movelist for bestsortscore can you keep a 2nd best? to save another scan?
+
+
+
+
+do a test: 10msv20v40v80v160 but how to get fastchess to do it??? need another 'option'
+
+
+
+'early move extensions' as opposed to LMR
+
+only reduce once on any given line???
+reduce if have a faillow(cut) TT move that doesn't quite have the STD to be used immediately
+
+
+singular extensions
+-avoid recursive singular search!
+-check moves being extended for sanity!
+
+
+
+PROBE LICHESS 8pc VIA HTTP! (and 7... and all if not available locally!)
+-test locally first and then send http request - have it fill in global vars which are read by search
+- https://github.com/yhirose/cpp-httplib
 
 
 don't reduce/prune passed P moves? unless SEE -ve
 -test on KP positions - test fully!
 -extend once determined rather than just using to flag no reduction!
 
-
-a long fastchess tourney eventually is unable to allocate large pages???
--test with no large pages?
 
 
 code analysis!
@@ -217,6 +329,8 @@ dumb 50th move 'issue' again :D
 -on 50th move don't test 50 move? truncate PVs manually after search?
 -the 'issue' may occur before the 50th move too, e.g. it might leave a mate in 3 on the 48th move
 -but it has to know about the 50th move else how can it see that it's a draw???
+-if the root move is the 100th ply, ignore 50-move draws in the tree completely so every move gets evaluated as normal BUT also truncate the PV if any root move takes over as best
+--whatever it plays the GUI declares a draw anyway AND it's too late to avoid the draw? no! it might have a capture/P-move on the 100th ply and ignore it in preference so some other 'draw' move! :O
 
 
 
@@ -243,9 +357,6 @@ e.g. Colossus v Caliban, maybyen v Colossus
 
 
 
-singular extensions
-
-
 tidy up mate mode - clearer messages re parameters
 
 
@@ -265,6 +376,7 @@ eval: mobility
 -use the last two values from main... save in the GR? 2 class vars? WHAT IF WE'RE IN CHECK? NEED LAST NON-CHECK POSN. MAYBE AVERAGE LAST 4 PLY?
 --calculate the 'eval' before entering the QS!
 -how do we get staticeval in main though??? the eval fn just returns the diff of the previous plies move counts - in QS copy the mobility from 2 ply earlier
+-just go for nnue?
 
 
 perft count overflows???

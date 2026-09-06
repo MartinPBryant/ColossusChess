@@ -32,6 +32,8 @@ void SendOptions()
 	Output("option name SyzygyProbeLimit type spin default " + MyITOA(SyzygyProbeLimitDefault) + " min " + MyITOA(SyzygyProbeLimitMin) + " max " + MyITOA(SyzygyProbeLimitMax));
 	Output("option name SyzygyProbe7PieceInTree type check default false");
 	Output("option name UCI_Chess960 type check default false");
+	Output("option name UseLargePages type check default true");
+	//Output("option name UseLichessEGTB type check default true");
 	//Output("option name MateFullWidth type check default false");
 	Output("option name MateAllChecks type check default false");
 	Output("option name MateAllThreateningMateInOne type check default false");
@@ -54,6 +56,8 @@ void SendOptionValues()
 	Output("info string SyzygyProbeLimit: " + MyITOA(SyzygyProbeLimit));
 	Output("info string SyzygyProbe7PieceInTree: " + MyBooleanTOA(SyzygyProbe7PieceInTree));
 	Output("info string UCI_Chess960: " + MyBooleanTOA(UCI_Chess960));
+	Output("info string UseLargePages: " + MyBooleanTOA(UseLargePages));
+	Output("info string UseLichessEGTB: " + MyBooleanTOA(UseLichessEGTB));
 	Output("info string MateMaximumDefenderKingMoves: " + MyITOA(TC.MateMaximumDefenderKingMoves));
 	Output("info string MateMaximumDefenderMovablePieces: " + MyITOA(TC.MateMaximumDefenderMovablePieces));
 	Output("info string MateMaximumDefenderMoves: " + MyITOA(TC.MateMaximumDefenderMoves));
@@ -61,7 +65,7 @@ void SendOptionValues()
 	Output("info string MateMinimumAttackerMaterial: " + MyITOA(TC.MateMinimumAttackerMaterial));
 	Output("info string MateFixedPieces: " + TC.MateFixedPieces);
 	Output("info string ShowPVTerminators: " + MyBooleanTOA(ShowPVTerminators));
-	Output("info string BlankLines: " + MyBooleanTOA(ShowBlankLines));
+	Output("info string ShowBlankLines: " + MyBooleanTOA(ShowBlankLines));
 }
 
 // Sets an engine option to a specified value
@@ -73,6 +77,7 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 
 	if (nameUpperCase == "HASH")
 	{
+		int previousTranspositionTableMemory = TranspositionTableMemory;
 		TranspositionTableMemory = atoi(value.c_str());
 		if (TranspositionTableMemory > TranspositionTableMemoryMax)
 			limit = " (maximum)";
@@ -81,7 +86,8 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 		TranspositionTableMemory = std::max(std::min(TranspositionTableMemory, TranspositionTableMemoryMax), TranspositionTableMemoryMin);
 		//if (IsDebug)
 		Output("info string Transposition table memory set to " + MyITOA(TranspositionTableMemory) + "MB" + limit);
-		FreeAnyTranspositionTableMemory();
+		if (previousTranspositionTableMemory != TranspositionTableMemory)
+			FreeAnyTranspositionTableMemory(); // Sets NormalTranspositionTableBuckets to 0 to retrigger size calculation and memory allocation
 	}
 
 	else if (nameUpperCase == "THREADS")
@@ -196,6 +202,20 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 		UCI_Chess960 = (UpperCase(value) == "TRUE");
 		//if (IsDebug)
 		Output("info string UCI_Chess960 set to " + MyBooleanTOA(UCI_Chess960));
+	}
+
+	else if (nameUpperCase == "USELARGEPAGES")
+	{
+		UseLargePages = (UpperCase(value) == "TRUE");
+		//if (IsDebug)
+		Output("info string UseLargePages set to " + MyBooleanTOA(UseLargePages));
+	}
+
+	else if (nameUpperCase == "USELICHESSEGTB")
+	{
+		UseLichessEGTB = (UpperCase(value) == "TRUE");
+		//if (IsDebug)
+		Output("info string UseLichessEGTB set to " + MyBooleanTOA(UseLichessEGTB));
 	}
 
 	else if ((nameUpperCase == "MATEFULLWIDTH") || (nameUpperCase == "MFW"))
@@ -586,7 +606,6 @@ std::string ProcessInput(std::string currentLine)
 				Quit = true;
 
 				FreeAnyTranspositionTableMemory();
-				//FreeMatingPositionsTableMemory();
 
 				// SYZYGY EGTBs
 				tb_free();

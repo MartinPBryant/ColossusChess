@@ -22,7 +22,7 @@ __forceinline uint32_t BitScanForwardBSF(uint64_t bb)
 	return (uint32_t)_Index;
 }
 
-__forceinline uint32_t BitScanForwardTZCNT(uint64_t bb)
+__forceinline uint32_t BitScanForwardTZCNT(uint64_t bb) // Fastest
 {
 	assert(bb != 0);
 	return (uint32_t)_tzcnt_u64(bb);
@@ -36,10 +36,10 @@ __forceinline uint32_t BitScanReverseBSR(uint64_t bb)
 	return (uint32_t)_Index;
 }
 
-__forceinline uint32_t BitScanReverseLZCNT(uint64_t bb)
+__forceinline uint32_t BitScanReverseLZCNT(uint64_t bb) // Fastest
 {
 	assert(bb != 0);
-	return (uint32_t)_lzcnt_u64(bb);
+	return (uint32_t)(63 - _lzcnt_u64(bb));
 }
 
 __forceinline int poplsb(uint64_t *bb) {

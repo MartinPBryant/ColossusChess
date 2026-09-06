@@ -34,7 +34,7 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 5 v 6 {2s+0.1s: movesLeftBaseEstimate reduced to 8} (-5.61) PCS1
 5 v 6 {2s+0.1s: movesLeftBaseEstimate reduced to 8} (-7.45) ASUS1
 
-2026aNonPGO v 6 (-10.48) PCS2
+2026aNonPGO v 6 {2s+0.1s} (-10.48) PCS2
 
 6 v 7 {LMP not done 1/256} (-0.59) PCS2
 6 v 7 {LMP not done 1/256} (-2.03) PCS1
@@ -47,6 +47,7 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 6 v 9 {LMP not done (ID-ply)/256 so more likely at lower ply} (0.57) ASUS1
 
 10 v 12 {BitScanForwardPOPCNT v BitScanForwardTZCNT} (-2.74) PCS2
+10 v 12 {BitScanForwardPOPCNT v BitScanForwardTZCNT} (-3.65) NIPOGI1
 
 12 v 13 {2s+0.1s: add movesLeft * Fischer bonus to timeleft} (-26.35, +/-4.03, 14135) PCS2
 12 v 13 {2s+0.1s: add movesLeft * Fischer bonus to timeleft} (-26.44, +/-4.66, 10937) PCS1
@@ -94,13 +95,136 @@ Recompiled both as a sanity check
 26 v 29 {passed P move extends rather than just doesn't reduce} (221.14, +/-36.58, 312) ASUS1
 *** :O How can such a small change cause such a disaster?!!! Explosions in endgames???
 
-26 v 30 {extensions done after pruning} () PCS2
+26 v 30 {extensions done after pruning} (1.58) PCS2
 26 v 30 {extensions done after pruning} (-2.07) PCS1
 26 v 30 {extensions done after pruning} (-2.80) ASUS1
 26 v 30 {extensions done after pruning} (-0.31) NIPOGI1
 
+NoLP v LP {no 'large pages' v 'large pages'} (-0.63) PCS2 - HUH???
 
+26 v 31 {singular extensions #1} (4.42, +/-4.59, 11095) PCS2
+26 v 31 {singular extensions #1} (2.85, +/-4.44, 12449) PCS1
+26 v 31 {singular extensions #1} (5.67, +/-4.59, 11960) ASUS1
 
+26 v 32 {singular extensions #2} (14.02, +/-8.87, 3015) PCS2
+
+***26 UseLargePages option --> 33
+
+33 v 34 {only extend at PV nodes} (16.93, +/-12.42, 1527) PCS2
+
+33 v 35 {only extend at Cut nodes} (18.96, +/-3.99, 15133) PCS2
+
+33 v 36 {only extend at All nodes} (17.94, +/-9.88, 2391) PCS2
+
+1v2v4v8 threads
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess33-8             157.39       9.97     232.55      12.89       2790      71.2%      41.8%
+   2 ColossusChess33-4              53.05       9.50      73.12      12.89       2792      57.6%      45.9%
+   3 ColossusChess33-2             -48.85       9.43     -67.68      12.89       2792      43.0%      46.6%
+   4 ColossusChess33-1            -162.17      10.18    -236.41      12.88       2794      28.2%      40.1%
+
+33 v 37 {singular extensions #3 - reduction=100 [was 50]} (11.24, +/-9.85, 2506) PCS2
+
+33 v 38 {singular extensions #4 - don't do if in check} (14.96, +/-11.88, 1711) PCS2
+
+33 v 39 {singular extensions #5 - don't do if in ttValue<alpha and make window relative to ttValue not alpha} (146.43, +/-35.28, 218) PCS2 - :O
+
+33 v 40 {singular extensions #6 - don't do if in ttValue<alpha} (17.12, +/-3.71, 17057) PCS2
+
+33 v 41 {singular extensions #7 - don't do if in ttValue<alpha and make window relative to ttValue not alpha and ttValue<winning and tteSTD>=DR-3} (57.24, +/-16.45, 903) PCS2
+
+33 v 42 {singular extensions #8 - not done recursively} (39.44, +/-13.47, 1334) PCS2
+
+43 v 44 {search done with full width window for 1st 2 iters} (21.16, +/-7.50, 4464) ASUS1
+
+43 v 45 {any LMP done returns alpha not bestMoveScore} (6.60, +/-6.25, 6173) PCS2
+
+43 v 46 {fut pruning relative to bestMoveScore rather than alpha} (5.67, +/-4.41, 12252) PCS2
+43 v 46 {fut pruning relative to bestMoveScore rather than alpha} (3.11, +/-6.03, 6713) PCS1
+43 v 46 {fut pruning relative to bestMoveScore rather than alpha} (3.72, +/-6.13, 6552) ASUS1
+
+***43 bug fixed for freeing TT memory --> 47
+
+47 v 48 {LMP only done if bestMoveScore == alpha} (20.04, +/-15.16, 1039) PCS2
+
+47 v 49 {fut pruning also uses '&& (bestSortScore <= 0)' clause} (7.85, +/-3.89, 15563) PCS2
+
+47 v 50 {LMP removes the '&& (bestSortScore <= 0)' clause} (-1.25) PCS2
+47 v 50 {LMP removes the '&& (bestSortScore <= 0)' clause} (1.16) PCS1
+47 v 50 {LMP removes the '&& (bestSortScore <= 0)' clause} (-0.21) ASUS1
+
+47 v 51 {init: bestMoveScore = std::min(currentGameRecordPointer->staticEvaluation, alpha)} (8.21, +/-4.73, 10603) PCS2
+
+47 v 52 {bestKnownScore setup correctly from tt score} (-4.05) PCS2
+
+52 v 53 {init: bestMoveScore = std::min(bestKnownScore, alpha)} (7.25, +/-5.37, 8211) PCS2
+
+52 v 54 {razoring tests bestKnownScore not staticEvaluation} (-0.10) PCS2
+52 v 54 {razoring tests bestKnownScore not staticEvaluation} (-3.28) PCS1
+52 v 54 {razoring tests bestKnownScore not staticEvaluation} (-2.08) ASUS1
+52 v 54 {razoring tests bestKnownScore not staticEvaluation} (-1.18) NIPOGI1
+
+52 v 55 {node level fut pruning tests bestKnownScore not staticEvaluation} (-7.78) PCS2
+52 v 55 {node level fut pruning tests bestKnownScore not staticEvaluation} (-13.09) PCS1
+52 v 55 {node level fut pruning tests bestKnownScore not staticEvaluation} (-8.57) ASUS1
+52 v 55 {node level fut pruning tests bestKnownScore not staticEvaluation} (-6.55) NIPOGI1
+
+***54 AND 55 adopted --> 56
+
+2026aNonPGO v 56 (-13.57) PCS2
+
+2026aNonPGO v 56-PEXT {2s+0.022s - large pages} (-41.93) PCS2
+2026aNonPGO v 56-PEXT {6s+0.066s - large pages} (-37.81) PCS2
+
+56 v 57 {AspirationWindowDelta changed from 50 to 60} (9.04, +/-4.57, 11283) PCS2
+
+56 v 58 {AspirationWindowDelta changed from 50 to 40} (-2.99) PCS2
+56 v 58 {AspirationWindowDelta changed from 50 to 40} (-5.19) PCS1
+56 v 58 {AspirationWindowDelta changed from 50 to 40} (-3.89) ASUS1
+
+56 v 59 {FutilityMargin[1] changed from 50 to 60} (-2.36) PCS2
+56 v 59 {FutilityMargin[1] changed from 50 to 60} (-4.48) PCS1
+56 v 59 {FutilityMargin[1] changed from 50 to 60} (2.03) ASUS1
+
+56-6pc v 56-7pcAtRootOnly {} (-4.15) PCS2
+
+***58 adopted --> 60
+
+60-NoLichessEGTB v 60-LichessEGTB {1s/move} (9.01, +/-9.40, 2179) PCS2 - WHY WORSE???
+
+***60 commented out lichess stuff --> 61
+
+61 v 62 {if any pruning done at an 'all' node returns alpha not bestMoveScore} (8.72) PCS2
+
+61 v 63 {if any pruning done at an 'all' node returns bestKnownScore if < alpha not bestMoveScore} (0.19) PCS2
+61 v 63 {if any pruning done at an 'all' node returns bestKnownScore if < alpha not bestMoveScore} (-1.49) PCS1
+61 v 63 {if any pruning done at an 'all' node returns bestKnownScore if < alpha not bestMoveScore} (-2.47) ASUS1
+61 v 63 {if any pruning done at an 'all' node returns bestKnownScore if < alpha not bestMoveScore} (-1.25) NIPOGI1
+
+61 v 64 {fut pruning uses bestKnownScore not staticEval} (24.24) PCS1
+
+***61 was still writing lichess logs so removed --> 65
+
+65 v 66 {SEE pruning done if DR<=10 rather than 6} (6.67, +/-4.94, 10272) ASUS1
+
+65 v 67 {razoring removed} (14.14, +/-7.13, 4715) PCS2
+
+65 v 68 {SEE pruning done if DR<=5 rather than 6} (0.82) PCS2
+65 v 68 {SEE pruning done if DR<=5 rather than 6} (0.56) ASUS1
+
+65 v 69 {razoring done more like SF} (-3.35) PCS2
+65 v 69 {razoring done more like SF} (-3.58) PCS1
+65 v 69 {razoring done more like SF} (-5.21) NIPOGI1
+
+***63 and 69 adopted --> 70
+
+70 v 71 {if any pruning, bestMoveScore = std::min(bestKnownScore, alpha)} (5.89) PCS2
+70 v 71 {if any pruning, bestMoveScore = std::min(bestKnownScore, alpha)} (-0.00) ASUS1
+
+2026aNonPGO v 70 (-25.58) PCS2
+2026aNonPGO v 70 () ASUS1
+
+2026aNonPGO v 70 {2s+0.022s N.B. non PEXT!} (-43.13) PCS2
 
 
 

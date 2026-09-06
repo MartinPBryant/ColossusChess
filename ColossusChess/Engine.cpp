@@ -44,7 +44,16 @@ bool IsDebug = false;
 // Variants
 bool UCI_Chess960 = false;
 
+// Large pages
+bool UseLargePages = true;
+bool MemoryAlocatedViaLargePages = false;
+
 // Endgame tablebases
+bool UseLichessEGTB = true;
+int LichessQueries = 0;
+int LichessQueriesReturned = 0;
+int LichessQueriesThrottled = 0;
+int LichessQueriesUsed = 0;
 int EndgameTablebasesPiecesFound = 0; // Returned by the EGTB initialisation code
 bool EndgameTablebasesInitialised = false;
 char EndgameTablebasesPath[256];
@@ -258,15 +267,17 @@ std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, Game
 
 void ClearMailboxBoard64(int8_t mailboxBoard64[64])
 {
-	for (int square = A1; square <= H8; square++)
-		mailboxBoard64[square] = Empty;
+	//for (int square = A1; square <= H8; square++)
+	//	mailboxBoard64[square] = Empty;
+	memset(mailboxBoard64, Empty, 64); // Cannot use 'sizeof(mailboxBoard64)' as it's treated as an 8 byte pointer!
 }
 
 void ClearPiecesBB(uint64_t piecesBB[Sides][King + 2])
 {
-	for (int side = 0; side < Sides; side++)
-		for (int piece = AllPieces; piece <= King; piece++)
-			piecesBB[side][piece] = 0;
+	//for (int side = 0; side < Sides; side++)
+	//	for (int piece = AllPieces; piece <= King; piece++)
+	//		piecesBB[side][piece] = 0;
+	memset(piecesBB, 0, 2 * 8 * 8);
 }
 
 std::string MailboxBoard64String(int8_t mailboxBoard64[64])
@@ -564,7 +575,7 @@ void* AlignedAllocateMemory(size_t size, size_t alignment)
 void AlignedFreeMemory(void* p)
 {
 #ifdef _WIN32
-	if (LargePagesAvailable)
+	if (MemoryAlocatedViaLargePages)
 		VirtualFree(p, 0, MEM_RELEASE);
 	else
 		_aligned_free(p);
@@ -673,20 +684,29 @@ void ClearEverythingForDeterminancy()
 // Initialise everything for a new game
 void NewGame(bool clearEverything)
 {
+	// This is called...
+	// Once on startup to clear everything for an interactive user
+	// Each ucinewgame command
+	// Each position startpos (but with clearEverything set to false)
+
 	// This assumes a 'normal' chess starting position. 'Chess960/FRC' starting positions are specified via a subsequent POSITION FEN command
 	SetNewGamePositionMailboxBoard64(EngineBrain.mailboxBoard64);
 	InitialKingFile = E;
 	InitialKingSideRookFile = H;
 	InitialQueenSideRookFile = A;
-	EngineBrain.gameRecordPointer->castlingStatus.ui8[0][0] = 0;
-	EngineBrain.gameRecordPointer->castlingStatus.ui8[0][1] = 0;
-	EngineBrain.gameRecordPointer->castlingStatus.ui8[1][0] = 0;
-	EngineBrain.gameRecordPointer->castlingStatus.ui8[1][1] = 0;
+	//EngineBrain.gameRecordPointer->castlingStatus.ui8[0][0] = 0;
+	//EngineBrain.gameRecordPointer->castlingStatus.ui8[0][1] = 0;
+	//EngineBrain.gameRecordPointer->castlingStatus.ui8[1][0] = 0;
+	//EngineBrain.gameRecordPointer->castlingStatus.ui8[1][1] = 0;
+	EngineBrain.gameRecordPointer->castlingStatus.ui32 = 0;
 	SideToMove = 0;
 	EngineBrain.ClearGameRecord();
 
 	if (clearEverything)
+	{
 		ClearEverythingForDeterminancy(); // Clears TT, killers, etc
+		//OutputError("Lichess: " + MyITOA(LichessQueries) + " " + MyITOA(LichessQueriesReturned) + " " + MyITOA(LichessQueriesThrottled) + " " + MyITOA(LichessQueriesUsed));//TEMP
+	}
 }
 
 void InitialiseMaterialValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)

@@ -1,0 +1,11 @@
+Fri Sep  4 09:09:49 2026
+*** Error!: Did not find Lichess EGTB move in RootMoveList! 88104
+8/5pk1/6p1/4K1P1/4N1r1/8/R7/8 w - - 1 60
+p fen 8/5pk1/6p1/4K1P1/4N1r1/8/R7/8 w - - 1 60
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

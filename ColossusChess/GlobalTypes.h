@@ -75,9 +75,9 @@ struct RootMoveList_Struct
 	MoveWithScore_Struct mws;
 	uint64_t nodes;
 	int priority;
-	int EGTBWDL;
+	int EGTBWDL; // win=1, draw=0, loss=-1
 	int EGTBDTZ;
-	int EGTBRank;
+	//int EGTBRank; //NOT USED???
 };
 
 struct History_Struct
@@ -163,8 +163,6 @@ struct GameRecordEntry_Struct
 
 	uint64_t fixedPiecesAttackerBB;
 	uint64_t fixedPiecesDefenderBB;
-
-	//int legalMovesCount;
 };
 
 enum CPUVendorIdEnum

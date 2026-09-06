@@ -42,6 +42,7 @@
     <ClInclude Include="Evaluate.h" />
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="GlobalTypes.h" />
+    <ClInclude Include="httplib.h" />
     <ClInclude Include="SearchMate.h" />
     <ClInclude Include="SearchNormal.h" />
     <ClInclude Include="SearchPerft.h" />
@@ -49,6 +50,9 @@
     <ClInclude Include="SYZYGYPYRRHIC\tbprobe.h" />
     <ClInclude Include="UGI.h" />
     <ClInclude Include="Utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RSJparser.tcc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

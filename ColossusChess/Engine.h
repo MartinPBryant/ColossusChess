@@ -29,7 +29,16 @@ extern bool IsDebug;
 // Variants
 extern bool UCI_Chess960;
 
+// Large pages
+extern bool UseLargePages;
+extern bool MemoryAlocatedViaLargePages;
+
 // Endgame tablebases
+extern bool UseLichessEGTB;
+extern int LichessQueries;
+extern int LichessQueriesReturned;
+extern int LichessQueriesThrottled;
+extern int LichessQueriesUsed;
 extern int EndgameTablebasesPiecesFound;
 extern bool EndgameTablebasesInitialised;
 extern char EndgameTablebasesPath[256];
@@ -233,7 +242,7 @@ void FreeAnyTranspositionTableMemory();
 uint64_t GenerateTranspositionTableHash64(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer);
 
 void ClearEverythingForDeterminancy();
-void NewGame(bool wipeEverything);
+void NewGame(bool clearEverything);
 
 void ConvertMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
 bool CompareMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
