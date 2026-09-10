@@ -49,6 +49,8 @@ int main(int argc, char * argv[])
 	// Determine if 'large pages' are available
 	LargePages();
 
+	//----------------------------------------------------------------------------------------------------
+	
 	// Get the application's path/filename and construct various utility file paths
 	std::string ApplicationPath = argv[0];
 	size_t index = ApplicationPath.rfind("\\");
@@ -75,6 +77,28 @@ int main(int argc, char * argv[])
 		Logging = true;
 	}
 
+	// Various warnings!
+#ifndef _WIN64
+	Output("info string *** Warning! 32-bit!");
+#endif
+#ifdef TB_NO_HW_POP_COUNT
+	Output("info string *** Warning! Software population count! 10% SLOWER!");
+#endif
+#ifdef SEARCHINGFORLINE
+	Output("info string *** Warning! SEARCHINGFORLINE is on!");
+#endif
+#ifdef BREAKONCURRENTVARIATIONDEF
+	Output("info string *** Warning! BREAKONCURRENTVARIATIONDEF is defined!");
+#endif
+	PRINTTREE(Output("info string *** Warning! PRINTTREEDEF is defined!"););
+#ifdef CRASHLOCATIONDEF
+	Output("info string *** Warning! CRASHLOCATIONDEF defined!");
+#endif
+
+
+
+	//----------------------------------------------------------------------------------------------------
+
 	// Initialise
 	ProcessingCommandFile = false;
 	ComputingMove = false;
@@ -94,20 +118,8 @@ int main(int argc, char * argv[])
 		}
 	}
 
-	// Various warnings!
-#ifndef _WIN64
-	Output("info string *** Warning! 32-bit!");
-#endif
-#ifdef TB_NO_HW_POP_COUNT
-	Output("info string *** Warning! Software population count! 10% SLOWER!");
-#endif
-#ifdef SEARCHINGFORLINE
-	Output("info string *** Warning! SEARCHINGFORLINE is on!");
-#endif
-	PRINTTREE(Output("info string *** Warning! PRINTTREE is on!");)
-
-		// Main command processing loop
-		Quit = false;
+	// Main command processing loop
+	Quit = false;
 	while (!Quit)
 	{
 		std::string s;

@@ -12,6 +12,40 @@
 
 //----------------------------------------------------------------------------------------------------
 
+//#define EXPERIMENTAL
+
+//#define PRINTTREEDEF // Writes the search tree to .csv files (one per iteration) which can be interrogated in a spreadsheet
+#ifdef PRINTTREEDEF
+#define PRINTTREE(s) {s}
+#else
+#define PRINTTREE(s)
+#endif
+const int PrintTreeDepth = 12;
+
+//#define GATHERSTATSDEF // Gathers statistics about TT/EGTB usage
+#ifdef GATHERSTATSDEF
+#define GATHERSTATS(s) {s}
+#else
+#define GATHERSTATS(s)
+#endif
+
+//#define BREAKONCURRENTVARIATIONDEF // Gathers statistics about TT/EGTB usage
+#ifdef BREAKONCURRENTVARIATIONDEF
+#define BREAKONCURRENTVARIATION(s) {if (normalBrain.CurrentLine(ply) == s) __debugbreak();}
+#else
+#define BREAKONCURRENTVARIATION(s)
+#endif
+
+// N.B. CRASHLOCATIONDEF must be undefined for multi-threaded play else the constant dirtying of the cache line causes huge overhead negating any lazy-SMP benefit!
+//#define CRASHLOCATIONDEF
+#ifdef CRASHLOCATIONDEF
+#define CRASHLOCATION(s) {CrashLocation = s;}
+#else
+#define CRASHLOCATION(s)
+#endif
+
+//----------------------------------------------------------------------------------------------------
+
 extern Brain EngineBrain;
 
 extern Normal EngineNormal;

@@ -1828,7 +1828,7 @@ void Unique()
 			//Output(MyUI64TOA(hash64));
 			//UGIBrain.gameRecordPointer->transpositionTableHash64 = hash64;
 			//UGIBrain.gameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[UGIBrain.gameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
-			bool isInCheck = EngineBrain.IsEnemyKingAttacked(BitScanForwardX(EngineBrain.piecesBB[sideToMove][King]), sideToMove ^ 1);
+			bool isInCheck = EngineBrain.IsEnemyKingAttacked(GetLS1BIndex(EngineBrain.piecesBB[sideToMove][King]), sideToMove ^ 1);
 
 			EngineBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
 			uint32_t movesCount = EngineBrain.GenerateAllMoves(sideToMove, isInCheck, moveList);
@@ -1845,35 +1845,35 @@ void Unique()
 				{
 					//gameRecordPointer->epSquare = currentMove->mf.toSquare + PawnMoveOffset[sideToMove ^ 1];
 					bool epLegal = false;
-					uint32_t kingSquare = BitScanForwardX(EngineBrain.piecesBB[sideToMove ^ 1][King]);
+					uint32_t kingSquare = GetLS1BIndex(EngineBrain.piecesBB[sideToMove ^ 1][King]);
 					Move_Struct previousMove;
 					previousMove.ui32 = (EngineBrain.gameRecordPointer - 1)->move.ui32;
-					if (West(UINT64SetBit(previousMove.mf.toSquare)) & EngineBrain.piecesBB[sideToMove ^ 1][Pawn])
+					if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & EngineBrain.piecesBB[sideToMove ^ 1][Pawn])
 					{
-						EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= (UINT64SetBit(previousMove.mf.toSquare - 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare));
-						EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= (UINT64SetBit(previousMove.mf.toSquare - 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare));
-						EngineBrain.piecesBB[sideToMove][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare);
-						EngineBrain.piecesBB[sideToMove][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare);
+						EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare));
+						EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare));
+						EngineBrain.piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+						EngineBrain.piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 						if (!EngineBrain.IsAttacked(kingSquare, sideToMove))
 							epLegal = true;
-						EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare - 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare);
-						EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare - 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare);
-						EngineBrain.piecesBB[sideToMove][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare);
-						EngineBrain.piecesBB[sideToMove][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare);
+						EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare);
+						EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare);
+						EngineBrain.piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+						EngineBrain.piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 					}
 					if (!epLegal)
-						if (East(UINT64SetBit(previousMove.mf.toSquare)) & EngineBrain.piecesBB[sideToMove ^ 1][Pawn])
+						if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & EngineBrain.piecesBB[sideToMove ^ 1][Pawn])
 						{
-							EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare + 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare);
-							EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare + 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare);
-							EngineBrain.piecesBB[sideToMove][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare);
-							EngineBrain.piecesBB[sideToMove][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare);
+							EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare);
+							EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare);
+							EngineBrain.piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+							EngineBrain.piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 							if (!EngineBrain.IsAttacked(kingSquare, sideToMove))
 								epLegal = true;
-							EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare + 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare);
-							EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare + 1) ^ UINT64SetBit(EngineBrain.gameRecordPointer->epSquare);
-							EngineBrain.piecesBB[sideToMove][Pawn] ^= UINT64SetBit(previousMove.mf.toSquare);
-							EngineBrain.piecesBB[sideToMove][AllPieces] ^= UINT64SetBit(previousMove.mf.toSquare);
+							EngineBrain.piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare);
+							EngineBrain.piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(EngineBrain.gameRecordPointer->epSquare);
+							EngineBrain.piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+							EngineBrain.piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 						}
 
 					if (!epLegal)

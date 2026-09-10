@@ -51,10 +51,6 @@ int Normal::CrashLocation;
 
 Normal::Normal()
 {
-#ifdef CRASHLOCATIONDEF
-	Output("*** Warning! CRASHLOCATIONDEF defined!");
-#endif
-
 	// Declaring CounterMoveHistory as a class variable loses ELO and crashes occasionally but I don't know why!
 	// Creating it on the heap here seems to work fine though.
 	CounterMoveHistory = new CounterMoveHistory_Struct;
@@ -222,104 +218,106 @@ void Normal::ClearCounterMoveHistory()
 
 std::string Normal::ThreadIdSuffix()
 {
-	if (Threads == 1)
-		return "";
-	return " ThreadId " + MyITOA(ThreadId);
+	return (Threads == 1) ? "" : " ThreadId " + std::to_string(ThreadId);
 }
 
 void Normal::ShowIterationStartMessage()
 {
-	if (ThreadId > 0)
-		return;
-
-	std::string IterationStartMessage = "info depth " + MySI64TOA(IterationPly);
-	if (IsDebug)
-		IterationStartMessage += ThreadIdSuffix();
-
-#ifndef _DEBUG
-	if (LastTickCount > MessageDelayTickCount)
-#endif
-		Output(IterationStartMessage);
-#ifndef _DEBUG
-	else
+	if (ThreadId == 0)
 	{
-		PreviousIterationsMessages = CurrentIterationsMessages;
-		CurrentIterationsMessages = IterationStartMessage;
-	}
+		std::string iterationStartMessage = "info depth " + std::to_string(IterationPly);
+		if (IsDebug)
+			iterationStartMessage += ThreadIdSuffix();
+
+#ifndef _DEBUG
+		if (LastTickCount > MessageDelayTickCount)
 #endif
+			Output(iterationStartMessage);
+#ifndef _DEBUG
+		else
+		{
+			PreviousIterationsMessages = CurrentIterationsMessages;
+			CurrentIterationsMessages = iterationStartMessage;
+		}
+#endif
+	}
 }
 
 void Normal::ShowProgressMessage(uint32_t move, int movesMade, short bestMoveScore, short alpha, short beta)
 {
-	if (ThreadId > 0)
-		return;
-
+	if (ThreadId == 0)
+	{
 #ifndef _DEBUG
-	if (LastTickCount > MessageDelayTickCount)
-		if (
-			(LastTickCount > LastProgressMessageTickCount + MessageDelayTickCount)
-			|| (movesMade == 1)
-			|| (movesMade == RootMovesCount)
-			)
+		if (LastTickCount > MessageDelayTickCount)
+			if (
+				(LastTickCount > LastProgressMessageTickCount + MessageDelayTickCount)
+				|| (movesMade == 1)
+				|| (movesMade == RootMovesCount)
+				)
 #endif
-		{
-			LastProgressMessageTickCount = LastTickCount;
-
-			std::string ProgressMessage = "info time " + MyUI64TOA(LastTickCount)
-				+ " nodes " + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch)
-				+ " currmove " + MoveNotation(move)
-				+ " currmovenumber " + MyITOA(movesMade)
-				;
-			if (IsDebug)
 			{
-				ProgressMessage += " depth " + MyITOA(IterationPly) + " bestMoveScore " + MyITOA(bestMoveScore) + " alpha " + MyITOA(alpha) + " beta " + MyITOA(beta);
-				ProgressMessage += ThreadIdSuffix();
-				//ProgressMessage += " processor " + std::to_string(GetCurrentProcessorNumber());
+				LastProgressMessageTickCount = LastTickCount;
+
+				std::string progressMessage = "info time " + std::to_string(LastTickCount)
+					+ " nodes " + std::to_string(NodeCount + NodeCountQuiescenceSearch)
+					+ " currmove " + MoveNotation(move)
+					+ " currmovenumber " + std::to_string(movesMade)
+					;
+				if (IsDebug)
+				{
+					progressMessage += " depth " + std::to_string(IterationPly) + " bestMoveScore " + std::to_string(bestMoveScore) + " alpha " + std::to_string(alpha) + " beta " + std::to_string(beta);
+					progressMessage += ThreadIdSuffix();
+					//ProgressMessage += " processor " + std::to_string(GetCurrentProcessorNumber());
+				}
+				Output(progressMessage);
 			}
-			Output(ProgressMessage);
-		}
+	}
 }
 
 void Normal::ShowFailedLowMessage(short rootAlpha)
 {
-	if (ThreadId > 0)
-		return;
+	if (ThreadId == 0)
+	{
+		std::string failedLowMessage = "info depth " + std::to_string(IterationPly) + " score cp " + std::to_string(rootAlpha) + " upperbound";
 
 #ifndef _DEBUG
-	if (LastTickCount > MessageDelayTickCount)
+		if (LastTickCount > MessageDelayTickCount)
 #endif
-	{
-		std::string FailedLowMessage = "info depth " + MyITOA(IterationPly) + " score cp " + MyITOA(rootAlpha) + " upperbound";
-		Output(FailedLowMessage);
+			Output(failedLowMessage);
+#ifndef _DEBUG
+		else
+			CurrentIterationsMessages += "\n" + failedLowMessage;
+#endif
 	}
 }
 
 void Normal::ShowIterationFinishMessage(uint32_t hashfull)
 {
-	if (ThreadId > 0)
-		return;
-
-	uint64_t totalNodes = NodeCount + NodeCountQuiescenceSearch;
-	IterationFinishMessage = "info depth " + MyITOA(IterationPly)
-		+ " time " + MyUI64TOA(LastTickCount)
-		+ " nodes " + MyUI64TOA(totalNodes)
-		+ " nps " + MyUI64TOA((totalNodes * 1000) / LastTickCount)
-		+ " hashfull " + MyITOA(hashfull)
-		+ (EndgameTablebasesHits > 0 ? " tbhits " + MyUI64TOA(EndgameTablebasesHits) : "");
-	if (IsDebug)
-		IterationFinishMessage += ThreadIdSuffix();
-	if (ShowBlankLines)
-		IterationFinishMessage += "\n";
-#ifndef _DEBUG
-	if (LastTickCount > MessageDelayTickCount)
-#endif
-		Output(IterationFinishMessage);
-#ifndef _DEBUG
-	else
+	if (ThreadId == 0)
 	{
-		CurrentIterationsMessages += "\n" + IterationFinishMessage;
-	}
+		uint64_t totalNodes = NodeCount + NodeCountQuiescenceSearch;
+		std::string iterationFinishMessage = "info depth " + std::to_string(IterationPly)
+			+ " time " + std::to_string(LastTickCount)
+			+ " nodes " + std::to_string(totalNodes)
+			+ " nps " + std::to_string((totalNodes * 1000) / LastTickCount)
+			+ " hashfull " + std::to_string(hashfull)
+			+ (EndgameTablebasesHits > 0 ? " tbhits " + std::to_string(EndgameTablebasesHits) : "");
+		if (IsDebug)
+		{
+			iterationFinishMessage += " seldepth " + std::to_string(MaximumPlyReached);
+			iterationFinishMessage += ThreadIdSuffix();
+		}
+		if (ShowBlankLines)
+			iterationFinishMessage += "\n";
+#ifndef _DEBUG
+		if (LastTickCount > MessageDelayTickCount)
 #endif
+			Output(iterationFinishMessage);
+#ifndef _DEBUG
+		else
+			CurrentIterationsMessages += "\n" + iterationFinishMessage;
+#endif
+	}
 }
 
 std::string Normal::BestLine()
@@ -337,122 +335,125 @@ std::string Normal::BestLine()
 
 void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 {
-	if (ThreadId > 0)
-		return;
-
-	// Construct the PV
-	std::string PVMessage = "";
-	int i = 0;
-	do
+	if (ThreadId == 0)
 	{
-		PVMessage += MoveNotation(PrincipalVariation[i++]) + " ";
-	} while ((PrincipalVariation[i] & 0xFFFF) != 0);
-
-	// Construct any 'end of PV' suffix
-	std::string pvTerminatorMessage = "";
-	if (ShowPVTerminators)
-	{
-		switch (PrincipalVariation[i])
+		// Construct the PV
+		std::string pvMessage = "";
+		int i = 0;
+		do
 		{
-		case PVTUnknown:
-			pvTerminatorMessage = "*Unknown";
-			break;
-		case PVTStandPat:
-			pvTerminatorMessage = "*StandPat";
-			break;
-		case PVTDrawByRepetition:
-			pvTerminatorMessage = "*Draw(Repetition)";
-			break;
-		case PVTDrawBy50MoveRule:
-			pvTerminatorMessage = "*Draw(50MoveRule)";
-			break;
-		case PVTDrawMinimumMaterial:
-			pvTerminatorMessage = "*Draw(MinimumMaterial)";
-			break;
-		case PVTDrawImmediateRepetition:
-			pvTerminatorMessage = "*Draw(ImmediateRepetition)";
-			break;
-		case PVTDrawPerpetual:
-			pvTerminatorMessage = "*Perpetual";
-			break;
-		case PVTDrawStalemate:
-			pvTerminatorMessage = "*Draw(Stalemate)";
-			break;
-		case PVTCheckmate:
-			pvTerminatorMessage = "*Checkmate";
-			break;
-		case PVTEGTB:
-			pvTerminatorMessage = "*EGTB";
-			break;
-		case PVTTTUpper:
-			pvTerminatorMessage = "*TTUpper";
-			break;
-		case PVTTTLower:
-			pvTerminatorMessage = "*TTLower";
-			break;
-		case PVTTTExact:
-			pvTerminatorMessage = "*TTExact";
-			break;
-		default:
-			pvTerminatorMessage = "*Unknown PV terminator found! " + MyITOA(PrincipalVariation[i]);
-			break;
-		}
-	}
+			pvMessage += MoveNotation(PrincipalVariation[i++]) + " ";
+		} while ((uint16_t)PrincipalVariation[i] != 0);
 
-	// Final bits and bobs
-	uint64_t totalNodes = NodeCount + NodeCountQuiescenceSearch;
-
-	std::string scoreMessage = " score ";
-	if (alpha >= MatingScore) // Mating?
-		scoreMessage += "mate " + MyITOA((MatingIn0Score - alpha) >> 1);
-	else if (alpha <= MatedScore) // Mated?
-		scoreMessage += "mate " + MyITOA((-MatingIn0Score - alpha + 1) >> 1);
-	else // Normal
-	{
-		// If we are in the EGTB at the root, adjust the displayed score appropriately
-		short displayedScore = alpha;
-		if (EndgameTablebasesRootMove.ui32 != 0)
+		// Construct any 'end of PV' suffix
+		std::string pvTerminatorMessage = "";
+		if (ShowPVTerminators)
 		{
-			if (EndgameTablebasesRootWDL == 0) // Draw?
+			switch (PrincipalVariation[i])
 			{
-				// Reduce the range of displayed scores to avoid UIs adjudicating the game as a loss! See https://talkchess.com/viewtopic.php?t=84821
-				//displayedScore = displayedScore / 8; // THIS CAUSED CONFUSION WHEN TRYING TO FIND A BUG AROUND SMALL DRAW SCORES!
-				displayedScore = std::min(displayedScore, (short)299); // Keep it in the range -299..299
-				displayedScore = std::max(displayedScore, (short)-299);
+			case PVTUnknown:
+				pvTerminatorMessage = "*Unknown";
+				break;
+			case PVTStandPat:
+				pvTerminatorMessage = "*StandPat";
+				break;
+			case PVTDrawByRepetition:
+				pvTerminatorMessage = "*Draw(Repetition)";
+				break;
+			case PVTDrawBy50MoveRule:
+				pvTerminatorMessage = "*Draw(50MoveRule)";
+				break;
+			case PVTDrawMinimumMaterial:
+				pvTerminatorMessage = "*Draw(MinimumMaterial)";
+				break;
+			case PVTDrawImmediateRepetition:
+				pvTerminatorMessage = "*Draw(ImmediateRepetition)";
+				break;
+			case PVTDrawPerpetual:
+				pvTerminatorMessage = "*Perpetual";
+				break;
+			case PVTDrawStalemate:
+				pvTerminatorMessage = "*Draw(Stalemate)";
+				break;
+			case PVTCheckmate:
+				pvTerminatorMessage = "*Checkmate";
+				break;
+			case PVTEGTB:
+				pvTerminatorMessage = "*EGTB";
+				break;
+			case PVTTTUpper:
+				pvTerminatorMessage = "*TTUpper";
+				break;
+			case PVTTTLower:
+				pvTerminatorMessage = "*TTLower";
+				break;
+			case PVTTTExact:
+				pvTerminatorMessage = "*TTExact";
+				break;
+			default:
+				pvTerminatorMessage = "*Unknown PV terminator found! " + std::to_string(PrincipalVariation[i]);
+				break;
 			}
-			else if (EndgameTablebasesRootWDL == 1) // Win?
-				if (displayedScore < EGTBWinningScore)
-					displayedScore = displayedScore + 1000; // Ensure the score looks like a winning score! (It may be just a few centi-pawns according to the eval)
 		}
 
-		scoreMessage += "cp " + MyITOA(displayedScore);
-	}
+		// Final bits and bobs
+		uint64_t totalNodes = NodeCount + NodeCountQuiescenceSearch;
 
-	std::string eulMessage = "";
-	if (eul != TTFlagExact)
-	{
-		if (eul == TTFlagLower)
-			eulMessage = " lowerbound";
-		else if (eul == TTFlagUpper)
-			eulMessage = " upperbound";
-	}
+		std::string scoreMessage;
+		if (alpha >= MatingScore) // Mating?
+			scoreMessage = "mate " + std::to_string((MatingIn0Score - alpha) >> 1);
+		else if (alpha <= MatedScore) // Mated?
+			scoreMessage = "mate " + std::to_string((-MatingIn0Score - alpha + 1) >> 1);
+		else // Normal
+		{
+			// If we are in the EGTB at the root, adjust the displayed score appropriately
+			short displayedScore = alpha;
+			if (EndgameTablebasesRootMove.ui32 != 0)
+			{
+				if (EndgameTablebasesRootWDL == 0) // Draw?
+				{
+					// Reduce the range of displayed scores to avoid UIs adjudicating the game as a loss! See https://talkchess.com/viewtopic.php?t=84821
+					//displayedScore = displayedScore / 8; // THIS CAUSED CONFUSION WHEN TRYING TO FIND A BUG AROUND SMALL DRAW SCORES!
+					// Reduce the part of the score above +/-100
+					if (std::abs(displayedScore) >= 100)
+						displayedScore = (((std::abs(displayedScore) - 100) / 8) + 100) * ((displayedScore > 0) - (displayedScore < 0));
+				}
+				else if (EndgameTablebasesRootWDL == 1) // Win?
+					if (displayedScore < EGTBWinningScore)
+						displayedScore = displayedScore + 1000; // Ensure the score looks like a winning score! (It may be just a few centi-pawns according to the eval)
+			}
 
-	// Display the constructed message
-	std::string BestLineMessage = "info depth " + MyITOA(IterationPly) // N.B. the 'depth' value is provided here (as well as in the iteration 'start' message) as some GUIs (e.g. Arena, Shredder) don't display it unless it's provided with the PV!
-		+ " time " + MyUI64TOA(LastTickCount)
-		+ " nodes " + MyUI64TOA(totalNodes) + scoreMessage + eulMessage
-		+ " pv " + PVMessage + pvTerminatorMessage;
-	if (IsDebug)
-		BestLineMessage += ThreadIdSuffix();
+			scoreMessage = "cp " + std::to_string(displayedScore);
+		}
+
+		// N.B. eul is only ever provided as TTFlagExact or TTFlagLower. Fail lows are handled by ShowFailedLowMessage
+		std::string eulMessage = "";
+		if (eul != TTFlagExact)
+		{
+			//if (eul == TTFlagLower)
+				eulMessage = " lowerbound";
+			//else if (eul == TTFlagUpper)
+			//	eulMessage = " upperbound";
+		}
+
+		// Display the constructed message
+		std::string BestLineMessage = "info depth " + std::to_string(IterationPly) // N.B. the 'depth' value is provided here (as well as in the iteration 'start' message) as some GUIs (e.g. Arena, Shredder) don't display it unless it's provided with the PV!
+			+ " time " + std::to_string(LastTickCount)
+			+ " nodes " + std::to_string(totalNodes)
+			+ " score " + scoreMessage + eulMessage
+			+ " pv " + pvMessage + pvTerminatorMessage;
+		if (IsDebug)
+			BestLineMessage += ThreadIdSuffix();
 
 #ifndef _DEBUG
-	if (LastTickCount > MessageDelayTickCount)
+		if (LastTickCount > MessageDelayTickCount)
 #endif
-		Output(BestLineMessage);
+			Output(BestLineMessage);
 #ifndef _DEBUG
-	else
-		CurrentIterationsMessages += "\n" + BestLineMessage;
+		else
+			CurrentIterationsMessages += "\n" + BestLineMessage;
 #endif
+	}
 }
 
 #pragma endregion
@@ -779,7 +780,7 @@ void Normal::AllocateNormalTranspositionTable()
 			if (NormalTranspositionTablePointer == nullptr)
 			{
 				uint32_t errorCode = GetLastError();
-				Output("info string *** Error! Normal 'large pages' transposition table memory could not be allocated! (Code:" + MyITOA(errorCode) + ") Falling back to standard pages.");
+				Output("info string *** Error! Normal 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.");
 				OutputError("Normal 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
 			}
 		}
@@ -791,7 +792,7 @@ void Normal::AllocateNormalTranspositionTable()
 		if ((NormalTranspositionTablePointer == nullptr))
 		{
 			uint32_t errorCode = GetLastError();
-			Output("info string *** Error! Normal transposition table memory could not be allocated! (Code:" + MyITOA(errorCode) + ")");
+			Output("info string *** Error! Normal transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ")");
 			OutputError("Normal transposition table memory could not be allocated!");
 			NormalTranspositionTableBuckets = 0;
 		}
@@ -859,7 +860,7 @@ void Normal::DisplayStatisticsNormalTranspositionTable()
 		}
 	}
 
-	Output("info string TT Statistics: Total = " + MyITOA(total) + ", Unused = " + MyITOA(unused) + "(" + MyFTOA((unused * 100) / (float)total) + "%)" + ", Exact = " + MyITOA(exact) + "(" + MyFTOA((exact * 100) / (float)total) + "%)" + ", Lower = " + MyITOA(lower) + "(" + MyFTOA((lower * 100) / (float)total) + "%)" + ", Upper = " + MyITOA(upper) + "(" + MyFTOA((upper * 100) / (float)total) + "%)");
+	Output("info string TT Statistics: Total = " + std::to_string(total) + ", Unused = " + std::to_string(unused) + "(" + MyFTOA((unused * 100) / (float)total) + "%)" + ", Exact = " + std::to_string(exact) + "(" + MyFTOA((exact * 100) / (float)total) + "%)" + ", Lower = " + std::to_string(lower) + "(" + MyFTOA((lower * 100) / (float)total) + "%)" + ", Upper = " + std::to_string(upper) + "(" + MyFTOA((upper * 100) / (float)total) + "%)");
 }
 
 void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, short score, uint8_t flag, uint32_t bestMove, short tteStaticEvaluation, int tteFound)
@@ -1019,7 +1020,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	{
 		MaximumPlyReachedBeforeQS = ply;
 		if (IsDebug)
-			LongestLineWithoutQS = normalBrain.CurrentLine(ply - 1) + " (Iteration:" + MyITOA(IterationPly) + " Ply:" + MyITOA(ply - 1) + " Alpha:" + MyITOA(alpha) + " Beta:" + MyITOA(beta) + ")";
+			LongestLineWithoutQS = normalBrain.CurrentLine(ply - 1) + " (Iteration:" + std::to_string(IterationPly) + " Ply:" + std::to_string(ply - 1) + " Alpha:" + std::to_string(alpha) + " Beta:" + std::to_string(beta) + ")";
 	}
 
 	bool isPVNode = (alpha != beta - 1);
@@ -1048,13 +1049,13 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			//	//	uint64_t movablePassedPawnsBB;
 			//	//	movablePassedPawnsBB = passedSide1(NormalGenerate.piecesBB[0][Pawn], NormalGenerate.piecesBB[1][Pawn]) & South(~occupiedBB);
 			//	//	if (movablePassedPawnsBB && ((NormalGenerate.gameRecordPointer - 1)->pliesSinceIrreversible == 0))
-			//	//		//if (UINT64SetBit((NormalGenerate.gameRecordPointer - 1)->move.mf.toSquare) & passedPawnsBB)
+			//	//		//if (CreateBitboardFromSquare((NormalGenerate.gameRecordPointer - 1)->move.mf.toSquare) & passedPawnsBB)
 			//	//		goto continueNormalSearch;
 			//	//	else
 			//	//	{
 			//	//		movablePassedPawnsBB = passedSide2(NormalGenerate.piecesBB[1][Pawn], NormalGenerate.piecesBB[0][Pawn]) & North(~occupiedBB);
 			//	//		if (movablePassedPawnsBB && ((NormalGenerate.gameRecordPointer - 1)->pliesSinceIrreversible == 0))
-			//	//			//if (UINT64SetBit((NormalGenerate.gameRecordPointer - 1)->move.mf.toSquare) & passedPawnsBB)
+			//	//			//if (CreateBitboardFromSquare((NormalGenerate.gameRecordPointer - 1)->move.mf.toSquare) & passedPawnsBB)
 			//	//			goto continueNormalSearch;
 			//	//	}
 			//	//}
@@ -1086,7 +1087,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			//	//uint64_t promotablePawns;
 			//	//promotablePawns = (sideToMove == 0) ? NormalGenerate.piecesBB[1][Pawn] & Rank2BB & North(~occupiedBB) : NormalGenerate.piecesBB[0][Pawn] & Rank7BB & South(~occupiedBB);
 			//	//if (promotablePawns && ((NormalGenerate.gameRecordPointer - 1)->pliesSinceIrreversible == 0))
-			//	//	//if (((NormalGenerate.gameRecordPointer - 1)->move.toSquarePiece) || (UINT64SetBit((NormalGenerate.gameRecordPointer - 1)->move.mf.toSquare) & promotablePawns))
+			//	//	//if (((NormalGenerate.gameRecordPointer - 1)->move.toSquarePiece) || (CreateBitboardFromSquare((NormalGenerate.gameRecordPointer - 1)->move.mf.toSquare) & promotablePawns))
 			//	//	goto continueNormalSearch;
 
 			//// Multiple hanging pieces?
@@ -1270,20 +1271,18 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 #pragma region Mate-distance pruning
 		// 'Mate-distance pruning' (Helps massively when we have a mate score)
-		// Ensures that we don't go deeper than the mate we've already got...
+		// Ensures that we don't go deeper than any mate we've already got...
 		// e.g. if STM at root has a #10 we won't go deeper than ply=19
 		// e.g. if SNTM at root has a #10 we won't go deeper than ply=20
-		// (In the 'alpha' line below we could test for 'isInCheck' and add +2 if we're not, but although it does make a slight difference it seems to harm the search depth rather than helping it!?)
 		// This is also included in the QS because reductions can cause you to enter the QS early and bypass this test in main.
-		// Because EITHER alpha gets increased, OR beta gets decreased, but not BOTH, you can omit the alpha test to save a few cycles during most normal searches with NO change in node count when you are mating (because the beta test is always hit a ply sooner than the alpha test)
-		// In fact, I think that the alpha test only ever does something if alpha has been set to -INF
 		// Must NOT be used at the root
-		//alpha = std::max(-MatingIn0Score + ply, (int)alpha); // If the worst possible score for the side to move in this position (i.e. being mated here) is > alpha, then increase alpha
-		beta = std::min(MatingIn0Score - ply - 1, (int)beta); // If the best possible score for the side to move in this position (i.e. giving mate in 1) < beta, then decrease beta
-		if (alpha >= beta)
+		
+		// The best possible score for the side to move in this position (i.e. giving mate in 1) is MatingIn0Score - ply - 1, e.g. at ply 3 {a mate in 2} would score 15996
+		// If an earlier variation has already acheived that score we can return immediately
+		if (alpha >= MatingIn0Score - ply - 1)
 			return alpha;
-		// At ply=2, alpha is set to -15998, beta is set to 15997
-		// At ply=3, alpha is set to -15997, beta is set to 15996 {BUT THIS IS THE #1 SCORE FOR THIS PLY???}
+		// Some programs fiddle with alpha and beta and even set beta one lower so that if a #1 from here is found it causes a beta cutoff immediately BUT it doesn't store the move in the PV! (Which I find irritating!)
+		// You can also test for the worst possible score but it gains nothing measurable as the above test will apply at the next ply
 #pragma endregion
 
 	}
@@ -1593,168 +1592,174 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 #pragma endregion
 
-	//----------------------------------------------------------------------------------------------------
+	//if ((bestKnownScore > EGTBLosingScore) && (bestKnownScore < EGTBWinningScore))
+	{
+		//----------------------------------------------------------------------------------------------------
 
 #pragma region Razoring
 	// Razoring
-	if (
-		(depthRemaining <= 5) // Near the leaves?
-		&& (!isPVNode) // Not a PV node?
-		&& (!isInCheck) // Not in check?
-		)
-	{
-		short razoringEvaluation = alpha - 200 - (depthRemaining * depthRemaining * 100);
-		if (bestKnownScore < razoringEvaluation)
+		if (
+			(depthRemaining <= 5) // Near the leaves?
+			&& (!isPVNode) // Not a PV node?
+			&& (!isInCheck) // Not in check?
+			)
 		{
-			short score = TreeSearchNormalQuiescence(alpha - 1, alpha, ply, 0, sideToMove, isInCheck); // N.B. always enter the QS with depthRemaining=0
-			if ((score < alpha) && (std::abs(score) < EGTBWinningScore))
-				return score;
+			short razoringEvaluation = alpha - 200 - (depthRemaining * depthRemaining * 100);
+			if (bestKnownScore < razoringEvaluation)
+			{
+				short score = TreeSearchNormalQuiescence(alpha - 1, alpha, ply, 0, sideToMove, isInCheck); // N.B. always enter the QS with depthRemaining=0
+				if ((score < alpha) && (std::abs(score) < EGTBWinningScore))
+					return score;
+			}
 		}
-	}
 #pragma endregion
 
-	//----------------------------------------------------------------------------------------------------
-	CRASHLOCATION(190);
+		//----------------------------------------------------------------------------------------------------
+		CRASHLOCATION(190);
 
 #pragma region Node level futility pruning
-	// Futility pruning at node level - Is the current static evaluation for this position so far above beta that we will likely find at least one move that will cause a cutoff?
-	// N.B. Don't do this when we have a 'losing' score as comparing a static evaluation with a mated/EGTB-loss score is nonsense
-	if (
-		(depthRemaining < 7) // Near the leaves? (+0.8 for doing this at every ply BUT it then misses shorter mates as they are always pruned!)TRY THIS AGAIN NOW WE HAVE THE beta > -WinningBaseScore CLAUSE BELOW
-		&& (!isPVNode) // Not a PV node?
-		&& (!isInCheck) // Not in check?
-		&& (currentGameRecordPointer->isTWM == 0) // Not threatened with mate? (+5.3, +/-3.7, 20000)
-		&& (currentGameRecordPointer->isO1M == 0)
-		&& (beta > EGTBLosingScore) // Otherwise we always immediately cutoff (with no moves being searched) and the move at the previous ply (which might be a shorter mate) gets discarded - NEVER remove this!
-		//&& (ply > FullWidthPlies)
-		)
-	{
-		// If the side-to-move has got a winning score then alpha (and therefore beta) will be >=EGTBWinningScore and so the staticEvaluation will fall far short and this won't prune
-		// If the side-to-move has got a losing score then alpha (and therefore beta) will be <=EGTBLosingScore and so the staticEvaluation will fall far short and this won't prune
-		//if (currentGameRecordPointer->staticEvaluation - (MVPawn * (depthRemaining)) >= beta) // Harder to prune the further from the leaves (N.B. this won't prune if we have got a 'winning' score)
-		if (bestKnownScore - (MVPawn * (depthRemaining)) >= beta) // Harder to prune the further from the leaves (N.B. this won't prune if we have got a 'winning' score)
+		// Futility pruning at node level - Is the current static evaluation for this position so far above beta that we will likely find at least one move that will cause a cutoff?
+		// N.B. Don't do this when we have a 'losing' score as comparing a static evaluation with a mated/EGTB-loss score is nonsense
+		if (
+			(depthRemaining < 7) // Near the leaves? (+0.8 for doing this at every ply BUT it then misses shorter mates as they are always pruned!)TRY THIS AGAIN NOW WE HAVE THE beta > -WinningBaseScore CLAUSE BELOW
+			&& (!isPVNode) // Not a PV node?
+			&& (!isInCheck) // Not in check?
+			&& (currentGameRecordPointer->isTWM == 0) // Not threatened with mate? (+5.3, +/-3.7, 20000)
+			&& (currentGameRecordPointer->isO1M == 0)
+			&& (beta > EGTBLosingScore) // Otherwise we always immediately cutoff (with no moves being searched) and the move at the previous ply (which might be a shorter mate) gets discarded - NEVER remove this!
+			//&& (ply > FullWidthPlies)
+			)
 		{
-			PRINTTREE(PrintTree2(IterationPly, ply, "Node level futility pruning"););
-			//assert(beta < EGTBWinningScore);
-			//return currentGameRecordPointer->staticEvaluation;
-			return bestKnownScore;
+			//if (alpha > EGTBWinningScore)
+			//	AC1++;
+			// If the side-to-move has got a winning score then alpha (and therefore beta) will be >=EGTBWinningScore and so the staticEvaluation will fall far short and this won't prune
+			// If the side-to-move has got a losing score then alpha (and therefore beta) will be <=EGTBLosingScore and so the staticEvaluation will fall far short and this won't prune
+			//if (currentGameRecordPointer->staticEvaluation - (MVPawn * (depthRemaining)) >= beta) // Harder to prune the further from the leaves (N.B. this won't prune if we have got a 'winning' score)
+			if (bestKnownScore - (MVPawn * (depthRemaining)) >= beta) // Harder to prune the further from the leaves (N.B. this won't prune if we have got a 'winning' score)
+			{
+				PRINTTREE(PrintTree2(IterationPly, ply, "Node level futility pruning"););
+				//assert(beta < EGTBWinningScore);
+				//return currentGameRecordPointer->staticEvaluation;
+				return bestKnownScore;
+			}
 		}
-	}
 #pragma endregion
 
-	//----------------------------------------------------------------------------------------------------
-	CRASHLOCATION(200);
+		//----------------------------------------------------------------------------------------------------
+		CRASHLOCATION(200);
+
+		int threatenedSquare = -1;
 
 #pragma region NullMove
-	// Null move (About 90% of normal (non-QS) nodes get this far)
-	// Perceived wisdom is that you shouldn't reduce into the QS. However my tests showed the opposite.
-	// Also that you can't use this in endgames but I believe the added zugzwang tests now allow this!? :O
+		// Null move (About 90% of normal (non-QS) nodes get this far)
+		// Perceived wisdom is that you shouldn't reduce into the QS. However my tests showed the opposite.
+		// Also that you can't use this in endgames but I believe the added zugzwang tests now allow this!? :O
 
-	// The evaluation from the TT will be based on some depth of search so may be more accurate than the static evaluation
-	//short bestKnownScore = (tteScore != INT16_MIN ? tteScore : currentGameRecordPointer->staticEvaluation);
-	// DOESN'T USING tteScore DEPEND ON WHAT BOUND IS IN THE TT??? SURELY CAN ONLY DO THIS IF IT'S AN EXACT OR CUT?
-	// CAN ALSO USE IT IF 'ALL' IF IT'S LOWER THAN STATICEVAL
-
-
+		// The evaluation from the TT will be based on some depth of search so may be more accurate than the static evaluation
+		//short bestKnownScore = (tteScore != INT16_MIN ? tteScore : currentGameRecordPointer->staticEvaluation);
+		// DOESN'T USING tteScore DEPEND ON WHAT BOUND IS IN THE TT??? SURELY CAN ONLY DO THIS IF IT'S AN EXACT OR CUT?
+		// CAN ALSO USE IT IF 'ALL' IF IT'S LOWER THAN STATICEVAL
 
 
 
 
 
-	if (
-		(allowNull) // Null moves are not allowed at the 1st ply or immediately after a null move or when using IID but can occur multiple times on a line
-		&& (!isPVNode)
-		&& (!isInCheck)
-		&& (currentGameRecordPointer->isTWM == 0)
-		&& (currentGameRecordPointer->isO1M == 0)
-		&& (currentGameRecordPointer->isFMTP == 0)
-		&& (bestKnownScore >= beta)
-		&& ((currentGameRecordPointer->gamePhase[sideToMove] > 0) || ((normalBrain.SafePawnMoves(sideToMove)) && normalBrain.HasOpposition(sideToMove))) // If no pieces, check for safe pawn moves and having the opposition
-		&& (beta > EGTBLosingScore) // Otherwise we will almost certainly assume a null move cutoff (with no moves being searched) and the move at the previous ply (which might be a shorter mating move) gets discarded (-2.2)
-		//&& (ply >= nullMoveMinimumPly) // Used if we do a verification search
-		//&& (ply > FullWidthPlies)
-		)
-	{ // About 54% of nodes (that get past the TT) perform a null move
-		// Unfortunately null move has several drawbacks
-		// 1) if the side to move is in zugzwang it is a mistake to assume that it can do nothing (hides the badness of the position)
-		// 2) #1 above stops the side to move seeing a better move than the one it already has (hides the goodness of the position for stm)
-		// 3) because it is used recursively it smashes the search depth
+
 
 		if (
-			(currentGameRecordPointer->gamePhase[sideToMove] <= 8)
-			&& (currentGameRecordPointer->isZLKM = !normalBrain.KingCanLegallyMove(sideToMove))
-			) // Helps find mates when the defending K is constrained (so the defender can't just 'null' to slash the search depth and hide the fact that it's being mated)
-			allowNull = false;
-		else if (depthRemaining > 10)
-		{
-			normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
-			uint32_t count = normalBrain.CountAllMoves(sideToMove, isInCheck);
-			if (count == 1)
+			(allowNull) // Null moves are not allowed at the 1st ply or immediately after a null move or when using IID but can occur multiple times on a line
+			&& (!isPVNode)
+			&& (!isInCheck)
+			&& (currentGameRecordPointer->isTWM == 0)
+			&& (currentGameRecordPointer->isO1M == 0)
+			&& (currentGameRecordPointer->isFMTP == 0)
+			&& (bestKnownScore >= beta)
+			&& ((currentGameRecordPointer->gamePhase[sideToMove] > 0) || ((normalBrain.SafePawnMoves(sideToMove)) && normalBrain.HasOpposition(sideToMove))) // If no pieces, check for safe pawn moves and having the opposition
+			&& (beta > EGTBLosingScore) // Otherwise we will almost certainly assume a null move cutoff (with no moves being searched) and the move at the previous ply (which might be a shorter mating move) gets discarded (-2.2)
+			//&& (ply >= nullMoveMinimumPly) // Used if we do a verification search
+			//&& (ply > FullWidthPlies)
+			)
+		{ // About 54% of nodes (that get past the TT) perform a null move
+			// Unfortunately null move has several drawbacks
+			// 1) if the side to move is in zugzwang it is a mistake to assume that it can do nothing (hides the badness of the position)
+			// 2) #1 above stops the side to move seeing a better move than the one it already has (hides the goodness of the position for stm)
+			// 3) because it is used recursively it smashes the search depth
+
+			if (
+				(currentGameRecordPointer->gamePhase[sideToMove] <= 8)
+				&& (currentGameRecordPointer->isZLKM = !normalBrain.KingCanLegallyMove(sideToMove))
+				) // Helps find mates when the defending K is constrained (so the defender can't just 'null' to slash the search depth and hide the fact that it's being mated)
 				allowNull = false;
-			else if (count < PopulationCountX(normalBrain.piecesBB[sideToMove][AllPieces]))
-				allowNull = false;
+			else if (depthRemaining > 10)
+			{
+				normalBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
+				uint32_t count = normalBrain.CountAllMoves(sideToMove, isInCheck);
+				if (count == 1)
+					allowNull = false;
+				else if (count < PopulationCountX(normalBrain.piecesBB[sideToMove][AllPieces]))
+					allowNull = false;
+			}
+
+			if (allowNull)
+			{
+				assert(ply > 1);
+				// Make null move
+				currentGameRecordPointer->move.ui32 = NullMove;
+				currentGameRecordPointer->move.fromSquarePiece = Pawn; // Ensure CMH treats all previous null moves as Px0
+				currentGameRecordPointer->move.toSquarePiece = Empty; // Ensure recapture extensions don't mistakenly kick in
+
+				normalBrain.gameRecordPointer++; // Normally done in make/unmake-move
+				normalBrain.gameRecordPointer->castlingStatus = (normalBrain.gameRecordPointer - 1)->castlingStatus;
+				normalBrain.gameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO)
+				normalBrain.gameRecordPointer->transpositionTableHash64 = ~(normalBrain.gameRecordPointer - 1)->transpositionTableHash64;
+				normalBrain.gameRecordPointer->transpositionTableHash64WithEP = normalBrain.gameRecordPointer->transpositionTableHash64;
+				normalBrain.gameRecordPointer->epSquare = 0;
+				*(uint32_t*)(&normalBrain.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides!
+				*(uint64_t*)(&normalBrain.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(normalBrain.gameRecordPointer - 1)->gamePhase[0]);
+				*(uint32_t*)(&normalBrain.gameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalOpeningPST[0]);
+				*(uint32_t*)(&normalBrain.gameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalEndgamePST[0]);
+				PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore););
+
+
+				int R;
+				R = 3 + (depthRemaining / 5) + std::min(9, ((bestKnownScore - beta) / 128));
+				normalBrain.gameRecordPointer->move.ui32 = 0;
+				short nullMoveScore = (short)-TreeSearchNormal((short)-beta, (short)(-beta + 1), ply + 1, depthRemaining - R - 1, sideToMove ^ 1, false, false, !isCutNode);
+
+				// About 89% of nodes after a null move are 'all' nodes
+
+				// Unmake null move
+				normalBrain.gameRecordPointer--;
+
+				if (nullMoveScore >= beta)
+					return nullMoveScore;
+
+				if (nullMoveScore <= alpha - 80)
+				{
+					if ((normalBrain.gameRecordPointer + 1)->move.ui32 != 0)
+						threatenedSquare = (normalBrain.gameRecordPointer + 1)->move.mf.toSquare;
+					if (nullMoveScore < MatedScore)
+						currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;
+				}
+			}
 		}
-
-		if (allowNull)
-		{
-			assert(ply > 1);
-			// Make null move
-			currentGameRecordPointer->move.ui32 = NullMove;
-			currentGameRecordPointer->move.fromSquarePiece = Pawn; // Ensure CMH treats all previous null moves as Px0
-			currentGameRecordPointer->move.toSquarePiece = Empty; // Ensure recapture extensions don't mistakenly kick in
-
-			normalBrain.gameRecordPointer++; // Normally done in make/unmake-move
-			normalBrain.gameRecordPointer->castlingStatus = (normalBrain.gameRecordPointer - 1)->castlingStatus;
-			normalBrain.gameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO)
-			normalBrain.gameRecordPointer->transpositionTableHash64 = ~(normalBrain.gameRecordPointer - 1)->transpositionTableHash64;
-			normalBrain.gameRecordPointer->transpositionTableHash64WithEP = normalBrain.gameRecordPointer->transpositionTableHash64;
-			normalBrain.gameRecordPointer->epSquare = 0;
-			*(uint32_t*)(&normalBrain.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides!
-			*(uint64_t*)(&normalBrain.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(normalBrain.gameRecordPointer - 1)->gamePhase[0]);
-			*(uint32_t*)(&normalBrain.gameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalOpeningPST[0]);
-			*(uint32_t*)(&normalBrain.gameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalEndgamePST[0]);
-			PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore););
-
-
-			int R;
-			R = 3 + (depthRemaining / 5) + std::min(9, ((bestKnownScore - beta) / 128));
-			short nullMoveScore = (short)-TreeSearchNormal((short)-beta, (short)(-beta + 1), ply + 1, depthRemaining - R - 1, sideToMove ^ 1, false, false, !isCutNode);
-
-			//BREAKONCURRENTVARIATION("g1f3 e7e5 f3e5 d7d6 a1a1 ");
-
-
-			//normalBrain.SavePrincipalVariation(currentMove.ui32); // Save the PV even if we (are about to) fail high as it might be useful for IID
-			//? gameRecordPointer->principalVariationPointer+ MaximumPly+1
-
-
-
-			// About 89% of nodes after a null move are 'all' nodes
-
-			// Unmake null move
-			normalBrain.gameRecordPointer--;
-
-			if (nullMoveScore >= beta)
-				return nullMoveScore;
-			//else
-			//{
-				if (nullMoveScore < MatedScore)
-					currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;
-			//}
-		}
-	}
-	// About 53% of nodes don't get cutoff by the null move
+		// About 53% of nodes don't get cutoff by the null move
 #pragma endregion
 
 	//----------------------------------------------------------------------------------------------------
+	}
 
 #pragma region IIR
 	// Internal Iterative Reductions - https://chessprogramming.org/Internal_Iterative_Reductions
 	if (!isPVNode
 		&& isCutNode
 		&& (tteBestMove.ui32 == 0)
-		&& (depthRemaining > 2)
+		//&& (depthRemaining > 2)
+		//)
+		//depthRemaining -= 2;
+		&& (depthRemaining > 1)
 		)
-		depthRemaining -= 2;
+		depthRemaining = std::max(depthRemaining - 2, 1);
 #pragma endregion
 
 	//----------------------------------------------------------------------------------------------------
@@ -2008,6 +2013,8 @@ GenerateMoveList:
 
 		//----------------------------------------------------------------------------------------------------
 		CRASHLOCATION(251);
+		
+		BREAKONCURRENTVARIATION("a4b4 ");
 
 		int newDepthRemaining = depthRemaining - 1;
 
@@ -2016,7 +2023,8 @@ GenerateMoveList:
 		// Extensions (about 1% of moves get extended)
 		int extensions = 0;
 		int TMI1ExtensionsSaved = TMI1Extensions;
-		if ((ply <= IterationPly * 2) && (ply + depthRemaining <= MaximumIterationPly)) // Hard limits to try to avoid things like hitting the MaximumPly, endless K chases in the endgame etc
+		//if ((ply <= IterationPly * 2) && (ply + depthRemaining <= MaximumIterationPly)) // Hard limits to try to avoid things like hitting the MaximumPly, endless K chases in the endgame etc
+		if ((ply <= IterationPly) || ((ply <= IterationPly * 2) && isPVNode))
 		{
 			//if (singular)
 			//	extensions = 1;
@@ -2025,6 +2033,7 @@ GenerateMoveList:
 				if ( // 'Safe' check?
 					(givesCheck)
 					&& (!normalBrain.SEETargetPieceUnsafe(currentMove.mf.toSquare, sideToMove ^ 1, 0))
+					//&& (ply <= IterationPly)
 					)
 					extensions = 1;
 				else if ( // Recapture?
@@ -2032,11 +2041,13 @@ GenerateMoveList:
 					&& ((currentGameRecordPointer - 1)->move.toSquarePiece)
 					&& (SimplePieceValues[std::abs(currentGameRecordPointer->move.toSquarePiece)] == SimplePieceValues[std::abs((currentGameRecordPointer - 1)->move.toSquarePiece)]) // ExE?
 					&& ((currentGameRecordPointer - 1)->move.mf.flag < MFPromotion) // Exclude promotions at the previous ply as otherwise can accidentally extend underpromotions and wouldn't strictly be an ExE capture
+					//&& (ply <= IterationPly)
 					)
 					extensions = 1;
 				else if ( // Only one move?
 					(movesCount == 1)// &&
 					&& (currentMove.mf.toSquare != (currentGameRecordPointer - 1)->move.mf.toSquare) // Not a recapture of last moved piece (filters out dumb throw-away checks from the previous ply)
+					//&& (ply <= IterationPly)
 					)
 					extensions = 1;
 
@@ -2072,13 +2083,28 @@ GenerateMoveList:
 				&& (bestSortScore <= 0)
 				//&& ((int)(NodeCount & 255) > (IterationPly - ply))//TESTING
 				//&& (bestMoveScore == alpha)
+				//&& (threatenedSquare != currentMove.mf.fromSquare)
 				)
 			{
 				assert(quietMove);
 				PRINTTREE(PrintTree2(IterationPly, ply, "LMP"););
-				normalBrain.UnMakeMove(sideToMove);
-				anyPruningDone = true;
-				continue;
+				//if (depthRemaining == 1)
+				//{
+					normalBrain.UnMakeMove(sideToMove);
+					anyPruningDone = true;
+					continue;
+				//}
+				//else
+				//{
+				//	short score = TreeSearchNormalQuiescence((short)-beta, (short)-alpha, ply + 1, 0, sideToMove ^ 1, 0); // N.B. always enter the QS with depthRemaining=0
+				//	if (score <= alpha)
+				//	{
+				//		normalBrain.UnMakeMove(sideToMove);
+				//		continue;
+				//	}
+				//	else
+				//		goto xxx;
+				//}
 			}
 
 			// Futility pruning
@@ -2091,6 +2117,7 @@ GenerateMoveList:
 				&& (!((std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn) && ((currentMove.mf.toSquare >> 3) == SeventhRank[sideToMove]))) // P move to 7th?
 				//&& (bestMoveScore==alpha)
 				//&& (bestSortScore <= 0)
+				//&& (threatenedSquare != currentMove.mf.fromSquare)
 				)
 			{
 				PRINTTREE(PrintTree2(IterationPly, ply, "Futility pruning"););
@@ -2101,9 +2128,10 @@ GenerateMoveList:
 
 			// SEE pruning
 			if (
-				(depthRemaining <= 5)//6)
+				(depthRemaining <= 6)
 				&& (SEEResult < 0)
 				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing! (Do NOT take this out otherwise we could get faulty mate scores returned e.g. 7r/B1b1qbPB/2k1q2q/1Nq2nN1/qQQ2QQq/8/q1RRQ2q/3K4 w - - 0 1, go depth 3, returns #3 when it's actually #7!)
+				//DOESN'T DO IT ANY MORE!!!!!
 				)
 			{
 				PRINTTREE(PrintTree2(IterationPly, ply, "SEE pruning"););
@@ -2112,11 +2140,13 @@ GenerateMoveList:
 				continue;
 			}
 		}
+xxx:
 
 		//----------------------------------------------------------------------------------------------------
 		CRASHLOCATION(253);
 
 		bool passedPawnMove = false;
+		//if (SEEResult >= 0)//TEMP TESTING
 		if (std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn)
 		{
 			uint64_t passedBB;
@@ -2127,7 +2157,6 @@ GenerateMoveList:
 			//passedBB = passedSTM[sideToMove](normalBrain.piecesBB[sideToMove][Pawn], normalBrain.piecesBB[sideToMove ^ 1][Pawn]);
 			passedPawnMove = (passedBB & CreateBitboardFromSquare(currentGameRecordPointer->move.mf.toSquare));
 		}
-
 
 		bool doNonReducedSearch;
 		int searches = 0;
@@ -2147,7 +2176,7 @@ GenerateMoveList:
 			//&& (!((std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn) && ((currentMove.mf.toSquare >> 3) == SeventhRank[sideToMove]))) // P move to 7th?
 			//&& (quietMove)
 			//(currentGameRecordPointer->isTWM == 0) &&
-			//(!(UINT64SetBit(currentMove.mf.fromSquare) & passedPawnsBB)) && // Don't reduce moves by passed Ps
+			//(!(CreateBitboardFromSquare(currentMove.mf.fromSquare) & passedPawnsBB)) && // Don't reduce moves by passed Ps
 
 			////(
 			////(abs((NormalGenerate.gameRecordPointer - 1)->move.fromSquarePiece) != Knight) ||
@@ -2220,7 +2249,7 @@ GenerateMoveList:
 			//					//}
 			//					//else 
 			//					if ((piece == Bishop) || (piece == Rook) || (piece == Queen))
-			//						if (LineListBB[currentMove.mf.fromSquare][currentMove.mf.toSquare] & UINT64SetBit((normalBrain.gameRecordPointer - 3)->move.mf.fromSquare))
+			//						if (LineListBB[currentMove.mf.fromSquare][currentMove.mf.toSquare] & CreateBitboardFromSquare((normalBrain.gameRecordPointer - 3)->move.mf.fromSquare))
 			//							reductions += 2;//THIS REDUCES MOVES FOR THE LOSING SIDE THAT REPEAT... SHOULD ONLY REDUCE IF WINNING!
 			//				}
 
@@ -2377,13 +2406,15 @@ GenerateMoveList:
 						assert((1 << 30) >= currentGameRecordPointer->historyPointer->History[pt2][ts2]);
 						int delta = depthRemaining * depthRemaining;
 						currentGameRecordPointer->historyPointer->History[pt2][ts2] = std::min(currentGameRecordPointer->historyPointer->History[pt2][ts2] + delta, (1 << 30));
+						//currentGameRecordPointer->historyPointer->History[pt2][ts2] = std::min(std::max(currentGameRecordPointer->historyPointer->History[pt2][ts2], 0) + delta, (1 << 30));
 						for (int count = 0; count < quietMovesSearchedCount; count++)
 						{
 							Move_Struct ms;
 							ms.ui32 = quietMovesSearched[count];
 							int8_t pt = std::abs(normalBrain.mailboxBoard64[ms.mf.fromSquare]) - 1;
 							int8_t ts = ms.mf.toSquare;
-							currentGameRecordPointer->historyPointer->History[pt][ts] = std::max(currentGameRecordPointer->historyPointer->History[pt][ts] - delta, 0);// -(1 << 30));
+							//currentGameRecordPointer->historyPointer->History[pt][ts] = std::max(currentGameRecordPointer->historyPointer->History[pt][ts] - delta, 0);// -(1 << 30));
+							currentGameRecordPointer->historyPointer->History[pt][ts] = std::max(currentGameRecordPointer->historyPointer->History[pt][ts] - delta, -(1 << 30));
 						}
 
 						// Update counter moves
@@ -2494,7 +2525,7 @@ GenerateMoveList:
 		}
 		assert((bestMoveScore > -MatingIn0Score) && (bestMoveScore <= alpha));
 		assert(*currentGameRecordPointer->principalVariationPointer == PVTUnknown);
-		PRINTTREE(PrintTree2(IterationPly, ply, "All:" + MyITOA(bestMoveScore)););
+		PRINTTREE(PrintTree2(IterationPly, ply, "All:" + std::to_string(bestMoveScore)););
 		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation, tteFound); // Keep any existing TT move even though it didn't raise alpha
 	}
 	else
@@ -2505,7 +2536,7 @@ GenerateMoveList:
 		assert((originalAlpha < bestMoveScore) && (bestMoveScore == alpha) && (bestMoveScore < beta));
 		assert(isPVNode);
 		assert(*currentGameRecordPointer->principalVariationPointer != PVTUnknown);
-		PRINTTREE(PrintTree2(IterationPly, ply, "Exact:" + MyITOA(bestMoveScore)););
+		PRINTTREE(PrintTree2(IterationPly, ply, "Exact:" + std::to_string(bestMoveScore)););
 		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, *currentGameRecordPointer->principalVariationPointer, currentGameRecordPointer->staticEvaluation, tteFound);
 	}
 
@@ -2874,7 +2905,6 @@ std::string Normal::ComputeNormal()
 				RootBeta = MatingIn0Score;
 				if (RootScore >= MatingScore)
 					RootAlpha = MatingScore;
-
 			}
 			else if (RootScore <= EGTBLosingScore)
 			{
@@ -2990,7 +3020,7 @@ std::string Normal::ComputeNormal()
 
 #ifdef SEARCHINGFORLINE
 			if (TargetLinePartial != "")
-				Output("IterationPly: " + MyITOA(IterationPly) + ", TargetLinePartial: " + TargetLinePartial + ", TargetLineRefutedBy: " + MoveNotation(TargetLineRefutedBy.ui32) + " (" + MyITOA(TargetLinePartialDepthRemaining) + ", " + MyITOA(TargetLinePartialThreateningMate) + ")\n");
+				Output("IterationPly: " + std::to_string(IterationPly) + ", TargetLinePartial: " + TargetLinePartial + ", TargetLineRefutedBy: " + MoveNotation(TargetLineRefutedBy.ui32) + " (" + std::to_string(TargetLinePartialDepthRemaining) + ", " + std::to_string(TargetLinePartialThreateningMate) + ")\n");
 #endif
 
 			CRASHLOCATION(64);
@@ -3014,7 +3044,7 @@ std::string Normal::ComputeNormal()
 		{
 			std::string s = "Endgame tablebase errors occurred...\n";
 			for (int count = 0; count < 8; count++)
-				s += " " + MyITOA(EndgameTablebasesErrorCounts[count]);
+				s += " " + std::to_string(EndgameTablebasesErrorCounts[count]);
 			OutputError(s + "\n");
 		}
 
@@ -3037,7 +3067,7 @@ std::string Normal::ComputeNormal()
 		{
 			FILE *sw;
 			fopen_s(&sw, "output.csv", "a+");
-			std::string s = BestLine() + MyITOA(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + MyUI64TOA(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
+			std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
 			fprintf(sw, "%s\n", s.c_str());
 			fclose(sw);
 		}
@@ -3136,7 +3166,7 @@ void Normal::ComputeNormalWrapper()
 	uint32_t result = ComputeNormalWrapperInner();
 	if (result != 0)
 	{
-		OutputError("Exception occurred! " + MyUI64TOA(result) + " : CrashLocation=" + MyITOA(CrashLocation));
+		OutputError("Exception occurred! " + MyUI64TOA(result) + " : CrashLocation=" + std::to_string(CrashLocation));
 		exit(0);
 	}
 }

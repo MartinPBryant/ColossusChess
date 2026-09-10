@@ -5,6 +5,8 @@ WritePiecesBB(&normalBrain)
 ?&normalBrain.CurrentLine(ply)	?&mateBrain.CurrentLine(ply)	?&perftBrain.CurrentLine(ply)
 ?MoveNotation(int)
 
+e.g. BREAKONCURRENTVARIATION("g1f3 e7e5 f3e5 d7d6 a1a1 ");
+
 wb(pos) FOR SF
 'd' - command displays the board in SF!
 
@@ -197,8 +199,76 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+
+always do at least one quiet move before pruning?
+
+
+if you've got a mate, the next iters window should start alpha at that mate score -1, not winningscore - OFTEN FAILS LOW
+-WHY CAN'T IT HOLD ON TO THE PREVIOUS MATE? PRUNING DIFFERENT? BUT WHY?
+-try to find some very short mate? need to run in debug mode console and look for fail lows and do printtree
+
+this #9 might be promising?
+8/4p1Rp/4pk1P/4p3/1n2P1p1/B2P2p1/3P2P1/K7 w - -
+a1b1 b4d5 b1c1! (hard to find) d5b4
+white's K moves get fut pruned even though black has ZLKM and O1PCM and FMTP - test filtering on those just to see if it works
+-extend if ZLKM from root - ZLKM rarely updated - MOVE GENERATORS COULD EASILY SUPPLY ZLKM? 'scoremoves'?
+-don't prune/reduce if opp has ZLKM/O1PCM/FMTP from root on current path - keep an integer count in GR - as soon as released, go back to normal
+-sometimes moves are genuinely useless but how to distinguish from 'quiet' moves with some purpose???
+-when have got a mating score, move the history pruning further down the quiet list
+
+
+
+SHOULD ALL UPDATES OF KRS,CM,FUM,HIST ALSO BE DONE AT PV NODES? I.E. IF > ALPHA?
+-try just history first!
+-if posn leads to winning score bonus it more in history?
+-does history degrade to 0? only degrade to min of 1? but isn't that tested in pruning/reductions
+-reduce history moves more slowly?
+-allow -ve?
+-if allow -ve, bump back to 0 when start incrementing again
+
+
+
+
+
+
+don't prune passed p moves like we don't reduce? have we tested this already? yes bit inconclusive - test on other PCs
+-ensure SAFE passed P moves!
+-passed p moves - see>=0, targetpiecesafe
+
+
+
+are CGM nodecounts in engine displays 64-bit? they need to be!
+
+
+because bestKnownScore could be in the winning/losing range, should we test this before doing razoring/nodelevelfutpruning/nullmove??? YES! coz doing mat/posn stuff relative to winning/losing is nonsense
+-test and bracket all 3! only will have an effect when mating?
+-is it quite that simple? should we only check one bound? also check alpha? beta?
+-i struggle to understand these!!!
+don't do Node level futility pruning if beta<losing or alpha >winning
+
+
+SEE pruning comment
+				&& (bestMoveScore > EGTBLosingScore) // Don't prune if we're losing! (Do NOT take this out otherwise we could get faulty mate scores returned e.g. 7r/B1b1qbPB/2k1q2q/1Nq2nN1/qQQ2QQq/8/q1RRQ2q/3K4 w - - 0 1, go depth 3, returns #3 when it's actually #7!)
+try to understand better!
+
+get rid of all myitoa calls?
+
+
+
+
+
+SEE HOW bestKnownScore CONDITIONALS BEHAVE NOW
+look at those bestKnownScore adjustment lines again
+
+
+don't set threatened sq unless nullscore<alpha-100
+
+
+
+
 in chessgui it seems to not provide a PV often! :O sometimes no move at all
 - v Pluto
+check other GUIs
 
 
 don't prune moves by threatened piece - but how to identify? from pv after null move? break and see if it's there!
@@ -207,11 +277,6 @@ don't prune moves by threatened piece - but how to identify? from pv after null 
 -probably in normalBrain.gameRecordPointer->move
 
 
-look at those bestKnownScore adjustment lines again
-
-
-
-because bestKnownScore could be in the winning/losing range, should we test this before doing razoring/nodelevelfutpruning/nullmove???
 
 
 

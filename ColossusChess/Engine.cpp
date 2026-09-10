@@ -419,7 +419,7 @@ bool CompareMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesB
 //	for (int piece = -King; piece <= King; piece++)
 //		for (int s1 = A1; s1 <= H8; s1++)
 //			for (int s2 = s1 + 1; s2 <= H8; s2++)
-//				if (AttacksByPieceBBList[abs(piece)][s1] & UINT64SetBit(s2)) // Can the current piece-type pseudo-legally move from s1 to s2?
+//				if (AttacksByPieceBBList[abs(piece)][s1] & CreateBitboardFromSquare(s2)) // Can the current piece-type pseudo-legally move from s1 to s2?
 //				{
 //					int move = (s1 << 8) + s2;
 //
@@ -524,9 +524,7 @@ std::string MoveNotation(uint32_t move)
 
 	std::string s;
 
-	if (move == 0x3F3F)
-		s = "null";
-	else
+	if (move != 0x3F3F)
 	{
 		if (ms.mf.flag == MFEnPassant)
 		{
@@ -557,6 +555,8 @@ std::string MoveNotation(uint32_t move)
 				s += "n";
 		}
 	}
+	else
+		s = "null";
 
 	return s;
 }
@@ -1482,7 +1482,7 @@ void SetPositionAndMoves(std::string positionAndMoves)
 //		for (int wb = 0; wb < 64; wb++)
 //			if (wb != wk)
 //			{
-//				uint64_t wbBB = UINT64SetBit(wb);
+//				uint64_t wbBB = CreateBitboardFromSquare(wb);
 //				if (wbBB & LightBB)
 //				{
 //					for (int wn = 0; wn < 64; wn++)
@@ -1491,13 +1491,13 @@ void SetPositionAndMoves(std::string positionAndMoves)
 //								if ((bk != wn) && (bk != wb) && (bk != wk))
 //									if (ChebyshevDistance[bk][wk] > 1)
 //									{
-//										b.piecesBB[0][King] = UINT64SetBit(wk);
+//										b.piecesBB[0][King] = CreateBitboardFromSquare(wk);
 //										//b.piecesBB[0][Queen] = 0;
 //										//b.piecesBB[0][Rook] = 0;
-//										b.piecesBB[0][Bishop] = UINT64SetBit(wb);
-//										b.piecesBB[0][Knight] = UINT64SetBit(wn);
+//										b.piecesBB[0][Bishop] = CreateBitboardFromSquare(wb);
+//										b.piecesBB[0][Knight] = CreateBitboardFromSquare(wn);
 //										//b.piecesBB[0][Pawn] = 0;
-//										b.piecesBB[1][King] = UINT64SetBit(bk);
+//										b.piecesBB[1][King] = CreateBitboardFromSquare(bk);
 //										//b.piecesBB[1][Queen] = 0;
 //										//b.piecesBB[1][Rook] = 0;
 //										//b.piecesBB[1][Bishop] = 0;
@@ -1597,12 +1597,12 @@ void MaximumMovesQueens()
 
 	ClearPiecesBB(EngineBrain.piecesBB);
 
-	EngineBrain.piecesBB[1][King] = UINT64SetBit(H8); // Put the black king on H8
+	EngineBrain.piecesBB[1][King] = CreateBitboardFromSquare(H8); // Put the black king on H8
 	EngineBrain.piecesBB[1][AllPieces] = EngineBrain.piecesBB[1][King];
-	uint64_t queenRestrictedBB = 0;// UINT64SetBit(H8) | UINT64SetBit(G8) | UINT64SetBit(H7) | UINT64SetBit(G7);
-	uint64_t firstQueenAllowedBB = UINT64SetBit(A1) | UINT64SetBit(B1) | UINT64SetBit(C1) | UINT64SetBit(D1) | UINT64SetBit(B2) | UINT64SetBit(C2) | UINT64SetBit(D2) | UINT64SetBit(C3) | UINT64SetBit(D3) | UINT64SetBit(D4);
+	uint64_t queenRestrictedBB = 0;// CreateBitboardFromSquare(H8) | CreateBitboardFromSquare(G8) | CreateBitboardFromSquare(H7) | CreateBitboardFromSquare(G7);
+	uint64_t firstQueenAllowedBB = CreateBitboardFromSquare(A1) | CreateBitboardFromSquare(B1) | CreateBitboardFromSquare(C1) | CreateBitboardFromSquare(D1) | CreateBitboardFromSquare(B2) | CreateBitboardFromSquare(C2) | CreateBitboardFromSquare(D2) | CreateBitboardFromSquare(C3) | CreateBitboardFromSquare(D3) | CreateBitboardFromSquare(D4);
 	// TO CONFIRM THE ABOVE WORKS, CHECK THE COUNTS IN THE FILES AGAINST PREVIOUS 'UNIQUE' COUNTS
-	//uint64_t rookRestrictedBB = UINT64SetBit(A1) | UINT64SetBit(B1) | UINT64SetBit(A2);
+	//uint64_t rookRestrictedBB = CreateBitboardFromSquare(A1) | CreateBitboardFromSquare(B1) | CreateBitboardFromSquare(A2);
 	
 	EngineBrain.gameRecordPointer = &EngineBrain.gameRecord[1];
 	EngineBrain.gameRecordPointer->pinnedRankFileBB = 0;
@@ -1643,41 +1643,41 @@ void MaximumMovesQueens()
 	{
 		Output(MyITOA(q1));
 
-		//if ((queenRestrictedBB & UINT64SetBit(q1)) == 0)
-		if ((firstQueenAllowedBB & UINT64SetBit(q1)) != 0)
+		//if ((queenRestrictedBB & CreateBitboardFromSquare(q1)) == 0)
+		if ((firstQueenAllowedBB & CreateBitboardFromSquare(q1)) != 0)
 			for (int q2 = q1 + 1; q2 < 64 - 7; q2++)
-				if ((queenRestrictedBB & UINT64SetBit(q2)) == 0)
+				if ((queenRestrictedBB & CreateBitboardFromSquare(q2)) == 0)
 					for (int q3 = q2 + 1; q3 < 64 - 6; q3++)
-						if ((queenRestrictedBB & UINT64SetBit(q3)) == 0)
+						if ((queenRestrictedBB & CreateBitboardFromSquare(q3)) == 0)
 							for (int q4 = q3 + 1; q4 < 64 - 5; q4++)
-								if ((queenRestrictedBB & UINT64SetBit(q4)) == 0)
+								if ((queenRestrictedBB & CreateBitboardFromSquare(q4)) == 0)
 									for (int q5 = q4 + 1; q5 < 64 - 4; q5++)
-										if ((queenRestrictedBB & UINT64SetBit(q5)) == 0)
+										if ((queenRestrictedBB & CreateBitboardFromSquare(q5)) == 0)
 											for (int q6 = q5 + 1; q6 < 64 - 3; q6++)
-												if ((queenRestrictedBB & UINT64SetBit(q6)) == 0)
+												if ((queenRestrictedBB & CreateBitboardFromSquare(q6)) == 0)
 													for (int q7 = q6 + 1; q7 < 64 - 2; q7++)
-														if ((queenRestrictedBB & UINT64SetBit(q7)) == 0)
+														if ((queenRestrictedBB & CreateBitboardFromSquare(q7)) == 0)
 															for (int q8 = q7 + 1; q8 < 64 - 1; q8++)
-																if ((queenRestrictedBB & UINT64SetBit(q8)) == 0)
+																if ((queenRestrictedBB & CreateBitboardFromSquare(q8)) == 0)
 																	for (int q9 = q8 + 1; q9 < 64 - 0; q9++)
-																		if ((queenRestrictedBB & UINT64SetBit(q9)) == 0)
+																		if ((queenRestrictedBB & CreateBitboardFromSquare(q9)) == 0)
 																	//for (int r1 = 0; r1 < 64 - 0; r1++)
-																	//	if ((rookRestrictedBB & UINT64SetBit(r1)) == 0)
+																	//	if ((rookRestrictedBB & CreateBitboardFromSquare(r1)) == 0)
 																	//		if ((r1 != q1) && (r1 != q2) && (r1 != q3) && (r1 != q4) && (r1 != q5) && (r1 != q6) && (r1 != q7) && (r1 != q8))
 																		{
 																			count++;
 
 																			EngineBrain.piecesBB[0][Queen] = 0;
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q1);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q2);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q3);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q4);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q5);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q6);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q7);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q8);
-																			EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(q9);
-																			//PiecesBB[0][Rook] = UINT64SetBit(r1);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q1);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q2);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q3);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q4);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q5);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q6);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q7);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q8);
+																			EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(q9);
+																			//PiecesBB[0][Rook] = CreateBitboardFromSquare(r1);
 																			EngineBrain.piecesBB[0][AllPieces] = EngineBrain.piecesBB[0][Queen];
 																			//PiecesBB[0][AllPieces] = PiecesBB[0][Queen] | PiecesBB[0][Rook];
 
@@ -1914,13 +1914,13 @@ void MaximumMoves(int inputFileNumber)
 
 			ClearPiecesBB(EngineBrain.piecesBB);
 
-			EngineBrain.piecesBB[1][King] |= UINT64SetBit(H8); // Put the black king on A1
+			EngineBrain.piecesBB[1][King] |= CreateBitboardFromSquare(H8); // Put the black king on A1
 			EngineBrain.piecesBB[1][AllPieces] = EngineBrain.piecesBB[1][King];
-			uint64_t queenRestrictedBB = UINT64SetBit(H8) | UINT64SetBit(G8) | UINT64SetBit(H7) | UINT64SetBit(G7);
+			uint64_t queenRestrictedBB = CreateBitboardFromSquare(H8) | CreateBitboardFromSquare(G8) | CreateBitboardFromSquare(H7) | CreateBitboardFromSquare(G7);
 			uint64_t kingRestrictedBB = queenRestrictedBB;
-			uint64_t rookRestrictedBB = UINT64SetBit(H8) | UINT64SetBit(G8) | UINT64SetBit(H7);
-			uint64_t bishopRestrictedBB = UINT64SetBit(H8) | UINT64SetBit(G7);
-			uint64_t knightRestrictedBB = UINT64SetBit(H8) | UINT64SetBit(F7) | UINT64SetBit(G6);
+			uint64_t rookRestrictedBB = CreateBitboardFromSquare(H8) | CreateBitboardFromSquare(G8) | CreateBitboardFromSquare(H7);
+			uint64_t bishopRestrictedBB = CreateBitboardFromSquare(H8) | CreateBitboardFromSquare(G7);
+			uint64_t knightRestrictedBB = CreateBitboardFromSquare(H8) | CreateBitboardFromSquare(F7) | CreateBitboardFromSquare(G6);
 
 			// Setup Queen and AllPieces bitboard from filename
 			EngineBrain.piecesBB[0][Queen] = 0;
@@ -1928,7 +1928,7 @@ void MaximumMoves(int inputFileNumber)
 			{
 				std::string s = position.substr((count - 1) * 2, 2);
 				int square = int(s.substr(0, 1)[0]) - int("a"[0]) + (int(s.substr(1, 1)[0]) - int("1"[0])) * 8;
-				EngineBrain.piecesBB[0][Queen] |= UINT64SetBit(square);
+				EngineBrain.piecesBB[0][Queen] |= CreateBitboardFromSquare(square);
 			}
 
 			EngineBrain.gameRecordPointer = &EngineBrain.gameRecord[1];
@@ -1954,29 +1954,29 @@ void MaximumMoves(int inputFileNumber)
 			{
 				Output("King = " + MyITOA(k));
 
-				if ((kingRestrictedBB & UINT64SetBit(k)) != 0)
+				if ((kingRestrictedBB & CreateBitboardFromSquare(k)) != 0)
 					continue;
-				if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(k))
+				if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(k))
 					continue;
-				//if (((EdgesBB | InnerCornersBB) & UINT64SetBit(k)) == 0)
-				//if ((EdgesBB & UINT64SetBit(k)) == 0)
-				if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(k)) == 0)
+				//if (((EdgesBB | InnerCornersBB) & CreateBitboardFromSquare(k)) == 0)
+				//if ((EdgesBB & CreateBitboardFromSquare(k)) == 0)
+				if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(k)) == 0)
 					continue;
 
-				EngineBrain.piecesBB[0][King] = UINT64SetBit(k);
+				EngineBrain.piecesBB[0][King] = CreateBitboardFromSquare(k);
 
 				//for (int r1 = -2; r1 < 64 - 1; r1++)
 				for (int r1 = 0; r1 < 64 - 1; r1++)
 				{
 					//if (r1 >= 0)
 					{
-						//if (((EdgesBB | InnerCornersBB) & UINT64SetBit(r1)) == 0)
-						//if (((EdgesBB)& UINT64SetBit(r1)) == 0)
-						if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(r1)) == 0)
+						//if (((EdgesBB | InnerCornersBB) & CreateBitboardFromSquare(r1)) == 0)
+						//if (((EdgesBB)& CreateBitboardFromSquare(r1)) == 0)
+						if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(r1)) == 0)
 							continue;
-						if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(r1))
+						if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(r1))
 							continue;
-						if ((rookRestrictedBB & UINT64SetBit(r1)) != 0)
+						if ((rookRestrictedBB & CreateBitboardFromSquare(r1)) != 0)
 							continue;
 						if (r1 == k)
 							continue;
@@ -1986,13 +1986,13 @@ void MaximumMoves(int inputFileNumber)
 					{
 						//if (r2 >= 0)
 						{
-							//if (((EdgesBB | InnerCornersBB) & UINT64SetBit(r2)) == 0)
-							//if (((EdgesBB)& UINT64SetBit(r2)) == 0)
-							if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(r2)) == 0)
+							//if (((EdgesBB | InnerCornersBB) & CreateBitboardFromSquare(r2)) == 0)
+							//if (((EdgesBB)& CreateBitboardFromSquare(r2)) == 0)
+							if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(r2)) == 0)
 								continue;
-							if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(r2))
+							if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(r2))
 								continue;
-							if ((rookRestrictedBB & UINT64SetBit(r2)) != 0)
+							if ((rookRestrictedBB & CreateBitboardFromSquare(r2)) != 0)
 								continue;
 							//if (r1 == -2)
 							//	continue;
@@ -2002,21 +2002,21 @@ void MaximumMoves(int inputFileNumber)
 
 						EngineBrain.piecesBB[0][Rook] = 0;
 						//if (r1 >= 0)
-						EngineBrain.piecesBB[0][Rook] |= UINT64SetBit(r1);
+						EngineBrain.piecesBB[0][Rook] |= CreateBitboardFromSquare(r1);
 						//if (r2 >= 0)
-						EngineBrain.piecesBB[0][Rook] |= UINT64SetBit(r2);
+						EngineBrain.piecesBB[0][Rook] |= CreateBitboardFromSquare(r2);
 
 						//for (int b1 = -2; b1 < 64 - 1; b1++)
 						for (int b1 = 0; b1 < 64 - 1; b1++)
 						{
 							//if (b1 >= 0)
 							{
-								//if ((EdgesBB & UINT64SetBit(b1)) == 0)
-								if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(b1)) == 0)
+								//if ((EdgesBB & CreateBitboardFromSquare(b1)) == 0)
+								if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(b1)) == 0)
 									continue;
-								if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(b1))
+								if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(b1))
 									continue;
-								if ((bishopRestrictedBB & UINT64SetBit(b1)) != 0)
+								if ((bishopRestrictedBB & CreateBitboardFromSquare(b1)) != 0)
 									continue;
 								if ((b1 == k) || (b1 == r1) || (b1 == r2))
 									continue;
@@ -2026,40 +2026,40 @@ void MaximumMoves(int inputFileNumber)
 							{
 								//if (b2 >= 0)
 								{
-									//if ((EdgesBB & UINT64SetBit(b2)) == 0)
-									if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(b2)) == 0)
+									//if ((EdgesBB & CreateBitboardFromSquare(b2)) == 0)
+									if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(b2)) == 0)
 										continue;
-									if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(b2))
+									if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(b2))
 										continue;
-									if ((bishopRestrictedBB & UINT64SetBit(b2)) != 0)
+									if ((bishopRestrictedBB & CreateBitboardFromSquare(b2)) != 0)
 										continue;
 									//if (b1 == -2)
 									//	continue;
 									if ((b2 == k) || (b2 == r1) || (b2 == r2))
 										continue;
 									//if (b1 >= 0)
-										if (((LightBB & UINT64SetBit(b1)) == 0) == ((LightBB & UINT64SetBit(b2)) == 0))
+										if (((LightBB & CreateBitboardFromSquare(b1)) == 0) == ((LightBB & CreateBitboardFromSquare(b2)) == 0))
 											continue;
 								}
 
 								EngineBrain.piecesBB[0][Bishop] = 0;
 								if (b1 >= 0)
-									EngineBrain.piecesBB[0][Bishop] |= UINT64SetBit(b1);
+									EngineBrain.piecesBB[0][Bishop] |= CreateBitboardFromSquare(b1);
 								if (b2 >= 0)
-									EngineBrain.piecesBB[0][Bishop] |= UINT64SetBit(b2);
+									EngineBrain.piecesBB[0][Bishop] |= CreateBitboardFromSquare(b2);
 
 								//for (int n1 = -2; n1 < 64 - 1; n1++)
 								for (int n1 = 0; n1 < 64 - 1; n1++)
 								{
 									//if (n1 >= 0)
 									{
-										//if (((EdgesBB | InnerCornersBB) & UINT64SetBit(n1)) == 0)
-										//if (((EdgesBB)& UINT64SetBit(n1)) == 0)
-										if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(n1)) == 0)
+										//if (((EdgesBB | InnerCornersBB) & CreateBitboardFromSquare(n1)) == 0)
+										//if (((EdgesBB)& CreateBitboardFromSquare(n1)) == 0)
+										if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(n1)) == 0)
 											continue;
-										if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(n1))
+										if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(n1))
 											continue;
-										if ((knightRestrictedBB & UINT64SetBit(n1)) != 0)
+										if ((knightRestrictedBB & CreateBitboardFromSquare(n1)) != 0)
 											continue;
 										if ((n1 == k) || (n1 == r1) || (n1 == r2) || (n1 == b1) || (n1 == b2))
 											continue;
@@ -2069,13 +2069,13 @@ void MaximumMoves(int inputFileNumber)
 									{
 										//if (n2 >= 0)
 										{
-											//if (((EdgesBB | InnerCornersBB) & UINT64SetBit(n2)) == 0)
-											//if (((EdgesBB)& UINT64SetBit(n2)) == 0)
-											if (((EdgesBB | InnerEdgesBB) & UINT64SetBit(n2)) == 0)
+											//if (((EdgesBB | InnerCornersBB) & CreateBitboardFromSquare(n2)) == 0)
+											//if (((EdgesBB)& CreateBitboardFromSquare(n2)) == 0)
+											if (((EdgesBB | InnerEdgesBB) & CreateBitboardFromSquare(n2)) == 0)
 												continue;
-											if (EngineBrain.piecesBB[0][Queen] & UINT64SetBit(n2))
+											if (EngineBrain.piecesBB[0][Queen] & CreateBitboardFromSquare(n2))
 												continue;
-											if ((knightRestrictedBB & UINT64SetBit(n2)) != 0)
+											if ((knightRestrictedBB & CreateBitboardFromSquare(n2)) != 0)
 												continue;
 											//if (n1 == -2)
 											//	continue;
@@ -2085,9 +2085,9 @@ void MaximumMoves(int inputFileNumber)
 
 										EngineBrain.piecesBB[0][Knight] = 0;
 										//if (n1 >= 0)
-										EngineBrain.piecesBB[0][Knight] |= UINT64SetBit(n1);
+										EngineBrain.piecesBB[0][Knight] |= CreateBitboardFromSquare(n1);
 										//if (n2 >= 0)
-										EngineBrain.piecesBB[0][Knight] |= UINT64SetBit(n2);
+										EngineBrain.piecesBB[0][Knight] |= CreateBitboardFromSquare(n2);
 										
 										//if ((InnerCornersBB & (PiecesBB[0][Rook] | PiecesBB[0][Knight])) == 0)
 										//	continue;

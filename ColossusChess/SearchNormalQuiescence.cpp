@@ -137,17 +137,18 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 
 #pragma region Mate-distance pruning
 	// 'Mate-distance pruning' (Helps massively when we have a mate score)
-	// Ensures that we don't go deeper than the mate we've already got...
-	// e.g. if we have a #10 we won't go deeper than ply=19
-	// e.g. if we have a #-10 we won't go deeper than ply=20
-	// (In the 'alpha' line below we could test for 'isInCheck' and add +2 if we're not, but although it does make a slight difference it seems to harm the search depth rather than helping it!?)
+	// Ensures that we don't go deeper than any mate we've already got...
+	// e.g. if STM at root has a #10 we won't go deeper than ply=19
+	// e.g. if SNTM at root has a #10 we won't go deeper than ply=20
 	// This is also included in the QS because reductions can cause you to enter the QS early and bypass this test in main.
-	// Because EITHER alpha gets increased, OR beta gets decreased, but not BOTH, you can omit the alpha test to save a few cycles during most normal searches with NO change in node count when you are mating (because the beta test is always hit a ply sooner than the alpha test)
-	// In fact, I think that the alpha test only ever does something if alpha has been set to -INF
-	//alpha = std::max(-MateBaseScore + ply, (int)alpha); // If the worst possible score for the side to move in this position (i.e. being mated here) is > alpha, then increase alpha
-	beta = std::min(MatingIn0Score - ply - 1, (int)beta); // If the best possible score for the side to move in this position (i.e. giving mate in 1) < beta, then lower beta
-	if (alpha >= beta)
+	// Must NOT be used at the root
+
+	// The best possible score for the side to move in this position (i.e. giving mate in 1) is MatingIn0Score - ply - 1, e.g. at ply 3 {a mate in 2} would score 15996
+	// If an earlier variation has already acheived that score we can return immediately
+	if (alpha >= MatingIn0Score - ply - 1)
 		return alpha;
+	// Some programs fiddle with alpha and beta and even set beta one lower so that if a #1 from here is found it causes a beta cutoff immediately BUT it doesn't store the move in the PV! (Which I find irritating!)
+	// You can also test for the worst possible score but it gains nothing measurable as the above test will apply at the next ply
 #pragma endregion
 
 	//----------------------------------------------------------------------------------------------------
@@ -575,6 +576,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				}
 			}
 
+			BREAKONCURRENTVARIATION("f8e7 b4c4 a1a4 d5b4 ");
 			currentMoveScore = (short)-TreeSearchNormalQuiescence((short)-beta, (short)-alpha, ply + 1, depthRemaining - 1, sideToMove ^ 1, givesCheck);
 
 			//----------------------------------------------------------------------------------------------------

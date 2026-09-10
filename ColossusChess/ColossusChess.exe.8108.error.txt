@@ -1,0 +1,11 @@
+Tue Sep  8 23:41:00 2026
+*** Error!: *** Error! There are zero moves in the position provided!
+2N5/2N5/8/4Q2R/RBk5/8/2B5/4K3 b - - 0 3
+p fen 2N5/2N5/8/4Q2R/RBk5/8/2B5/4K3 b - - 0 3
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

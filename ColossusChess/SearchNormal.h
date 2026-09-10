@@ -2,16 +2,6 @@
 
 //----------------------------------------------------------------------------------------------------
 
-// CRASHLOCATIONDEF must be undefined for multi-threaded play else the constant dirtying of the cache line causes huge overhead negating any lazy-SMP benefit
-//#define CRASHLOCATIONDEF
-#ifdef CRASHLOCATIONDEF
-#define CRASHLOCATION(s) {CrashLocation = s;}
-#else
-#define CRASHLOCATION(s)
-#endif
-
-//----------------------------------------------------------------------------------------------------
-
 class Normal
 {
 public:
@@ -182,7 +172,6 @@ private:
 	bool isFollowingPV;
 	std::string LongestLineWithQS;
 	std::string LongestLineWithoutQS;
-	std::string IterationFinishMessage;
 	std::string PreviousIterationsMessages;
 	std::string CurrentIterationsMessages;
 	uint64_t LastTickCount; // Set in TimeUp method

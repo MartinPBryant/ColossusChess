@@ -4,6 +4,8 @@
 
 //----------------------------------------------------------------------------------------------------
 
+//#define PEXT // N.B. the PEXT instruction is VERY slow on AMD Zen2 architecture and Intel 'efficiency' cores!
+
 extern uint64_t RanksListBB[64];
 extern uint64_t FilesListBB[64];
 extern uint64_t LeftDiagonalsListBB[64];

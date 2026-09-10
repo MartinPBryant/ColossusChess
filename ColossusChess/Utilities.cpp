@@ -198,7 +198,7 @@ void Split(std::string command, std::string *tokens, int *tokenCount, char separ
 
 //----------------------------------------------------------------------------------------------------
 
-std::string MyITOA(int i)
+inline std::string MyITOA(int i)
 {
 	return std::to_string(i);
 }
@@ -208,16 +208,14 @@ std::string MyUI64TOA(uint64_t i)
 	return std::to_string(i);
 }
 
-std::string MySI64TOA(int64_t i)
+inline std::string MySI64TOA(int64_t i)
 {
 	return std::to_string(i);
 }
 
 std::string MyBooleanTOA(bool b)
 {
-	if (b)
-		return "true";
-	return "false";
+	return b ? "true" : "false";
 }
 
 std::string MyFTOA(float f, std::string format)
@@ -317,7 +315,7 @@ bool PVSearchedFirst(int ply)
 
 void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRemaining, int move, int bestSortScore, int staticEvaluation, int bestMoveScore)
 {
-	if (ply <= 8)
+	if (ply <= PrintTreeDepth)
 	{
 		FILE *f;
 		char treeFilename[100];

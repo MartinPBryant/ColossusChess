@@ -12,27 +12,6 @@ extern std::ofstream SyzygyPathLogFile;
 extern std::string ErrorFileName;
 extern FILE *ErrorFile;
 
-//#define PRINTTREEDEF // Writes the search tree to .csv files (one per iteration) which can be interrogated in a spreadsheet
-#ifdef PRINTTREEDEF
-#define PRINTTREE(s) {s}
-#else
-#define PRINTTREE(s)
-#endif
-
-//#define GATHERSTATSDEF // Gathers statistics about TT/EGTB usage
-#ifdef GATHERSTATSDEF
-#define GATHERSTATS(s) {s}
-#else
-#define GATHERSTATS(s)
-#endif
-
-#define BREAKONCURRENTVARIATIONDEF // Gathers statistics about TT/EGTB usage
-#ifdef BREAKONCURRENTVARIATIONDEF
-#define BREAKONCURRENTVARIATION(s) {if (normalBrain.CurrentLine(ply) == s) __debugbreak();}
-#else
-#define BREAKONCURRENTVARIATION(s)
-#endif
-
 extern int LastPrintTreePly;
 
 //#define SEARCHINGFORLINE

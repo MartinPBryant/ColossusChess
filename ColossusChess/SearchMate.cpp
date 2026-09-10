@@ -1807,7 +1807,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 			//							//}
 			//							//else 
 			//							if ((piece == Bishop) || (piece == Rook) || (piece == Queen))
-			//								if (LineListBB[currentMove.mf.fromSquare][currentMove.mf.toSquare] & UINT64SetBit((mateBrain.gameRecordPointer - 3)->move.mf.fromSquare))
+			//								if (LineListBB[currentMove.mf.fromSquare][currentMove.mf.toSquare] & CreateBitboardFromSquare((mateBrain.gameRecordPointer - 3)->move.mf.fromSquare))
 			//								{
 			//									reductions = 1;
 			//									goto AssignNewDepthRemaining;

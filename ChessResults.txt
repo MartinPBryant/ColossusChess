@@ -222,9 +222,101 @@ Rank Name                             Elo        +/-       nElo        +/-      
 70 v 71 {if any pruning, bestMoveScore = std::min(bestKnownScore, alpha)} (-0.00) ASUS1
 
 2026aNonPGO v 70 (-25.58) PCS2
-2026aNonPGO v 70 () ASUS1
+2026aNonPGO v 70 (-24.03) ASUS1
 
 2026aNonPGO v 70 {2s+0.022s N.B. non PEXT!} (-43.13) PCS2
+
+70 v 72 {don't LMP moves by 'threatened' piece} (7.02, +/-5.28, 8331) PCS2
+
+70 v 73 {don't LMP moves by 'threatened' piece but that's only set if nullmovescore<=alpha-80} (5.42, +/-4.70, 10851) PCS2
+
+70 v 74 {don't fut prune LMP moves by 'threatened' piece but that's only set if nullmovescore<=alpha-80} (1.15) PCS2
+
+75 v 76 v 77 {LMP: ID/2, ID/3, ID/4} () PCS2
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess76                 4.17       2.66       5.83       3.72      33462      50.6%      48.8%
+   2 ColossusChess75                -1.00       2.66      -1.40       3.72      33461      49.9%      49.0%
+   3 ColossusChess77                -3.18       2.66      -4.44       3.72      33461      49.5%      48.8%
+75 v 76 v 77 {LMP: ID/2, ID/3, ID/4} () ASUS1
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess76                 1.41       3.91       1.93       5.34      16256      50.2%      46.3%
+   2 ColossusChess75                 1.09       3.92       1.49       5.34      16257      50.2%      46.2%
+   3 ColossusChess77                -2.50       3.92      -3.41       5.34      16255      49.6%      46.3%
+
+78 v 79 v 80 {Fut pruning: DR 10/8/6} () PCS1
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess79                12.71       3.81      17.53       5.25      16844      51.8%      47.3%
+   2 ColossusChess80                12.20       3.82      16.77       5.25      16841      51.8%      47.0%
+   3 ColossusChess78               -24.94       3.80     -34.58       5.25      16843      46.4%      47.7%
+78 v 79 v 80 {Fut pruning: DR 10/8/6} () NIPOGI1
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess80                 8.04       3.49      10.97       4.77      20405      51.2%      46.3%
+   2 ColossusChess79                 4.73       3.48       6.48       4.77      20404      50.7%      46.6%
+   3 ColossusChess78               -12.77       3.48     -17.50       4.77      20407      48.2%      46.6%
+
+70 v 81 {don't LMP if immediate QS says ok} (29.63, +/-11.58, 1747) PCS2
+
+***70 slight value correction and minor optimisations --> 82
+
+82 v 83 {O1M extensions only <=ID} (-1.95) PCS2
+82 v 83 {O1M extensions only <=ID} (1.63) PCS1
+82 v 83 {O1M extensions only <=ID} (0.36) ASUS1
+82 v 83 {O1M extensions only <=ID} (-3.34) NIPOGI1
+
+82 v 84 {O1M extensions allowed <=ID*2 if ispvnode} (3.53) PCS2
+82 v 84 {O1M extensions allowed <=ID*2 if ispvnode} (-0.47) PCS1
+82 v 84 {O1M extensions allowed <=ID*2 if ispvnode} (0.17) ASUS1
+82 v 84 {O1M extensions allowed <=ID*2 if ispvnode} (-7.31) NIPOGI1
+
+83 v 85 {recapture extensions only <=ID} (0.38) PCS2
+83 v 85 {recapture extensions only <=ID} (-1.34) PCS1
+83 v 85 {recapture extensions only <=ID} (0.02) ASUS1
+83 v 85 {recapture extensions only <=ID} (-1.49) NIPOGI1
+
+83 v 86 {recapture extensions only <=ID*2 if ispvnode} (-0.78) PCS2
+83 v 86 {recapture extensions only <=ID*2 if ispvnode} (-0.16) PCS1
+83 v 86 {recapture extensions only <=ID*2 if ispvnode} (1.42) ASUS1
+83 v 86 {recapture extensions only <=ID*2 if ispvnode} (-6.24) NIPOGI1
+
+85 v 87 {IIR also reduces when DR=2} (-1.41) PCS2
+85 v 87 {IIR also reduces when DR=2} (-5.80) PCS1
+85 v 87 {IIR also reduces when DR=2} (-6.45) ASUS1
+
+85 v 88 {check extensions only <=ID} (0.00) PCS2
+
+82 v 89 {all extensions only <=ID*2 if ispvnode} (2.80) PCS2
+82 v 89 {all extensions only <=ID*2 if ispvnode} (-1.34) PCS1
+82 v 89 {all extensions only <=ID*2 if ispvnode} (-2.31) ASUS1
+82 v 89 {all extensions only <=ID*2 if ispvnode} (-0.82) NIPOGI1
+
+***89 MDP 'fixed' --> 91
+
+91 v 92 {passed P moves only not reduced if SEEResult>=0} (1.27) PCS2
+91 v 92 {passed P moves only not reduced if SEEResult>=0} (-3.09) PCS1
+91 v 92 {passed P moves only not reduced if SEEResult>=0} (2.19) NIPOGI1
+
+91 v 93 {winning moves get extra history bump} (2.19) PCS2
+91 v 93 {winning moves get extra history bump} (3.87) ASUS1
+
+91 v 94 {history updated at PV nodes too} (-0.49) PCS2
+91 v 94 {history updated at PV nodes too} (2.17) PCS1
+91 v 94 {history updated at PV nodes too} (1.53) NIPOGI1
+
+91 v 95 {history reduced to 1 not 0} (49.05, +/-15.74, 1003) PCS2
+
+91 v 95 {history reduced to 1 not 0} (49.05, +/-15.74, 1003) PCS2
+
+91 v 96 {history reduced at half the rate} (16.53, +/-6.86, 5131) PCS2
+
+91 v 97 {history can go -ve} (-3.35) PCS2
+91 v 97 {history can go -ve} () PCS1
+91 v 97 {history can go -ve} () ASUS1
+91 v 97 {history can go -ve} () NIPOGI1
+
+***87 and 97 adopted --> 98
+
+98 v 99 {history starts at min of 0 when bumping up} () PCS2
+
 
 
 
