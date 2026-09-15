@@ -102,7 +102,7 @@ void OutputError(std::string s)
 		ctime_s(buffer, sizeof(buffer), &t);
 		ErrorFile << buffer;
 		ErrorFile << "*** Error!: " + s + "\n";
-		ErrorFile << ConvertPositionToFEN(EngineBrain.mailboxBoard64, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].sideToMove, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].castlingStatus, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].epSquare, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].pliesSinceIrreversible, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].moveNumber) + "\n";
+		ErrorFile << ConvertPositionToFEN(EngineBrain.MailboxBoard64, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].sideToMove, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].castlingStatus, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].epSquare, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].pliesSinceIrreversible, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].moveNumber) + "\n";
 
 		ErrorFile << LastPositionAndMoves << "\n";
 		ErrorFile << "TranspositionTableMemory=" + std::to_string(TranspositionTableMemory) << "\n";
@@ -484,7 +484,7 @@ void CPUInfo()
 			ThisCPUSupportsEISNames += EISNames[i] + " ";
 	trim(ThisCPUSupportsEISNames);
 
-	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported: " + ThisCPUSupportsEISNames + "\n");
+	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported=" + ThisCPUSupportsEISNames + "\n");
 }
 
 void LargePages()

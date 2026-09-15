@@ -1159,7 +1159,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	// 1.8 hours (4GB hash, 16 threads, AMD Ryzen 9 7950X 16-Core Processor 4.50 GHz)
 	// 0.9 hours (16GB hash, 16 threads, AMD Ryzen 9 7950X 16-Core Processor 4.50 GHz)
 
-	assert(CompareMailboxBoard64ToPiecesBB(perftBrain.mailboxBoard64, perftBrain.piecesBB));
+	assert(CompareMailboxBoard64ToPiecesBB(perftBrain.MailboxBoard64, perftBrain.piecesBB));
 	assert((PopulationCountX(perftBrain.piecesBB[0][King]) == 1) && (PopulationCountX(perftBrain.piecesBB[1][King]) == 1));
 	assert((PopulationCountX(perftBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(perftBrain.piecesBB[1][Queen]) <= 9));
 	assert((PopulationCountX(perftBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(perftBrain.piecesBB[1][Rook]) <= 10));
@@ -1168,7 +1168,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	assert((PopulationCountX(perftBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(perftBrain.piecesBB[1][Pawn]) <= 8));
 	assert(perftBrain.piecesBB[0][AllPieces] == (perftBrain.piecesBB[0][Pawn] | perftBrain.piecesBB[0][Knight] | perftBrain.piecesBB[0][Bishop] | perftBrain.piecesBB[0][Rook] | perftBrain.piecesBB[0][Queen] | perftBrain.piecesBB[0][King]));
 	assert(perftBrain.piecesBB[1][AllPieces] == (perftBrain.piecesBB[1][Pawn] | perftBrain.piecesBB[1][Knight] | perftBrain.piecesBB[1][Bishop] | perftBrain.piecesBB[1][Rook] | perftBrain.piecesBB[1][Queen] | perftBrain.piecesBB[1][King]));
-	assert(perftBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(perftBrain.mailboxBoard64, perftBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(perftBrain.mailboxBoard64, perftBrain.gameRecordPointer)));
+	assert(perftBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.gameRecordPointer)));
 	assert(perftBrain.gameRecordPointer->transpositionTableHash64WithEP == (perftBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[perftBrain.gameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply < MaximumPly));
 	assert((sideToMove >= 0) && (sideToMove < Sides));
@@ -1318,7 +1318,7 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	perftBrain.CopyFrom(&EngineBrain);
 
 	// Set up the bit boards from the 64-square mailbox board
-	ConvertMailboxBoard64ToPiecesBB(perftBrain.mailboxBoard64, perftBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(perftBrain.MailboxBoard64, perftBrain.piecesBB);
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -1329,7 +1329,7 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 
 	// Initialise any variables required for the search
 	perftBrain.gameRecordPointer = &perftBrain.gameRecord[perftBrain.GameRecordIndexRoot];
-	uint64_t hash64 = GenerateTranspositionTableHash64(perftBrain.mailboxBoard64, perftBrain.gameRecordPointer);
+	uint64_t hash64 = GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.gameRecordPointer);
 	if (SideToMove == 1)
 		hash64 = ~hash64;
 	perftBrain.gameRecordPointer->transpositionTableHash64 = hash64;

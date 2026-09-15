@@ -3,9 +3,12 @@
 #include <atomic>
 #include <chrono>
 
+// N.B. Engine.h references most other files so no need to include them again if you include this file
+#include "GlobalConstants.h"
 #include "GlobalTypes.h"
 #include "BitBoard.h"
 #include "Brain.h"
+#include "NNUE.h"
 #include "SearchNormal.h"
 #include "SearchPerft.h"
 #include "SearchMate.h"
@@ -255,17 +258,17 @@ extern size_t LargePageMinimum;
 
 //----------------------------------------------------------------------------------------------------
 
-void ClearMailboxBoard64(int8_t mailboxBoard64[64]);
+void ClearMailboxBoard64(int8_t MailboxBoard64[64]);
 
-void InitialiseMaterialValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
-bool MaterialValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
-void InitialisePSTValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
-bool PSTValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
+void InitialiseMaterialValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
+bool MaterialValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
+void InitialisePSTValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
+bool PSTValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 extern const int GamePhaseIncrement[8];
-void InitialiseGamePhase(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp);
+void InitialiseGamePhase(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 
 //std::string ConvertPositionToFEN(int8_t mailboxBoard64[64]);
-std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber); // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
+std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber); // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
 //std::string ConvertPositionToFEN(Brain* brain);
 //std::string ConvertPositionToFENForPerft(Brain* brain);
 
@@ -273,13 +276,13 @@ void InitialiseOneOffStuff();
 void* AlignedAllocateMemory(size_t size, size_t alignment);
 void AlignedFreeMemory(void* p);
 void FreeAnyTranspositionTableMemory();
-uint64_t GenerateTranspositionTableHash64(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer);
+uint64_t GenerateTranspositionTableHash64(int8_t MailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer);
 
 void ClearEverythingForDeterminancy();
 void NewGame(bool clearEverything);
 
-void ConvertMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
-bool CompareMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
+void ConvertMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
+bool CompareMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
 void WriteMailboxBoard64(Brain* brain);
 void WritePiecesBB(uint64_t piecesBB[Sides][King + 2]);
 

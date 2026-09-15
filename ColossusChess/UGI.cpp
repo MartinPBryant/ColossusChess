@@ -5,9 +5,9 @@
 #include <processthreadsapi.h>
 
 #include "Engine.h"
-#include "SearchNormal.h"
-#include "SearchMate.h"
-#include "SearchPerft.h"
+//#include "SearchNormal.h"
+//#include "SearchMate.h"
+//#include "SearchPerft.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
 #include "Evaluate.h"
 #include "Utilities.h"
@@ -346,6 +346,14 @@ std::string ProcessInput(std::string currentLine)
 
 		if (commandToken == "ISREADY")
 		{
+			// Give any running search a chance to finish up (at most 1 second)
+			for (int count = 0; count < 100; count++)
+			{
+				if (ComputingMove)
+					Sleep(10);
+				else
+					break;
+			}
 			Output("readyok");
 		}
 		else

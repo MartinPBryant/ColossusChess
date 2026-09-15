@@ -3,7 +3,7 @@
 
 short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck)
 {
-	assert(CompareMailboxBoard64ToPiecesBB(normalBrain.mailboxBoard64, normalBrain.piecesBB));
+	assert(CompareMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB));
 	assert((PopulationCountX(normalBrain.piecesBB[0][King]) == 1) && (PopulationCountX(normalBrain.piecesBB[1][King]) == 1));
 	assert((PopulationCountX(normalBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(normalBrain.piecesBB[1][Queen]) <= 9));
 	assert((PopulationCountX(normalBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Rook]) <= 10));
@@ -12,7 +12,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	assert((PopulationCountX(normalBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(normalBrain.piecesBB[1][Pawn]) <= 8));
 	assert(normalBrain.piecesBB[0][AllPieces] == (normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[0][King]));
 	assert(normalBrain.piecesBB[1][AllPieces] == (normalBrain.piecesBB[1][Pawn] | normalBrain.piecesBB[1][Knight] | normalBrain.piecesBB[1][Bishop] | normalBrain.piecesBB[1][Rook] | normalBrain.piecesBB[1][Queen] | normalBrain.piecesBB[1][King]));
-	assert(normalBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer)));
+	assert(normalBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer)));
 	assert(normalBrain.gameRecordPointer->transpositionTableHash64WithEP == (normalBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[normalBrain.gameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply <= MaximumPlyInQS));
 	assert(depthRemaining <= 0);
@@ -161,11 +161,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	short futilityBaseScore;
 	short standPatScore = INT16_MIN; // This may be retrieved from the TT below
 
-	currentGameRecordPointer->isTWM = 0; // These may get set if we find a TT entry
-	currentGameRecordPointer->isO1M = 0;
-	currentGameRecordPointer->isFMTP = 0;
-	currentGameRecordPointer->isZLKM = 0;
-	currentGameRecordPointer->isO1PCM = 0;
+	//currentGameRecordPointer->dangerConditions.ui64 = 0; // These may get set if we find a TT entry
+	currentGameRecordPointer->dangerConditions = 0; // These may get set if we find a TT entry
 	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // Default PV terminator
 #ifdef _DEBUG
 	isFollowingPV = false;
@@ -204,10 +201,11 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				tteSubTreeDepth = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->subTreeDepth;
 				uint8_t flag = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->flag;
 				uint8_t tteEUL = (flag & TTFlagEULMask);
-				currentGameRecordPointer->isTWM = flag & TTFlagThreatenedWithMate;
-				currentGameRecordPointer->isO1M = flag & TTFlagOnlyOneLegalMove;
-				currentGameRecordPointer->isFMTP = flag & TTFlagFewerMovesThanPieces;
-				currentGameRecordPointer->isO1PCM = flag & TTFlagOnlyOnePieceCanMove;
+				//currentGameRecordPointer->dangerConditions.dc.isO1PCM = flag & TTFlagOnlyOnePieceCanMove;
+				//currentGameRecordPointer->dangerConditions.dc.isTWM = flag & TTFlagThreatenedWithMate;
+				//currentGameRecordPointer->dangerConditions.dc.isO1M = flag & TTFlagOnlyOneMove;
+				//currentGameRecordPointer->dangerConditions.dc.isFMTP = flag & TTFlagFewerMovesThanPieces;
+				currentGameRecordPointer->dangerConditions |= flag & TTFlagIsInDangerMask;
 				standPatScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
 				assert((standPatScore == INT16_MIN) || (standPatScore == Evaluate(sideToMove)));
 				short tteScore;
@@ -599,7 +597,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				{
 					// This move has returned a score >= beta, therefore this is a 'Cut' node
 					// The currentMoveScore is a lower bound (floor) on the exact score of the node (i.e. the exact score might be greater than currentMoveScore, it is "at least" currentMoveScore)
-					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, currentMove.ui32, standPatScore, tteFound);
+					//AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP + currentGameRecordPointer->dangerConditions.dc.isO1PCM, currentMove.ui32, standPatScore, tteFound);
+					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->dangerConditions, currentMove.ui32, standPatScore, tteFound);
 					return currentMoveScore;
 				}
 
@@ -630,6 +629,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			&& (!normalBrain.KingCanLegallyMove(sideToMove))
 			)
 		{
+			assert(tteBestMove.ui32 == 0);
 			*currentGameRecordPointer->principalVariationPointer = PVTDrawStalemate;
 			return drawScore;
 		}
@@ -652,7 +652,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		// The children of an All node are Cut nodes. The parent of an All node is a Cut node. The ply distance of an All node to its PV ancestor is even.
 		assert((bestMoveScore > -MatingIn0Score) && (bestMoveScore <= alpha));
 		assert(*currentGameRecordPointer->principalVariationPointer == PVTUnknown);
-		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, tteBestMove.ui32, standPatScore, tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
+		//AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP + currentGameRecordPointer->dangerConditions.dc.isO1PCM, tteBestMove.ui32, standPatScore, tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
+		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->dangerConditions, tteBestMove.ui32, standPatScore, tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
 	}
 	else
 	{
@@ -662,7 +663,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		assert((originalAlpha < bestMoveScore) && (bestMoveScore == alpha) && (bestMoveScore < beta));
 		assert(isPVNode);
 		assert(*currentGameRecordPointer->principalVariationPointer != PVTUnknown);
-		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP + currentGameRecordPointer->isO1PCM, *currentGameRecordPointer->principalVariationPointer == PVTStandPat ? tteBestMove.ui32 : *currentGameRecordPointer->principalVariationPointer, standPatScore, tteFound);
+		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->dangerConditions, *currentGameRecordPointer->principalVariationPointer == PVTStandPat ? tteBestMove.ui32 : *currentGameRecordPointer->principalVariationPointer, standPatScore, tteFound);
 	}
 
 	//----------------------------------------------------------------------------------------------------

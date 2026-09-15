@@ -309,15 +309,94 @@ Rank Name                             Elo        +/-       nElo        +/-      
 91 v 96 {history reduced at half the rate} (16.53, +/-6.86, 5131) PCS2
 
 91 v 97 {history can go -ve} (-3.35) PCS2
-91 v 97 {history can go -ve} () PCS1
-91 v 97 {history can go -ve} () ASUS1
-91 v 97 {history can go -ve} () NIPOGI1
+91 v 97 {history can go -ve} (-2.69) PCS1
+91 v 97 {history can go -ve} (-2.43) ASUS1
+91 v 97 {history can go -ve} (-5.79) NIPOGI1
 
 ***87 and 97 adopted --> 98
 
-98 v 99 {history starts at min of 0 when bumping up} () PCS2
+98 v 99 {history starts at min of 0 when bumping up} (1.74) PCS2
+98 v 99 {history starts at min of 0 when bumping up} (1.60) NIPOGI1
 
+98 v 100 {razoring doesn't filter winning scores} (-3.42) PCS2
+98 v 100 {razoring doesn't filter winning scores} (13.14, +/-3.61, 18345) PCS1 - WTF???
+98 v 100 {razoring doesn't filter winning scores} (-1.37) PCS1 - Restarted PC
+98 v 100 {razoring doesn't filter winning scores} (-1.75) ASUS1
+98 v 100 {razoring doesn't filter winning scores} (-0.99) NIPOGI1
 
+2026aNonPGO v 100 {2s+0.022s N.B. non PEXT!} (-44.31) PCS2 (01:47:51)
+
+***Switching time control to 3"+0.025"
+
+100 v 101 {Razoring tests <=alpha rather than <} (1.91) PCS2 (02:07:23)
+
+2026aNonPGO v 101 {3s+0.025s N.B. non PEXT!} (-35.81) PCS2
+2026aNonPGO v 101 {3s+0.025s N.B. non PEXT!} (-35.54) ASUS1
+
+2026aNonPGO v 70 {3s+0.025s N.B. non PEXT!} (-38.43) PCS2
+
+70 v 101 {} (-3.21) PCS2
+70 v 101 {} (-3.20) PCS1
+70 v 101 {} (0.02) ASUS1
+70 v 101 {} (-3.39) NIPOGI1
+
+101 v 102 {node level fut pruning tests ALL danger conditions} (1.20) PCS2
+101 v 102 {node level fut pruning tests ALL danger conditions} (1.09) PCS1
+101 v 102 {node level fut pruning tests ALL danger conditions} (-1.13) ASUS1
+101 v 102 {node level fut pruning tests ALL danger conditions} (4.20) NIPOGI1
+
+101 v 103 {null move pruning tests ALL danger conditions} (0.97) PCS2
+101 v 103 {null move pruning tests ALL danger conditions} (-3.68) PCS1
+101 v 103 {null move pruning tests ALL danger conditions} (-3.16) ASUS1
+101 v 103 {null move pruning tests ALL danger conditions} (25.09, +/-8.01, 3921) NIPOGI1 - WTF???
+101 v 103 {null move pruning tests ALL danger conditions} (-1.67) NIPOGI1
+
+***102 and 103 accepted --> 104
+
+104 v 105 {null move pruning occasionally updates O1M and FMTP} (-0.66) PCS2
+
+105 v 106 {node level fut pruning doesn't test ANY danger conditions} (1.41) PCS2
+105 v 106 {node level fut pruning doesn't test ANY danger conditions} (-1.51) ASUS1
+
+105 v 107 {node level fut pruning DR<=8 rather than 6} (1.63) ASUS1
+105 v 107 {node level fut pruning DR<=8 rather than 6} (2.08) NIPOGI1
+
+105 v 108 {node level fut pruning DR<=4 rather than 6} (1.70) PCS2
+105 v 108 {node level fut pruning DR<=4 rather than 6} (3.01) PCS1
+
+105 v 109 {node level fut pruning at every ply} (-1.09) PCS2
+105 v 109 {node level fut pruning at every ply} (-0.42) PCS1
+105 v 109 {node level fut pruning at every ply} (-1.58) ASUS1
+105 v 109 {node level fut pruning at every ply} (0.38) NIPOGI1
+
+105 v 110 {safe passed pawn moves not pruned} (0.28) PCS2
+105 v 110 {safe passed pawn moves not pruned} (-1.98) PCS1
+105 v 110 {safe passed pawn moves not pruned} (-0.43) ASUS1
+105 v 110 {safe passed pawn moves not pruned} (-8.08) NIPOGI1
+
+2026aNonPGO v 110 {3s+0.025s N.B. non PEXT!} (-39.92) PCS2
+
+110 v 111 {safe passed pawn moves extended} (-4.34) PCS2
+110 v 111 {safe passed pawn moves extended} (-6.01) ASUS1
+110 v 111 {safe passed pawn moves extended} (-2.80) PCS1
+110 v 111 {safe passed pawn moves extended} (-3.40) NIPOGI1
+
+2026aNonPGO v 111 {3s+0.025s N.B. non PEXT!} (-38.90) PCS2
+
+***105/109/110/111 accepted --> 112
+
+104 v 112 {sanity check} (-2.28) PCS2
+
+112 v 113 {razoring formula less aggresive} (-5.89) PCS2
+112 v 113 {razoring formula less aggresive} (-2.74) PCS1
+112 v 113 {razoring formula less aggresive} (-6.93) NIPOGI1
+
+113 v 114 {razoring formula less aggresive again} (-1.02) PCS2
+113 v 114 {razoring formula less aggresive again} (2.80) PCS1
+113 v 114 {razoring formula less aggresive again} (-2.59) ASUS1
+113 v 114 {razoring formula less aggresive again} (-3.18) NIPOGI1
+
+2026aNonPGO v 114 {3s+0.025s N.B. non PEXT!} (-45.34) PCS2
 
 
 

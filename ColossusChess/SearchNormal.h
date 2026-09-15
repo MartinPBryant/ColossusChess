@@ -59,10 +59,9 @@ public:
 		// Tests indicate that although reducing the number of bits in the key (down to 24 bits) does cause errors it does NOT lose any ELO
 
 		uint64_t hash64;
-		//uint64_t data; //8 - 0-15=bestMove, 16-31=score, 32-47=staticEvaluation, 48-55=flag, 56-63=subTreeDepth
 		union
 		{
-			uint64_t data;
+			uint64_t data; //8 - 0-15=bestMove, 16-31=score, 32-47=staticEvaluation, 48-55=flag, 56-63=subTreeDepth
 			NormalTranspositionTableEntryDataFields_Struct mf;
 		};
 	};
@@ -133,6 +132,9 @@ public:
 
 private:
 	Brain normalBrain;
+	//Mate sm;
+
+	NNUE nnue;
 
 	TwoGoodMoves_Struct KillerMoves[MaximumPly];
 	TwoGoodMoves_Struct CounterMoves[6][64];

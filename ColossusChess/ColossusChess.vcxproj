@@ -24,6 +24,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Evaluate.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NNUE.cpp" />
     <ClCompile Include="SearchMate.cpp" />
     <ClCompile Include="SearchNormal.cpp" />
     <ClCompile Include="SearchNormalQuiescence.cpp">
@@ -43,6 +44,7 @@
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="GlobalTypes.h" />
     <ClInclude Include="httplib.h" />
+    <ClInclude Include="NNUE.h" />
     <ClInclude Include="SearchMate.h" />
     <ClInclude Include="SearchNormal.h" />
     <ClInclude Include="SearchPerft.h" />

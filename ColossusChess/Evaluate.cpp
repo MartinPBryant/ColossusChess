@@ -3,8 +3,8 @@
 
 #include "Engine.h"
 #include "Utilities.h"
-#include "Brain.h"
-#include "SearchNormal.h"
+//#include "Brain.h"
+//#include "SearchNormal.h"
 //#include "NNUE\nnue.h"
 //#include "nnue-probe-master\nnue-probe-master\src\nnue.h"
 //#include "nncpu-probe-master\src\nncpu.h"
@@ -175,8 +175,8 @@ int whitePassedPawnSquare, blackPassedPawnSquare;//TEMP
 int Normal::EvaluateInner(int sideToMove)
 {
 	// Returns a score relative to the side to move e.g. white to move and a pawn up returns +100 as does black to move and a pawn up
-	assert(MaterialValuesCorrect(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer));
-	assert(PSTValuesCorrect(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer));
+	assert(MaterialValuesCorrect(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer));
+	assert(PSTValuesCorrect(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer));
 
 	int openingScore[Sides];
 	int endgameScore[Sides];
@@ -460,9 +460,9 @@ int Normal::EvaluateInner(int sideToMove)
 	}
 
 	// Trapped rook
-	if (((normalBrain.mailboxBoard64[H1] == Rook) || (normalBrain.mailboxBoard64[G1] == Rook)) && ((normalBrain.mailboxBoard64[G1] == King) || (normalBrain.mailboxBoard64[F1] == King)))
+	if (((normalBrain.MailboxBoard64[H1] == Rook) || (normalBrain.MailboxBoard64[G1] == Rook)) && ((normalBrain.MailboxBoard64[G1] == King) || (normalBrain.MailboxBoard64[F1] == King)))
 		openingScore[0] += -20;
-	if (((normalBrain.mailboxBoard64[H8] == -Rook) || (normalBrain.mailboxBoard64[G8] == -Rook)) && ((normalBrain.mailboxBoard64[G8] == -King) || (normalBrain.mailboxBoard64[F8] == -King)))
+	if (((normalBrain.MailboxBoard64[H8] == -Rook) || (normalBrain.MailboxBoard64[G8] == -Rook)) && ((normalBrain.MailboxBoard64[G8] == -King) || (normalBrain.MailboxBoard64[F8] == -King)))
 		openingScore[1] += -20;
 
 	//----------------------------------------------------------------------------------------------------
@@ -1024,6 +1024,16 @@ return 0;
 
 short Normal::Evaluate(int sideToMove)
 {
+		//int result2 = nnue.evaluate(
+		//	normalBrain.mailboxBoard64,
+		//	sideToMove
+		//);
+
+		//return (short)result2;
+
+
+
+
 	//return EvaluateNN(sideToMove, 0);
 
 	// Get the simple symmetrical part
@@ -1098,10 +1108,10 @@ void Normal::StaticEvaluation()
 
 	normalBrain.CopyFrom(&EngineBrain);
 
-	ConvertMailboxBoard64ToPiecesBB(normalBrain.mailboxBoard64, normalBrain.piecesBB);
-	InitialiseMaterialValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-	InitialisePSTValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-	InitialiseGamePhase(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
+	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+	InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+	InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+	InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
 	Output("info string normalBrain.gameRecordPointer->totalMaterial[0] = " + MyITOA(normalBrain.gameRecordPointer->totalMaterial[0]));
 	Output("info string normalBrain.gameRecordPointer->totalMaterial[1] = " + MyITOA(normalBrain.gameRecordPointer->totalMaterial[1]));
 	Output("info string normalBrain.gameRecordPointer->gamePhase[0] = " + MyITOA(normalBrain.gameRecordPointer->gamePhase[0]));
@@ -1127,46 +1137,46 @@ void Normal::TestSymmetry0()
 
 	for (int count = 1; count <= 10000000; count++)
 	{
-		ClearMailboxBoard64(normalBrain.mailboxBoard64);
+		ClearMailboxBoard64(normalBrain.MailboxBoard64);
 
 		for (int j = 0; j < 8; j++)
 		{
 			square = BoardRand0To63();
 			if ((square >= A2) && (square <= H7))
 			{
-				normalBrain.mailboxBoard64[square] = Pawn;
+				normalBrain.MailboxBoard64[square] = Pawn;
 				rank = square / 8;
 				file = square % 8;
-				normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -Pawn;
+				normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -Pawn;
 			}
 		}
 
 		square = BoardRand0To63();
-		normalBrain.mailboxBoard64[square] = King;
+		normalBrain.MailboxBoard64[square] = King;
 		rank = square / 8;
 		file = square % 8;
-		normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -King;
+		normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -King;
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.mailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
-		if (normalBrain.mailboxBoard64[E1] == King)
+		if (normalBrain.MailboxBoard64[E1] == King)
 		{
-			if (normalBrain.mailboxBoard64[H1] == Rook)
+			if (normalBrain.MailboxBoard64[H1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
-			if (normalBrain.mailboxBoard64[A1] == Rook)
+			if (normalBrain.MailboxBoard64[A1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
-		if (normalBrain.mailboxBoard64[E8] == -King)
+		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
-			if (normalBrain.mailboxBoard64[H8] == -Rook)
+			if (normalBrain.MailboxBoard64[H8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
-			if (normalBrain.mailboxBoard64[A8] == -Rook)
+			if (normalBrain.MailboxBoard64[A8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
@@ -1200,42 +1210,42 @@ void Normal::TestSymmetry1()
 
 	for (int count = 1; count <= 10000000; count++)
 	{
-		ClearMailboxBoard64(normalBrain.mailboxBoard64);
+		ClearMailboxBoard64(normalBrain.MailboxBoard64);
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Knight;
+			normalBrain.MailboxBoard64[square] = Knight;
 			rank = square / 8;
 			file = square % 8;
-			normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -Knight;
+			normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -Knight;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Bishop;
+			normalBrain.MailboxBoard64[square] = Bishop;
 			rank = square / 8;
 			file = square % 8;
-			normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -Bishop;
+			normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -Bishop;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Rook;
+			normalBrain.MailboxBoard64[square] = Rook;
 			rank = square / 8;
 			file = square % 8;
-			normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -Rook;
+			normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -Rook;
 		}
 
 		for (int j = 0; j < 1; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Queen;
+			normalBrain.MailboxBoard64[square] = Queen;
 			rank = square / 8;
 			file = square % 8;
-			normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -Queen;
+			normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -Queen;
 		}
 
 		for (int j = 0; j < 8; j++)
@@ -1243,39 +1253,39 @@ void Normal::TestSymmetry1()
 			square = BoardRand0To63();
 			if ((square >= A2) && (square <= H7))
 			{
-				normalBrain.mailboxBoard64[square] = Pawn;
+				normalBrain.MailboxBoard64[square] = Pawn;
 				rank = square / 8;
 				file = square % 8;
-				normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -Pawn;
+				normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -Pawn;
 			}
 		}
 
 		square = BoardRand0To63();
-		normalBrain.mailboxBoard64[square] = King;
+		normalBrain.MailboxBoard64[square] = King;
 		rank = square / 8;
 		file = square % 8;
-		normalBrain.mailboxBoard64[(7 - rank) * 8 + file] = -King;
+		normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -King;
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.mailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
-		if (normalBrain.mailboxBoard64[E1] == King)
+		if (normalBrain.MailboxBoard64[E1] == King)
 		{
-			if (normalBrain.mailboxBoard64[H1] == Rook)
+			if (normalBrain.MailboxBoard64[H1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
-			if (normalBrain.mailboxBoard64[A1] == Rook)
+			if (normalBrain.MailboxBoard64[A1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
-		if (normalBrain.mailboxBoard64[E8] == -King)
+		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
-			if (normalBrain.mailboxBoard64[H8] == -Rook)
+			if (normalBrain.MailboxBoard64[H8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
-			if (normalBrain.mailboxBoard64[A8] == -Rook)
+			if (normalBrain.MailboxBoard64[A8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
@@ -1309,100 +1319,100 @@ void Normal::TestSymmetry2()
 
 	for (int count = 1; count <= 10000000; count++)
 	{
-		ClearMailboxBoard64(normalBrain.mailboxBoard64);
+		ClearMailboxBoard64(normalBrain.MailboxBoard64);
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Knight;
+			normalBrain.MailboxBoard64[square] = Knight;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = -Knight;
+			normalBrain.MailboxBoard64[square] = -Knight;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Bishop;
+			normalBrain.MailboxBoard64[square] = Bishop;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = -Bishop;
+			normalBrain.MailboxBoard64[square] = -Bishop;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Rook;
+			normalBrain.MailboxBoard64[square] = Rook;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = -Rook;
+			normalBrain.MailboxBoard64[square] = -Rook;
 		}
 
 		for (int j = 0; j < 1; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = Queen;
+			normalBrain.MailboxBoard64[square] = Queen;
 		}
 
 		for (int j = 0; j < 1; j++)
 		{
 			square = BoardRand0To63();
-			normalBrain.mailboxBoard64[square] = -Queen;
+			normalBrain.MailboxBoard64[square] = -Queen;
 		}
 
 		for (int j = 0; j < 8; j++)
 		{
 			square = BoardRand0To63();
 			if ((square >= A2) && (square <= H7))
-				normalBrain.mailboxBoard64[square] = Pawn;
+				normalBrain.MailboxBoard64[square] = Pawn;
 		}
 
 		for (int j = 0; j < 8; j++)
 		{
 			square = BoardRand0To63();
 			if ((square >= A2) && (square <= H7))
-				normalBrain.mailboxBoard64[square] = -Pawn;
+				normalBrain.MailboxBoard64[square] = -Pawn;
 		}
 
 		square = BoardRand0To63();
-		normalBrain.mailboxBoard64[square] = King;
+		normalBrain.MailboxBoard64[square] = King;
 
 		do
 		{
 			square = BoardRand0To63();
-		} while (normalBrain.mailboxBoard64[square] == King);
-		normalBrain.mailboxBoard64[square] = -King;
+		} while (normalBrain.MailboxBoard64[square] == King);
+		normalBrain.MailboxBoard64[square] = -King;
 
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.mailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
-		if (normalBrain.mailboxBoard64[E1] == King)
+		if (normalBrain.MailboxBoard64[E1] == King)
 		{
-			if (normalBrain.mailboxBoard64[H1] == Rook)
+			if (normalBrain.MailboxBoard64[H1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
-			if (normalBrain.mailboxBoard64[A1] == Rook)
+			if (normalBrain.MailboxBoard64[A1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
-		if (normalBrain.mailboxBoard64[E8] == -King)
+		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
-			if (normalBrain.mailboxBoard64[H8] == -Rook)
+			if (normalBrain.MailboxBoard64[H8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
-			if (normalBrain.mailboxBoard64[A8] == -Rook)
+			if (normalBrain.MailboxBoard64[A8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
@@ -1413,31 +1423,31 @@ void Normal::TestSymmetry2()
 			for (int file = 1; file <= 8; file++)
 			{
 				int piece;
-				piece = normalBrain.mailboxBoard64[(rank - 1) * 8 + file - 1];
-				normalBrain.mailboxBoard64[(rank - 1) * 8 + file - 1] = -normalBrain.mailboxBoard64[(8 - rank) * 8 + file - 1];
-				normalBrain.mailboxBoard64[(8 - rank) * 8 + file - 1] = -piece;
+				piece = normalBrain.MailboxBoard64[(rank - 1) * 8 + file - 1];
+				normalBrain.MailboxBoard64[(rank - 1) * 8 + file - 1] = -normalBrain.MailboxBoard64[(8 - rank) * 8 + file - 1];
+				normalBrain.MailboxBoard64[(8 - rank) * 8 + file - 1] = -piece;
 			}
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.mailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.mailboxBoard64, normalBrain.gameRecordPointer);
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
 		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
-		if (normalBrain.mailboxBoard64[E1] == King)
+		if (normalBrain.MailboxBoard64[E1] == King)
 		{
-			if (normalBrain.mailboxBoard64[H1] == Rook)
+			if (normalBrain.MailboxBoard64[H1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
-			if (normalBrain.mailboxBoard64[A1] == Rook)
+			if (normalBrain.MailboxBoard64[A1] == Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
-		if (normalBrain.mailboxBoard64[E8] == -King)
+		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
-			if (normalBrain.mailboxBoard64[H8] == -Rook)
+			if (normalBrain.MailboxBoard64[H8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
-			if (normalBrain.mailboxBoard64[A8] == -Rook)
+			if (normalBrain.MailboxBoard64[A8] == -Rook)
 				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 

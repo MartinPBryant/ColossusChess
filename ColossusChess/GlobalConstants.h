@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx99"
+#define VersionX "20NNx114"
 
 #define Sides 2
 
@@ -79,7 +79,7 @@ const int PromotedPieces[4] = { Queen, Rook, Bishop, Knight };
 #define NTPV 0
 #define NTCut 1
 
-// TT flag values
+// TT flag values (bits 7-4 are 'danger' conditions)
 // Bit 7:		Only one piece can move
 // Bit 6:		Threatened with mate
 // Bit 5:		Only one legal move
@@ -88,7 +88,7 @@ const int PromotedPieces[4] = { Queen, Rook, Bishop, Knight };
 // Bits 1,0:	Age
 #define TTFlagOnlyOnePieceCanMove 0x80
 #define TTFlagThreatenedWithMate 0x40
-#define TTFlagOnlyOneLegalMove 0x20
+#define TTFlagOnlyOneMove 0x20
 #define TTFlagFewerMovesThanPieces 0x10
 #define TTFlagIsInDangerMask 0xF0
 #define TTFlagExact 0x00 // PV
@@ -97,6 +97,12 @@ const int PromotedPieces[4] = { Queen, Rook, Bishop, Knight };
 #define TTFlagEULMask 0x0C
 #define TTFlagAgeMask 0x03
 
+// Danger condition flags
+// For the first four values see above as they are stored in the TT
+#define TTFlagZeroLegalKingMoves 0x08
+#define TTFlagOnlyKingCanMove 0x04
+
+// UI
 const std::string Notation64[64] =
 {
 	"a1","b1","c1","d1","e1","f1","g1","h1",

@@ -3,7 +3,6 @@
 #include <sstream>
 #include <thread>
 
-#include "GlobalTypes.h"
 #include "Engine.h"
 #include "UGI.h"
 #include "Utilities.h"
@@ -17,34 +16,50 @@ int main(int argc, char * argv[])
 	CPUInfo();
 
 	// Test for compatibility
-	if (((ThisCPUSupports & EISPOPCNT) == 0) || ((ThisCPUSupports & EISLZCNT) == 0))
+	bool runnable = true;
+
+	// First check that the current CPU supports POPCNT, LZCNT and TZCNT(part of BMI1)
+	if (((ThisCPUSupports & EISPOPCNT) == 0) || ((ThisCPUSupports & EISLZCNT) == 0) || ((ThisCPUSupports & EISBMI1) == 0))
 	{
-		Output("*****");
-		Output("This executable uses the POPCNT and TZCNT instructions which are not both supported by this CPU.");
-		Output("Press return to exit.");
-		std::string s;
-		std::getline(std::cin, s);
-		return EXIT_FAILURE;
+		Output("***** This executable uses the POPCNT, LZCNT and TZCNT instructions which are NOT all supported by this CPU.");
+		runnable = false;
 	}
+	else
+	{
 #ifdef PEXT
-	if ((CPUVendorId == CPUVENDORAMD) && (CPUFamily < 25))
+		// Next check that the current CPU supports BMI2 (because we are running the executable that requires it!)
+		if (ThisCPUSupports & EISBMI2)
+		{
+			if ((CPUVendorId == CPUVENDORAMD) && (CPUFamily < 25))
+			{
+				Output("***** This executable uses the BMI2:PEXT instruction which will NOT run efficiently on AMD CPUs prior to the Zen 3 (Family>=25) architecture.");
+				Output("***** Please use the correct baseline executable.");
+				runnable = false;
+			}
+		}
+		else
+		{
+			Output("***** This executable uses the BMI2:PEXT instruction which is NOT supported by this CPU.");
+			Output("***** Please use the correct baseline executable.");
+			runnable = false;
+		}
+#else
+		// Next check if the current CPU supports BMI2 (because we are running the executable that doesn't require it!)
+		if ((ThisCPUSupports & EISBMI2) && (((CPUVendorId == CPUVENDORAMD) && (CPUFamily >= 25)) || (CPUVendorId == CPUVENDORINTEL)))
+		{
+			Output("info string ***** This version of the executable does not use the BMI2:PEXT instruction but this CPU IS capable of using it.");
+			Output("info string ***** Please use the correct BMI2 executable.\n");
+			//runnable = false;
+		}
+#endif
+	}
+	if (!runnable)
 	{
-		Output("*****");
-		Output("This version of the executable uses the PEXT instruction which will not run efficiently on AMD CPUs prior to the Zen 3 (Family>=25) architecture.");
-		Output("Please use the correct baseline executable.");
 		Output("Press return to exit.");
 		std::string s;
 		std::getline(std::cin, s);
 		return EXIT_FAILURE;
 	}
-#else
-	if ((CPUVendorId == CPUVENDORAMD) && (CPUFamily >= 25))
-	{
-		Output("info string *****");
-		Output("info string This version of the executable does not use the PEXT instruction but this CPU is capable of using it.");
-		Output("info string Please use the correct PEXT executable.\n");
-	}
-#endif
 
 	// Determine if 'large pages' are available
 	LargePages();

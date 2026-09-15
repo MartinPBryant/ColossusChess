@@ -418,7 +418,8 @@ bool Mate::AllO1M(int ply)
 {
 	for (int i = 0; i < ply; i += 2)
 	{
-		if (!(RootGameRecordPointer + i)->isO1M)
+		//if (!(RootGameRecordPointer + i)->dangerConditions.dc.isO1M)
+		if (!(RootGameRecordPointer + i)->dangerConditions & TTFlagOnlyOneMove)
 			return false;
 	}
 
@@ -429,7 +430,8 @@ bool Mate::AllTWM(int ply)
 {
 	for (int i = 0; i < ply; i += 2)
 	{
-		if (!(mateBrain.gameRecordPointer - i)->isTWM)
+		//if (!(mateBrain.gameRecordPointer - i)->dangerConditions.dc.isTWM)
+		if (!(mateBrain.gameRecordPointer - i)->dangerConditions & TTFlagThreatenedWithMate)
 			return false;
 	}
 
@@ -767,7 +769,7 @@ void Mate::AddToMateTranspositionTable(int8_t depthRemaining, short ply, short s
 
 short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck, int freeMoves)//, bool allowNull, bool isCutNode, int currentLineExpense)
 {
-	assert(CompareMailboxBoard64ToPiecesBB(mateBrain.mailboxBoard64, mateBrain.piecesBB));
+	assert(CompareMailboxBoard64ToPiecesBB(mateBrain.MailboxBoard64, mateBrain.piecesBB));
 	assert((PopulationCountX(mateBrain.piecesBB[0][King]) == 1) && (PopulationCountX(mateBrain.piecesBB[1][King]) == 1));
 	assert((PopulationCountX(mateBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(mateBrain.piecesBB[1][Queen]) <= 9));
 	assert((PopulationCountX(mateBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(mateBrain.piecesBB[1][Rook]) <= 10));
@@ -776,7 +778,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	assert((PopulationCountX(mateBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(mateBrain.piecesBB[1][Pawn]) <= 8));
 	assert(mateBrain.piecesBB[0][AllPieces] == (mateBrain.piecesBB[0][Pawn] | mateBrain.piecesBB[0][Knight] | mateBrain.piecesBB[0][Bishop] | mateBrain.piecesBB[0][Rook] | mateBrain.piecesBB[0][Queen] | mateBrain.piecesBB[0][King]));
 	assert(mateBrain.piecesBB[1][AllPieces] == (mateBrain.piecesBB[1][Pawn] | mateBrain.piecesBB[1][Knight] | mateBrain.piecesBB[1][Bishop] | mateBrain.piecesBB[1][Rook] | mateBrain.piecesBB[1][Queen] | mateBrain.piecesBB[1][King]));
-	assert(mateBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer)));
+	assert(mateBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer)));
 	assert(mateBrain.gameRecordPointer->transpositionTableHash64WithEP == (mateBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[mateBrain.gameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply <= MaximumPly));
 	assert(depthRemaining <= MaximumPly);
@@ -973,11 +975,12 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 	// Up-date tree search variables
 	currentGameRecordPointer->isInCheck = isInCheck;
-	currentGameRecordPointer->isTWM = 0; // These may get set if we find a TT entry
-	currentGameRecordPointer->isO1M = 0;
-	currentGameRecordPointer->isFMTP = 0;
-	currentGameRecordPointer->isO1PCM = 0;
-	currentGameRecordPointer->isZLKM = 0;
+	//currentGameRecordPointer->dangerConditions.dc.isO1PCM = 0; // These may get set if we find a TT entry
+	//currentGameRecordPointer->dangerConditions.dc.isTWM = 0;
+	//currentGameRecordPointer->dangerConditions.dc.isO1M = 0;
+	//currentGameRecordPointer->dangerConditions.dc.isFMTP = 0;
+	//currentGameRecordPointer->dangerConditions.dc.isZLKM = 0;
+	currentGameRecordPointer->dangerConditions = 0;
 	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // Terminator
 
 	//----------------------------------------------------------------------------------------------------
@@ -1239,8 +1242,9 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 	if (movesCount == 1)
 	{
-		currentGameRecordPointer->isO1M = TTFlagOnlyOneLegalMove;
-		currentGameRecordPointer->isO1PCM = TTFlagOnlyOnePieceCanMove;
+		//currentGameRecordPointer->dangerConditions.dc.isO1M = TTFlagOnlyOneMove;
+		//currentGameRecordPointer->dangerConditions.dc.isO1PCM = TTFlagOnlyOnePieceCanMove;
+		currentGameRecordPointer->dangerConditions |= (TTFlagOnlyOneMove + TTFlagOnlyOnePieceCanMove);
 		(currentGameRecordPointer - 1)->forcingMove = true; // Set the previous move to be 'forcing'
 		(currentGameRecordPointer - 1)->forcingLine = (currentGameRecordPointer - 3)->forcingLine; // Update the 'forcingLine' status
 	}
@@ -1333,9 +1337,12 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 		currentGameRecordPointer->DefenderKingMovesBefore = defenderKingMoves;
 		currentGameRecordPointer->TotalDefenderKingMovesBefore = (currentGameRecordPointer - 2)->TotalDefenderKingMovesBefore + defenderKingMoves;
-		currentGameRecordPointer->isZLKM = (defenderKingMoves == 0);
-		currentGameRecordPointer->isOKCM = (defenderKingMoves == movesCount);
-		currentGameRecordPointer->isO1PCM = (defenderMoveablePieces == 1);
+		//currentGameRecordPointer->dangerConditions.dc.isZLKM = (defenderKingMoves == 0);
+		//currentGameRecordPointer->dangerConditions.dc.isOKCM = (defenderKingMoves == movesCount);
+		//currentGameRecordPointer->dangerConditions.dc.isO1PCM = (defenderMoveablePieces == 1);
+		currentGameRecordPointer->dangerConditions |= (TTFlagZeroLegalKingMoves * (defenderKingMoves == 0));
+		currentGameRecordPointer->dangerConditions |= (TTFlagOnlyKingCanMove * (defenderKingMoves == movesCount));
+		currentGameRecordPointer->dangerConditions |= (TTFlagOnlyOnePieceCanMove * (defenderMoveablePieces == 1));
 
 
 
@@ -1353,7 +1360,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 					if ((currentGameRecordPointer - 1)->isThreateningMateInOne.ui32 != 0)
 					{
 						(currentGameRecordPointer - 1)->forcingMove = true;
-						currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;
+						currentGameRecordPointer->dangerConditions |= TTFlagThreatenedWithMate;
 						if ((currentGameRecordPointer - 1)->isThreateningMateInOne.ui32 != (currentGameRecordPointer - 3)->isThreateningMateInOne.ui32)
 							(currentGameRecordPointer - 1)->forcingLine = (currentGameRecordPointer - 3)->forcingLine; // Update the 'forcingLine' status
 					}
@@ -1380,10 +1387,13 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 			if (!isInCheck)
 				//if (!(currentGameRecordPointer - 1)->forcingLine)
 				if (!(currentGameRecordPointer - 1)->forcingMove)
-					if (!currentGameRecordPointer->isZLKM)
-						if (!currentGameRecordPointer->isO1PCM)
-							if (!currentGameRecordPointer->isO1M)//NOT NECC
-					if (depthRemaining > 2)
+					//if (!currentGameRecordPointer->dangerConditions.dc.isZLKM)
+					//	if (!currentGameRecordPointer->dangerConditions.dc.isO1PCM)
+					//		if (!currentGameRecordPointer->dangerConditions.dc.isO1M)//NOT NECC
+					if (!(currentGameRecordPointer->dangerConditions & TTFlagZeroLegalKingMoves))
+						if (!(currentGameRecordPointer->dangerConditions & TTFlagOnlyOnePieceCanMove))
+							if (!(currentGameRecordPointer->dangerConditions & TTFlagOnlyOneMove))//NOT NECC
+								if (depthRemaining > 2)
 						if (depthRemaining < (TC.MateInN * 2) - 2)
 						{
 
@@ -1438,7 +1448,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							{
 								(currentGameRecordPointer - 1)->forcingMove = true;
 								(currentGameRecordPointer - 1)->forcingLine = (currentGameRecordPointer - 3)->forcingLine; // Update the 'forcingLine' status
-								currentGameRecordPointer->isTWM = TTFlagThreatenedWithMate;
+								//currentGameRecordPointer->dangerConditions.dc.isTWM = TTFlagThreatenedWithMate;
+								currentGameRecordPointer->dangerConditions |= TTFlagThreatenedWithMate;
 							}
 						}
 
@@ -1536,7 +1547,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 		// Up-date move
 		legalMovesMade++;
-		int8_t toSquarePiece = mateBrain.mailboxBoard64[currentMove.mf.toSquare]; // Needed later to determine if the move is a capture
+		int8_t toSquarePiece = mateBrain.MailboxBoard64[currentMove.mf.toSquare]; // Needed later to determine if the move is a capture
 		mateBrain.MakeMove(sideToMove); // N.B. MakeMove increments mateBrain.gameRecordPointer!
 		mateBrain.gameRecordPointer->fixedPiecesAttackerBB = (mateBrain.gameRecordPointer - 1)->fixedPiecesAttackerBB;
 		mateBrain.gameRecordPointer->fixedPiecesDefenderBB = (mateBrain.gameRecordPointer - 1)->fixedPiecesDefenderBB;
@@ -1858,7 +1869,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		else // Even ply
 		{
 			if (//***HERE - surely the 1st clause below is always forcingmove as its a check???
-				((isInCheck && (currentGameRecordPointer - 1)->forcingMove) || (currentGameRecordPointer->isTWM == TTFlagThreatenedWithMate) || currentGameRecordPointer->isO1M)
+				//((isInCheck && (currentGameRecordPointer - 1)->forcingMove) || (currentGameRecordPointer->dangerConditions.dc.isTWM == TTFlagThreatenedWithMate) || currentGameRecordPointer->dangerConditions.dc.isO1M)
+				((isInCheck && (currentGameRecordPointer - 1)->forcingMove) || (currentGameRecordPointer->dangerConditions & TTFlagThreatenedWithMate) || currentGameRecordPointer->dangerConditions & TTFlagOnlyOneMove)
 				//((isInCheck && (currentGameRecordPointer- 2)->forcingMove) || (currentGameRecordPointer->isTWM == TTFlagThreatenedWithMate) || (currentGameRecordPointer - 1)->isO1M || (currentGameRecordPointer - 1)->isZLKM)
 				//&& (currentGameRecordPointer - 2)->forcingLine // SURELY WE SHOULD STILL EXTEND BY 1 IF THIS IS FALSE???
 				)
@@ -2254,7 +2266,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 						{
 							Move_Struct ms;
 							ms.ui32 = quietMovesSearched[count];
-							int8_t pt = std::abs(mateBrain.mailboxBoard64[ms.mf.fromSquare]) - 1;
+							int8_t pt = std::abs(mateBrain.MailboxBoard64[ms.mf.fromSquare]) - 1;
 							int8_t ts = ms.mf.toSquare;
 							currentGameRecordPointer->historyPointer->History[pt][ts] = std::max(currentGameRecordPointer->historyPointer->History[pt][ts] - delta, 0);// -(1 << 30));
 						}
@@ -2276,7 +2288,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 					// This move has returned a score >= beta, therefore this is a 'Cut' node
 					// The currentMoveScore is a lower bound (floor) on the exact score of the node (i.e. the exact score might be greater than currentMoveScore, it is "at least" currentMoveScore)
-					AddToMateTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP, currentGameRecordPointer->move.ui32, currentGameRecordPointer->staticEvaluation);
+					//AddToMateTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP, currentGameRecordPointer->move.ui32, currentGameRecordPointer->staticEvaluation);
+					AddToMateTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->dangerConditions, currentGameRecordPointer->move.ui32, currentGameRecordPointer->staticEvaluation);
 					if (ply == 1)
 						ShowBestLineMessage(currentMoveScore, 1);
 
@@ -2329,7 +2342,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		// The children of an All node are Cut nodes. The parent of an All node is a Cut node. The ply distance of an All node to its PV ancestor is even.
 		//AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + fewerMovesThanPieces + threatenedWithMate, tteBestMove); // Keep any existing TT move even though it didn't raise alpha
 		//AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + fewerMovesThanPieces + MateGenerate.gameRecordPointer->isInDanger, tteBestMove); // Keep any existing TT move even though it didn't raise alpha
-		AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation); // Keep any existing TT move even though it didn't raise alpha
+		//AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation); // Keep any existing TT move even though it didn't raise alpha
+		AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->dangerConditions, tteBestMove.ui32, currentGameRecordPointer->staticEvaluation); // Keep any existing TT move even though it didn't raise alpha
 	}
 	else
 	{
@@ -2341,7 +2355,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		// The root node and the leftmost nodes are always PV-nodes. All siblings of a PV node are expected Cut nodes.
 		//AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + fewerMovesThanPieces + threatenedWithMate, *MateGenerate.gameRecordPointer->principalVariationPointer);
 		//AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + fewerMovesThanPieces + MateGenerate.gameRecordPointer->isInDanger, *MateGenerate.gameRecordPointer->principalVariationPointer);
-		AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->isTWM + currentGameRecordPointer->isO1M + currentGameRecordPointer->isFMTP, *currentGameRecordPointer->principalVariationPointer, currentGameRecordPointer->staticEvaluation);
+		//AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP, *currentGameRecordPointer->principalVariationPointer, currentGameRecordPointer->staticEvaluation);
+		AddToMateTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagExact + currentGameRecordPointer->dangerConditions, *currentGameRecordPointer->principalVariationPointer, currentGameRecordPointer->staticEvaluation);
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -2359,7 +2374,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	mateBrain.CopyFrom(&EngineBrain);
 
 	// Set up the bit boards from the 64-square mailbox board
-	ConvertMailboxBoard64ToPiecesBB(mateBrain.mailboxBoard64, mateBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(mateBrain.MailboxBoard64, mateBrain.piecesBB);
 
 	// Initialise the PV array pointers in the GameRecord array
 	for (uint32_t index = 0; index < MaximumPly; index++)
@@ -2386,12 +2401,12 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	StopImmediately = false;
 	StopWhenIterationComplete = false;
 	ReplyImmediately = false;
-	InitialiseMaterialValues(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer);
+	InitialiseMaterialValues(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
 	//*(uint32_t*)(&MateGenerate.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&RootTotalMaterial[0]);
-	InitialisePSTValues(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer);
-	InitialiseGamePhase(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer);
+	InitialisePSTValues(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
+	InitialiseGamePhase(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
 	//*(uint64_t*)(&MateGenerate.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&GamePhase[0]);
-	uint64_t hash64 = GenerateTranspositionTableHash64(mateBrain.mailboxBoard64, mateBrain.gameRecordPointer);
+	uint64_t hash64 = GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
 	if (SideToMove == 1)
 		hash64 = ~hash64;
 	mateBrain.gameRecordPointer->transpositionTableHash64 = hash64;
@@ -2423,8 +2438,8 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	{
 		RootZLMPiecesMailboxBoard64[square] = false;
 		if (
-			((mateBrain.mailboxBoard64[square] > Empty) && (SideToMove == 1))
-			|| ((mateBrain.mailboxBoard64[square] < Empty) && (SideToMove == 0))
+			((mateBrain.MailboxBoard64[square] > Empty) && (SideToMove == 1))
+			|| ((mateBrain.MailboxBoard64[square] < Empty) && (SideToMove == 0))
 			)
 			RootZLMPiecesMailboxBoard64[square] = true;
 	}
@@ -2447,9 +2462,9 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	{
 		std::string sq = s.substr(0, 2);
 		int squareIndex = sq[0] - 'a' + ((sq[1] - '1') * 8);
-		if (mateBrain.mailboxBoard64[squareIndex] > 0)
+		if (mateBrain.MailboxBoard64[squareIndex] > 0)
 			RootFixedPiecesAttackerBB ^= CreateBitboardFromSquare(squareIndex);
-		else if (mateBrain.mailboxBoard64[squareIndex] < 0)
+		else if (mateBrain.MailboxBoard64[squareIndex] < 0)
 			RootFixedPiecesDefenderBB ^= CreateBitboardFromSquare(squareIndex);
 		s = s.substr(2);
 	}
@@ -2682,7 +2697,7 @@ Mate::MateResult_Struct Mate::ComputeMateMT()
 	//mapPly1[0] = 99;
 	//mapPly1[1] = 88;
 
-	ConvertMailboxBoard64ToPiecesBB(EngineBrain.mailboxBoard64, EngineBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(EngineBrain.MailboxBoard64, EngineBrain.piecesBB);
 
 	StopImmediately = false;
 

@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <assert.h>
 
-#include "BitBoard.h"
+//#include "BitBoard.h"
 #include "Engine.h"
 #include "Utilities.h"
 #include "Brain.h"
-#include "SearchNormal.h"
+//#include "SearchNormal.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
 
 //----------------------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ Brain::~Brain()
 void Brain::CopyFrom(Brain* sourceBrain)
 {
 	// Copy the mailbox board and the game record from the source brain into this brain
-	std::copy(sourceBrain->mailboxBoard64, sourceBrain->mailboxBoard64 + 64, this->mailboxBoard64); // N.B. "+64" is correct!
+	std::copy(sourceBrain->MailboxBoard64, sourceBrain->MailboxBoard64 + 64, this->MailboxBoard64); // N.B. "+64" is correct!
 	for (int i = 0; i < this->gameRecordSize; i++)
 		this->gameRecord[i] = sourceBrain->gameRecord[i];
 	this->GameRecordIndexRoot = sourceBrain->GameRecordIndexRoot;
@@ -45,13 +45,14 @@ void Brain::ClearGameRecord()
 	gameRecord[0].transpositionTableHash64 = 0;
 	gameRecord[0].transpositionTableHash64WithEP = 0;
 	gameRecord[0].isInCheck = 0;
-	gameRecord[0].isTWM = TTFlagThreatenedWithMate;
-	gameRecord[0].isFMTP = TTFlagFewerMovesThanPieces;
-	gameRecord[0].isO1M = TTFlagOnlyOneLegalMove;
-	gameRecord[0].isO1PCM = TTFlagOnlyOnePieceCanMove;
+	//gameRecord[0].dangerConditions.dc.isTWM = TTFlagThreatenedWithMate;
+	//gameRecord[0].dangerConditions.dc.isFMTP = TTFlagFewerMovesThanPieces;
+	//gameRecord[0].dangerConditions.dc.isO1M = TTFlagOnlyOneMove;
+	//gameRecord[0].dangerConditions.dc.isO1PCM = TTFlagOnlyOnePieceCanMove;
+	//gameRecord[0].dangerConditions.dc.isZLKM = 1;
+	//gameRecord[0].dangerConditions.dc.isOKCM = 1;
+	gameRecord[0].dangerConditions = 0xFF;
 	gameRecord[0].isThreateningMateInOne.ui32 = 0;
-	gameRecord[0].isZLKM = 1;
-	gameRecord[0].isOKCM = 1;
 	gameRecord[0].epSquare = 0;
 	gameRecord[0].pliesSinceIrreversible = 0;
 	gameRecord[0].givesCheck = 0;
@@ -77,13 +78,14 @@ void Brain::ClearGameRecord()
 	gameRecord[1].transpositionTableHash64 = 0;
 	gameRecord[1].transpositionTableHash64WithEP = 0;
 	gameRecord[1].isInCheck = 0;
-	gameRecord[1].isTWM = TTFlagThreatenedWithMate;
-	gameRecord[1].isFMTP = TTFlagFewerMovesThanPieces;
-	gameRecord[1].isO1M = TTFlagOnlyOneLegalMove;
-	gameRecord[1].isO1PCM = TTFlagOnlyOnePieceCanMove;
+	//gameRecord[1].dangerConditions.dc.isTWM = TTFlagThreatenedWithMate;
+	//gameRecord[1].dangerConditions.dc.isFMTP = TTFlagFewerMovesThanPieces;
+	//gameRecord[1].dangerConditions.dc.isO1M = TTFlagOnlyOneMove;
+	//gameRecord[1].dangerConditions.dc.isO1PCM = TTFlagOnlyOnePieceCanMove;
+	//gameRecord[1].dangerConditions.dc.isZLKM = 1;
+	//gameRecord[1].dangerConditions.dc.isOKCM = 1;
+	gameRecord[0].dangerConditions = 0xFF;
 	gameRecord[1].isThreateningMateInOne.ui32 = 0;
-	gameRecord[1].isZLKM = 1;
-	gameRecord[1].isOKCM = 1;
 	gameRecord[1].epSquare = 0;
 	gameRecord[1].pliesSinceIrreversible = 0;
 	gameRecord[1].givesCheck = 0;
@@ -524,7 +526,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 			while (true) // Scan king squares
 			{
 				if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
-					if (mailboxBoard64[square] != Empty)
+					if (MailboxBoard64[square] != Empty)
 					{
 						allEmpty = false;
 						break;
@@ -547,7 +549,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
-						if (mailboxBoard64[square] != Empty)
+						if (MailboxBoard64[square] != Empty)
 						{
 							allEmpty = false;
 							break;
@@ -581,7 +583,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 			while (true) // Scan king squares
 			{
 				if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
-					if (mailboxBoard64[square] != Empty)
+					if (MailboxBoard64[square] != Empty)
 					{
 						allEmpty = false;
 						break;
@@ -604,7 +606,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
-						if (mailboxBoard64[square] != Empty)
+						if (MailboxBoard64[square] != Empty)
 						{
 							allEmpty = false;
 							break;
@@ -617,7 +619,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 				{
 					uint64_t rooksAndQueensBB = piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen];
 					if ((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
-						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
+						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
 							mlp++->ui32 = kingSquare | ((BackRankBaseSquareIndex[sideToMove] + C) << 8) | (MFCastling << 16);
 				}
 			}
@@ -627,13 +629,13 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	{
 		// King side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
-			if ((mailboxBoard64[kingSquare + 2] | mailboxBoard64[kingSquare + 1]) == Empty)
+			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					mlp++->ui32 = kingSquare | ((kingSquare + 2) << 8) | (MFCastling << 16);
 
 		// Queen side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
-			if ((mailboxBoard64[kingSquare - 3] | mailboxBoard64[kingSquare - 2] | mailboxBoard64[kingSquare - 1]) == Empty)
+			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					mlp++->ui32 = kingSquare | ((kingSquare - 2) << 8) | (MFCastling << 16);
 	}
@@ -819,7 +821,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 			while (true) // Scan king squares
 			{
 				if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
-					if (mailboxBoard64[square] != Empty)
+					if (MailboxBoard64[square] != Empty)
 					{
 						allEmpty = false;
 						break;
@@ -842,7 +844,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
-						if (mailboxBoard64[square] != Empty)
+						if (MailboxBoard64[square] != Empty)
 						{
 							allEmpty = false;
 							break;
@@ -876,7 +878,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 			while (true) // Scan king squares
 			{
 				if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
-					if (mailboxBoard64[square] != Empty)
+					if (MailboxBoard64[square] != Empty)
 					{
 						allEmpty = false;
 						break;
@@ -899,7 +901,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
-						if (mailboxBoard64[square] != Empty)
+						if (MailboxBoard64[square] != Empty)
 						{
 							allEmpty = false;
 							break;
@@ -912,7 +914,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 				{
 					uint64_t rooksAndQueensBB = piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen];
 					if ((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
-						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
+						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
 							moves++;
 				}
 			}
@@ -922,13 +924,13 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 	{
 		// King side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
-			if ((mailboxBoard64[kingSquare + 2] | mailboxBoard64[kingSquare + 1]) == Empty)
+			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					moves++;
 
 		// Queen side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
-			if ((mailboxBoard64[kingSquare - 3] | mailboxBoard64[kingSquare - 2] | mailboxBoard64[kingSquare - 1]) == Empty)
+			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					moves++;
 	}
@@ -2266,7 +2268,7 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 	{
 		// King side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
-			if ((mailboxBoard64[kingSquare + 2] | mailboxBoard64[kingSquare + 1]) == Empty)
+			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] != 0)
 						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileFBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F]) // Are all the squares between the enemy king and the rook empty?
@@ -2274,7 +2276,7 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 
 		// Queen side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
-			if ((mailboxBoard64[kingSquare - 3] | mailboxBoard64[kingSquare - 2] | mailboxBoard64[kingSquare - 1]) == Empty)
+			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] != 0)
 						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileDBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D]) // Are all the squares between the enemy king and the rook empty?
@@ -2442,7 +2444,7 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 	{
 		// King side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
-			if ((mailboxBoard64[kingSquare + 2] | mailboxBoard64[kingSquare + 1]) == Empty)
+			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] != 0)
 						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileFBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F]) // Are all the squares between the enemy king and the rook empty?
@@ -2450,7 +2452,7 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 
 		// Queen side
 		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
-			if ((mailboxBoard64[kingSquare - 3] | mailboxBoard64[kingSquare - 2] | mailboxBoard64[kingSquare - 1]) == Empty)
+			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] != 0)
 						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileDBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D]) // Are all the squares between the enemy king and the rook empty?
@@ -2733,7 +2735,7 @@ void Brain::MakeMove(int sideToMove)
 	assert((currentMove->mf.fromSquare >= A1) && (currentMove->mf.fromSquare <= H8) && (currentMove->mf.toSquare >= A1) && (currentMove->mf.toSquare <= H8)); // Can't assert fromSquare!=toSquare because of FRC castling! Also can't assert that the toSquare is empty or contains opponent's piece
 	assert(currentMove->mf.flag <= 15);
 	assert(currentMove->ui32 != 0);
-	assert(mailboxBoard64[currentMove->mf.fromSquare] != Empty);
+	assert(MailboxBoard64[currentMove->mf.fromSquare] != Empty);
 
 	uint64_t hash64 = gameRecordPointer->transpositionTableHash64;
 	(gameRecordPointer + 1)->castlingStatus = gameRecordPointer->castlingStatus;
@@ -2745,8 +2747,8 @@ void Brain::MakeMove(int sideToMove)
 	gameRecordPointer++;
 
 	// Save pieces
-	currentMove->fromSquarePiece = mailboxBoard64[currentMove->mf.fromSquare];
-	currentMove->toSquarePiece = mailboxBoard64[currentMove->mf.toSquare];
+	currentMove->fromSquarePiece = MailboxBoard64[currentMove->mf.fromSquare];
+	currentMove->toSquarePiece = MailboxBoard64[currentMove->mf.toSquare];
 	if (currentMove->toSquarePiece)
 		if ((currentMove->fromSquarePiece > 0) == (currentMove->toSquarePiece > 0)) // Chess960 castling where K stays on same square or takes own rook?
 			currentMove->toSquarePiece = Empty;
@@ -2756,8 +2758,8 @@ void Brain::MakeMove(int sideToMove)
 	piecesBB[sideToMove][AllPieces] ^= currentMove->fromToXor;
 
 	// Update the mailbox board
-	mailboxBoard64[currentMove->mf.fromSquare] = Empty; // N.B. must update the from-square BEFORE the to-square for Chess960 castling as they might be the same square!
-	mailboxBoard64[currentMove->mf.toSquare] = currentMove->fromSquarePiece;
+	MailboxBoard64[currentMove->mf.fromSquare] = Empty; // N.B. must update the from-square BEFORE the to-square for Chess960 castling as they might be the same square!
+	MailboxBoard64[currentMove->mf.toSquare] = currentMove->fromSquarePiece;
 	hash64 ^= TranspositionTableRandoms[sideToMove][abs(currentMove->fromSquarePiece)][currentMove->mf.toSquare] ^ TranspositionTableRandoms[sideToMove][abs(currentMove->fromSquarePiece)][currentMove->mf.fromSquare];
 
 	int pstXOR = (sideToMove ? 0 : 56);
@@ -2777,7 +2779,7 @@ void Brain::MakeMove(int sideToMove)
 			promotionPiece = PromotedPieces[currentMove->mf.flag >> 2];
 
 			// Update the mailbox board, bitboards and transposition table hash
-			mailboxBoard64[currentMove->mf.toSquare] = (sideToMove ? -promotionPiece : promotionPiece);
+			MailboxBoard64[currentMove->mf.toSquare] = (sideToMove ? -promotionPiece : promotionPiece);
 			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 			piecesBB[sideToMove][promotionPiece] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 			hash64 ^= TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare];
@@ -2827,9 +2829,9 @@ void Brain::MakeMove(int sideToMove)
 			{
 				if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G) // King-side?
 				{
-					if (abs(mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile]) != King)
-						mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = Empty;
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
+					if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile]) != King)
+						MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = Empty;
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
 					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile];
@@ -2838,9 +2840,9 @@ void Brain::MakeMove(int sideToMove)
 				}
 				else
 				{
-					if (abs(mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile]) != King)
-						mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = Empty;
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
+					if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile]) != King)
+						MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = Empty;
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
 					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile];
@@ -2852,8 +2854,8 @@ void Brain::MakeMove(int sideToMove)
 			{
 				if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G) // King-side?
 				{
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = Empty;
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = Empty;
 					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + H];
@@ -2862,8 +2864,8 @@ void Brain::MakeMove(int sideToMove)
 				}
 				else
 				{
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = Empty;
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = Empty;
 					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + A];
@@ -2895,8 +2897,8 @@ void Brain::MakeMove(int sideToMove)
 			{ // An EP move is stored as e.g. fromSquare=d5, toSquare = e5 (not e6), so we have to move the capturing pawn forward one square
 				piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
 				piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
-				mailboxBoard64[currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] = -currentMove->toSquarePiece;
-				mailboxBoard64[currentMove->mf.toSquare] = Empty;
+				MailboxBoard64[currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] = -currentMove->toSquarePiece;
+				MailboxBoard64[currentMove->mf.toSquare] = Empty;
 				hash64 ^= TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] ^ TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare];
 
 				gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
@@ -2951,8 +2953,8 @@ void Brain::UnMakeMove(int sideToMove)
 	MoveUndo_Struct* currentMove = &gameRecordPointer->move;
 	assert((currentMove->mf.fromSquare >= A1) && (currentMove->mf.fromSquare <= H8) && (currentMove->mf.toSquare >= A1) && (currentMove->mf.toSquare <= H8));
 
-	mailboxBoard64[currentMove->mf.toSquare] = currentMove->toSquarePiece; // N.B. must un-update the to-square BEFORE the from-square for Chess960 castling as they might be the same square!
-	mailboxBoard64[currentMove->mf.fromSquare] = currentMove->fromSquarePiece;
+	MailboxBoard64[currentMove->mf.toSquare] = currentMove->toSquarePiece; // N.B. must un-update the to-square BEFORE the from-square for Chess960 castling as they might be the same square!
+	MailboxBoard64[currentMove->mf.fromSquare] = currentMove->fromSquarePiece;
 	piecesBB[sideToMove][abs(currentMove->fromSquarePiece)] ^= currentMove->fromToXor;
 	piecesBB[sideToMove][AllPieces] ^= currentMove->fromToXor;
 
@@ -2962,17 +2964,17 @@ void Brain::UnMakeMove(int sideToMove)
 		{
 			if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G)
 			{
-				if (abs(mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F]) != King)
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
-				mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = (sideToMove ? -Rook : Rook);
+				if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F]) != King)
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
+				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = (sideToMove ? -Rook : Rook);
 				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
 				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
 			}
 			else
 			{
-				if (abs(mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D]) != King)
-					mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
-				mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = (sideToMove ? -Rook : Rook);
+				if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D]) != King)
+					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
+				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = (sideToMove ? -Rook : Rook);
 				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
 				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
 			}
@@ -2981,15 +2983,15 @@ void Brain::UnMakeMove(int sideToMove)
 		{
 			if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G)
 			{
-				mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
-				mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = (sideToMove ? -Rook : Rook);
+				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
+				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = (sideToMove ? -Rook : Rook);
 				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
 				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
 			}
 			else
 			{
-				mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
-				mailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = (sideToMove ? -Rook : Rook);
+				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
+				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = (sideToMove ? -Rook : Rook);
 				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
 				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
 			}
@@ -3012,7 +3014,7 @@ void Brain::UnMakeMove(int sideToMove)
 			// Was it an en-passant capture?
 			if (currentMove->mf.flag == MFEnPassant)
 			{
-				mailboxBoard64[currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] = Empty;
+				MailboxBoard64[currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] = Empty;
 				piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare));
 				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare));
 			}
@@ -3138,8 +3140,8 @@ void Brain::ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMov
 			uint16_t flag = mlp->mf.flag;
 			int fromSquare = mlp->mf.fromSquare;
 			int toSquare = mlp->mf.toSquare;
-			int fromSquarePiece = std::abs(mailboxBoard64[fromSquare]);
-			int toSquarePiece = std::abs(mailboxBoard64[toSquare]);
+			int fromSquarePiece = std::abs(MailboxBoard64[fromSquare]);
+			int toSquarePiece = std::abs(MailboxBoard64[toSquare]);
 
 			if (flag >= MFPromotion)//NOT WORTH TESTING FOR AS SO RARE???
 			{
@@ -3197,8 +3199,8 @@ void Brain::ScoreMovesMVVLVA(MoveWithScore_Struct* mlp, int movesCount)
 	{
 		int fromSquare = mlp->mf.fromSquare;
 		int toSquare = mlp->mf.toSquare;
-		int fromSquarePiece = std::abs(mailboxBoard64[fromSquare]);
-		int toSquarePiece = std::abs(mailboxBoard64[toSquare]);
+		int fromSquarePiece = std::abs(MailboxBoard64[fromSquare]);
+		int toSquarePiece = std::abs(MailboxBoard64[toSquare]);
 
 		// MVV/LVA				
 		score = MVVLVA[toSquarePiece][fromSquarePiece];
@@ -3224,8 +3226,8 @@ void Brain::ScoreMovesMateMode(MoveWithScore_Struct* mlp, int movesCount, int tt
 			uint16_t flag = mlp->mf.flag;
 			int fromSquare = mlp->mf.fromSquare;
 			int toSquare = mlp->mf.toSquare;
-			int fromSquarePiece = std::abs(mailboxBoard64[fromSquare]);
-			int toSquarePiece = std::abs(mailboxBoard64[toSquare]);
+			int fromSquarePiece = std::abs(MailboxBoard64[fromSquare]);
+			int toSquarePiece = std::abs(MailboxBoard64[toSquare]);
 
 			if (toSquarePiece) // Capture?
 			{
@@ -3334,8 +3336,8 @@ int Brain::SEE(int fromSquare, int toSquare, int sideToMove)
 
 	int sideNotToMove = sideToMove ^ 1;
 	uint64_t attackersBB, occupiedBB;
-	int latestToSquarePiece = abs(mailboxBoard64[fromSquare]);
-	int sideToMoveTotalGain = SeeValues[abs(mailboxBoard64[toSquare])];
+	int latestToSquarePiece = abs(MailboxBoard64[fromSquare]);
+	int sideToMoveTotalGain = SeeValues[abs(MailboxBoard64[toSquare])];
 	int sideNotToMoveTotalGain = 0;
 	int piece;
 
@@ -3458,7 +3460,7 @@ int Brain::SEE2(int fromSquare, int toSquare, int sideToMove, int threshold)
 
 	int sideNotToMove = sideToMove ^ 1;
 	uint64_t attackersBB, occupiedBB;
-	int latestToSquarePiece = abs(mailboxBoard64[fromSquare]);
+	int latestToSquarePiece = abs(MailboxBoard64[fromSquare]);
 	int sideToMoveTotalGain = threshold;
 	int sideNotToMoveTotalGain = 0;
 	int piece;
@@ -3579,7 +3581,7 @@ bool Brain::SEETargetPieceUnsafe(int toSquare, int sideToMove, int offset)
 
 	int sideToMoveTotalGain = 0;
 	int sideNotToMoveTotalGain = offset;
-	int toSquarePiece = abs(mailboxBoard64[toSquare]);
+	int toSquarePiece = abs(MailboxBoard64[toSquare]);
 	int piece;
 	uint64_t bb;
 
@@ -3821,7 +3823,8 @@ bool Brain::ForcingLine(int ply, int offset)
 	for (int i = offset; i < ply; i += 2)
 	{
 		//if (!((gameRecordPointer - i)->isZLKM || (gameRecordPointer - i)->isInCheck || (gameRecordPointer - i)->isO1M || (gameRecordPointer - i)->isTWM))
-		if (!((gameRecordPointer - i)->isZLKM))
+		//if (!((gameRecordPointer - i)->dangerConditions.dc.isZLKM))
+		if (!((gameRecordPointer - i)->dangerConditions & TTFlagZeroLegalKingMoves))
 			return false;
 	}
 
@@ -3920,7 +3923,7 @@ uint32_t Brain::SYZYGYPYRRHICMoveToColossusMove(uint16_t SYZYGYPYRRHICMove, uint
 	uint32_t toSquare = pyrrhic_move_to2(SYZYGYPYRRHICMove);
 	colossusMove = fromSquare | (toSquare << 8);
 
-	if (epSquare && (toSquare == epSquare) && (std::abs(mailboxBoard64[fromSquare]) == Pawn))
+	if (epSquare && (toSquare == epSquare) && (std::abs(MailboxBoard64[fromSquare]) == Pawn))
 		colossusMove = fromSquare | ((toSquare - PawnMoveOffset[SideToMove]) << 8) | (MFEnPassant << 16);
 	else
 	{

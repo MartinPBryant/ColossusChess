@@ -118,12 +118,8 @@ struct GameRecordEntry_Struct
 	// About the position before any move is played at this ply
 	GameRecordCastlingStatusUnion castlingStatus; // Four entries set to 0 at the start of a game to signify all castling possible
 	int isInCheck;
-	int isTWM; // Threatened with mate
-	int isO1M; // Only one move
-	int isFMTP; // Fewer moves than pieces
-	int isZLKM; // Zero legal king moves
-	int isO1PCM; // Only one piece can move
-	int isOKCM; // Only king can move
+
+	uint8_t dangerConditions;
 
 	int sideToMove; // N.B. NOT updated during tree search
 	int moveNumber; // N.B. NOT updated during tree search

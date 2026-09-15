@@ -8,16 +8,16 @@
 #define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
 #include <windows.h>
 
-#include "GlobalConstants.h"
-#include "GlobalTypes.h"
+//#include "GlobalConstants.h"
+//#include "GlobalTypes.h"
 #include "Engine.h"
-#include "BitBoard.h"
-#include "Brain.h"
+//#include "BitBoard.h"
+//#include "Brain.h"
 #include "Evaluate.h"
 #include "Utilities.h"
-#include "SearchNormal.h"
-#include "SearchPerft.h"
-#include "SearchMate.h"
+//#include "SearchNormal.h"
+//#include "SearchPerft.h"
+//#include "SearchMate.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
 //#include "NNUE\nnue.h"
 //#include "nnue-probe-master\nnue-probe-master\src\nnue.h"
@@ -175,7 +175,7 @@ void AdvanceSideToMove()
 
 //----------------------------------------------------------------------------------------------------
 
-std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber) // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
+std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber) // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
 //std::string ConvertPositionToFEN(Brain* brain) // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
 {
 	std::string fen = "";
@@ -189,7 +189,7 @@ std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, Game
 
 		for (file = 1; file <= 8; file++)
 		{
-			currentPiece = mailboxBoard64[(rank - 1) * 8 + (file - 1)];
+			currentPiece = MailboxBoard64[(rank - 1) * 8 + (file - 1)];
 
 			if (currentPiece == 0)
 				emptySquares++;
@@ -233,13 +233,13 @@ std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, Game
 	}
 	else
 	{
-		if ((castlingStatus.ui8[0][0] == 0) && (mailboxBoard64[E1] == King) && (mailboxBoard64[H1] == Rook))
+		if ((castlingStatus.ui8[0][0] == 0) && (MailboxBoard64[E1] == King) && (MailboxBoard64[H1] == Rook))
 			_castling += "K";
-		if ((castlingStatus.ui8[0][1] == 0) && (mailboxBoard64[E1] == King) && (mailboxBoard64[A1] == Rook))
+		if ((castlingStatus.ui8[0][1] == 0) && (MailboxBoard64[E1] == King) && (MailboxBoard64[A1] == Rook))
 			_castling += "Q";
-		if ((castlingStatus.ui8[1][0] == 0) && (mailboxBoard64[E8] == -King) && (mailboxBoard64[H8] == -Rook))
+		if ((castlingStatus.ui8[1][0] == 0) && (MailboxBoard64[E8] == -King) && (MailboxBoard64[H8] == -Rook))
 			_castling += "k";
-		if ((castlingStatus.ui8[1][1] == 0) && (mailboxBoard64[E8] == -King) && (mailboxBoard64[A8] == -Rook))
+		if ((castlingStatus.ui8[1][1] == 0) && (MailboxBoard64[E8] == -King) && (MailboxBoard64[A8] == -Rook))
 			_castling += "q";
 	}
 	if (_castling == "")
@@ -265,11 +265,11 @@ std::string ConvertPositionToFEN(int8_t mailboxBoard64[64], int sideToMove, Game
 
 //----------------------------------------------------------------------------------------------------
 
-void ClearMailboxBoard64(int8_t mailboxBoard64[64])
+void ClearMailboxBoard64(int8_t MailboxBoard64[64])
 {
 	//for (int square = A1; square <= H8; square++)
 	//	mailboxBoard64[square] = Empty;
-	memset(mailboxBoard64, Empty, 64); // Cannot use 'sizeof(mailboxBoard64)' as it's treated as an 8 byte pointer!
+	memset(MailboxBoard64, Empty, 64); // Cannot use 'sizeof(mailboxBoard64)' as it's treated as an 8 byte pointer!
 }
 
 void ClearPiecesBB(uint64_t piecesBB[Sides][King + 2])
@@ -280,7 +280,7 @@ void ClearPiecesBB(uint64_t piecesBB[Sides][King + 2])
 	memset(piecesBB, 0, 2 * 8 * 8);
 }
 
-std::string MailboxBoard64String(int8_t mailboxBoard64[64])
+std::string MailboxBoard64String(int8_t MailboxBoard64[64])
 {
 	int rank;
 	int file;
@@ -294,7 +294,7 @@ std::string MailboxBoard64String(int8_t mailboxBoard64[64])
 
 		for (file = 0; file <= 7; file++)
 		{
-			piece = mailboxBoard64[rank * 8 + file];
+			piece = MailboxBoard64[rank * 8 + file];
 			line += PieceToChar[piece + 6];
 			line += " ";
 		}
@@ -308,10 +308,10 @@ std::string MailboxBoard64String(int8_t mailboxBoard64[64])
 
 void WriteMailboxBoard64(Brain* brain)
 {
-	Output(MailboxBoard64String(brain->mailboxBoard64));
+	Output(MailboxBoard64String(brain->MailboxBoard64));
 	//Output(ConvertPositionToFEN(brain));
-	Output(ConvertPositionToFEN(brain->mailboxBoard64, brain->gameRecord[brain->GameRecordIndexRoot].sideToMove, brain->gameRecord[brain->GameRecordIndexRoot].castlingStatus, brain->gameRecord[brain->GameRecordIndexRoot].epSquare, brain->gameRecord[brain->GameRecordIndexRoot].pliesSinceIrreversible, brain->gameRecord[brain->GameRecordIndexRoot].moveNumber));
-	uint64_t hash64 = GenerateTranspositionTableHash64(brain->mailboxBoard64, &brain->gameRecord[brain->GameRecordIndexRoot]);
+	Output(ConvertPositionToFEN(brain->MailboxBoard64, brain->gameRecord[brain->GameRecordIndexRoot].sideToMove, brain->gameRecord[brain->GameRecordIndexRoot].castlingStatus, brain->gameRecord[brain->GameRecordIndexRoot].epSquare, brain->gameRecord[brain->GameRecordIndexRoot].pliesSinceIrreversible, brain->gameRecord[brain->GameRecordIndexRoot].moveNumber));
+	uint64_t hash64 = GenerateTranspositionTableHash64(brain->MailboxBoard64, &brain->gameRecord[brain->GameRecordIndexRoot]);
 
 	static char buffer[100];
 
@@ -323,40 +323,40 @@ void WriteMailboxBoard64(Brain* brain)
 	Output("");
 }
 
-void WritePiecesBBAddPieces(int8_t mailboxBoard64[64], uint64_t bb, int8_t pieceType)
+void WritePiecesBBAddPieces(int8_t MailboxBoard64[64], uint64_t bb, int8_t pieceType)
 {
 	while (bb)
 	{
 		int square = GetLS1BIndex(bb);
-		mailboxBoard64[square] = pieceType;
+		MailboxBoard64[square] = pieceType;
 		ClearLS1B(bb);
 	}
 }
 
 void WritePiecesBB(Brain* brain)
 {
-	int8_t mailboxBoard64[64];
+	int8_t MailboxBoard64[64];
 
-	ClearMailboxBoard64(mailboxBoard64);
+	ClearMailboxBoard64(MailboxBoard64);
 
 	for (int piece = Pawn; piece <= King; piece++)
 	{
-		WritePiecesBBAddPieces(mailboxBoard64, brain->piecesBB[0][piece], piece);
-		WritePiecesBBAddPieces(mailboxBoard64, brain->piecesBB[1][piece], -piece);
+		WritePiecesBBAddPieces(MailboxBoard64, brain->piecesBB[0][piece], piece);
+		WritePiecesBBAddPieces(MailboxBoard64, brain->piecesBB[1][piece], -piece);
 	}
 
-	Output(MailboxBoard64String(mailboxBoard64));
-	Output(ConvertPositionToFEN(brain->mailboxBoard64, brain->gameRecord[brain->GameRecordIndexRoot].sideToMove, brain->gameRecord[brain->GameRecordIndexRoot].castlingStatus, brain->gameRecord[brain->GameRecordIndexRoot].epSquare, brain->gameRecord[brain->GameRecordIndexRoot].pliesSinceIrreversible, brain->gameRecord[brain->GameRecordIndexRoot].moveNumber));
+	Output(MailboxBoard64String(MailboxBoard64));
+	Output(ConvertPositionToFEN(brain->MailboxBoard64, brain->gameRecord[brain->GameRecordIndexRoot].sideToMove, brain->gameRecord[brain->GameRecordIndexRoot].castlingStatus, brain->gameRecord[brain->GameRecordIndexRoot].epSquare, brain->gameRecord[brain->GameRecordIndexRoot].pliesSinceIrreversible, brain->gameRecord[brain->GameRecordIndexRoot].moveNumber));
 	Output("");
 }
 
-void ConvertMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesBB[Sides][King + 2])
+void ConvertMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t piecesBB[Sides][King + 2])
 {
 	ClearPiecesBB(piecesBB);
 
 	for (int square = A1; square <= H8; square++)
 	{
-		int8_t piece = mailboxBoard64[square];
+		int8_t piece = MailboxBoard64[square];
 		if (piece != Empty)
 		{
 			int sideToMove = (piece < 0 ? 1 : 0);
@@ -366,9 +366,9 @@ void ConvertMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesB
 	}
 }
 
-void ConvertPiecesBBToMailboxBoard64(uint64_t piecesBB[Sides][King + 2], int8_t mailboxBoard64[64])
+void ConvertPiecesBBToMailboxBoard64(uint64_t piecesBB[Sides][King + 2], int8_t MailboxBoard64[64])
 {
-	ClearMailboxBoard64(mailboxBoard64);
+	ClearMailboxBoard64(MailboxBoard64);
 
 	for (int side = 0; side < Sides; side++)
 		for (int piece = Pawn; piece <= King; piece++)
@@ -377,18 +377,18 @@ void ConvertPiecesBBToMailboxBoard64(uint64_t piecesBB[Sides][King + 2], int8_t 
 			while (bb2)
 			{
 				int square = GetLS1BIndex(bb2);
-				mailboxBoard64[square] = (side == 0 ? piece : -piece);
+				MailboxBoard64[square] = (side == 0 ? piece : -piece);
 				ClearLS1B(bb2);
 			}
 		}
 }
 
-bool CompareMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesBB[Sides][King + 2])
+bool CompareMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t piecesBB[Sides][King + 2])
 {
 	uint64_t piecesBB2[Sides][King + 2];
 
 	ClearPiecesBB(piecesBB2);
-	ConvertMailboxBoard64ToPiecesBB(mailboxBoard64, piecesBB2);
+	ConvertMailboxBoard64ToPiecesBB(MailboxBoard64, piecesBB2);
 
 	for (int side = 0; side < Sides; side++)
 		for (int piece = AllPieces; piece <= King; piece++)
@@ -457,43 +457,43 @@ bool CompareMailboxBoard64ToPiecesBB(int8_t mailboxBoard64[64], uint64_t piecesB
 
 //----------------------------------------------------------------------------------------------------
 
-void SetNewGamePositionMailboxBoard64(int8_t mailboxBoard64[64])
+void SetNewGamePositionMailboxBoard64(int8_t MailboxBoard64[64])
 {
 	// Set the board for a new game
-	ClearMailboxBoard64(mailboxBoard64);
+	ClearMailboxBoard64(MailboxBoard64);
 
-	mailboxBoard64[A1] = Rook;
-	mailboxBoard64[B1] = Knight;
-	mailboxBoard64[C1] = Bishop;
-	mailboxBoard64[D1] = Queen;
-	mailboxBoard64[E1] = King;
-	mailboxBoard64[F1] = Bishop;
-	mailboxBoard64[G1] = Knight;
-	mailboxBoard64[H1] = Rook;
-	mailboxBoard64[A2] = Pawn;
-	mailboxBoard64[B2] = Pawn;
-	mailboxBoard64[C2] = Pawn;
-	mailboxBoard64[D2] = Pawn;
-	mailboxBoard64[E2] = Pawn;
-	mailboxBoard64[F2] = Pawn;
-	mailboxBoard64[G2] = Pawn;
-	mailboxBoard64[H2] = Pawn;
-	mailboxBoard64[A8] = -Rook;
-	mailboxBoard64[B8] = -Knight;
-	mailboxBoard64[C8] = -Bishop;
-	mailboxBoard64[D8] = -Queen;
-	mailboxBoard64[E8] = -King;
-	mailboxBoard64[F8] = -Bishop;
-	mailboxBoard64[G8] = -Knight;
-	mailboxBoard64[H8] = -Rook;
-	mailboxBoard64[A7] = -Pawn;
-	mailboxBoard64[B7] = -Pawn;
-	mailboxBoard64[C7] = -Pawn;
-	mailboxBoard64[D7] = -Pawn;
-	mailboxBoard64[E7] = -Pawn;
-	mailboxBoard64[F7] = -Pawn;
-	mailboxBoard64[G7] = -Pawn;
-	mailboxBoard64[H7] = -Pawn;
+	MailboxBoard64[A1] = Rook;
+	MailboxBoard64[B1] = Knight;
+	MailboxBoard64[C1] = Bishop;
+	MailboxBoard64[D1] = Queen;
+	MailboxBoard64[E1] = King;
+	MailboxBoard64[F1] = Bishop;
+	MailboxBoard64[G1] = Knight;
+	MailboxBoard64[H1] = Rook;
+	MailboxBoard64[A2] = Pawn;
+	MailboxBoard64[B2] = Pawn;
+	MailboxBoard64[C2] = Pawn;
+	MailboxBoard64[D2] = Pawn;
+	MailboxBoard64[E2] = Pawn;
+	MailboxBoard64[F2] = Pawn;
+	MailboxBoard64[G2] = Pawn;
+	MailboxBoard64[H2] = Pawn;
+	MailboxBoard64[A8] = -Rook;
+	MailboxBoard64[B8] = -Knight;
+	MailboxBoard64[C8] = -Bishop;
+	MailboxBoard64[D8] = -Queen;
+	MailboxBoard64[E8] = -King;
+	MailboxBoard64[F8] = -Bishop;
+	MailboxBoard64[G8] = -Knight;
+	MailboxBoard64[H8] = -Rook;
+	MailboxBoard64[A7] = -Pawn;
+	MailboxBoard64[B7] = -Pawn;
+	MailboxBoard64[C7] = -Pawn;
+	MailboxBoard64[D7] = -Pawn;
+	MailboxBoard64[E7] = -Pawn;
+	MailboxBoard64[F7] = -Pawn;
+	MailboxBoard64[G7] = -Pawn;
+	MailboxBoard64[H7] = -Pawn;
 }
 
 void InitialiseDistances()
@@ -636,13 +636,13 @@ void InitialiseTranspositionTableRandomValues()
 #endif
 }
 
-uint64_t GenerateTranspositionTableHash64(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer)
+uint64_t GenerateTranspositionTableHash64(int8_t MailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer)
 {
 	uint64_t hash64 = 0;
 
 	for (int square = A1; square <= H8; square++)
 	{
-		int8_t piece = mailboxBoard64[square];
+		int8_t piece = MailboxBoard64[square];
 		if (piece >= Pawn)
 			hash64 ^= TranspositionTableRandoms[0][piece][square];
 		else if (piece <= -Pawn)
@@ -690,7 +690,7 @@ void NewGame(bool clearEverything)
 	// Each position startpos (but with clearEverything set to false)
 
 	// This assumes a 'normal' chess starting position. 'Chess960/FRC' starting positions are specified via a subsequent POSITION FEN command
-	SetNewGamePositionMailboxBoard64(EngineBrain.mailboxBoard64);
+	SetNewGamePositionMailboxBoard64(EngineBrain.MailboxBoard64);
 	InitialKingFile = E;
 	InitialKingSideRookFile = H;
 	InitialQueenSideRookFile = A;
@@ -709,14 +709,14 @@ void NewGame(bool clearEverything)
 	}
 }
 
-void InitialiseMaterialValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
+void InitialiseMaterialValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
 {
 	grp->totalMaterial[0] = 0;
 	grp->totalMaterial[1] = 0;
 
 	for (int square = A1; square <= H8; square++)
 	{
-		int8_t piece = mailboxBoard64[square];
+		int8_t piece = MailboxBoard64[square];
 		if ((piece != Empty) && (abs(piece) != King))
 		{
 			if (piece > 0)
@@ -727,7 +727,7 @@ void InitialiseMaterialValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct*
 	}
 }
 
-bool MaterialValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
+bool MaterialValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
 {
 	short totalMaterial[2];
 
@@ -736,7 +736,7 @@ bool MaterialValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gr
 
 	for (int square = A1; square <= H8; square++)
 	{
-		int8_t piece = mailboxBoard64[square];
+		int8_t piece = MailboxBoard64[square];
 		if ((piece != Empty) && (abs(piece) != King))
 		{
 			if (piece > 0)
@@ -750,7 +750,7 @@ bool MaterialValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* gr
 }
 
 
-void CalculatePSTValues(int8_t mailboxBoard64[64], int openingPST[Sides], int endgamePST[Sides])
+void CalculatePSTValues(int8_t MailboxBoard64[64], int openingPST[Sides], int endgamePST[Sides])
 {
 	openingPST[0] = 0;
 	openingPST[1] = 0;
@@ -759,7 +759,7 @@ void CalculatePSTValues(int8_t mailboxBoard64[64], int openingPST[Sides], int en
 
 	for (int square = A1; square <= H8; square++)
 	{
-		int8_t piece = mailboxBoard64[square];
+		int8_t piece = MailboxBoard64[square];
 		if (piece != Empty)
 		{
 			if (piece > 0)
@@ -776,22 +776,22 @@ void CalculatePSTValues(int8_t mailboxBoard64[64], int openingPST[Sides], int en
 	}
 }
 
-bool PSTValuesCorrect(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
+bool PSTValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
 {
 	int openingPST[Sides];
 	int endgamePST[Sides];
 
-	CalculatePSTValues(mailboxBoard64, openingPST, endgamePST);
+	CalculatePSTValues(MailboxBoard64, openingPST, endgamePST);
 
 	return (openingPST[0] == grp->totalOpeningPST[0]) && (openingPST[1] == grp->totalOpeningPST[1]) && (endgamePST[0] == grp->totalEndgamePST[0]) && (endgamePST[1] == grp->totalEndgamePST[1]);
 }
 
-void InitialisePSTValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
+void InitialisePSTValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
 {
 	int openingPST[Sides];
 	int endgamePST[Sides];
 
-	CalculatePSTValues(mailboxBoard64, openingPST, endgamePST);
+	CalculatePSTValues(MailboxBoard64, openingPST, endgamePST);
 
 	grp->totalOpeningPST[0] = openingPST[0];
 	grp->totalOpeningPST[1] = openingPST[1];
@@ -801,14 +801,14 @@ void InitialisePSTValues(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
 
 const int GamePhaseIncrement[8] = { 0, 0, 3, 3, 5, 9, 0, 0 };
 
-void InitialiseGamePhase(int8_t mailboxBoard64[64], GameRecordEntry_Struct* grp)
+void InitialiseGamePhase(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
 {
 	grp->gamePhase[0] = 0;
 	grp->gamePhase[1] = 0;
 
 	for (int square = A1; square <= H8; square++)
 	{
-		int8_t piece = mailboxBoard64[square];
+		int8_t piece = MailboxBoard64[square];
 		if (piece != Empty)
 		{
 			if (piece > 0)
@@ -915,9 +915,9 @@ bool MakeMove(std::string move)
 	}
 
 	// Special case flags (en-passant, castling)
-	if (abs(EngineBrain.mailboxBoard64[EngineBrain.gameRecordPointer->move.mf.fromSquare]) == Pawn)
+	if (abs(EngineBrain.MailboxBoard64[EngineBrain.gameRecordPointer->move.mf.fromSquare]) == Pawn)
 	{
-		if (EngineBrain.mailboxBoard64[EngineBrain.gameRecordPointer->move.mf.toSquare] == Empty)
+		if (EngineBrain.MailboxBoard64[EngineBrain.gameRecordPointer->move.mf.toSquare] == Empty)
 		{
 			delta = abs(EngineBrain.gameRecordPointer->move.mf.toSquare - EngineBrain.gameRecordPointer->move.mf.fromSquare);
 			if ((delta == 7) || (delta == 9))
@@ -927,12 +927,12 @@ bool MakeMove(std::string move)
 			}
 		}
 	}
-	if (abs(EngineBrain.mailboxBoard64[EngineBrain.gameRecordPointer->move.mf.fromSquare]) == King)
+	if (abs(EngineBrain.MailboxBoard64[EngineBrain.gameRecordPointer->move.mf.fromSquare]) == King)
 	{
 		if (UCI_Chess960)
 		{
-			if (abs(EngineBrain.mailboxBoard64[EngineBrain.gameRecordPointer->move.mf.toSquare]) == Rook) // GUIs send Chess960 castling moves as 'king takes own rook' but we want 'K to G1/8 or C1/8'
-				if ((EngineBrain.mailboxBoard64[EngineBrain.gameRecordPointer->move.mf.fromSquare] > 0) == (EngineBrain.mailboxBoard64[EngineBrain.gameRecordPointer->move.mf.toSquare] > 0))
+			if (abs(EngineBrain.MailboxBoard64[EngineBrain.gameRecordPointer->move.mf.toSquare]) == Rook) // GUIs send Chess960 castling moves as 'king takes own rook' but we want 'K to G1/8 or C1/8'
+				if ((EngineBrain.MailboxBoard64[EngineBrain.gameRecordPointer->move.mf.fromSquare] > 0) == (EngineBrain.MailboxBoard64[EngineBrain.gameRecordPointer->move.mf.toSquare] > 0))
 				{
 					EngineBrain.gameRecordPointer->move.mf.flag = MFCastling;
 
@@ -970,7 +970,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 	char c;
 
 	// Set board to Empty in case FEN std::string faulty
-	ClearMailboxBoard64(brain.mailboxBoard64);
+	ClearMailboxBoard64(brain.MailboxBoard64);
 
 	// Process the 'position' element
 	row = 7;
@@ -984,52 +984,52 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 		switch (c)
 		{
 		case 'P':
-			brain.mailboxBoard64[row * 8 + column] = Pawn;
+			brain.MailboxBoard64[row * 8 + column] = Pawn;
 			column++;
 			break;
 		case 'N':
-			brain.mailboxBoard64[row * 8 + column] = Knight;
+			brain.MailboxBoard64[row * 8 + column] = Knight;
 			column++;
 			break;
 		case 'B':
-			EngineBrain.mailboxBoard64[row * 8 + column] = Bishop;
+			EngineBrain.MailboxBoard64[row * 8 + column] = Bishop;
 			column++;
 			break;
 		case 'R':
-			brain.mailboxBoard64[row * 8 + column] = Rook;
+			brain.MailboxBoard64[row * 8 + column] = Rook;
 			column++;
 			break;
 		case 'Q':
-			brain.mailboxBoard64[row * 8 + column] = Queen;
+			brain.MailboxBoard64[row * 8 + column] = Queen;
 			column++;
 			break;
 		case 'K':
-			brain.mailboxBoard64[row * 8 + column] = King;
+			brain.MailboxBoard64[row * 8 + column] = King;
 			column++;
 			break;
 
 		case 'p':
-			brain.mailboxBoard64[row * 8 + column] = -Pawn;
+			brain.MailboxBoard64[row * 8 + column] = -Pawn;
 			column++;
 			break;
 		case 'n':
-			brain.mailboxBoard64[row * 8 + column] = -Knight;
+			brain.MailboxBoard64[row * 8 + column] = -Knight;
 			column++;
 			break;
 		case 'b':
-			brain.mailboxBoard64[row * 8 + column] = -Bishop;
+			brain.MailboxBoard64[row * 8 + column] = -Bishop;
 			column++;
 			break;
 		case 'r':
-			brain.mailboxBoard64[row * 8 + column] = -Rook;
+			brain.MailboxBoard64[row * 8 + column] = -Rook;
 			column++;
 			break;
 		case 'q':
-			brain.mailboxBoard64[row * 8 + column] = -Queen;
+			brain.MailboxBoard64[row * 8 + column] = -Queen;
 			column++;
 			break;
 		case 'k':
-			brain.mailboxBoard64[row * 8 + column] = -King;
+			brain.MailboxBoard64[row * 8 + column] = -King;
 			column++;
 			break;
 
@@ -1089,7 +1089,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 				if (c >= 'A' && c <= 'Z') // Uppercase?
 				{
 					for (int8_t square = A1; square <= H1; square++)
-						if (brain.mailboxBoard64[square] == King)
+						if (brain.MailboxBoard64[square] == King)
 						{
 							InitialKingFile = square & 7;
 							break;
@@ -1099,7 +1099,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 					{
 						brain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
 						for (int8_t square = H1; square >= A1; square--) // Find the rightmost rook
-							if (brain.mailboxBoard64[square] == Rook)
+							if (brain.MailboxBoard64[square] == Rook)
 							{
 								InitialKingSideRookFile = square & 7;
 								break;
@@ -1109,7 +1109,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 					{
 						brain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
 						for (int8_t square = A1; square <= H1; square++) // Find the leftmost rook
-							if (brain.mailboxBoard64[square] == Rook)
+							if (brain.MailboxBoard64[square] == Rook)
 							{
 								InitialQueenSideRookFile = square & 7;
 								break;
@@ -1133,7 +1133,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 				else
 				{
 					for (int8_t square = A8; square <= H8; square++)
-						if (brain.mailboxBoard64[square] == -King)
+						if (brain.MailboxBoard64[square] == -King)
 						{
 							InitialKingFile = square & 7;
 							break;
@@ -1143,7 +1143,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 					{
 						brain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
 						for (int8_t square = H8; square >= A8; square--) // Find the rightmost rook
-							if (brain.mailboxBoard64[square] == -Rook)
+							if (brain.MailboxBoard64[square] == -Rook)
 							{
 								InitialKingSideRookFile = square & 7;
 								break;
@@ -1153,7 +1153,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 					{
 						brain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
 						for (int8_t square = A8; square <= H8; square++) // Find the leftmost rook
-							if (brain.mailboxBoard64[square] == -Rook)
+							if (brain.MailboxBoard64[square] == -Rook)
 							{
 								InitialQueenSideRookFile = square & 7;
 								break;
@@ -1297,17 +1297,17 @@ void SetPositionAndMoves(std::string positionAndMoves)
 	}
 
 	// Set up the bit boards from the 64-square mailbox board
-	ConvertMailboxBoard64ToPiecesBB(EngineBrain.mailboxBoard64, EngineBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(EngineBrain.MailboxBoard64, EngineBrain.piecesBB);
 
 	// The calls to ClearGameRecord above should have set GameRecordIndexRoot to 2
 	assert(EngineBrain.GameRecordIndexRoot == 2);
 	EngineBrain.gameRecordPointer = &EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot];
 
 	// Ensure that the root game record entry has correct values
-	InitialiseMaterialValues(EngineBrain.mailboxBoard64, EngineBrain.gameRecordPointer);
-	InitialiseGamePhase(EngineBrain.mailboxBoard64, EngineBrain.gameRecordPointer);
+	InitialiseMaterialValues(EngineBrain.MailboxBoard64, EngineBrain.gameRecordPointer);
+	InitialiseGamePhase(EngineBrain.MailboxBoard64, EngineBrain.gameRecordPointer);
 
-	EngineBrain.gameRecordPointer->transpositionTableHash64 = GenerateTranspositionTableHash64(EngineBrain.mailboxBoard64, EngineBrain.gameRecordPointer);
+	EngineBrain.gameRecordPointer->transpositionTableHash64 = GenerateTranspositionTableHash64(EngineBrain.MailboxBoard64, EngineBrain.gameRecordPointer);
 	if (SideToMove == 1)
 		EngineBrain.gameRecordPointer->transpositionTableHash64 = ~EngineBrain.gameRecordPointer->transpositionTableHash64;
 	EngineBrain.gameRecordPointer->transpositionTableHash64WithEP = EngineBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[EngineBrain.gameRecordPointer->epSquare];
@@ -1319,8 +1319,8 @@ void SetPositionAndMoves(std::string positionAndMoves)
 		// GameRecordIndexRoot should be 2 here
 		while (positionAndMoves != "")
 		{
-			assert(CompareMailboxBoard64ToPiecesBB(EngineBrain.mailboxBoard64, EngineBrain.piecesBB));
-			assert(EngineBrain.gameRecordPointer->transpositionTableHash64 == ((SideToMove == 0) ? GenerateTranspositionTableHash64(EngineBrain.mailboxBoard64, EngineBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(EngineBrain.mailboxBoard64, EngineBrain.gameRecordPointer)));
+			assert(CompareMailboxBoard64ToPiecesBB(EngineBrain.MailboxBoard64, EngineBrain.piecesBB));
+			assert(EngineBrain.gameRecordPointer->transpositionTableHash64 == ((SideToMove == 0) ? GenerateTranspositionTableHash64(EngineBrain.MailboxBoard64, EngineBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(EngineBrain.MailboxBoard64, EngineBrain.gameRecordPointer)));
 
 			move = UpperCase(GetNextToken(&positionAndMoves));
 			MakeMove(move);
