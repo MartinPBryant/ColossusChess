@@ -12,13 +12,13 @@
 
 Brain::Brain()
 {
-	gameRecord = new GameRecordEntry_Struct[gameRecordSize];
+	GameRecord = new GameRecordEntry_Struct[GameRecordSize];
 	ClearGameRecord();
 }
 
 Brain::~Brain()
 {
-	delete gameRecord;
+	delete GameRecord;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -27,91 +27,91 @@ void Brain::CopyFrom(Brain* sourceBrain)
 {
 	// Copy the mailbox board and the game record from the source brain into this brain
 	std::copy(sourceBrain->MailboxBoard64, sourceBrain->MailboxBoard64 + 64, this->MailboxBoard64); // N.B. "+64" is correct!
-	for (int i = 0; i < this->gameRecordSize; i++)
-		this->gameRecord[i] = sourceBrain->gameRecord[i];
+	for (int i = 0; i < this->GameRecordSize; i++)
+		this->GameRecord[i] = sourceBrain->GameRecord[i];
 	this->GameRecordIndexRoot = sourceBrain->GameRecordIndexRoot;
-	this->gameRecordPointer = &gameRecord[GameRecordIndexRoot];
+	this->GameRecordPointer = &GameRecord[GameRecordIndexRoot];
 }
 
 void Brain::ClearGameRecord()
 {
 	// The 0th and 1th entries are placeholders BEFORE the first move of the game. They may be referenced by 'improving' code/'follow-up-move' code which examines previous plies data
-	gameRecord[0].move.ui32 = 0 | (0 << 8) | (MFCastling << 16); // Anything to flag it as irreversible
-	gameRecord[0].move.fromSquarePiece = King;
-	gameRecord[0].move.toSquarePiece = King;
-	gameRecord[0].castlingStatus.ui32 = 0;
-	gameRecord[0].sideToMove = 0;
-	gameRecord[0].moveNumber = 0;
-	gameRecord[0].transpositionTableHash64 = 0;
-	gameRecord[0].transpositionTableHash64WithEP = 0;
-	gameRecord[0].isInCheck = 0;
+	GameRecord[0].move.ui32 = 0 | (0 << 8) | (MFCastling << 16); // Anything to flag it as irreversible
+	GameRecord[0].move.fromSquarePiece = King;
+	GameRecord[0].move.toSquarePiece = King;
+	GameRecord[0].castlingStatus.ui32 = 0;
+	GameRecord[0].sideToMove = 0;
+	GameRecord[0].moveNumber = 0;
+	GameRecord[0].transpositionTableHash64 = 0;
+	GameRecord[0].transpositionTableHash64WithEP = 0;
+	GameRecord[0].isInCheck = 0;
 	//gameRecord[0].dangerConditions.dc.isTWM = TTFlagThreatenedWithMate;
 	//gameRecord[0].dangerConditions.dc.isFMTP = TTFlagFewerMovesThanPieces;
 	//gameRecord[0].dangerConditions.dc.isO1M = TTFlagOnlyOneMove;
 	//gameRecord[0].dangerConditions.dc.isO1PCM = TTFlagOnlyOnePieceCanMove;
 	//gameRecord[0].dangerConditions.dc.isZLKM = 1;
 	//gameRecord[0].dangerConditions.dc.isOKCM = 1;
-	gameRecord[0].dangerConditions = 0xFF;
-	gameRecord[0].isThreateningMateInOne.ui32 = 0;
-	gameRecord[0].epSquare = 0;
-	gameRecord[0].pliesSinceIrreversible = 0;
-	gameRecord[0].givesCheck = 0;
-	gameRecord[0].isThreateningMateInOne.ui32 = 0;
-	gameRecord[0].forcingLine = true;
-	gameRecord[0].forcingLineTWM = true;
-	gameRecord[0].forcingMove = true;
-	gameRecord[0].DefenderKingMovesBefore = 0;
-	gameRecord[0].TotalDefenderKingMovesBefore = 0;
-	gameRecord[0].DefenderKingMovesAfter = 0;
-	gameRecord[0].TotalDefenderKingMovesAfter = 0;
-	gameRecord[0].SEEResult = 0;
-	gameRecord[0].move.ui32 = 0;
-	gameRecord[0].move.fromSquarePiece = 1;
-	gameRecord[0].move.toSquarePiece = 0;
+	GameRecord[0].dangerConditions = 0xFF;
+	GameRecord[0].isThreateningMateInOne.ui32 = 0;
+	GameRecord[0].epSquare = 0;
+	GameRecord[0].pliesSinceIrreversible = 0;
+	GameRecord[0].givesCheck = 0;
+	GameRecord[0].isThreateningMateInOne.ui32 = 0;
+	GameRecord[0].forcingLine = true;
+	GameRecord[0].forcingLineTWM = true;
+	GameRecord[0].forcingMove = true;
+	GameRecord[0].DefenderKingMovesBefore = 0;
+	GameRecord[0].TotalDefenderKingMovesBefore = 0;
+	GameRecord[0].DefenderKingMovesAfter = 0;
+	GameRecord[0].TotalDefenderKingMovesAfter = 0;
+	GameRecord[0].SEEResult = 0;
+	GameRecord[0].move.ui32 = 0;
+	GameRecord[0].move.fromSquarePiece = 1;
+	GameRecord[0].move.toSquarePiece = 0;
 
-	gameRecord[1].move.ui32 = 0 | (0 << 8) | (MFCastling << 16); // Anything to flag it as irreversible
-	gameRecord[1].move.fromSquarePiece = King;
-	gameRecord[1].move.toSquarePiece = King;
-	gameRecord[1].castlingStatus.ui32 = 0;
-	gameRecord[1].sideToMove = 1;
-	gameRecord[1].moveNumber = 0;
-	gameRecord[1].transpositionTableHash64 = 0;
-	gameRecord[1].transpositionTableHash64WithEP = 0;
-	gameRecord[1].isInCheck = 0;
+	GameRecord[1].move.ui32 = 0 | (0 << 8) | (MFCastling << 16); // Anything to flag it as irreversible
+	GameRecord[1].move.fromSquarePiece = King;
+	GameRecord[1].move.toSquarePiece = King;
+	GameRecord[1].castlingStatus.ui32 = 0;
+	GameRecord[1].sideToMove = 1;
+	GameRecord[1].moveNumber = 0;
+	GameRecord[1].transpositionTableHash64 = 0;
+	GameRecord[1].transpositionTableHash64WithEP = 0;
+	GameRecord[1].isInCheck = 0;
 	//gameRecord[1].dangerConditions.dc.isTWM = TTFlagThreatenedWithMate;
 	//gameRecord[1].dangerConditions.dc.isFMTP = TTFlagFewerMovesThanPieces;
 	//gameRecord[1].dangerConditions.dc.isO1M = TTFlagOnlyOneMove;
 	//gameRecord[1].dangerConditions.dc.isO1PCM = TTFlagOnlyOnePieceCanMove;
 	//gameRecord[1].dangerConditions.dc.isZLKM = 1;
 	//gameRecord[1].dangerConditions.dc.isOKCM = 1;
-	gameRecord[0].dangerConditions = 0xFF;
-	gameRecord[1].isThreateningMateInOne.ui32 = 0;
-	gameRecord[1].epSquare = 0;
-	gameRecord[1].pliesSinceIrreversible = 0;
-	gameRecord[1].givesCheck = 0;
-	gameRecord[1].isThreateningMateInOne.ui32 = 0;
-	gameRecord[1].forcingLine = true;
-	gameRecord[1].forcingLineTWM = true;
-	gameRecord[1].forcingMove = true;
-	gameRecord[1].DefenderKingMovesBefore = 0;
-	gameRecord[0].TotalDefenderKingMovesBefore = 0;
-	gameRecord[1].DefenderKingMovesAfter = 0;
-	gameRecord[1].TotalDefenderKingMovesAfter = 0;
-	gameRecord[1].SEEResult = 0;
-	gameRecord[1].move.ui32 = 0;
-	gameRecord[1].move.fromSquarePiece = 1;
-	gameRecord[1].move.toSquarePiece = 0;
+	GameRecord[0].dangerConditions = 0xFF;
+	GameRecord[1].isThreateningMateInOne.ui32 = 0;
+	GameRecord[1].epSquare = 0;
+	GameRecord[1].pliesSinceIrreversible = 0;
+	GameRecord[1].givesCheck = 0;
+	GameRecord[1].isThreateningMateInOne.ui32 = 0;
+	GameRecord[1].forcingLine = true;
+	GameRecord[1].forcingLineTWM = true;
+	GameRecord[1].forcingMove = true;
+	GameRecord[1].DefenderKingMovesBefore = 0;
+	GameRecord[0].TotalDefenderKingMovesBefore = 0;
+	GameRecord[1].DefenderKingMovesAfter = 0;
+	GameRecord[1].TotalDefenderKingMovesAfter = 0;
+	GameRecord[1].SEEResult = 0;
+	GameRecord[1].move.ui32 = 0;
+	GameRecord[1].move.fromSquarePiece = 1;
+	GameRecord[1].move.toSquarePiece = 0;
 
 	// The 2th entry needs some fields initialising too (which may subsequently be updated if a FEN position is specified)
-	gameRecord[2].sideToMove = 0;
-	gameRecord[2].moveNumber = 1;
-	gameRecord[2].castlingStatus.ui32 = 0;
-	gameRecord[2].epSquare = 0;
-	gameRecord[2].pliesSinceIrreversible = 0;
+	GameRecord[2].sideToMove = 0;
+	GameRecord[2].moveNumber = 1;
+	GameRecord[2].castlingStatus.ui32 = 0;
+	GameRecord[2].epSquare = 0;
+	GameRecord[2].pliesSinceIrreversible = 0;
 
 	// The first move of the game goes in the 2th entry
 	GameRecordIndexRoot = 2;
-	gameRecordPointer = &gameRecord[GameRecordIndexRoot];
+	GameRecordPointer = &GameRecord[GameRecordIndexRoot];
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -139,17 +139,17 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnPromotionsBB = (((piecesBB[sideToMove][Pawn] & SeventhRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnPromotionsBB = (((PiecesBB[sideToMove][Pawn] & SeventhRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnPromotionsBB)
 	{
 		toSquare = GetLS1BIndex(pawnPromotionsBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - pmo][kingSquare])
 			)
 		{
@@ -165,12 +165,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 		}
 		ClearLS1B(pawnPromotionsBB);
 	}
-	uint64_t pawnsCapturesEastBB = (East(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesEastBB = (East(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesEastBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo + 1)][kingSquare])
 			)
 		{
@@ -193,12 +193,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 		}
 		ClearLS1B(pawnsCapturesEastBB);
 	}
-	uint64_t pawnsCapturesWestBB = (West(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesWestBB = (West(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo - 1)][kingSquare])
 			)
 		{
@@ -222,44 +222,44 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 		ClearLS1B(pawnsCapturesWestBB);
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				mlp++->ui32 = (previousMove.mf.toSquare - 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				mlp++->ui32 = (previousMove.mf.toSquare + 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
 	}
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
-		attacksBB = KnightAttacksBBList[fromSquare] & piecesBB[sideToMove ^ 1][AllPieces];
+		attacksBB = KnightAttacksBBList[fromSquare] & PiecesBB[sideToMove ^ 1][AllPieces];
 		while (attacksBB)
 		{
 			int toSquare = GetLS1BIndex(attacksBB);
@@ -270,12 +270,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 	}
 
 	// Bishops and queens
-	uint64_t bishopsAndQueensBB = piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen];
+	uint64_t bishopsAndQueensBB = PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen];
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & piecesBB[sideToMove ^ 1][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & PiecesBB[sideToMove ^ 1][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -287,12 +287,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 	}
 
 	// Rooks and queens
-	uint64_t rooksAndQueensBB = piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen];
+	uint64_t rooksAndQueensBB = PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen];
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & piecesBB[sideToMove ^ 1][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & PiecesBB[sideToMove ^ 1][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -304,7 +304,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndPromotions(int sideToMove, MoveW
 	}
 
 	// King
-	attacksBB = KingAttacksBBList[kingSquare] & piecesBB[sideToMove ^ 1][AllPieces];
+	attacksBB = KingAttacksBBList[kingSquare] & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -320,17 +320,17 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnMove1BB = (((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB; // The '>> (sideToMove << 4)' clause flips north to south when the 2nd side is to move
+	uint64_t pawnMove1BB = (((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB; // The '>> (sideToMove << 4)' clause flips north to south when the 2nd side is to move
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - pmo][kingSquare])
 			)
 		{
@@ -351,23 +351,23 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 		}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedRankFileBB)) ||
+			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedRankFileBB)) ||
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo * 2)][kingSquare])
 			)
 			mlp++->ui32 = (toSquare - pmo * 2) | (toSquare << 8);
 		ClearLS1B(pawnMove2BB);
 	}
-	uint64_t pawnsCapturesEastBB = (East(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesEastBB = (East(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesEastBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo + 1)][kingSquare])
 			)
 		{
@@ -388,12 +388,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 		}
 		ClearLS1B(pawnsCapturesEastBB);
 	}
-	uint64_t pawnsCapturesWestBB = (West(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesWestBB = (West(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo - 1)][kingSquare])
 			)
 		{
@@ -415,44 +415,44 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 		ClearLS1B(pawnsCapturesWestBB);
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				mlp++->ui32 = (previousMove.mf.toSquare - 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				mlp++->ui32 = (previousMove.mf.toSquare + 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
 	}
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
-		attacksBB = KnightAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = KnightAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces];
 		while (attacksBB)
 		{
 			int toSquare = GetLS1BIndex(attacksBB);
@@ -463,12 +463,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	}
 
 	// Bishops and queens
-	uint64_t bishopsAndQueensBB = piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen];
+	uint64_t bishopsAndQueensBB = PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen];
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -480,12 +480,12 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	}
 
 	// Rooks and queens
-	uint64_t rooksAndQueensBB = piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen];
+	uint64_t rooksAndQueensBB = PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen];
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -497,7 +497,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	}
 
 	// King
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces];
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -510,7 +510,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	if (UCI_Chess960)
 	{
 		// King side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 		{
 			// Check passed-over squares are empty and not attacked
 			bool allEmpty;
@@ -560,14 +560,14 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 				}
 				if (allEmpty)
 				{
-					if (((piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0)
+					if (((PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0)
 						mlp++->ui32 = kingSquare | ((BackRankBaseSquareIndex[sideToMove] + G) << 8) | (MFCastling << 16);
 				}
 			}
 		}
 
 		// Queen side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 		{
 			// Check passed-over squares are empty
 			bool allEmpty;
@@ -617,7 +617,7 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 				}
 				if (allEmpty)
 				{
-					uint64_t rooksAndQueensBB = piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen];
+					uint64_t rooksAndQueensBB = PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen];
 					if ((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
 						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
 							mlp++->ui32 = kingSquare | ((BackRankBaseSquareIndex[sideToMove] + C) << 8) | (MFCastling << 16);
@@ -628,13 +628,13 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	else
 	{
 		// King side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					mlp++->ui32 = kingSquare | ((kingSquare + 2) << 8) | (MFCastling << 16);
 
 		// Queen side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					mlp++->ui32 = kingSquare | ((kingSquare - 2) << 8) | (MFCastling << 16);
@@ -647,18 +647,18 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 	uint64_t moves = 0;
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnMove1BB = (((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove1BB = (((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - pmo][kingSquare])
 			)
 		{
@@ -673,23 +673,23 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 		}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedRankFileBB)) ||
+			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedRankFileBB)) ||
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo * 2)][kingSquare])
 			)
 			moves++;
 		ClearLS1B(pawnMove2BB);
 	}
-	uint64_t pawnsCapturesEastBB = (East(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesEastBB = (East(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesEastBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo + 1)][kingSquare])
 			)
 		{
@@ -704,12 +704,12 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 		}
 		ClearLS1B(pawnsCapturesEastBB);
 	}
-	uint64_t pawnsCapturesWestBB = (West(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesWestBB = (West(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo - 1)][kingSquare])
 			)
 		{
@@ -725,74 +725,74 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 		ClearLS1B(pawnsCapturesWestBB);
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				moves++;
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				moves++;
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
 	}
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
-		attacksBB = KnightAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = KnightAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces];
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(knightsBB);
 	}
 
 	// Bishops and queens
-	uint64_t bishopsAndQueensBB = piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen];
+	uint64_t bishopsAndQueensBB = PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen];
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(bishopsAndQueensBB);
 	}
 
 	// Rooks and queens
-	uint64_t rooksAndQueensBB = piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen];
+	uint64_t rooksAndQueensBB = PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen];
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(rooksAndQueensBB);
 	}
 
 	// King
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces];
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -805,7 +805,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 	if (UCI_Chess960)
 	{
 		// King side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 		{
 			// Check passed-over squares are empty and not attacked
 			bool allEmpty;
@@ -855,14 +855,14 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 				}
 				if (allEmpty)
 				{
-					if (((piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0)
+					if (((PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0)
 						moves++;
 				}
 			}
 		}
 
 		// Queen side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 		{
 			// Check passed-over squares are empty
 			bool allEmpty;
@@ -912,7 +912,7 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 				}
 				if (allEmpty)
 				{
-					uint64_t rooksAndQueensBB = piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen];
+					uint64_t rooksAndQueensBB = PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen];
 					if ((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
 						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
 							moves++;
@@ -923,13 +923,13 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 	else
 	{
 		// King side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					moves++;
 
 		// Queen side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					moves++;
@@ -942,19 +942,19 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 	//uint64_t moves = 0;
 	bool canMove;
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnMove1BB = (((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove1BB = (((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - pmo][kingSquare])
 			)
 		{
@@ -970,24 +970,24 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 		}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedRankFileBB)) ||
+			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedRankFileBB)) ||
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo * 2)][kingSquare])
 			)
 			//moves++;
 			return true;
 		ClearLS1B(pawnMove2BB);
 	}
-	uint64_t pawnsCapturesEastBB = (East(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesEastBB = (East(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesEastBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo + 1)][kingSquare])
 			)
 		{
@@ -1003,12 +1003,12 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 		}
 		ClearLS1B(pawnsCapturesEastBB);
 	}
-	uint64_t pawnsCapturesWestBB = (West(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesWestBB = (West(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo - 1)][kingSquare])
 			)
 		{
@@ -1025,50 +1025,50 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 		ClearLS1B(pawnsCapturesWestBB);
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			//if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				//moves++;
 			canMove = !IsAttacked(kingSquare, sideToMove ^ 1);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (canMove)
 				return true;
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			//if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				//moves++;
 			canMove = !IsAttacked(kingSquare, sideToMove ^ 1);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (canMove)
 				return true;
 		}
 	}
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
-		attacksBB = KnightAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = KnightAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces];
 		//moves += PopulationCountX(attacksBB);
 		if (PopulationCountX(attacksBB))
 			return true;
@@ -1076,12 +1076,12 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 	}
 
 	// Bishops and queens
-	uint64_t bishopsAndQueensBB = piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen];
+	uint64_t bishopsAndQueensBB = PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen];
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		//moves += PopulationCountX(attacksBB);
 		if (PopulationCountX(attacksBB))
@@ -1090,12 +1090,12 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 	}
 
 	// Rooks and queens
-	uint64_t rooksAndQueensBB = piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen];
+	uint64_t rooksAndQueensBB = PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen];
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		//moves += PopulationCountX(attacksBB);
 		if (PopulationCountX(attacksBB))
@@ -1104,7 +1104,7 @@ bool Brain::AnyCapturesAndNonCaptures(int sideToMove)
 	}
 
 	// King
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces];
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -1260,15 +1260,15 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 
 	// Generate a bitboard containing all the checking pieces
 	uint64_t enemyCheckersBB =
-		(BishopAttacksBB(kingSquare, occupiedBB) & (piecesBB[sideToMove ^ 1][Bishop] | piecesBB[sideToMove ^ 1][Queen])) |
-		(RookAttacksBB(kingSquare, occupiedBB) & (piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen])) |
-		(KnightAttacksBBList[kingSquare] & piecesBB[sideToMove ^ 1][Knight]) |
-		(PawnAttacksBBList[sideToMove][kingSquare] & piecesBB[sideToMove ^ 1][Pawn])
+		(BishopAttacksBB(kingSquare, occupiedBB) & (PiecesBB[sideToMove ^ 1][Bishop] | PiecesBB[sideToMove ^ 1][Queen])) |
+		(RookAttacksBB(kingSquare, occupiedBB) & (PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen])) |
+		(KnightAttacksBBList[kingSquare] & PiecesBB[sideToMove ^ 1][Knight]) |
+		(PawnAttacksBBList[sideToMove][kingSquare] & PiecesBB[sideToMove ^ 1][Pawn])
 		;
 	assert(PopulationCountX(enemyCheckersBB) >= 1);
 	if (PopulationCountX(enemyCheckersBB) > 1) // If in double-check then only king moves are possible
@@ -1282,11 +1282,11 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnsCapturesEastBB = (East((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
+	uint64_t pawnsCapturesEastBB = (East((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
 	if (pawnsCapturesEastBB) // At most one bit set
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			if ((toSquare >> 3) == EigthRank[sideToMove])
 			{
@@ -1302,11 +1302,11 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 				mlp++->ui32 = (toSquare - (pmo + 1)) | (toSquare << 8);
 		}
 	}
-	uint64_t pawnsCapturesWestBB = (West((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
+	uint64_t pawnsCapturesWestBB = (West((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
 	if (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			if ((toSquare >> 3) == EigthRank[sideToMove])
 			{
@@ -1323,42 +1323,42 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 		}
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				mlp++->ui32 = (previousMove.mf.toSquare - 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				mlp++->ui32 = (previousMove.mf.toSquare + 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
 	}
-	uint64_t pawnMove1BB = ((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
+	uint64_t pawnMove1BB = ((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
-		if (!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			if ((toSquare >> 3) == EigthRank[sideToMove])
 			{
@@ -1375,17 +1375,17 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 		}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove]) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove]) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 			mlp++->ui32 = toSquare - (pmo * 2) | (toSquare << 8);
 		ClearLS1B(pawnMove2BB);
 	}
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
@@ -1401,7 +1401,7 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 
 	// Bishops and queens
 	//uint64_t bishopsAndQueensBB = piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen];
-	uint64_t bishopsAndQueensBB = (piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]) & ~gameRecordPointer->pinnedAllBB;
+	uint64_t bishopsAndQueensBB = (PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]) & ~GameRecordPointer->pinnedAllBB;
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
@@ -1420,7 +1420,7 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 
 	// Rooks and queens
 	//uint64_t rooksAndQueensBB = piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen];
-	uint64_t rooksAndQueensBB = (piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]) & ~gameRecordPointer->pinnedAllBB;
+	uint64_t rooksAndQueensBB = (PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]) & ~GameRecordPointer->pinnedAllBB;
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
@@ -1439,8 +1439,8 @@ MoveWithScore_Struct* Brain::GenerateAllMovesOutOfCheck(int sideToMove, MoveWith
 
 	// King
 king:
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces];
-	piecesBB[sideToMove][AllPieces] ^= piecesBB[sideToMove][King];
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces];
+	PiecesBB[sideToMove][AllPieces] ^= PiecesBB[sideToMove][King];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -1448,7 +1448,7 @@ king:
 			mlp++->ui32 = kingSquare | (toSquare << 8);
 		ClearLS1B(attacksBB);
 	}
-	piecesBB[sideToMove][AllPieces] ^= piecesBB[sideToMove][King];
+	PiecesBB[sideToMove][AllPieces] ^= PiecesBB[sideToMove][King];
 
 	return mlp;
 }
@@ -1457,16 +1457,16 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 	uint64_t moves = 0;
 
 	// Generate a bitboard containing all the checking pieces
 	uint64_t enemyCheckersBB =
-		(BishopAttacksBB(kingSquare, occupiedBB) & (piecesBB[sideToMove ^ 1][Bishop] | piecesBB[sideToMove ^ 1][Queen])) |
-		(RookAttacksBB(kingSquare, occupiedBB) & (piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen])) |
-		(KnightAttacksBBList[kingSquare] & piecesBB[sideToMove ^ 1][Knight]) |
-		(PawnAttacksBBList[sideToMove][kingSquare] & piecesBB[sideToMove ^ 1][Pawn])
+		(BishopAttacksBB(kingSquare, occupiedBB) & (PiecesBB[sideToMove ^ 1][Bishop] | PiecesBB[sideToMove ^ 1][Queen])) |
+		(RookAttacksBB(kingSquare, occupiedBB) & (PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen])) |
+		(KnightAttacksBBList[kingSquare] & PiecesBB[sideToMove ^ 1][Knight]) |
+		(PawnAttacksBBList[sideToMove][kingSquare] & PiecesBB[sideToMove ^ 1][Pawn])
 		;
 	assert(PopulationCountX(enemyCheckersBB) >= 1);
 	if (PopulationCountX(enemyCheckersBB) > 1) // If in double-check then only King moves are possible
@@ -1480,11 +1480,11 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnsCapturesEastBB = (East((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
+	uint64_t pawnsCapturesEastBB = (East((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
 	if (pawnsCapturesEastBB) // At most one bit set
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			if ((toSquare >> 3) == EigthRank[sideToMove])
 			{
@@ -1494,11 +1494,11 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 				moves++;
 		}
 	}
-	uint64_t pawnsCapturesWestBB = (West((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
+	uint64_t pawnsCapturesWestBB = (West((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
 	if (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			if ((toSquare >> 3) == EigthRank[sideToMove])
 			{
@@ -1509,42 +1509,42 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 		}
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				moves++;
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				moves++;
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
 	}
-	uint64_t pawnMove1BB = ((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
+	uint64_t pawnMove1BB = ((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
-		if (!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			if ((toSquare >> 3) == EigthRank[sideToMove])
 			{
@@ -1555,11 +1555,11 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 		}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove]) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove]) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 			moves++;
 		ClearLS1B(pawnMove2BB);
 	}
@@ -1567,7 +1567,7 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 	// If we are in check then pinned pieces can't move at all as they couldn't capture the checker/interrupt the check without exposing the king
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;//CAN DO PINNED TEST HERE AS IN COUNTCPAS&NONCAPS!
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;//CAN DO PINNED TEST HERE AS IN COUNTCPAS&NONCAPS!
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
@@ -1580,7 +1580,7 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 	}
 
 	// Bishops and queens
-	uint64_t bishopsAndQueensBB = (piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]) & ~gameRecordPointer->pinnedAllBB;
+	uint64_t bishopsAndQueensBB = (PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]) & ~GameRecordPointer->pinnedAllBB;
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
@@ -1593,7 +1593,7 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 	}
 
 	// Rooks and queens
-	uint64_t rooksAndQueensBB = (piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]) & ~gameRecordPointer->pinnedAllBB;
+	uint64_t rooksAndQueensBB = (PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]) & ~GameRecordPointer->pinnedAllBB;
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
@@ -1607,8 +1607,8 @@ uint32_t Brain::CountAllMovesOutOfCheck(int sideToMove)
 
 	// King
 king:
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces];
-	piecesBB[sideToMove][AllPieces] ^= piecesBB[sideToMove][King];
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces];
+	PiecesBB[sideToMove][AllPieces] ^= PiecesBB[sideToMove][King];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -1616,7 +1616,7 @@ king:
 			moves++;
 		ClearLS1B(attacksBB);
 	}
-	piecesBB[sideToMove][AllPieces] ^= piecesBB[sideToMove][King];
+	PiecesBB[sideToMove][AllPieces] ^= PiecesBB[sideToMove][King];
 
 	return moves;
 }
@@ -1625,17 +1625,17 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 {
 	uint32_t fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint32_t kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint32_t kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 	//uint64_t moves = 0;
 	bool canMove;
 
 	// Generate a bitboard containing all the checking pieces
 	uint64_t enemyCheckersBB =
-		(BishopAttacksBB(kingSquare, occupiedBB) & (piecesBB[sideToMove ^ 1][Bishop] | piecesBB[sideToMove ^ 1][Queen])) |
-		(RookAttacksBB(kingSquare, occupiedBB) & (piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen])) |
-		(KnightAttacksBBList[kingSquare] & piecesBB[sideToMove ^ 1][Knight]) |
-		(PawnAttacksBBList[sideToMove][kingSquare] & piecesBB[sideToMove ^ 1][Pawn])
+		(BishopAttacksBB(kingSquare, occupiedBB) & (PiecesBB[sideToMove ^ 1][Bishop] | PiecesBB[sideToMove ^ 1][Queen])) |
+		(RookAttacksBB(kingSquare, occupiedBB) & (PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen])) |
+		(KnightAttacksBBList[kingSquare] & PiecesBB[sideToMove ^ 1][Knight]) |
+		(PawnAttacksBBList[sideToMove][kingSquare] & PiecesBB[sideToMove ^ 1][Pawn])
 		;
 	assert(PopulationCountX(enemyCheckersBB) >= 1);
 	if (PopulationCountX(enemyCheckersBB) > 1) // If in double-check then only King moves are possible
@@ -1649,11 +1649,11 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnsCapturesEastBB = (East((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
+	uint64_t pawnsCapturesEastBB = (East((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
 	if (pawnsCapturesEastBB) // At most one bit set
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo + 1)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			//if ((toSquare >> 3) == EigthRank[sideToMove])
 			//{
@@ -1664,11 +1664,11 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 			return true;
 		}
 	}
-	uint64_t pawnsCapturesWestBB = (West((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
+	uint64_t pawnsCapturesWestBB = (West((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4))) & enemyCheckersBB;
 	if (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo - 1)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			//if ((toSquare >> 3) == EigthRank[sideToMove])
 			//{
@@ -1680,49 +1680,49 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 		}
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			//if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				//moves++;
 			canMove = !IsAttacked(kingSquare, sideToMove ^ 1);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (canMove)
 				return true;
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			//if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				//moves++;
 			canMove = !IsAttacked(kingSquare, sideToMove ^ 1);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (canMove)
 				return true;
 		}
 
 	}
-	uint64_t pawnMove1BB = ((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
+	uint64_t pawnMove1BB = ((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
-		if (!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 		{
 			//if ((toSquare >> 3) == EigthRank[sideToMove])
 			//{
@@ -1734,11 +1734,11 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 		}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove]) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove]) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & enemyCheckersBetweenSquaresBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
-		if (!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedAllBB)) // Not pinned?
+		if (!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedAllBB)) // Not pinned?
 			//moves++;
 			return true;
 		ClearLS1B(pawnMove2BB);
@@ -1747,7 +1747,7 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 	// If we are in check then pinned pieces can't move at all as they couldn't capture the checker/interrupt the check without exposing the king
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;//CAN DO PINNED TEST HERE AS IN COUNTCPAS&NONCAPS!
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;//CAN DO PINNED TEST HERE AS IN COUNTCPAS&NONCAPS!
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
@@ -1762,7 +1762,7 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 	}
 
 	// Bishops and queens
-	uint64_t bishopsAndQueensBB = (piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]) & ~gameRecordPointer->pinnedAllBB;
+	uint64_t bishopsAndQueensBB = (PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]) & ~GameRecordPointer->pinnedAllBB;
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
@@ -1777,7 +1777,7 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 	}
 
 	// Rooks and queens
-	uint64_t rooksAndQueensBB = (piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]) & ~gameRecordPointer->pinnedAllBB;
+	uint64_t rooksAndQueensBB = (PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]) & ~GameRecordPointer->pinnedAllBB;
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
@@ -1793,8 +1793,8 @@ bool Brain::AnyMovesOutOfCheck(int sideToMove)
 
 	// King
 king:
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces];
-	piecesBB[sideToMove][AllPieces] ^= piecesBB[sideToMove][King];
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces];
+	PiecesBB[sideToMove][AllPieces] ^= PiecesBB[sideToMove][King];
 	canMove = false;
 	while (attacksBB)
 	{
@@ -1807,7 +1807,7 @@ king:
 		}
 		ClearLS1B(attacksBB);
 	}
-	piecesBB[sideToMove][AllPieces] ^= piecesBB[sideToMove][King];
+	PiecesBB[sideToMove][AllPieces] ^= PiecesBB[sideToMove][King];
 	if (canMove)
 		return true;
 
@@ -1818,9 +1818,9 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 {
 	int fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	int kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
-	int enemyKingSquare = GetLS1BIndex(piecesBB[sideToMove ^ 1][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	int kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
+	int enemyKingSquare = GetLS1BIndex(PiecesBB[sideToMove ^ 1][King]);
 	uint64_t enemyKingPawnAttacksBB = PawnAttacksBBList[sideToMove ^ 1][enemyKingSquare];
 	uint64_t enemyKingKnightAttacksBB = KnightAttacksBBList[enemyKingSquare];
 	uint64_t enemyKingBishopAttacksBB = BishopAttacksBB(enemyKingSquare, occupiedBB);
@@ -1829,23 +1829,23 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnMove1BB = (((piecesBB[sideToMove][Pawn] & ~SeventhRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB & enemyKingPawnAttacksBB;
+	uint64_t pawnMove1BB = (((PiecesBB[sideToMove][Pawn] & ~SeventhRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB & enemyKingPawnAttacksBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - pmo) & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(CreateBitboardFromSquare(toSquare - pmo) & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - pmo][kingSquare]) // Is the to-square on the line between the from-square and the king?
 			)
 			mlp++->ui32 = (toSquare - pmo) | (toSquare << 8);
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB & enemyKingPawnAttacksBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB & enemyKingPawnAttacksBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
 		if (
-			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & gameRecordPointer->pinnedRankFileBB)) ||
+			(!(CreateBitboardFromSquare(toSquare - (pmo * 2)) & GameRecordPointer->pinnedRankFileBB)) ||
 			(CreateBitboardFromSquare(toSquare) & LineListBB[toSquare - (pmo * 2)][kingSquare])
 			)
 			mlp++->ui32 = (toSquare - (pmo * 2)) | (toSquare << 8);
@@ -1853,7 +1853,7 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 	}
 
 	// Knights
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
@@ -1875,7 +1875,7 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 	}
 
 	// Bishops
-	uint64_t bishopsBB = piecesBB[sideToMove][Bishop];
+	uint64_t bishopsBB = PiecesBB[sideToMove][Bishop];
 	while (bishopsBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsBB);
@@ -1886,7 +1886,7 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 		//		validBB = -1;
 		//attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & notOccupiedBB & validBB;
 		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & notOccupiedBB & enemyKingBishopAttacksBB;
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -1898,7 +1898,7 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 	}
 
 	// Rooks
-	uint64_t rooksBB = piecesBB[sideToMove][Rook];
+	uint64_t rooksBB = PiecesBB[sideToMove][Rook];
 	while (rooksBB)
 	{
 		fromSquare = GetLS1BIndex(rooksBB);
@@ -1909,7 +1909,7 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 		//		validBB = -1;
 		//attacksBB = RookAttacksBB(fromSquare, occupiedBB) & notOccupiedBB & validBB;
 		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & notOccupiedBB & enemyKingRookAttacksBB;
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -1921,12 +1921,12 @@ MoveWithScore_Struct* Brain::GenerateNonCaptureNonPromotionDirectChecks(int side
 	}
 
 	// Queens (have to be done separately from the rooks and bishops above as they can check along rank/files and diagonals)
-	uint64_t queensBB = piecesBB[sideToMove][Queen];
+	uint64_t queensBB = PiecesBB[sideToMove][Queen];
 	while (queensBB)
 	{
 		fromSquare = GetLS1BIndex(queensBB);
 		attacksBB = ((BishopAttacksBB(fromSquare, occupiedBB) | RookAttacksBB(fromSquare, occupiedBB)) & notOccupiedBB) & (enemyKingRookAttacksBB | enemyKingBishopAttacksBB);
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -1944,9 +1944,9 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 {
 	int fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	int kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
-	int enemyKingSquare = GetLS1BIndex(piecesBB[sideToMove ^ 1][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	int kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
+	int enemyKingSquare = GetLS1BIndex(PiecesBB[sideToMove ^ 1][King]);
 	uint64_t enemyKingPawnAttacksBB = PawnAttacksBBList[sideToMove ^ 1][enemyKingSquare];
 	uint64_t enemyKingKnightAttacksBB = KnightAttacksBBList[enemyKingSquare];
 	uint64_t enemyKingBishopAttacksBB = BishopAttacksBB(enemyKingSquare, occupiedBB);
@@ -1955,7 +1955,7 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnMove1BB = (((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove1BB = (((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
@@ -1963,11 +1963,11 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 		fromSquare = toSquare - pmo;
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
 		if (
-			(!(fromSquareBB & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(fromSquareBB & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(toSquareBB & LineListBB[fromSquare][kingSquare])
 			)
 			if (
-				(fromSquareBB & gameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
+				(fromSquareBB & GameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
 				|| (toSquareBB & enemyKingPawnAttacksBB) // Direct check?
 				)
 			{
@@ -2005,7 +2005,7 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 			}
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
@@ -2013,17 +2013,17 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 		fromSquare = toSquare - pmo * 2;
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
 		if (
-			(!(fromSquareBB & gameRecordPointer->pinnedRankFileBB)) ||
+			(!(fromSquareBB & GameRecordPointer->pinnedRankFileBB)) ||
 			(toSquareBB & LineListBB[fromSquare][kingSquare])
 			)
 			if (
-				(fromSquareBB & gameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
+				(fromSquareBB & GameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
 				|| (toSquareBB & enemyKingPawnAttacksBB) // Direct check?
 				)
 				mlp++->ui32 = (toSquare - pmo * 2) | (toSquare << 8);
 		ClearLS1B(pawnMove2BB);
 	}
-	uint64_t pawnsCapturesEastBB = (East(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesEastBB = (East(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesEastBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesEastBB);
@@ -2031,11 +2031,11 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 		fromSquare = toSquare - (pmo + 1);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
 		if (
-			(!(fromSquareBB & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(fromSquareBB & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(toSquareBB & LineListBB[fromSquare][kingSquare])
 			)
 			if (
-				(fromSquareBB & gameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
+				(fromSquareBB & GameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
 				|| (toSquareBB & enemyKingPawnAttacksBB) // Direct check?
 				)
 			{
@@ -2075,7 +2075,7 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 			}
 		ClearLS1B(pawnsCapturesEastBB);
 	}
-	uint64_t pawnsCapturesWestBB = (West(((piecesBB[sideToMove][Pawn] & ~gameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & piecesBB[sideToMove ^ 1][AllPieces];
+	uint64_t pawnsCapturesWestBB = (West(((PiecesBB[sideToMove][Pawn] & ~GameRecordPointer->pinnedRankFileBB) << 8) >> (sideToMove << 4))) & PiecesBB[sideToMove ^ 1][AllPieces];
 	while (pawnsCapturesWestBB)
 	{
 		toSquare = GetLS1BIndex(pawnsCapturesWestBB);
@@ -2083,11 +2083,11 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 		fromSquare = toSquare - (pmo - 1);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
 		if (
-			(!(fromSquareBB & gameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
+			(!(fromSquareBB & GameRecordPointer->pinnedDiagonalBB)) || // Not pinned?
 			(toSquareBB & LineListBB[fromSquare][kingSquare])
 			)
 			if (
-				(fromSquareBB & gameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
+				(fromSquareBB & GameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
 				|| (toSquareBB & enemyKingPawnAttacksBB) // Direct check?
 				)
 			{
@@ -2128,50 +2128,50 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 		ClearLS1B(pawnsCapturesWestBB);
 	}
 	// En-passant
-	if (gameRecordPointer->epSquare)
+	if (GameRecordPointer->epSquare)
 	{
 		Move_Struct previousMove;
-		previousMove.ui32 = (gameRecordPointer - 1)->move.ui32;
-		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		previousMove.ui32 = (GameRecordPointer - 1)->move.ui32;
+		if (West(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare));
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare));
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				if (IsAttacked(enemyKingSquare, sideToMove))
 					mlp++->ui32 = (previousMove.mf.toSquare - 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare - 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
-		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & piecesBB[sideToMove][Pawn])
+		if (East(CreateBitboardFromSquare(previousMove.mf.toSquare)) & PiecesBB[sideToMove][Pawn])
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 			if (!IsAttacked(kingSquare, sideToMove ^ 1))
 				if (IsAttacked(enemyKingSquare, sideToMove))
 					mlp++->ui32 = (previousMove.mf.toSquare + 1) | ((previousMove.mf.toSquare) << 8) | (MFEnPassant << 16);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(gameRecordPointer->epSquare);
-			piecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare + 1) ^ CreateBitboardFromSquare(GameRecordPointer->epSquare);
+			PiecesBB[sideToMove ^ 1][Pawn] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(previousMove.mf.toSquare);
 		}
 	}
 
 	// Knights (can give discovered checks along ranks/files and diagonals)
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
-		if (fromSquareBB & gameRecordPointer->discoverersAllBB)
-			attacksBB = KnightAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces]; // All moves will give discovered checks
+		if (fromSquareBB & GameRecordPointer->discoverersAllBB)
+			attacksBB = KnightAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces]; // All moves will give discovered checks
 		else
-			attacksBB = KnightAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces] & enemyKingKnightAttacksBB; // Some moves may directly give check
+			attacksBB = KnightAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces] & enemyKingKnightAttacksBB; // Some moves may directly give check
 		while (attacksBB)
 		{
 			toSquare = GetLS1BIndex(attacksBB);
@@ -2182,16 +2182,16 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 	}
 
 	// Bishops (can give discovered checks along ranks/files)
-	uint64_t bishopsBB = piecesBB[sideToMove][Bishop];
+	uint64_t bishopsBB = PiecesBB[sideToMove][Bishop];
 	while (bishopsBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsBB);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
-		if (fromSquareBB & gameRecordPointer->discoverersAllBB)
-			attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
+		if (fromSquareBB & GameRecordPointer->discoverersAllBB)
+			attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
 		else
-			attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces] & enemyKingBishopAttacksBB;
-		if (fromSquareBB & gameRecordPointer->pinnedAllBB) // Pinned?
+			attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces] & enemyKingBishopAttacksBB;
+		if (fromSquareBB & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -2203,16 +2203,16 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 	}
 
 	// Rooks (can give discovered checks along diagonals)
-	uint64_t rooksBB = piecesBB[sideToMove][Rook];
+	uint64_t rooksBB = PiecesBB[sideToMove][Rook];
 	while (rooksBB)
 	{
 		fromSquare = GetLS1BIndex(rooksBB);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
-		if (fromSquareBB & gameRecordPointer->discoverersAllBB)
-			attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
+		if (fromSquareBB & GameRecordPointer->discoverersAllBB)
+			attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
 		else
-			attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces] & enemyKingRookAttacksBB;
-		if (fromSquareBB & gameRecordPointer->pinnedAllBB) // Pinned?
+			attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces] & enemyKingRookAttacksBB;
+		if (fromSquareBB & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -2224,7 +2224,7 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 	}
 
 	// Queens (cannot give discovered checks as they would already be checking)
-	uint64_t queensBB = piecesBB[sideToMove][Queen];
+	uint64_t queensBB = PiecesBB[sideToMove][Queen];
 	while (queensBB)
 	{
 		fromSquare = GetLS1BIndex(queensBB);
@@ -2232,8 +2232,8 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 		//if (fromSquareBB & gameRecordPointer->discoverersAllBB)
 		//	attacksBB = ((BishopAttacksBB(fromSquare, occupiedBB) | RookAttacksBB(fromSquare, occupiedBB)) & ~piecesBB[sideToMove][AllPieces]);
 		//else
-			attacksBB = ((BishopAttacksBB(fromSquare, occupiedBB) | RookAttacksBB(fromSquare, occupiedBB)) & ~piecesBB[sideToMove][AllPieces]) & (enemyKingRookAttacksBB | enemyKingBishopAttacksBB);
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+			attacksBB = ((BishopAttacksBB(fromSquare, occupiedBB) | RookAttacksBB(fromSquare, occupiedBB)) & ~PiecesBB[sideToMove][AllPieces]) & (enemyKingRookAttacksBB | enemyKingBishopAttacksBB);
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -2246,9 +2246,9 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 
 	// King (can give discovered checks along ranks/files and diagonals but not along the ray to/fro the enemy king)
 	fromSquareBB = CreateBitboardFromSquare(kingSquare);//SURELY THIS IS piecesBB[sideToMove][King] ?????
-	if (fromSquareBB & gameRecordPointer->discoverersAllBB)
+	if (fromSquareBB & GameRecordPointer->discoverersAllBB)
 	{
-		attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces] & ~LineListBB[enemyKingSquare][kingSquare];
+		attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces] & ~LineListBB[enemyKingSquare][kingSquare];
 		while (attacksBB)
 		{
 			int toSquare = GetLS1BIndex(attacksBB);
@@ -2267,19 +2267,19 @@ MoveWithScore_Struct* Brain::GenerateAllChecks(int sideToMove, MoveWithScore_Str
 	//else
 	{
 		// King side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] != 0)
-						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileFBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F]) // Are all the squares between the enemy king and the rook empty?
+						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] & ~(occupiedBB & ~PiecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileFBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F]) // Are all the squares between the enemy king and the rook empty?
 							mlp++->ui32 = kingSquare | ((kingSquare + 2) << 8) | (MFCastling << 16);
 
 		// Queen side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] != 0)
-						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileDBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D]) // Are all the squares between the enemy king and the rook empty?
+						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] & ~(occupiedBB & ~PiecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileDBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D]) // Are all the squares between the enemy king and the rook empty?
 							mlp++->ui32 = kingSquare | ((kingSquare - 2) << 8) | (MFCastling << 16);
 	}
 
@@ -2290,9 +2290,9 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 {
 	int fromSquare, toSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	int kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
-	int enemyKingSquare = GetLS1BIndex(piecesBB[sideToMove ^ 1][King]);
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	int kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
+	int enemyKingSquare = GetLS1BIndex(PiecesBB[sideToMove ^ 1][King]);
 	uint64_t enemyKingPawnAttacksBB = PawnAttacksBBList[sideToMove ^ 1][enemyKingSquare];
 	uint64_t enemyKingKnightAttacksBB = KnightAttacksBBList[enemyKingSquare];
 	uint64_t enemyKingBishopAttacksBB = BishopAttacksBB(enemyKingSquare, occupiedBB);
@@ -2301,7 +2301,7 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 
 	// Pawns
 	int pmo = PawnMoveOffset[sideToMove];
-	uint64_t pawnMove1BB = (((piecesBB[sideToMove][Pawn] & ~SeventhRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove1BB = (((PiecesBB[sideToMove][Pawn] & ~SeventhRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove1BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove1BB);
@@ -2309,17 +2309,17 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 		fromSquare = toSquare - pmo;
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
 		if (
-			(!(fromSquareBB & gameRecordPointer->pinnedRankFileBB)) || // Not pinned?
+			(!(fromSquareBB & GameRecordPointer->pinnedRankFileBB)) || // Not pinned?
 			(toSquareBB & LineListBB[fromSquare][kingSquare])
 			)
 			if (
-				(fromSquareBB & gameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
+				(fromSquareBB & GameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
 				|| (toSquareBB & enemyKingPawnAttacksBB) // Direct check?
 				)
 				mlp++->ui32 = fromSquare | (toSquare << 8);
 		ClearLS1B(pawnMove1BB);
 	}
-	uint64_t pawnMove2BB = ((((((piecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~gameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t pawnMove2BB = ((((((PiecesBB[sideToMove][Pawn] & SecondRankBB[sideToMove] & ~GameRecordPointer->pinnedDiagonalBB) << 8) >> (sideToMove << 4)) & notOccupiedBB) << 8) >> (sideToMove << 4)) & notOccupiedBB;
 	while (pawnMove2BB)
 	{
 		toSquare = GetLS1BIndex(pawnMove2BB);
@@ -2327,11 +2327,11 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 		fromSquare = toSquare - pmo * 2;
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
 		if (
-			(!(fromSquareBB & gameRecordPointer->pinnedRankFileBB)) ||
+			(!(fromSquareBB & GameRecordPointer->pinnedRankFileBB)) ||
 			(toSquareBB & LineListBB[fromSquare][kingSquare])
 			)
 			if (
-				(fromSquareBB & gameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
+				(fromSquareBB & GameRecordPointer->discoverersAllBB) && ((toSquareBB & LineListBB[fromSquare][enemyKingSquare]) == 0) // Discovered check?
 				|| (toSquareBB & enemyKingPawnAttacksBB) // Direct check?
 				)
 				mlp++->ui32 = fromSquare | (toSquare << 8);
@@ -2339,12 +2339,12 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 	}
 
 	// Knights (can give discovered checks along ranks/files and diagonals)
-	uint64_t knightsBB = piecesBB[sideToMove][Knight] & ~gameRecordPointer->pinnedAllBB;
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight] & ~GameRecordPointer->pinnedAllBB;
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
-		if (fromSquareBB & gameRecordPointer->discoverersAllBB)
+		if (fromSquareBB & GameRecordPointer->discoverersAllBB)
 			attacksBB = KnightAttacksBBList[fromSquare] & notOccupiedBB; // All moves will give discovered checks
 		else
 			attacksBB = KnightAttacksBBList[fromSquare] & notOccupiedBB & enemyKingKnightAttacksBB; // Some moves may directly give check
@@ -2358,16 +2358,16 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 	}
 
 	// Bishops (can give discovered checks along ranks/files)
-	uint64_t bishopsBB = piecesBB[sideToMove][Bishop];
+	uint64_t bishopsBB = PiecesBB[sideToMove][Bishop];
 	while (bishopsBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsBB);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
-		if (fromSquareBB & gameRecordPointer->discoverersAllBB)
+		if (fromSquareBB & GameRecordPointer->discoverersAllBB)
 			attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & notOccupiedBB;
 		else
 			attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & notOccupiedBB & enemyKingBishopAttacksBB;
-		if (fromSquareBB & gameRecordPointer->pinnedAllBB) // Pinned?
+		if (fromSquareBB & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -2379,16 +2379,16 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 	}
 
 	// Rooks (can give discovered checks along diagonals)
-	uint64_t rooksBB = piecesBB[sideToMove][Rook];
+	uint64_t rooksBB = PiecesBB[sideToMove][Rook];
 	while (rooksBB)
 	{
 		fromSquare = GetLS1BIndex(rooksBB);
 		fromSquareBB = CreateBitboardFromSquare(fromSquare);
-		if (fromSquareBB & gameRecordPointer->discoverersAllBB)
+		if (fromSquareBB & GameRecordPointer->discoverersAllBB)
 			attacksBB = RookAttacksBB(fromSquare, occupiedBB) & notOccupiedBB;
 		else
 			attacksBB = RookAttacksBB(fromSquare, occupiedBB) & notOccupiedBB & enemyKingRookAttacksBB;
-		if (fromSquareBB & gameRecordPointer->pinnedAllBB) // Pinned?
+		if (fromSquareBB & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -2400,7 +2400,7 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 	}
 
 	// Queens (cannot give discovered checks as they would already be checking)
-	uint64_t queensBB = piecesBB[sideToMove][Queen];
+	uint64_t queensBB = PiecesBB[sideToMove][Queen];
 	while (queensBB)
 	{
 		fromSquare = GetLS1BIndex(queensBB);
@@ -2409,7 +2409,7 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 		//	attacksBB = ((BishopAttacksBB(fromSquare, occupiedBB) | RookAttacksBB(fromSquare, occupiedBB)) & ~piecesBB[sideToMove][AllPieces]);
 		//else
 		attacksBB = ((BishopAttacksBB(fromSquare, occupiedBB) | RookAttacksBB(fromSquare, occupiedBB)) & notOccupiedBB) & (enemyKingRookAttacksBB | enemyKingBishopAttacksBB);
-		if (CreateBitboardFromSquare(fromSquare) & gameRecordPointer->pinnedAllBB) // Pinned?
+		if (CreateBitboardFromSquare(fromSquare) & GameRecordPointer->pinnedAllBB) // Pinned?
 			attacksBB &= LineListBB[fromSquare][kingSquare]; // If it's pinned then it can only move along the ray to/fro the king
 		while (attacksBB)
 		{
@@ -2422,7 +2422,7 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 
 	// King (can give discovered checks along ranks/files and diagonals but not along the ray to/fro the enemy king)
 	fromSquareBB = CreateBitboardFromSquare(kingSquare);//SURELY THIS IS piecesBB[sideToMove][King] ?????
-	if (fromSquareBB & gameRecordPointer->discoverersAllBB)
+	if (fromSquareBB & GameRecordPointer->discoverersAllBB)
 	{
 		attacksBB = KingAttacksBBList[kingSquare] & notOccupiedBB & ~LineListBB[enemyKingSquare][kingSquare];
 		while (attacksBB)
@@ -2443,19 +2443,19 @@ MoveWithScore_Struct* Brain::GenerateAllNonCaptureNonPromotionChecks(int sideToM
 	//else
 	{
 		// King side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 			if ((MailboxBoard64[kingSquare + 2] | MailboxBoard64[kingSquare + 1]) == Empty)
 				if (!IsAttacked(kingSquare + 1, sideToMove ^ 1) && !IsAttacked(kingSquare + 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] != 0)
-						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileFBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F]) // Are all the squares between the enemy king and the rook empty?
+						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F] & ~(occupiedBB & ~PiecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileFBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + F]) // Are all the squares between the enemy king and the rook empty?
 							mlp++->ui32 = kingSquare | ((kingSquare + 2) << 8) | (MFCastling << 16);
 
 		// Queen side
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 			if ((MailboxBoard64[kingSquare - 3] | MailboxBoard64[kingSquare - 2] | MailboxBoard64[kingSquare - 1]) == Empty)
 				if (!IsAttacked(kingSquare - 1, sideToMove ^ 1) && !IsAttacked(kingSquare - 2, sideToMove ^ 1))
 					if (BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] != 0)
-						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] & ~(occupiedBB & ~piecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileDBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D]) // Are all the squares between the enemy king and the rook empty?
+						if ((BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D] & ~(occupiedBB & ~PiecesBB[sideToMove][King]) & (FirstRankBB[sideToMove] | FileDBB)) == BetweenListBB[enemyKingSquare][BackRankBaseSquareIndex[sideToMove] + D]) // Are all the squares between the enemy king and the rook empty?
 							mlp++->ui32 = kingSquare | ((kingSquare - 2) << 8) | (MFCastling << 16);
 	}
 
@@ -2468,8 +2468,8 @@ uint32_t Brain::CountKingMoves(int sideToMove)
 	uint64_t attacksBB;
 	uint32_t moves = 0;
 
-	fromSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
-	attacksBB = KingAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces];
+	fromSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
+	attacksBB = KingAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -2486,57 +2486,57 @@ uint32_t Brain::CountKingMoves(int sideToMove)
 void Brain::CalculatePinnedPieces(int sideToMove)
 {
 	// Find pieces of the side to move that are pinned to their own king
-	int kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	int kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 	uint64_t pinnersBB;
 
-	gameRecordPointer->pinnedRankFileBB = 0;
+	GameRecordPointer->pinnedRankFileBB = 0;
 	pinnersBB = RankFilePinnersBB(kingSquare, sideToMove);
 	//gameRecordPointer->pinnersRankFileBB = pinnersBB;
 	while (pinnersBB)
 	{
 		int pinnerSquare = GetLS1BIndex(pinnersBB);
-		gameRecordPointer->pinnedRankFileBB |= piecesBB[sideToMove][AllPieces] & BetweenListBB[pinnerSquare][kingSquare];
+		GameRecordPointer->pinnedRankFileBB |= PiecesBB[sideToMove][AllPieces] & BetweenListBB[pinnerSquare][kingSquare];
 		ClearLS1B(pinnersBB);
 	}
 
-	gameRecordPointer->pinnedDiagonalBB = 0;
+	GameRecordPointer->pinnedDiagonalBB = 0;
 	pinnersBB = DiagonalPinnersBB(kingSquare, sideToMove);
 	//gameRecordPointer->pinnersDiagonalBB = pinnersBB;
 	while (pinnersBB)
 	{
 		int pinnerSquare = GetLS1BIndex(pinnersBB);
-		gameRecordPointer->pinnedDiagonalBB |= piecesBB[sideToMove][AllPieces] & BetweenListBB[pinnerSquare][kingSquare];
+		GameRecordPointer->pinnedDiagonalBB |= PiecesBB[sideToMove][AllPieces] & BetweenListBB[pinnerSquare][kingSquare];
 		ClearLS1B(pinnersBB);
 	}
 
-	gameRecordPointer->pinnedAllBB = gameRecordPointer->pinnedRankFileBB | gameRecordPointer->pinnedDiagonalBB;
+	GameRecordPointer->pinnedAllBB = GameRecordPointer->pinnedRankFileBB | GameRecordPointer->pinnedDiagonalBB;
 }
 
 void Brain::CalculateDiscovererPieces(int sideToMove)
 {
 	// Find pieces of the side to move that are hiding a discovered check to the enemy king
-	int enemyKingSquare = GetLS1BIndex(piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(PiecesBB[sideToMove ^ 1][King]);
 	uint64_t discovereesBB;
 
-	gameRecordPointer->discoverersRankFileBB = 0;
+	GameRecordPointer->discoverersRankFileBB = 0;
 	discovereesBB = RankFileDiscovereesBB(enemyKingSquare, sideToMove);
 	while (discovereesBB)
 	{
 		int discovereeSquare = GetLS1BIndex(discovereesBB);
-		gameRecordPointer->discoverersRankFileBB |= piecesBB[sideToMove][AllPieces] & BetweenListBB[discovereeSquare][enemyKingSquare];
+		GameRecordPointer->discoverersRankFileBB |= PiecesBB[sideToMove][AllPieces] & BetweenListBB[discovereeSquare][enemyKingSquare];
 		ClearLS1B(discovereesBB);
 	}
 
-	gameRecordPointer->discoverersDiagonalBB = 0;
+	GameRecordPointer->discoverersDiagonalBB = 0;
 	discovereesBB = DiagonalDiscovereesBB(enemyKingSquare, sideToMove);
 	while (discovereesBB)
 	{
 		int discovereeSquare = GetLS1BIndex(discovereesBB);
-		gameRecordPointer->discoverersDiagonalBB |= piecesBB[sideToMove][AllPieces] & BetweenListBB[discovereeSquare][enemyKingSquare];
+		GameRecordPointer->discoverersDiagonalBB |= PiecesBB[sideToMove][AllPieces] & BetweenListBB[discovereeSquare][enemyKingSquare];
 		ClearLS1B(discovereesBB);
 	}
 
-	gameRecordPointer->discoverersAllBB = gameRecordPointer->discoverersRankFileBB | gameRecordPointer->discoverersDiagonalBB;
+	GameRecordPointer->discoverersAllBB = GameRecordPointer->discoverersRankFileBB | GameRecordPointer->discoverersDiagonalBB;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -2640,17 +2640,17 @@ int Brain::CountAllQueenMovesMM(int sideToMove)
 {
 	int fromSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	int moves = 0;
 
 	// Queens
-	uint64_t queensBB = piecesBB[sideToMove][Queen];
+	uint64_t queensBB = PiecesBB[sideToMove][Queen];
 	while (queensBB)
 	{
 		fromSquare = GetLS1BIndex(queensBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
 		moves += PopulationCountX(attacksBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(queensBB);
 	}
@@ -2662,16 +2662,16 @@ int Brain::CountAllMovesMM(int sideToMove)
 {
 	int fromSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	int moves = 0;
 
 	// Rooks and queens
 	// The maximum number of 'rook' moves that 9 queens and 2 rooks can contribute is 11*14=154
-	uint64_t rooksAndQueensBB = piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen];
+	uint64_t rooksAndQueensBB = PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen];
 	while (rooksAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(rooksAndQueensBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(rooksAndQueensBB);
 	}
@@ -2681,11 +2681,11 @@ int Brain::CountAllMovesMM(int sideToMove)
 
 	// Bishops and queens
 	// The maximum number of 'bishop' moves that 9 queens and 2 bishops can contribute is 11*13=143
-	uint64_t bishopsAndQueensBB = piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen];
+	uint64_t bishopsAndQueensBB = PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen];
 	while (bishopsAndQueensBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsAndQueensBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB) & ~PiecesBB[sideToMove][AllPieces];
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(bishopsAndQueensBB);
 	}
@@ -2695,11 +2695,11 @@ int Brain::CountAllMovesMM(int sideToMove)
 
 	// Knights
 	// The maximum number of moves that 2 knights can contribute is 16
-	uint64_t knightsBB = piecesBB[sideToMove][Knight];
+	uint64_t knightsBB = PiecesBB[sideToMove][Knight];
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
-		attacksBB = KnightAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces];
+		attacksBB = KnightAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces];
 		moves += PopulationCountX(attacksBB);
 		ClearLS1B(knightsBB);
 	}
@@ -2709,9 +2709,9 @@ int Brain::CountAllMovesMM(int sideToMove)
 
 	// King
 	// The maximum number of moves that the king can contribute is 8
-	int kingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
+	int kingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
 	uint64_t restrictedBB = CreateBitboardFromSquare(H8) | CreateBitboardFromSquare(G8) | CreateBitboardFromSquare(H7) | CreateBitboardFromSquare(G7);
-	attacksBB = KingAttacksBBList[kingSquare] & ~piecesBB[sideToMove][AllPieces] & ~restrictedBB;
+	attacksBB = KingAttacksBBList[kingSquare] & ~PiecesBB[sideToMove][AllPieces] & ~restrictedBB;
 	moves += PopulationCountX(attacksBB);
 
 	//// Castling
@@ -2730,21 +2730,21 @@ int Brain::CountAllMovesMM(int sideToMove)
 
 void Brain::MakeMove(int sideToMove)
 {
-	MoveUndo_Struct* currentMove = &gameRecordPointer->move;
+	MoveUndo_Struct* currentMove = &GameRecordPointer->move;
 
 	assert((currentMove->mf.fromSquare >= A1) && (currentMove->mf.fromSquare <= H8) && (currentMove->mf.toSquare >= A1) && (currentMove->mf.toSquare <= H8)); // Can't assert fromSquare!=toSquare because of FRC castling! Also can't assert that the toSquare is empty or contains opponent's piece
 	assert(currentMove->mf.flag <= 15);
 	assert(currentMove->ui32 != 0);
 	assert(MailboxBoard64[currentMove->mf.fromSquare] != Empty);
 
-	uint64_t hash64 = gameRecordPointer->transpositionTableHash64;
-	(gameRecordPointer + 1)->castlingStatus = gameRecordPointer->castlingStatus;
-	*(uint32_t*)(&(gameRecordPointer + 1)->totalMaterial[0]) = *(uint32_t*)(&gameRecordPointer->totalMaterial[0]);
-	*(uint64_t*)(&(gameRecordPointer + 1)->gamePhase[0]) = *(uint64_t*)(&gameRecordPointer->gamePhase[0]);
-	*(uint32_t*)(&(gameRecordPointer + 1)->totalOpeningPST[0]) = *(uint32_t*)(&gameRecordPointer->totalOpeningPST[0]);
-	*(uint32_t*)(&(gameRecordPointer + 1)->totalEndgamePST[0]) = *(uint32_t*)(&gameRecordPointer->totalEndgamePST[0]);
+	uint64_t hash64 = GameRecordPointer->transpositionTableHash64;
+	(GameRecordPointer + 1)->castlingStatus = GameRecordPointer->castlingStatus;
+	*(uint32_t*)(&(GameRecordPointer + 1)->totalMaterial[0]) = *(uint32_t*)(&GameRecordPointer->totalMaterial[0]);
+	*(uint64_t*)(&(GameRecordPointer + 1)->gamePhase[0]) = *(uint64_t*)(&GameRecordPointer->gamePhase[0]);
+	*(uint32_t*)(&(GameRecordPointer + 1)->totalOpeningPST[0]) = *(uint32_t*)(&GameRecordPointer->totalOpeningPST[0]);
+	*(uint32_t*)(&(GameRecordPointer + 1)->totalEndgamePST[0]) = *(uint32_t*)(&GameRecordPointer->totalEndgamePST[0]);
 
-	gameRecordPointer++;
+	GameRecordPointer++;
 
 	// Save pieces
 	currentMove->fromSquarePiece = MailboxBoard64[currentMove->mf.fromSquare];
@@ -2754,8 +2754,8 @@ void Brain::MakeMove(int sideToMove)
 			currentMove->toSquarePiece = Empty;
 
 	currentMove->fromToXor = CreateBitboardFromSquare(currentMove->mf.fromSquare) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
-	piecesBB[sideToMove][abs(currentMove->fromSquarePiece)] ^= currentMove->fromToXor;
-	piecesBB[sideToMove][AllPieces] ^= currentMove->fromToXor;
+	PiecesBB[sideToMove][abs(currentMove->fromSquarePiece)] ^= currentMove->fromToXor;
+	PiecesBB[sideToMove][AllPieces] ^= currentMove->fromToXor;
 
 	// Update the mailbox board
 	MailboxBoard64[currentMove->mf.fromSquare] = Empty; // N.B. must update the from-square BEFORE the to-square for Chess960 castling as they might be the same square!
@@ -2763,12 +2763,12 @@ void Brain::MakeMove(int sideToMove)
 	hash64 ^= TranspositionTableRandoms[sideToMove][abs(currentMove->fromSquarePiece)][currentMove->mf.toSquare] ^ TranspositionTableRandoms[sideToMove][abs(currentMove->fromSquarePiece)][currentMove->mf.fromSquare];
 
 	int pstXOR = (sideToMove ? 0 : 56);
-	gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
-	gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
+	GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
+	GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
 
 
 	// Piece specific updates
-	gameRecordPointer->epSquare = 0;
+	GameRecordPointer->epSquare = 0;
 	switch (abs(currentMove->fromSquarePiece))
 	{
 	case Pawn:
@@ -2780,48 +2780,48 @@ void Brain::MakeMove(int sideToMove)
 
 			// Update the mailbox board, bitboards and transposition table hash
 			MailboxBoard64[currentMove->mf.toSquare] = (sideToMove ? -promotionPiece : promotionPiece);
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
-			piecesBB[sideToMove][promotionPiece] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+			PiecesBB[sideToMove][promotionPiece] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 			hash64 ^= TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare];
 			hash64 ^= TranspositionTableRandoms[sideToMove][promotionPiece][currentMove->mf.toSquare];
 
 			// Update the material etc
-			gameRecordPointer->totalMaterial[sideToMove] += MaterialValue[promotionPiece] - MVPawn;
-			gameRecordPointer->gamePhase[sideToMove] += GamePhaseIncrement[promotionPiece];// -GamePhaseIncrement[Pawn];
-			gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
-			gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
+			GameRecordPointer->totalMaterial[sideToMove] += MaterialValue[promotionPiece] - MVPawn;
+			GameRecordPointer->gamePhase[sideToMove] += GamePhaseIncrement[promotionPiece];// -GamePhaseIncrement[Pawn];
+			GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
+			GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
 		}
 		else if (
 			(abs(currentMove->mf.toSquare - currentMove->mf.fromSquare) == 16)
-			&& ((West(CreateBitboardFromSquare(currentMove->mf.toSquare)) | East(CreateBitboardFromSquare(currentMove->mf.toSquare))) & piecesBB[sideToMove ^ 1][Pawn])
+			&& ((West(CreateBitboardFromSquare(currentMove->mf.toSquare)) | East(CreateBitboardFromSquare(currentMove->mf.toSquare))) & PiecesBB[sideToMove ^ 1][Pawn])
 			)
-			gameRecordPointer->epSquare = currentMove->mf.toSquare + PawnMoveOffset[sideToMove ^ 1];
+			GameRecordPointer->epSquare = currentMove->mf.toSquare + PawnMoveOffset[sideToMove ^ 1];
 
 		break;
 	case Rook:
 		// Update castling statuses
 		if (currentMove->mf.fromSquare == BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile)
 		{
-			if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+			if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 				hash64 ^= TranspositionTableRandomKingSideCastling[sideToMove];
-			gameRecordPointer->castlingStatus.ui8[sideToMove][0] = 1;
+			GameRecordPointer->castlingStatus.ui8[sideToMove][0] = 1;
 		}
 		else if (currentMove->mf.fromSquare == BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile)
 		{
-			if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+			if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 				hash64 ^= TranspositionTableRandomQueenSideCastling[sideToMove];
-			gameRecordPointer->castlingStatus.ui8[sideToMove][1] = 1;
+			GameRecordPointer->castlingStatus.ui8[sideToMove][1] = 1;
 		}
 		break;
 	case King:
 		// Update castling statuses
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 			hash64 ^= TranspositionTableRandomKingSideCastling[sideToMove];
 		//gameRecordPointer->castlingStatus.ui8[sideToMove][0] = 1;
-		if (gameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
+		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 			hash64 ^= TranspositionTableRandomQueenSideCastling[sideToMove];
 		//gameRecordPointer->castlingStatus.ui8[sideToMove][1] = 1;
-		gameRecordPointer->castlingStatus.ui16[sideToMove] = 0x0101;
+		GameRecordPointer->castlingStatus.ui16[sideToMove] = 0x0101;
 		// Was it a castling move?
 		if (currentMove->mf.flag == MFCastling)
 		{
@@ -2832,22 +2832,22 @@ void Brain::MakeMove(int sideToMove)
 					if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile]) != King)
 						MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = Empty;
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
-					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
-					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
+					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
+					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile];
-					gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
-					gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
+					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
+					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
 				}
 				else
 				{
 					if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile]) != King)
 						MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = Empty;
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
-					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
-					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
+					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
+					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile];
-					gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
-					gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
+					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
+					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
 				}
 			}
 			else
@@ -2856,21 +2856,21 @@ void Brain::MakeMove(int sideToMove)
 				{
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = Empty;
-					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
-					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
+					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
+					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + H];
-					gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
-					gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
+					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
+					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
 				}
 				else
 				{
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = Empty;
-					piecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
-					piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
+					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
+					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + A];
-					gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
-					gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
+					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
+					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
 				}
 			}
 		}
@@ -2880,12 +2880,12 @@ void Brain::MakeMove(int sideToMove)
 	// Was it a capture?
 	if (currentMove->toSquarePiece)
 	{
-		piecesBB[sideToMove ^ 1][abs(currentMove->toSquarePiece)] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
-		piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
-		gameRecordPointer->totalMaterial[sideToMove ^ 1] -= MaterialValue[abs(currentMove->toSquarePiece)];
-		gameRecordPointer->gamePhase[sideToMove ^ 1] -= GamePhaseIncrement[abs(currentMove->toSquarePiece)];
-		gameRecordPointer->totalOpeningPST[sideToMove ^ 1] -= OpeningPSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
-		gameRecordPointer->totalEndgamePST[sideToMove ^ 1] -= EndgamePSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
+		PiecesBB[sideToMove ^ 1][abs(currentMove->toSquarePiece)] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+		PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+		GameRecordPointer->totalMaterial[sideToMove ^ 1] -= MaterialValue[abs(currentMove->toSquarePiece)];
+		GameRecordPointer->gamePhase[sideToMove ^ 1] -= GamePhaseIncrement[abs(currentMove->toSquarePiece)];
+		GameRecordPointer->totalOpeningPST[sideToMove ^ 1] -= OpeningPSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
+		GameRecordPointer->totalEndgamePST[sideToMove ^ 1] -= EndgamePSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
 
 		// Remove the to square piece from the to square
 		hash64 ^= TranspositionTableRandoms[sideToMove ^ 1][abs(currentMove->toSquarePiece)][currentMove->mf.toSquare];
@@ -2895,14 +2895,14 @@ void Brain::MakeMove(int sideToMove)
 			// Was it an en-passant capture?
 			if (currentMove->mf.flag == MFEnPassant)
 			{ // An EP move is stored as e.g. fromSquare=d5, toSquare = e5 (not e6), so we have to move the capturing pawn forward one square
-				piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
-				piecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
+				PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
+				PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare);
 				MailboxBoard64[currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] = -currentMove->toSquarePiece;
 				MailboxBoard64[currentMove->mf.toSquare] = Empty;
 				hash64 ^= TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] ^ TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare];
 
-				gameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
-				gameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
+				GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
+				GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
 			}
 		}
 		else
@@ -2912,15 +2912,15 @@ void Brain::MakeMove(int sideToMove)
 				// Update castling statuses
 				if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove ^ 1] + InitialKingSideRookFile)
 				{
-					if (gameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][0] == 0)
+					if (GameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][0] == 0)
 						hash64 ^= TranspositionTableRandomKingSideCastling[sideToMove ^ 1];
-					gameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][0] = 1;
+					GameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][0] = 1;
 				}
 				else if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove ^ 1] + InitialQueenSideRookFile)
 				{
-					if (gameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][1] == 0)
+					if (GameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][1] == 0)
 						hash64 ^= TranspositionTableRandomQueenSideCastling[sideToMove ^ 1];
-					gameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][1] = 1;
+					GameRecordPointer->castlingStatus.ui8[sideToMove ^ 1][1] = 1;
 				}
 			}
 		}
@@ -2930,33 +2930,33 @@ void Brain::MakeMove(int sideToMove)
 	if (
 		(abs(currentMove->fromSquarePiece) == Pawn) // Pawn move?
 		|| (currentMove->toSquarePiece) // Capture?
-		|| (gameRecordPointer->castlingStatus.ui32 != (gameRecordPointer - 1)->castlingStatus.ui32) // Move by king (including castling) or rook that changes castling status?
+		|| (GameRecordPointer->castlingStatus.ui32 != (GameRecordPointer - 1)->castlingStatus.ui32) // Move by king (including castling) or rook that changes castling status?
 		)
-		gameRecordPointer->pliesSinceIrreversible = 0;
+		GameRecordPointer->pliesSinceIrreversible = 0;
 	else
-		gameRecordPointer->pliesSinceIrreversible = (gameRecordPointer - 1)->pliesSinceIrreversible + 1;
-	assert((gameRecordPointer->pliesSinceIrreversible >= 0) && (gameRecordPointer->pliesSinceIrreversible <= 100));
+		GameRecordPointer->pliesSinceIrreversible = (GameRecordPointer - 1)->pliesSinceIrreversible + 1;
+	assert((GameRecordPointer->pliesSinceIrreversible >= 0) && (GameRecordPointer->pliesSinceIrreversible <= 100));
 
 	// Update hash for side to move
 	hash64 = ~hash64;
 
 	// Update hashes
-	gameRecordPointer->transpositionTableHash64 = hash64;
-	gameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[gameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
+	GameRecordPointer->transpositionTableHash64 = hash64;
+	GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 
-	assert(!IsAttacked(GetLS1BIndex(piecesBB[sideToMove][King]), sideToMove ^ 1));
+	assert(!IsAttacked(GetLS1BIndex(PiecesBB[sideToMove][King]), sideToMove ^ 1));
 }
 
 void Brain::UnMakeMove(int sideToMove)
 {
-	gameRecordPointer--;
-	MoveUndo_Struct* currentMove = &gameRecordPointer->move;
+	GameRecordPointer--;
+	MoveUndo_Struct* currentMove = &GameRecordPointer->move;
 	assert((currentMove->mf.fromSquare >= A1) && (currentMove->mf.fromSquare <= H8) && (currentMove->mf.toSquare >= A1) && (currentMove->mf.toSquare <= H8));
 
 	MailboxBoard64[currentMove->mf.toSquare] = currentMove->toSquarePiece; // N.B. must un-update the to-square BEFORE the from-square for Chess960 castling as they might be the same square!
 	MailboxBoard64[currentMove->mf.fromSquare] = currentMove->fromSquarePiece;
-	piecesBB[sideToMove][abs(currentMove->fromSquarePiece)] ^= currentMove->fromToXor;
-	piecesBB[sideToMove][AllPieces] ^= currentMove->fromToXor;
+	PiecesBB[sideToMove][abs(currentMove->fromSquarePiece)] ^= currentMove->fromToXor;
+	PiecesBB[sideToMove][AllPieces] ^= currentMove->fromToXor;
 
 	if (currentMove->mf.flag == MFCastling)
 	{
@@ -2967,16 +2967,16 @@ void Brain::UnMakeMove(int sideToMove)
 				if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F]) != King)
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
 				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = (sideToMove ? -Rook : Rook);
-				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
-				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
+				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
+				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
 			}
 			else
 			{
 				if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D]) != King)
 					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
 				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = (sideToMove ? -Rook : Rook);
-				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
-				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
+				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
+				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
 			}
 		}
 		else
@@ -2985,15 +2985,15 @@ void Brain::UnMakeMove(int sideToMove)
 			{
 				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
 				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = (sideToMove ? -Rook : Rook);
-				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
-				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
+				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
+				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
 			}
 			else
 			{
 				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
 				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = (sideToMove ? -Rook : Rook);
-				piecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
-				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
+				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
+				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
 			}
 		}
 	}
@@ -3001,22 +3001,22 @@ void Brain::UnMakeMove(int sideToMove)
 	{
 		if (currentMove->mf.flag >= MFPromotion) // Promotion
 		{
-			piecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
-			piecesBB[sideToMove][PromotedPieces[currentMove->mf.flag >> 2]] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+			PiecesBB[sideToMove][Pawn] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+			PiecesBB[sideToMove][PromotedPieces[currentMove->mf.flag >> 2]] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 		}
 
 		if (currentMove->toSquarePiece) // Capture?
 		{
 			// Restore the captured pieces bitboard
-			piecesBB[sideToMove ^ 1][abs(currentMove->toSquarePiece)] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
-			piecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+			PiecesBB[sideToMove ^ 1][abs(currentMove->toSquarePiece)] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
+			PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 
 			// Was it an en-passant capture?
 			if (currentMove->mf.flag == MFEnPassant)
 			{
 				MailboxBoard64[currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] = Empty;
-				piecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare));
-				piecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare));
+				PiecesBB[sideToMove][Pawn] ^= (CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare));
+				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ CreateBitboardFromSquare(currentMove->mf.toSquare));
 			}
 		}
 	}
@@ -3025,11 +3025,11 @@ void Brain::UnMakeMove(int sideToMove)
 int Brain::IsAttacked(int square, int sideToMove)
 {
 	return
-		(KnightAttacksBBList[square] & piecesBB[sideToMove][Knight]) ||
-		((piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]) && (BishopAttacksBB(square, piecesBB[sideToMove][AllPieces] | piecesBB[sideToMove ^ 1][AllPieces]) & (piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]))) ||
-		(PawnAttacksBBList[sideToMove ^ 1][square] & piecesBB[sideToMove][Pawn]) ||
-		((piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]) && (RookAttacksBB(square, piecesBB[sideToMove][AllPieces] | piecesBB[sideToMove ^ 1][AllPieces]) & (piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]))) ||
-		(KingAttacksBBList[square] & piecesBB[sideToMove][King])
+		(KnightAttacksBBList[square] & PiecesBB[sideToMove][Knight]) ||
+		((PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]) && (BishopAttacksBB(square, PiecesBB[sideToMove][AllPieces] | PiecesBB[sideToMove ^ 1][AllPieces]) & (PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]))) ||
+		(PawnAttacksBBList[sideToMove ^ 1][square] & PiecesBB[sideToMove][Pawn]) ||
+		((PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]) && (RookAttacksBB(square, PiecesBB[sideToMove][AllPieces] | PiecesBB[sideToMove ^ 1][AllPieces]) & (PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]))) ||
+		(KingAttacksBBList[square] & PiecesBB[sideToMove][King])
 		;
 }
 
@@ -3039,43 +3039,43 @@ int Brain::IsEnemyKingAttacked(int square, int sideToMove)
 	// N.B. The inclusion of the extra clause in the slider tests is intentional to allow short-circuiting
 	// The king is attacked about 3% of the time
 	return
-		(KnightAttacksBBList[square] & piecesBB[sideToMove][Knight]) ||
-		((piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]) && (BishopAttacksBB(square, piecesBB[sideToMove][AllPieces] | piecesBB[sideToMove ^ 1][AllPieces]) & (piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]))) ||
-		(PawnAttacksBBList[sideToMove ^ 1][square] & piecesBB[sideToMove][Pawn]) ||
-		((piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]) && (RookAttacksBB(square, piecesBB[sideToMove][AllPieces] | piecesBB[sideToMove ^ 1][AllPieces]) & (piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen])))
+		(KnightAttacksBBList[square] & PiecesBB[sideToMove][Knight]) ||
+		((PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]) && (BishopAttacksBB(square, PiecesBB[sideToMove][AllPieces] | PiecesBB[sideToMove ^ 1][AllPieces]) & (PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]))) ||
+		(PawnAttacksBBList[sideToMove ^ 1][square] & PiecesBB[sideToMove][Pawn]) ||
+		((PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]) && (RookAttacksBB(square, PiecesBB[sideToMove][AllPieces] | PiecesBB[sideToMove ^ 1][AllPieces]) & (PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen])))
 		;
 }
 
 uint64_t Brain::RankFilePinnersBB(int kingSquare, int sideToMove)
 {
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	uint64_t attacksBB = RookAttacksBB(kingSquare, occupiedBB);
-	uint64_t potentiallyPinnedBB = attacksBB & piecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be pinned
-	return (attacksBB ^ RookAttacksBB(kingSquare, occupiedBB ^ potentiallyPinnedBB)) & (piecesBB[sideToMove ^ 1][Rook] | piecesBB[sideToMove ^ 1][Queen]);
+	uint64_t potentiallyPinnedBB = attacksBB & PiecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be pinned
+	return (attacksBB ^ RookAttacksBB(kingSquare, occupiedBB ^ potentiallyPinnedBB)) & (PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]);
 }
 
 uint64_t Brain::DiagonalPinnersBB(int kingSquare, int sideToMove)
 {
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	uint64_t attacksBB = BishopAttacksBB(kingSquare, occupiedBB);
-	uint64_t potentiallyPinnedBB = attacksBB & piecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be pinned
-	return (attacksBB ^ BishopAttacksBB(kingSquare, occupiedBB ^ potentiallyPinnedBB)) & (piecesBB[sideToMove ^ 1][Bishop] | piecesBB[sideToMove ^ 1][Queen]);
+	uint64_t potentiallyPinnedBB = attacksBB & PiecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be pinned
+	return (attacksBB ^ BishopAttacksBB(kingSquare, occupiedBB ^ potentiallyPinnedBB)) & (PiecesBB[sideToMove ^ 1][Bishop] | PiecesBB[sideToMove ^ 1][Queen]);
 }
 
 uint64_t Brain::RankFileDiscovereesBB(int enemyKingSquare, int sideToMove)
 {
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	uint64_t attacksBB = RookAttacksBB(enemyKingSquare, occupiedBB);
-	uint64_t potentiallyDiscovererBB = attacksBB & piecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be discoverers
-	return (attacksBB ^ RookAttacksBB(enemyKingSquare, occupiedBB ^ potentiallyDiscovererBB)) & (piecesBB[sideToMove][Rook] | piecesBB[sideToMove][Queen]);
+	uint64_t potentiallyDiscovererBB = attacksBB & PiecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be discoverers
+	return (attacksBB ^ RookAttacksBB(enemyKingSquare, occupiedBB ^ potentiallyDiscovererBB)) & (PiecesBB[sideToMove][Rook] | PiecesBB[sideToMove][Queen]);
 }
 
 uint64_t Brain::DiagonalDiscovereesBB(int enemyKingSquare, int sideToMove)
 {
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	uint64_t attacksBB = BishopAttacksBB(enemyKingSquare, occupiedBB);
-	uint64_t potentiallyDiscovererBB = attacksBB & piecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be discoverers
-	return (attacksBB ^ BishopAttacksBB(enemyKingSquare, occupiedBB ^ potentiallyDiscovererBB)) & (piecesBB[sideToMove][Bishop] | piecesBB[sideToMove][Queen]);
+	uint64_t potentiallyDiscovererBB = attacksBB & PiecesBB[sideToMove][AllPieces]; // Find friendly pieces that may be discoverers
+	return (attacksBB ^ BishopAttacksBB(enemyKingSquare, occupiedBB ^ potentiallyDiscovererBB)) & (PiecesBB[sideToMove][Bishop] | PiecesBB[sideToMove][Queen]);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -3180,7 +3180,7 @@ void Brain::ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMov
 					score = INT_MAX - 110;
 
 				else
-					score = gameRecordPointer->historyPointer->History[fromSquarePiece - 1][toSquare];
+					score = GameRecordPointer->historyPointer->History[fromSquarePiece - 1][toSquare];
 			}
 		}
 
@@ -3277,7 +3277,7 @@ void Brain::ScoreMovesMateMode(MoveWithScore_Struct* mlp, int movesCount, int tt
 						////[abs(fromSquarePiece) - 1]
 						//.History[abs(fromSquarePiece) - 1]
 						//	[toSquare];
-						score = gameRecordPointer->historyPointer->History[fromSquarePiece - 1][toSquare];
+						score = GameRecordPointer->historyPointer->History[fromSquarePiece - 1][toSquare];
 						//if (score == 0)
 						//	score += Random64() & 15;//TEMP
 
@@ -3301,7 +3301,7 @@ void Brain::ScoreMovesMateMode(MoveWithScore_Struct* mlp, int movesCount, int tt
 // Saves the current subtree principal variation in the triangular array.
 void Brain::SavePrincipalVariation(uint32_t move)
 {
-	uint32_t* p1 = gameRecordPointer->principalVariationPointer;
+	uint32_t* p1 = GameRecordPointer->principalVariationPointer;
 	uint32_t* p2 = p1 + MaximumPly;
 
 	// Save move at this ply
@@ -3341,7 +3341,7 @@ int Brain::SEE(int fromSquare, int toSquare, int sideToMove)
 	int sideNotToMoveTotalGain = 0;
 	int piece;
 
-	occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	occupiedBB ^= CreateBitboardFromSquare(fromSquare); // Remove the initial capturing piece
 
 	if (latestToSquarePiece == Pawn)
@@ -3360,12 +3360,12 @@ int Brain::SEE(int fromSquare, int toSquare, int sideToMove)
 
 	// Get all the attackers for both sides
 	attackersBB =
-		(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-		(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-		(KnightAttacksBBList[toSquare] & (piecesBB[0][Knight] | piecesBB[1][Knight])) |
-		(KingAttacksBBList[toSquare] & (piecesBB[0][King] | piecesBB[1][King])) |
-		(PawnAttacksBBList[0][toSquare] & piecesBB[1][Pawn]) |
-		(PawnAttacksBBList[1][toSquare] & piecesBB[0][Pawn]);
+		(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+		(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+		(KnightAttacksBBList[toSquare] & (PiecesBB[0][Knight] | PiecesBB[1][Knight])) |
+		(KingAttacksBBList[toSquare] & (PiecesBB[0][King] | PiecesBB[1][King])) |
+		(PawnAttacksBBList[0][toSquare] & PiecesBB[1][Pawn]) |
+		(PawnAttacksBBList[1][toSquare] & PiecesBB[0][Pawn]);
 	attackersBB &= occupiedBB; // Remove all the empty squares along the rays
 
 	int floor = -1, ceiling = 1;
@@ -3378,14 +3378,14 @@ sideNotToMove:
 		ceiling = 0;
 	}
 
-	if (attackersBB & piecesBB[sideNotToMove][AllPieces]) // Any more defenders?
+	if (attackersBB & PiecesBB[sideNotToMove][AllPieces]) // Any more defenders?
 	{
 		// Find the lowest valued piece type
 		sideNotToMoveTotalGain += SeeValues[latestToSquarePiece];
 		if (latestToSquarePiece == King)
 			goto exit;
 		piece = Pawn;
-		while (!(attackersBB & piecesBB[sideNotToMove][piece]))
+		while (!(attackersBB & PiecesBB[sideNotToMove][piece]))
 			piece++;
 		latestToSquarePiece = piece;
 
@@ -3396,12 +3396,12 @@ sideNotToMove:
 				latestToSquarePiece = Queen;
 			}
 
-		uint64_t bb = attackersBB & piecesBB[sideNotToMove][piece];
+		uint64_t bb = attackersBB & PiecesBB[sideNotToMove][piece];
 		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
 		// Add any new x-ray attacks by either side behind the just removed piece
 		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen]));
+			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
 		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
 	}
 	else
@@ -3415,14 +3415,14 @@ sideNotToMove:
 		floor = 0;
 	}
 
-	if (attackersBB & piecesBB[sideToMove][AllPieces]) // Any more attackers?
+	if (attackersBB & PiecesBB[sideToMove][AllPieces]) // Any more attackers?
 	{
 		// Find the lowest valued piece type
 		sideToMoveTotalGain += SeeValues[latestToSquarePiece];
 		if (latestToSquarePiece == King)
 			goto exit;
 		piece = Pawn;
-		while (!(attackersBB & piecesBB[sideToMove][piece]))
+		while (!(attackersBB & PiecesBB[sideToMove][piece]))
 			piece++;
 		latestToSquarePiece = piece;
 
@@ -3433,12 +3433,12 @@ sideNotToMove:
 				latestToSquarePiece = Queen;
 			}
 
-		uint64_t bb = attackersBB & piecesBB[sideToMove][piece];
+		uint64_t bb = attackersBB & PiecesBB[sideToMove][piece];
 		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
 		// Add any new x-ray attacks by either side behind the just removed piece
 		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen]));
+			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
 		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
 
 		goto sideNotToMove;
@@ -3465,7 +3465,7 @@ int Brain::SEE2(int fromSquare, int toSquare, int sideToMove, int threshold)
 	int sideNotToMoveTotalGain = 0;
 	int piece;
 
-	occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 	occupiedBB ^= CreateBitboardFromSquare(fromSquare); // Remove the initial capturing piece
 
 	if (latestToSquarePiece == Pawn)
@@ -3484,12 +3484,12 @@ int Brain::SEE2(int fromSquare, int toSquare, int sideToMove, int threshold)
 
 	// Get all the attackers for both sides
 	attackersBB =
-		(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-		(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-		(KnightAttacksBBList[toSquare] & (piecesBB[0][Knight] | piecesBB[1][Knight])) |
-		(KingAttacksBBList[toSquare] & (piecesBB[0][King] | piecesBB[1][King])) |
-		(PawnAttacksBBList[0][toSquare] & piecesBB[1][Pawn]) |
-		(PawnAttacksBBList[1][toSquare] & piecesBB[0][Pawn]);
+		(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+		(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+		(KnightAttacksBBList[toSquare] & (PiecesBB[0][Knight] | PiecesBB[1][Knight])) |
+		(KingAttacksBBList[toSquare] & (PiecesBB[0][King] | PiecesBB[1][King])) |
+		(PawnAttacksBBList[0][toSquare] & PiecesBB[1][Pawn]) |
+		(PawnAttacksBBList[1][toSquare] & PiecesBB[0][Pawn]);
 	attackersBB &= occupiedBB; // Remove all the empty squares along the rays
 
 	int floor = -1, ceiling = 1;
@@ -3502,22 +3502,22 @@ sideNotToMove:
 		ceiling = 0;
 	}
 
-	if (attackersBB & piecesBB[sideNotToMove][AllPieces]) // Any more defenders?
+	if (attackersBB & PiecesBB[sideNotToMove][AllPieces]) // Any more defenders?
 	{
 		// Find the lowest valued piece type
 		sideNotToMoveTotalGain += SeeValues[latestToSquarePiece];
 		if (latestToSquarePiece == King)
 			goto exit;
 		piece = Pawn;
-		while (!(attackersBB & piecesBB[sideNotToMove][piece]))
+		while (!(attackersBB & PiecesBB[sideNotToMove][piece]))
 			piece++;
 		latestToSquarePiece = piece;
-		uint64_t bb = attackersBB & piecesBB[sideNotToMove][piece];
+		uint64_t bb = attackersBB & PiecesBB[sideNotToMove][piece];
 		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
 		// Add any new x-ray attacks by either side behind the just removed piece
 		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen]));
+			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
 		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
 	}
 	else
@@ -3531,22 +3531,22 @@ sideNotToMove:
 		floor = 0;
 	}
 
-	if (attackersBB & piecesBB[sideToMove][AllPieces]) // Any more attackers?
+	if (attackersBB & PiecesBB[sideToMove][AllPieces]) // Any more attackers?
 	{
 		// Find the lowest valued piece type
 		sideToMoveTotalGain += SeeValues[latestToSquarePiece];
 		if (latestToSquarePiece == King)
 			goto exit;
 		piece = Pawn;
-		while (!(attackersBB & piecesBB[sideToMove][piece]))
+		while (!(attackersBB & PiecesBB[sideToMove][piece]))
 			piece++;
 		latestToSquarePiece = piece;
-		uint64_t bb = attackersBB & piecesBB[sideToMove][piece];
+		uint64_t bb = attackersBB & PiecesBB[sideToMove][piece];
 		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
 		// Add any new x-ray attacks by either side behind the just removed piece
 		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen]));
+			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
 		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
 
 		goto sideNotToMove;
@@ -3567,16 +3567,16 @@ bool Brain::SEETargetPieceUnsafe(int toSquare, int sideToMove, int offset)
 	int sideNotToMove = sideToMove ^ 1;
 	uint64_t attackersBB, occupiedBB;
 
-	occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
+	occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
 
 	// Get all the attackers for both sides
 	attackersBB =
-		(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-		(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-		(KnightAttacksBBList[toSquare] & (piecesBB[0][Knight] | piecesBB[1][Knight])) |
-		(KingAttacksBBList[toSquare] & (piecesBB[0][King] | piecesBB[1][King])) |
-		(PawnAttacksBBList[0][toSquare] & piecesBB[1][Pawn]) |
-		(PawnAttacksBBList[1][toSquare] & piecesBB[0][Pawn]);
+		(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+		(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+		(KnightAttacksBBList[toSquare] & (PiecesBB[0][Knight] | PiecesBB[1][Knight])) |
+		(KingAttacksBBList[toSquare] & (PiecesBB[0][King] | PiecesBB[1][King])) |
+		(PawnAttacksBBList[0][toSquare] & PiecesBB[1][Pawn]) |
+		(PawnAttacksBBList[1][toSquare] & PiecesBB[0][Pawn]);
 	attackersBB &= occupiedBB; // Remove all the empty squares along the rays
 
 	int sideToMoveTotalGain = 0;
@@ -3589,22 +3589,22 @@ sideToMove:
 	if (sideToMoveTotalGain > sideNotToMoveTotalGain)
 		return true;
 
-	if (attackersBB & piecesBB[sideToMove][AllPieces]) // Any more attackers?
+	if (attackersBB & PiecesBB[sideToMove][AllPieces]) // Any more attackers?
 	{
 		if (toSquarePiece == King)
 			return true;
 		// Find the lowest valued piece type
 		piece = Pawn;
-		while (!(attackersBB & piecesBB[sideToMove][piece]))
+		while (!(attackersBB & PiecesBB[sideToMove][piece]))
 			piece++;
 		sideToMoveTotalGain += SeeValues[toSquarePiece];
 		toSquarePiece = piece;
-		bb = attackersBB & piecesBB[sideToMove][piece];
+		bb = attackersBB & PiecesBB[sideToMove][piece];
 		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
 		// Add any new x-ray attacks by either side behind the just removed piece
 		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen]));
+			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
 		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
 	}
 	else
@@ -3614,22 +3614,22 @@ sideToMove:
 	if (sideNotToMoveTotalGain >= sideToMoveTotalGain)
 		return false;
 
-	if (attackersBB & piecesBB[sideNotToMove][AllPieces]) // Any more defenders?
+	if (attackersBB & PiecesBB[sideNotToMove][AllPieces]) // Any more defenders?
 	{
 		if (toSquarePiece == King)
 			return false;
 		// Find the lowest valued piece type
 		piece = Pawn;
-		while (!(attackersBB & piecesBB[sideNotToMove][piece]))
+		while (!(attackersBB & PiecesBB[sideNotToMove][piece]))
 			piece++;
 		sideNotToMoveTotalGain += SeeValues[toSquarePiece];
 		toSquarePiece = piece;
-		bb = attackersBB & piecesBB[sideNotToMove][piece];
+		bb = attackersBB & PiecesBB[sideNotToMove][piece];
 		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
 		// Add any new x-ray attacks by either side behind the just removed piece
 		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Queen] | piecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (piecesBB[0][Bishop] | piecesBB[1][Bishop] | piecesBB[0][Queen] | piecesBB[1][Queen]));
+			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
 		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
 	}
 	else
@@ -3646,60 +3646,60 @@ int Brain::KnownLowMaterialDraws(int sideToMove)
 	// Currently, no configurations with more than 4 pieces tested
 
 	// No queens/rooks/pawns left for either side?
-	if ((piecesBB[0][Queen] | piecesBB[1][Queen] | piecesBB[0][Rook] | piecesBB[1][Rook] | piecesBB[0][Pawn] | piecesBB[1][Pawn]) == 0)
+	if ((PiecesBB[0][Queen] | PiecesBB[1][Queen] | PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Pawn] | PiecesBB[1][Pawn]) == 0)
 	{
 		// Lone white king?
-		if (gameRecordPointer->totalMaterial[0] == 0)
+		if (GameRecordPointer->totalMaterial[0] == 0)
 		{
 			// No pieces or lone Knight or lone Bishop? i.e. KvK, KvKB, KvKN
-			if (gameRecordPointer->totalMaterial[1] <= MVBishop)
+			if (GameRecordPointer->totalMaterial[1] <= MVBishop)
 				return PVTDrawMinimumMaterial;
 
 			// Two bishops of same colour? i.e. KvKBB
-			if (gameRecordPointer->totalMaterial[1] == MVBishop + MVBishop)
-				if (((piecesBB[1][Bishop] & LightBB) == 0) || ((piecesBB[1][Bishop] & DarkBB) == 0))
+			if (GameRecordPointer->totalMaterial[1] == MVBishop + MVBishop)
+				if (((PiecesBB[1][Bishop] & LightBB) == 0) || ((PiecesBB[1][Bishop] & DarkBB) == 0))
 					return PVTDrawMinimumMaterial;
 
 			// Two knights? i.e. KvKNN
-			if (gameRecordPointer->totalMaterial[1] == MVKnight + MVKnight)
-				if ((sideToMove == 0) || (piecesBB[0][King] & ~CornersBB)) // White to move or the white king not in a corner
+			if (GameRecordPointer->totalMaterial[1] == MVKnight + MVKnight)
+				if ((sideToMove == 0) || (PiecesBB[0][King] & ~CornersBB)) // White to move or the white king not in a corner
 					return PVTDrawMinimumMaterial;
 		}
 
 		// Lone black king?
-		if (gameRecordPointer->totalMaterial[1] == 0)
+		if (GameRecordPointer->totalMaterial[1] == 0)
 		{
 			// No pieces or lone Knight or lone Bishop? i.e. KvK, KBvK, KNvK
-			if (gameRecordPointer->totalMaterial[0] <= MVBishop)
+			if (GameRecordPointer->totalMaterial[0] <= MVBishop)
 				return PVTDrawMinimumMaterial;
 
 			// Two bishops of same colour? i.e. KBBvK
-			if (gameRecordPointer->totalMaterial[0] == MVBishop + MVBishop)
-				if (((piecesBB[0][Bishop] & LightBB) == 0) || ((piecesBB[0][Bishop] & DarkBB) == 0))
+			if (GameRecordPointer->totalMaterial[0] == MVBishop + MVBishop)
+				if (((PiecesBB[0][Bishop] & LightBB) == 0) || ((PiecesBB[0][Bishop] & DarkBB) == 0))
 					return PVTDrawMinimumMaterial;
 
 			// Two knights? i.e. KNNvK
-			if (gameRecordPointer->totalMaterial[0] == MVKnight + MVKnight)
-				if ((sideToMove == 1) || (piecesBB[1][King] & ~CornersBB)) // Black to move or the black king not in a corner
+			if (GameRecordPointer->totalMaterial[0] == MVKnight + MVKnight)
+				if ((sideToMove == 1) || (PiecesBB[1][King] & ~CornersBB)) // Black to move or the black king not in a corner
 					return PVTDrawMinimumMaterial;
 		}
 
 		// KB v KB (bishops same colour)
-		if ((gameRecordPointer->totalMaterial[0] == MVBishop) && (gameRecordPointer->totalMaterial[1] == MVBishop))
-			if (PopulationCountX(piecesBB[0][Bishop] & LightBB) == PopulationCountX(piecesBB[1][Bishop] & LightBB))
+		if ((GameRecordPointer->totalMaterial[0] == MVBishop) && (GameRecordPointer->totalMaterial[1] == MVBishop))
+			if (PopulationCountX(PiecesBB[0][Bishop] & LightBB) == PopulationCountX(PiecesBB[1][Bishop] & LightBB))
 				return PVTDrawMinimumMaterial;
 
 		// Neither king in a corner?
-		if (!((piecesBB[0][King] ^ piecesBB[1][King]) & CornersBB))
+		if (!((PiecesBB[0][King] ^ PiecesBB[1][King]) & CornersBB))
 		{
 			// KN v KN
-			if ((gameRecordPointer->totalMaterial[0] == MVKnight) && (gameRecordPointer->totalMaterial[1] == MVKnight))
+			if ((GameRecordPointer->totalMaterial[0] == MVKnight) && (GameRecordPointer->totalMaterial[1] == MVKnight))
 				return PVTDrawMinimumMaterial;
 
 			// KB v KN
 			if (
-				((gameRecordPointer->totalMaterial[0] == MVBishop) && (gameRecordPointer->totalMaterial[1] == MVKnight)) ||
-				((gameRecordPointer->totalMaterial[1] == MVBishop) && (gameRecordPointer->totalMaterial[0] == MVKnight))
+				((GameRecordPointer->totalMaterial[0] == MVBishop) && (GameRecordPointer->totalMaterial[1] == MVKnight)) ||
+				((GameRecordPointer->totalMaterial[1] == MVBishop) && (GameRecordPointer->totalMaterial[0] == MVKnight))
 				)
 				return PVTDrawMinimumMaterial;
 
@@ -3785,15 +3785,15 @@ int Brain::KnownLowMaterialDraws(int sideToMove)
 bool Brain::KnownLowMaterialWins()
 {
 	// Lone white king?
-	if (gameRecordPointer->totalMaterial[0] == 0)
+	if (GameRecordPointer->totalMaterial[0] == 0)
 	{
-		if (piecesBB[1][Queen] | piecesBB[1][Rook])
+		if (PiecesBB[1][Queen] | PiecesBB[1][Rook])
 			return true;
 	}
 	// Lone black king?
-	if (gameRecordPointer->totalMaterial[1] == 0)
+	if (GameRecordPointer->totalMaterial[1] == 0)
 	{
-		if (piecesBB[0][Queen] | piecesBB[0][Rook])
+		if (PiecesBB[0][Queen] | PiecesBB[0][Rook])
 			return true;
 	}
 
@@ -3805,8 +3805,8 @@ bool Brain::KingCanLegallyMove(int sideToMove)
 	int fromSquare;
 	uint64_t attacksBB;
 
-	fromSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
-	attacksBB = KingAttacksBBList[fromSquare] & ~piecesBB[sideToMove][AllPieces];
+	fromSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
+	attacksBB = KingAttacksBBList[fromSquare] & ~PiecesBB[sideToMove][AllPieces];
 	while (attacksBB)
 	{
 		int toSquare = GetLS1BIndex(attacksBB);
@@ -3824,7 +3824,7 @@ bool Brain::ForcingLine(int ply, int offset)
 	{
 		//if (!((gameRecordPointer - i)->isZLKM || (gameRecordPointer - i)->isInCheck || (gameRecordPointer - i)->isO1M || (gameRecordPointer - i)->isTWM))
 		//if (!((gameRecordPointer - i)->dangerConditions.dc.isZLKM))
-		if (!((gameRecordPointer - i)->dangerConditions & TTFlagZeroLegalKingMoves))
+		if (!((GameRecordPointer - i)->dangerConditions & TTFlagZeroLegalKingMoves))
 			return false;
 	}
 
@@ -3833,17 +3833,17 @@ bool Brain::ForcingLine(int ply, int offset)
 
 int Brain::SafePawnMoves(int sideToMove)
 {
-	uint64_t occupiedBB = piecesBB[0][AllPieces] | piecesBB[1][AllPieces];
-	uint64_t stmPawnMoveBB = ((piecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & notOccupiedBB;
-	uint64_t sntmPawnCaptureBB = ((piecesBB[sideToMove ^ 1][Pawn] << 8) >> ((sideToMove ^ 1) << 4));
+	uint64_t occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+	uint64_t stmPawnMoveBB = ((PiecesBB[sideToMove][Pawn] << 8) >> (sideToMove << 4)) & notOccupiedBB;
+	uint64_t sntmPawnCaptureBB = ((PiecesBB[sideToMove ^ 1][Pawn] << 8) >> ((sideToMove ^ 1) << 4));
 	sntmPawnCaptureBB = East(sntmPawnCaptureBB) | West(sntmPawnCaptureBB);
 	return PopulationCountX(stmPawnMoveBB & ~sntmPawnCaptureBB);
 }
 
 bool Brain::HasOpposition(int sideToMove)
 {
-	int stmKingSquare = GetLS1BIndex(piecesBB[sideToMove][King]);
-	int sntmKingSquare = GetLS1BIndex(piecesBB[sideToMove ^ 1][King]);
+	int stmKingSquare = GetLS1BIndex(PiecesBB[sideToMove][King]);
+	int sntmKingSquare = GetLS1BIndex(PiecesBB[sideToMove ^ 1][King]);
 	if (ChebyshevDistance[stmKingSquare][sntmKingSquare] == 2)
 		if (ManhattanDistance[stmKingSquare][sntmKingSquare] == 3)
 			return true;
@@ -3859,7 +3859,7 @@ std::string Brain::CurrentLine(int ply)
 	for (int i = 0; i < ply; i++)
 		currentLine +=
 		//"(" + MyITOA(MateLineTotalCostSaved[i + 1]) + ")" +
-		MoveNotation(gameRecord[GameRecordIndexRoot + i].move.ui32) +
+		MoveNotation(GameRecord[GameRecordIndexRoot + i].move.ui32) +
 		" ";//"(" + lowerLimitPointer[i] + "/" + bestScorePointer[i] + "/" + upperLimitPointer[i] + ") ";
 
 	return currentLine;
@@ -3869,12 +3869,12 @@ Move_Struct Brain::ThreateningMateInOneWithNull(int sideToMove, int &checksCount
 {
 	Move_Struct result;
 
-	gameRecordPointer++; // Normally done in make/unmake-move
-	gameRecordPointer->castlingStatus = (gameRecordPointer - 1)->castlingStatus;
-	gameRecordPointer->epSquare = 0;
-	gameRecordPointer->pliesSinceIrreversible = 0;
+	GameRecordPointer++; // Normally done in make/unmake-move
+	GameRecordPointer->castlingStatus = (GameRecordPointer - 1)->castlingStatus;
+	GameRecordPointer->epSquare = 0;
+	GameRecordPointer->pliesSinceIrreversible = 0;
 	result = ThreateningMateInOne(sideToMove, checksCount);
-	gameRecordPointer--; // Normally done in make/unmake-move
+	GameRecordPointer--; // Normally done in make/unmake-move
 
 	return result;
 }
@@ -3894,7 +3894,7 @@ Move_Struct Brain::ThreateningMateInOne(int sideToMove, int &checksCount)
 	for (int moveListIndexIterator = 0; moveListIndexIterator < checksCount; moveListIndexIterator++)
 	{
 		currentMove.ui32 = moveList[moveListIndexIterator].ui32;
-		gameRecordPointer->move.ui32 = currentMove.ui32;
+		GameRecordPointer->move.ui32 = currentMove.ui32;
 		MakeMove(sideToMove); // N.B. MakeMove increments MateBrain.gameRecordPointer!
 
 		CalculatePinnedPieces(sideToMove ^ 1); // Required for legal move generation
@@ -3904,7 +3904,7 @@ Move_Struct Brain::ThreateningMateInOne(int sideToMove, int &checksCount)
 
 		if (!anyMoves)
 		{
-			result.ui32 = gameRecordPointer->move.ui32;
+			result.ui32 = GameRecordPointer->move.ui32;
 			break;
 		}
 	}

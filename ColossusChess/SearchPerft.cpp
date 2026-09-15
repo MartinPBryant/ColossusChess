@@ -1089,7 +1089,7 @@ void Perft::AddToPerftTranspositionTable(PerftTranspositionTableEntry_Struct* tt
 		}
 
 		perftStores++;
-		uint64_t hash64 = perftBrain.gameRecordPointer->transpositionTableHash64WithEP;
+		uint64_t hash64 = perftBrain.GameRecordPointer->transpositionTableHash64WithEP;
 
 		// Find candidate entry for replacement
 		int entryToReplace;
@@ -1159,17 +1159,17 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	// 1.8 hours (4GB hash, 16 threads, AMD Ryzen 9 7950X 16-Core Processor 4.50 GHz)
 	// 0.9 hours (16GB hash, 16 threads, AMD Ryzen 9 7950X 16-Core Processor 4.50 GHz)
 
-	assert(CompareMailboxBoard64ToPiecesBB(perftBrain.MailboxBoard64, perftBrain.piecesBB));
-	assert((PopulationCountX(perftBrain.piecesBB[0][King]) == 1) && (PopulationCountX(perftBrain.piecesBB[1][King]) == 1));
-	assert((PopulationCountX(perftBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(perftBrain.piecesBB[1][Queen]) <= 9));
-	assert((PopulationCountX(perftBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(perftBrain.piecesBB[1][Rook]) <= 10));
-	assert((PopulationCountX(perftBrain.piecesBB[0][Bishop]) <= 10) && (PopulationCountX(perftBrain.piecesBB[1][Bishop]) <= 10));
-	assert((PopulationCountX(perftBrain.piecesBB[0][Knight]) <= 10) && (PopulationCountX(perftBrain.piecesBB[1][Knight]) <= 10));
-	assert((PopulationCountX(perftBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(perftBrain.piecesBB[1][Pawn]) <= 8));
-	assert(perftBrain.piecesBB[0][AllPieces] == (perftBrain.piecesBB[0][Pawn] | perftBrain.piecesBB[0][Knight] | perftBrain.piecesBB[0][Bishop] | perftBrain.piecesBB[0][Rook] | perftBrain.piecesBB[0][Queen] | perftBrain.piecesBB[0][King]));
-	assert(perftBrain.piecesBB[1][AllPieces] == (perftBrain.piecesBB[1][Pawn] | perftBrain.piecesBB[1][Knight] | perftBrain.piecesBB[1][Bishop] | perftBrain.piecesBB[1][Rook] | perftBrain.piecesBB[1][Queen] | perftBrain.piecesBB[1][King]));
-	assert(perftBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.gameRecordPointer)));
-	assert(perftBrain.gameRecordPointer->transpositionTableHash64WithEP == (perftBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[perftBrain.gameRecordPointer->epSquare]));
+	assert(CompareMailboxBoard64ToPiecesBB(perftBrain.MailboxBoard64, perftBrain.PiecesBB));
+	assert((PopulationCountX(perftBrain.PiecesBB[0][King]) == 1) && (PopulationCountX(perftBrain.PiecesBB[1][King]) == 1));
+	assert((PopulationCountX(perftBrain.PiecesBB[0][Queen]) <= 9) && (PopulationCountX(perftBrain.PiecesBB[1][Queen]) <= 9));
+	assert((PopulationCountX(perftBrain.PiecesBB[0][Rook]) <= 10) && (PopulationCountX(perftBrain.PiecesBB[1][Rook]) <= 10));
+	assert((PopulationCountX(perftBrain.PiecesBB[0][Bishop]) <= 10) && (PopulationCountX(perftBrain.PiecesBB[1][Bishop]) <= 10));
+	assert((PopulationCountX(perftBrain.PiecesBB[0][Knight]) <= 10) && (PopulationCountX(perftBrain.PiecesBB[1][Knight]) <= 10));
+	assert((PopulationCountX(perftBrain.PiecesBB[0][Pawn]) <= 8) && (PopulationCountX(perftBrain.PiecesBB[1][Pawn]) <= 8));
+	assert(perftBrain.PiecesBB[0][AllPieces] == (perftBrain.PiecesBB[0][Pawn] | perftBrain.PiecesBB[0][Knight] | perftBrain.PiecesBB[0][Bishop] | perftBrain.PiecesBB[0][Rook] | perftBrain.PiecesBB[0][Queen] | perftBrain.PiecesBB[0][King]));
+	assert(perftBrain.PiecesBB[1][AllPieces] == (perftBrain.PiecesBB[1][Pawn] | perftBrain.PiecesBB[1][Knight] | perftBrain.PiecesBB[1][Bishop] | perftBrain.PiecesBB[1][Rook] | perftBrain.PiecesBB[1][Queen] | perftBrain.PiecesBB[1][King]));
+	assert(perftBrain.GameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.GameRecordPointer) : ~GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.GameRecordPointer)));
+	assert(perftBrain.GameRecordPointer->transpositionTableHash64WithEP == (perftBrain.GameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[perftBrain.GameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply < MaximumPly));
 	assert((sideToMove >= 0) && (sideToMove < Sides));
 
@@ -1184,7 +1184,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	if (PerftTranspositionTableBuckets > 0)
 	{
 		perftProbes++;
-		uint64_t hash64 = perftBrain.gameRecordPointer->transpositionTableHash64WithEP;
+		uint64_t hash64 = perftBrain.GameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (PerftTranspositionTableEntry_Struct*)(PerftTranspositionTablePointer + (hash64 & PerftTranspositionTableBucketsMask));
 
 		for (int entry = 0; entry < PerftTranspositionTableEntriesPerBucket; entry++) // Do we already have this position in the table?
@@ -1226,7 +1226,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	uint32_t movesCount = perftBrain.GenerateAllMoves(sideToMove, isInCheck, moveList);
 
 	// Loop through move list
-	int enemyKingSquare = GetLS1BIndex(perftBrain.piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(perftBrain.PiecesBB[sideToMove ^ 1][King]);
 
 	// Try to get any extra threads working on different moves in the list by offsetting and reversing
 	int start = 0;
@@ -1244,7 +1244,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 	for (uint32_t moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 	{
 		// Get next move
-		perftBrain.gameRecordPointer->move.ui32 = moveList[start].ui32;
+		perftBrain.GameRecordPointer->move.ui32 = moveList[start].ui32;
 
 		// Adjust index
 		start += increment;
@@ -1266,7 +1266,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 		else
 		{
 			// Initiate the retrieval of the next transposition table cache line as soon as possible
-			_mm_prefetch((char*)(PerftTranspositionTablePointer + (perftBrain.gameRecordPointer->transpositionTableHash64 & PerftTranspositionTableBucketsMask)), _MM_HINT_T0);
+			_mm_prefetch((char*)(PerftTranspositionTablePointer + (perftBrain.GameRecordPointer->transpositionTableHash64 & PerftTranspositionTableBucketsMask)), _MM_HINT_T0);
 			TreeSearchPerft(ply + 1, sideToMove ^ 1, perftBrain.IsEnemyKingAttacked(enemyKingSquare, sideToMove));
 		}
 
@@ -1289,7 +1289,7 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 				&& ((ThreadId == 0) || IsDebug)
 				)
 			{
-				std::string s = "info string " + MoveNotation(perftBrain.gameRecordPointer->move.ui32);
+				std::string s = "info string " + MoveNotation(perftBrain.GameRecordPointer->move.ui32);
 				s += ": " + MyUI64TOA(perftNodes - previousPerftNodes);
 				if (IsDebug)
 				{
@@ -1318,7 +1318,7 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	perftBrain.CopyFrom(&EngineBrain);
 
 	// Set up the bit boards from the 64-square mailbox board
-	ConvertMailboxBoard64ToPiecesBB(perftBrain.MailboxBoard64, perftBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(perftBrain.MailboxBoard64, perftBrain.PiecesBB);
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -1328,12 +1328,12 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	previousClock = startClock;
 
 	// Initialise any variables required for the search
-	perftBrain.gameRecordPointer = &perftBrain.gameRecord[perftBrain.GameRecordIndexRoot];
-	uint64_t hash64 = GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.gameRecordPointer);
+	perftBrain.GameRecordPointer = &perftBrain.GameRecord[perftBrain.GameRecordIndexRoot];
+	uint64_t hash64 = GenerateTranspositionTableHash64(perftBrain.MailboxBoard64, perftBrain.GameRecordPointer);
 	if (SideToMove == 1)
 		hash64 = ~hash64;
-	perftBrain.gameRecordPointer->transpositionTableHash64 = hash64;
-	perftBrain.gameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[perftBrain.gameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
+	perftBrain.GameRecordPointer->transpositionTableHash64 = hash64;
+	perftBrain.GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[perftBrain.GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 
 	// Clear Perft counts
 	perftNodes = 0;
@@ -1350,10 +1350,10 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	{
 		// An optimisation in the TreeSearchPerft routine stops 'go perft 1' working! So that is handled uniquely here
 		perftBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-		perftNodes += perftBrain.CountAllMoves(SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.piecesBB[SideToMove][King]), SideToMove ^ 1));
+		perftNodes += perftBrain.CountAllMoves(SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1));
 	}
 	else
-		TreeSearchPerft(1, SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.piecesBB[SideToMove][King]), SideToMove ^ 1));
+		TreeSearchPerft(1, SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1));
 
 	ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startClock).count();
 

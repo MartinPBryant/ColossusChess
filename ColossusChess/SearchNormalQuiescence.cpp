@@ -3,22 +3,22 @@
 
 short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck)
 {
-	assert(CompareMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB));
-	assert((PopulationCountX(normalBrain.piecesBB[0][King]) == 1) && (PopulationCountX(normalBrain.piecesBB[1][King]) == 1));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(normalBrain.piecesBB[1][Queen]) <= 9));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Rook]) <= 10));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Bishop]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Bishop]) <= 10));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Knight]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Knight]) <= 10));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(normalBrain.piecesBB[1][Pawn]) <= 8));
-	assert(normalBrain.piecesBB[0][AllPieces] == (normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[0][King]));
-	assert(normalBrain.piecesBB[1][AllPieces] == (normalBrain.piecesBB[1][Pawn] | normalBrain.piecesBB[1][Knight] | normalBrain.piecesBB[1][Bishop] | normalBrain.piecesBB[1][Rook] | normalBrain.piecesBB[1][Queen] | normalBrain.piecesBB[1][King]));
-	assert(normalBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer)));
-	assert(normalBrain.gameRecordPointer->transpositionTableHash64WithEP == (normalBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[normalBrain.gameRecordPointer->epSquare]));
+	assert(CompareMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][King]) == 1) && (PopulationCountX(normalBrain.PiecesBB[1][King]) == 1));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Queen]) <= 9) && (PopulationCountX(normalBrain.PiecesBB[1][Queen]) <= 9));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Rook]) <= 10) && (PopulationCountX(normalBrain.PiecesBB[1][Rook]) <= 10));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Bishop]) <= 10) && (PopulationCountX(normalBrain.PiecesBB[1][Bishop]) <= 10));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Knight]) <= 10) && (PopulationCountX(normalBrain.PiecesBB[1][Knight]) <= 10));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Pawn]) <= 8) && (PopulationCountX(normalBrain.PiecesBB[1][Pawn]) <= 8));
+	assert(normalBrain.PiecesBB[0][AllPieces] == (normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[0][King]));
+	assert(normalBrain.PiecesBB[1][AllPieces] == (normalBrain.PiecesBB[1][Pawn] | normalBrain.PiecesBB[1][Knight] | normalBrain.PiecesBB[1][Bishop] | normalBrain.PiecesBB[1][Rook] | normalBrain.PiecesBB[1][Queen] | normalBrain.PiecesBB[1][King]));
+	assert(normalBrain.GameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer) : ~GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer)));
+	assert(normalBrain.GameRecordPointer->transpositionTableHash64WithEP == (normalBrain.GameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[normalBrain.GameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply <= MaximumPlyInQS));
 	assert(depthRemaining <= 0);
 	assert((sideToMove >= 0) && (sideToMove < Sides));
 	assert(-MatingIn0Score <= alpha && alpha < beta && beta <= MatingIn0Score);
-	assert((normalBrain.gameRecordPointer->gamePhase[0] >= 0) && (normalBrain.gameRecordPointer->gamePhase[0] <= 103) && (normalBrain.gameRecordPointer->gamePhase[1] >= 0) && (normalBrain.gameRecordPointer->gamePhase[1] <= 103));
+	assert((normalBrain.GameRecordPointer->gamePhase[0] >= 0) && (normalBrain.GameRecordPointer->gamePhase[0] <= 103) && (normalBrain.GameRecordPointer->gamePhase[1] >= 0) && (normalBrain.GameRecordPointer->gamePhase[1] <= 103));
 	//assert(depthRemaining >= -30); N.B. we cannot test this as we also search non-captures when in check!
 
 	// The quiescence search mainly tries out capture sequences (the maximum number of captures in a row is 30)
@@ -49,7 +49,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	short originalAlpha = alpha;
 	bool isPVNode = (alpha != beta - 1);
 	short bestMoveScore = -MatingIn0Score; // If anything takes over as best (a 'pv' or 'cut' node) then bestMoveScore will be equal to alpha. If nothing takes over as best (an 'all' node) then bestMoveScore will be less than alpha and will be a more accurate upper bound.
-	GameRecordEntry_Struct* currentGameRecordPointer = normalBrain.gameRecordPointer;
+	GameRecordEntry_Struct* currentGameRecordPointer = normalBrain.GameRecordPointer;
 	short drawScore = DrawScore(sideToMove);
 
 	//----------------------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			for (int i = 4; i <= pliesSinceIrreversible; i += 2) // Repetition?
 			{
 				// Make sure we haven't gone past the start of the array. This could happen if a position is setup from a FEN string which provides a high half-move count (for the 50-move rule).
-				if ((currentGameRecordPointer - i) < &normalBrain.gameRecord[2])
+				if ((currentGameRecordPointer - i) < &normalBrain.GameRecord[2])
 					break;
 
 				if ((currentGameRecordPointer - i)->transpositionTableHash64 == currentGameRecordPointer->transpositionTableHash64)
@@ -294,7 +294,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	}
 	else
 	{
-		int totalPieces = PopulationCountX(normalBrain.piecesBB[0][AllPieces] | normalBrain.piecesBB[1][AllPieces]); // Get how many pieces remain on the board
+		int totalPieces = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]); // Get how many pieces remain on the board
 		if (
 			(totalPieces <= EndgameTablebasesTreeProbeLimitQS)
 			//&& (currentGameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases when no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13) : This condition would realistically never fail in the QS in a real game so it is commented out for efficiency!
@@ -305,14 +305,14 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 
 			uint32_t result;
 			result = tb_probe_wdl(
-				normalBrain.piecesBB[0][AllPieces],
-				normalBrain.piecesBB[1][AllPieces],
-				normalBrain.piecesBB[0][King] | normalBrain.piecesBB[1][King],
-				normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen],
-				normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[1][Rook],
-				normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[1][Bishop],
-				normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight],
-				normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[1][Pawn],
+				normalBrain.PiecesBB[0][AllPieces],
+				normalBrain.PiecesBB[1][AllPieces],
+				normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
+				normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
+				normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
+				normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
+				normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
+				normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
 				currentGameRecordPointer->epSquare,
 				(sideToMove == 0)
 			);
@@ -461,7 +461,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		// Loop through move list
 		int SEEResult;
 		legalMovesMade = 0;
-		int enemyKingSquare = GetLS1BIndex(normalBrain.piecesBB[sideToMove ^ 1][King]);
+		int enemyKingSquare = GetLS1BIndex(normalBrain.PiecesBB[sideToMove ^ 1][King]);
 		int winningCapturesSearched = 0; // N.B. only increments this if not in check
 
 		for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
@@ -522,7 +522,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			legalMovesMade++;
 
 			// Initiate the retrieval of the next transposition table cache line as soon as possible
-			_mm_prefetch((char*)(NormalTranspositionTablePointer + (normalBrain.gameRecordPointer->transpositionTableHash64 & NormalTranspositionTableBucketsMask)), _MM_HINT_T0);
+			_mm_prefetch((char*)(NormalTranspositionTablePointer + (normalBrain.GameRecordPointer->transpositionTableHash64 & NormalTranspositionTableBucketsMask)), _MM_HINT_T0);
 
 #ifdef SEARCHINGFORLINE
 			if (TargetLineLength == ply)
@@ -625,7 +625,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 			return (short)(-MatingIn0Score + ply);
 		}
 		if ( // Lone K stalemate? (Doesn't add any ELO but helps with some puzzle solving)
-			(normalBrain.piecesBB[sideToMove][AllPieces] == normalBrain.piecesBB[sideToMove][King])
+			(normalBrain.PiecesBB[sideToMove][AllPieces] == normalBrain.PiecesBB[sideToMove][King])
 			&& (!normalBrain.KingCanLegallyMove(sideToMove))
 			)
 		{

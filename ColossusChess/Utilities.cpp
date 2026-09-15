@@ -102,7 +102,7 @@ void OutputError(std::string s)
 		ctime_s(buffer, sizeof(buffer), &t);
 		ErrorFile << buffer;
 		ErrorFile << "*** Error!: " + s + "\n";
-		ErrorFile << ConvertPositionToFEN(EngineBrain.MailboxBoard64, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].sideToMove, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].castlingStatus, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].epSquare, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].pliesSinceIrreversible, EngineBrain.gameRecord[EngineBrain.GameRecordIndexRoot].moveNumber) + "\n";
+		ErrorFile << ConvertPositionToFEN(EngineBrain.MailboxBoard64, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].sideToMove, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].castlingStatus, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].epSquare, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].pliesSinceIrreversible, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].moveNumber) + "\n";
 
 		ErrorFile << LastPositionAndMoves << "\n";
 		ErrorFile << "TranspositionTableMemory=" + std::to_string(TranspositionTableMemory) << "\n";

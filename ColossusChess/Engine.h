@@ -276,15 +276,15 @@ void InitialiseOneOffStuff();
 void* AlignedAllocateMemory(size_t size, size_t alignment);
 void AlignedFreeMemory(void* p);
 void FreeAnyTranspositionTableMemory();
-uint64_t GenerateTranspositionTableHash64(int8_t MailboxBoard64[64], GameRecordEntry_Struct* gameRecordPointer);
+uint64_t GenerateTranspositionTableHash64(int8_t MailboxBoard64[64], GameRecordEntry_Struct* GameRecordPointer);
 
 void ClearEverythingForDeterminancy();
 void NewGame(bool clearEverything);
 
-void ConvertMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
-bool CompareMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t piecesBB[Sides][King + 2]);
+void ConvertMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t PiecesBB[Sides][King + 2]);
+bool CompareMailboxBoard64ToPiecesBB(int8_t MailboxBoard64[64], uint64_t PiecesBB[Sides][King + 2]);
 void WriteMailboxBoard64(Brain* brain);
-void WritePiecesBB(uint64_t piecesBB[Sides][King + 2]);
+void WritePiecesBB(uint64_t PiecesBB[Sides][King + 2]);
 
 //void ConvertFENToPosition(std::string position, std::string sideToMove, std::string castling, std::string ep, std::string irreversible, std::string moveNumber);
 void SetPositionAndMoves(std::string positionAndMoves);

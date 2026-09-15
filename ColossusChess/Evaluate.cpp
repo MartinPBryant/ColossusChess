@@ -175,14 +175,14 @@ int whitePassedPawnSquare, blackPassedPawnSquare;//TEMP
 int Normal::EvaluateInner(int sideToMove)
 {
 	// Returns a score relative to the side to move e.g. white to move and a pawn up returns +100 as does black to move and a pawn up
-	assert(MaterialValuesCorrect(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer));
-	assert(PSTValuesCorrect(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer));
+	assert(MaterialValuesCorrect(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer));
+	assert(PSTValuesCorrect(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer));
 
 	int openingScore[Sides];
 	int endgameScore[Sides];
 
 	// N.B. these must be 'int' NOT 'uint32_t' else it screws up the signed multiplication in the final formula below!!!
-	int gamePhase = normalBrain.gameRecordPointer->gamePhase[0] + normalBrain.gameRecordPointer->gamePhase[1];
+	int gamePhase = normalBrain.GameRecordPointer->gamePhase[0] + normalBrain.GameRecordPointer->gamePhase[1];
 	int scaleFactor = 0; // The lower scaleFactor is, the closer to zero the score will be pulled
 	//int ceilingMaterial = MateBaseScore, floorMaterial = -MateBaseScore;
 	
@@ -191,10 +191,10 @@ int Normal::EvaluateInner(int sideToMove)
 	//----------------------------------------------------------------------------------------------------
 
 	// PSTs
-	openingScore[0] = normalBrain.gameRecordPointer->totalOpeningPST[0];
-	openingScore[1] = normalBrain.gameRecordPointer->totalOpeningPST[1];
-	endgameScore[0] = normalBrain.gameRecordPointer->totalEndgamePST[0];
-	endgameScore[1] = normalBrain.gameRecordPointer->totalEndgamePST[1];
+	openingScore[0] = normalBrain.GameRecordPointer->totalOpeningPST[0];
+	openingScore[1] = normalBrain.GameRecordPointer->totalOpeningPST[1];
+	endgameScore[0] = normalBrain.GameRecordPointer->totalEndgamePST[0];
+	endgameScore[1] = normalBrain.GameRecordPointer->totalEndgamePST[1];
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -219,7 +219,7 @@ int Normal::EvaluateInner(int sideToMove)
 
 	// WOULD IT BE FASTER TO ACCUMULATE THE PAWN SCORE IN A LOCAL VARIABLE RATHER THAN lastPawnScoreWhite.pawnStructureOpeningScore? THEN IT CAN BE ENREGISTERED AND ASSIGNED INTO lastPawnScoreWhite.pawnStructureOpeningScore AFTERWARDS
 
-	if (normalBrain.piecesBB[0][Pawn] != lastPawnScoreWhite.bb)
+	if (normalBrain.PiecesBB[0][Pawn] != lastPawnScoreWhite.bb)
 	{
 		//AC1++;
 		//lastButOnePawnScoreWhite = lastPawnScoreWhite;
@@ -234,36 +234,36 @@ int Normal::EvaluateInner(int sideToMove)
 			lastPawnScoreWhite.pawnStructureOpeningScore = 0;
 			lastPawnScoreWhite.pawnStructureEndgameScore = 0;
 
-			doubled = PopulationCountX(normalBrain.piecesBB[0][Pawn] & SouthSpan(normalBrain.piecesBB[0][Pawn]));
+			doubled = PopulationCountX(normalBrain.PiecesBB[0][Pawn] & SouthSpan(normalBrain.PiecesBB[0][Pawn]));
 			if (doubled > 0)
 			{
 				lastPawnScoreWhite.pawnStructureOpeningScore += -15 * doubled;
 				lastPawnScoreWhite.pawnStructureEndgameScore += -10 * doubled;
 			}
 
-			isolated = PopulationCountX(isolanis(normalBrain.piecesBB[0][Pawn]));
+			isolated = PopulationCountX(isolanis(normalBrain.PiecesBB[0][Pawn]));
 			if (isolated > 0)
 			{
 				lastPawnScoreWhite.pawnStructureOpeningScore -= 16 * isolated;
 				//lastPawnScoreWhite.pawnStructureEndgameScore -= 0 * isolated;
 			}
 
-			chainBB = normalBrain.piecesBB[0][Pawn];
+			chainBB = normalBrain.PiecesBB[0][Pawn];
 			chainBB = East(chainBB) | West(chainBB);
 			chainBB = chainBB | North(chainBB) | South(chainBB);
-			chainBB = normalBrain.piecesBB[0][Pawn] & ~chainBB;
+			chainBB = normalBrain.PiecesBB[0][Pawn] & ~chainBB;
 			if (chainBB)
 			{
 				lastPawnScoreWhite.pawnStructureOpeningScore -= 8 * PopulationCountX(chainBB);
 			}
 		}
 
-		lastPawnScoreWhite.bb = normalBrain.piecesBB[0][Pawn];
+		lastPawnScoreWhite.bb = normalBrain.PiecesBB[0][Pawn];
 	}
 	openingScore[0] += lastPawnScoreWhite.pawnStructureOpeningScore;
 	endgameScore[0] += lastPawnScoreWhite.pawnStructureEndgameScore;
 
-	if (normalBrain.piecesBB[1][Pawn] != lastPawnScoreBlack.bb)
+	if (normalBrain.PiecesBB[1][Pawn] != lastPawnScoreBlack.bb)
 	{
 		//if (NormalGenerate.piecesBB[1][Pawn] == 0)
 		//{
@@ -275,41 +275,41 @@ int Normal::EvaluateInner(int sideToMove)
 			lastPawnScoreBlack.pawnStructureOpeningScore = 0;
 			lastPawnScoreBlack.pawnStructureEndgameScore = 0;
 
-			doubled = PopulationCountX(normalBrain.piecesBB[1][Pawn] & NorthSpan(normalBrain.piecesBB[1][Pawn]));
+			doubled = PopulationCountX(normalBrain.PiecesBB[1][Pawn] & NorthSpan(normalBrain.PiecesBB[1][Pawn]));
 			if (doubled > 0)
 			{
 				lastPawnScoreBlack.pawnStructureOpeningScore += -15 * doubled;
 				lastPawnScoreBlack.pawnStructureEndgameScore += -10 * doubled;
 			}
 
-			isolated = PopulationCountX(isolanis(normalBrain.piecesBB[1][Pawn]));
+			isolated = PopulationCountX(isolanis(normalBrain.PiecesBB[1][Pawn]));
 			if (isolated > 0)
 			{
 				lastPawnScoreBlack.pawnStructureOpeningScore -= 16 * isolated;
 				//lastPawnScoreBlack.pawnStructureEndgameScore -= 0 * isolated;
 			}
 
-			chainBB = normalBrain.piecesBB[1][Pawn];
+			chainBB = normalBrain.PiecesBB[1][Pawn];
 			chainBB = East(chainBB) | West(chainBB);
 			chainBB = chainBB | North(chainBB) | South(chainBB);
-			chainBB = normalBrain.piecesBB[1][Pawn] & ~chainBB;
+			chainBB = normalBrain.PiecesBB[1][Pawn] & ~chainBB;
 			if (chainBB)
 			{
 				lastPawnScoreBlack.pawnStructureOpeningScore -= 8 * PopulationCountX(chainBB);
 			}
 		}
 
-		lastPawnScoreBlack.bb = normalBrain.piecesBB[1][Pawn];
+		lastPawnScoreBlack.bb = normalBrain.PiecesBB[1][Pawn];
 	}
 	openingScore[1] += lastPawnScoreBlack.pawnStructureOpeningScore;
 	endgameScore[1] += lastPawnScoreBlack.pawnStructureEndgameScore;
 
 
 	// Backward Ps on semi open files and the opponent has heavy pieces
-	if (normalBrain.piecesBB[1][Rook] | normalBrain.piecesBB[1][Queen])
+	if (normalBrain.PiecesBB[1][Rook] | normalBrain.PiecesBB[1][Queen])
 	{
-		backwardBB = backwardSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]);
-		backwardBB &= halfOpenOrOpenFiles(normalBrain.piecesBB[1][Pawn]);
+		backwardBB = backwardSide1(normalBrain.PiecesBB[0][Pawn], normalBrain.PiecesBB[1][Pawn]);
+		backwardBB &= halfOpenOrOpenFiles(normalBrain.PiecesBB[1][Pawn]);
 		if (backwardBB != 0)
 		{
 			openingScore[0] -= 32 * PopulationCountX(backwardBB);
@@ -321,10 +321,10 @@ int Normal::EvaluateInner(int sideToMove)
 		}
 	}
 
-	if (normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[0][Queen])
+	if (normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[0][Queen])
 	{
-		backwardBB = backwardSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
-		backwardBB &= halfOpenOrOpenFiles(normalBrain.piecesBB[0][Pawn]);
+		backwardBB = backwardSide2(normalBrain.PiecesBB[1][Pawn], normalBrain.PiecesBB[0][Pawn]);
+		backwardBB &= halfOpenOrOpenFiles(normalBrain.PiecesBB[0][Pawn]);
 		if (backwardBB != 0)
 		{
 			openingScore[1] -= 32 * PopulationCountX(backwardBB);
@@ -342,7 +342,7 @@ int Normal::EvaluateInner(int sideToMove)
 	//TODO: connected passed pawns
 	uint64_t passedBB, connectedPassedBB;
 	int passed;
-	passedBB = passedSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]);
+	passedBB = passedSide1(normalBrain.PiecesBB[0][Pawn], normalBrain.PiecesBB[1][Pawn]);
 	passed = PopulationCountX(passedBB);
 	if (passed > 0)
 	{
@@ -356,12 +356,12 @@ int Normal::EvaluateInner(int sideToMove)
 		//	endgameScore[0] += 9;
 		//}
 
-		if (normalBrain.gameRecordPointer->gamePhase[1] == 0) // Opponent has no pieces to stop a runner?
+		if (normalBrain.GameRecordPointer->gamePhase[1] == 0) // Opponent has no pieces to stop a runner?
 		//if (normalBrain.gameRecordPointer->gamePhase[1] < 9) // Opponent has less than a Q to stop a runner?
 		{
 			// USING THIS PassedPawnCatchableByKing[STM] MAKES EVAL NON-SYMETRICAL!!!
 			//USE PAWN-SQUARE BITBOARDS??? AND JUST CHECK IF THE OPP K IS INSIDE
-			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][1][GetLS1BIndex(normalBrain.piecesBB[1][King])];
+			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][1][GetLS1BIndex(normalBrain.PiecesBB[1][King])];
 			if (passedBB)
 			{
 				//endgameScore[0] += 16 * passed;
@@ -370,7 +370,7 @@ int Normal::EvaluateInner(int sideToMove)
 			}
 		}
 	}
-	passedBB = passedSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
+	passedBB = passedSide2(normalBrain.PiecesBB[1][Pawn], normalBrain.PiecesBB[0][Pawn]);
 	passed = PopulationCountX(passedBB);
 	if (passed > 0)
 	{
@@ -384,10 +384,10 @@ int Normal::EvaluateInner(int sideToMove)
 		//	endgameScore[1] += 9;
 		//}
 
-		if (normalBrain.gameRecordPointer->gamePhase[0] == 0) // Opponent has no pieces to stop a runner?
+		if (normalBrain.GameRecordPointer->gamePhase[0] == 0) // Opponent has no pieces to stop a runner?
 		//if (normalBrain.gameRecordPointer->gamePhase[0] < 9) // Opponent has less than a Q to stop a runner?
 		{
-			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][0][GetLS1BIndex(normalBrain.piecesBB[0][King])];
+			passedBB = passedBB & ~PassedPawnCatchableByKing[sideToMove][0][GetLS1BIndex(normalBrain.PiecesBB[0][King])];
 			if (passedBB)
 			{
 				//endgameScore[1] += 16 * passed;
@@ -419,12 +419,12 @@ int Normal::EvaluateInner(int sideToMove)
 	//----------------------------------------------------------------------------------------------------
 	
 	// Bishop pair
-	if (PopulationCountX(normalBrain.piecesBB[0][Bishop]) > 1)
+	if (PopulationCountX(normalBrain.PiecesBB[0][Bishop]) > 1)
 	{
 		openingScore[0] += 20;
 		endgameScore[0] += 20;
 	}
-	if (PopulationCountX(normalBrain.piecesBB[1][Bishop]) > 1)
+	if (PopulationCountX(normalBrain.PiecesBB[1][Bishop]) > 1)
 	{
 		openingScore[1] += 20;
 		endgameScore[1] += 20;
@@ -434,7 +434,7 @@ int Normal::EvaluateInner(int sideToMove)
 
 	// Rook on semi-open file
 	uint64_t semiOpenRooks, openRooks;
-	semiOpenRooks = normalBrain.piecesBB[0][Rook] & halfOpenOrOpenFiles(normalBrain.piecesBB[0][Pawn]);
+	semiOpenRooks = normalBrain.PiecesBB[0][Rook] & halfOpenOrOpenFiles(normalBrain.PiecesBB[0][Pawn]);
 	if (semiOpenRooks)
 	{
 		openingScore[0] += 20 * PopulationCountX(semiOpenRooks);
@@ -446,7 +446,7 @@ int Normal::EvaluateInner(int sideToMove)
 		//	//endgameScore[0] += 8 * PopulationCountX(openRooks);
 		//}
 	}
-	semiOpenRooks = normalBrain.piecesBB[1][Rook] & halfOpenOrOpenFiles(normalBrain.piecesBB[1][Pawn]);
+	semiOpenRooks = normalBrain.PiecesBB[1][Rook] & halfOpenOrOpenFiles(normalBrain.PiecesBB[1][Pawn]);
 	if (semiOpenRooks)
 	{
 		openingScore[1] += 20 * PopulationCountX(semiOpenRooks);
@@ -471,24 +471,24 @@ int Normal::EvaluateInner(int sideToMove)
 	uint32_t kingSquare, pawnShelter;
 	
 	pawnShelter = 0;
-	kingSquare = GetLS1BIndex(normalBrain.piecesBB[0][King]);
+	kingSquare = GetLS1BIndex(normalBrain.PiecesBB[0][King]);
 	//if (kingSquare <= H2)
 	{
 		if ((kingSquare & 7) >= 6)
-			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.piecesBB[0][Pawn] & F2G2H2BB) * 2) + PopulationCountX(normalBrain.piecesBB[0][Pawn] & F3G3H3BB)));
+			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.PiecesBB[0][Pawn] & F2G2H2BB) * 2) + PopulationCountX(normalBrain.PiecesBB[0][Pawn] & F3G3H3BB)));
 		else if ((kingSquare & 7) <= 2)
-			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.piecesBB[0][Pawn] & A2B2C2BB) * 2) + PopulationCountX(normalBrain.piecesBB[0][Pawn] & A3B3C3BB)));
+			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.PiecesBB[0][Pawn] & A2B2C2BB) * 2) + PopulationCountX(normalBrain.PiecesBB[0][Pawn] & A3B3C3BB)));
 	}
 	openingScore[0] -= 3 * (6 - pawnShelter);
 	
 	pawnShelter = 0;
-	kingSquare = GetLS1BIndex(normalBrain.piecesBB[1][King]);
+	kingSquare = GetLS1BIndex(normalBrain.PiecesBB[1][King]);
 	//if (kingSquare >= A7)
 	{
 		if ((kingSquare & 7) >= 6)
-			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.piecesBB[1][Pawn] & F7G7H7BB) * 2) + PopulationCountX(normalBrain.piecesBB[1][Pawn] & F6G6H6BB)));
+			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.PiecesBB[1][Pawn] & F7G7H7BB) * 2) + PopulationCountX(normalBrain.PiecesBB[1][Pawn] & F6G6H6BB)));
 		else if ((kingSquare & 7) <= 2)
-			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.piecesBB[1][Pawn] & A7B7C7BB) * 2) + PopulationCountX(normalBrain.piecesBB[1][Pawn] & A6B6C6BB)));
+			pawnShelter = std::min(6, int((PopulationCountX(normalBrain.PiecesBB[1][Pawn] & A7B7C7BB) * 2) + PopulationCountX(normalBrain.PiecesBB[1][Pawn] & A6B6C6BB)));
 	}
 	openingScore[1] -= 3 * (6 - pawnShelter);
 
@@ -548,9 +548,9 @@ int Normal::EvaluateInner(int sideToMove)
 	// Mobility
 	uint32_t fromSquare;
 	uint64_t attacksBB;
-	uint64_t occupiedBB = normalBrain.piecesBB[0][AllPieces] | normalBrain.piecesBB[1][AllPieces];
-	uint64_t pawnAttacks0 = Side0PawnAttacksBB(normalBrain.piecesBB[0][Pawn]);
-	uint64_t pawnAttacks1 = Side1PawnAttacksBB(normalBrain.piecesBB[1][Pawn]);
+	uint64_t occupiedBB = normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces];
+	uint64_t pawnAttacks0 = Side0PawnAttacksBB(normalBrain.PiecesBB[0][Pawn]);
+	uint64_t pawnAttacks1 = Side1PawnAttacksBB(normalBrain.PiecesBB[1][Pawn]);
 	int mobility0 = 0, mobility1 = 0;
 
 	//uint32_t kingSquareSide0, kingSquareSide1;
@@ -585,7 +585,7 @@ int Normal::EvaluateInner(int sideToMove)
 
 	// Knights
 	uint64_t knightsBB;
-	knightsBB = normalBrain.piecesBB[0][Knight];
+	knightsBB = normalBrain.PiecesBB[0][Knight];
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
@@ -595,14 +595,14 @@ int Normal::EvaluateInner(int sideToMove)
 		//	enemyKingAttacksCountSide0++;
 		//	enemyKingAttacksWeightSide0 += 2;
 		//}
-		attacksBB = attacksBB & ~normalBrain.piecesBB[0][AllPieces] & ~pawnAttacks1;
+		attacksBB = attacksBB & ~normalBrain.PiecesBB[0][AllPieces] & ~pawnAttacks1;
 		if (attacksBB == 0)
 			mobility0 -= 20;
 		else
 			mobility0 += (PopulationCountX(attacksBB) << 1) + (PopulationCountX(attacksBB & Side1HalfBB) << 1);
 		ClearLS1B(knightsBB);
 	}
-	knightsBB = normalBrain.piecesBB[1][Knight];
+	knightsBB = normalBrain.PiecesBB[1][Knight];
 	while (knightsBB)
 	{
 		fromSquare = GetLS1BIndex(knightsBB);
@@ -612,7 +612,7 @@ int Normal::EvaluateInner(int sideToMove)
 		//	enemyKingAttacksCountSide1++;
 		//	enemyKingAttacksWeightSide1 += 2;
 		//}
-		attacksBB = attacksBB & ~normalBrain.piecesBB[1][AllPieces] & ~pawnAttacks0;
+		attacksBB = attacksBB & ~normalBrain.PiecesBB[1][AllPieces] & ~pawnAttacks0;
 		if (attacksBB == 0)
 			mobility1 -= 20;
 		else
@@ -622,34 +622,34 @@ int Normal::EvaluateInner(int sideToMove)
 
 	// Bishops
 	uint64_t bishopsBB;
-	bishopsBB = normalBrain.piecesBB[0][Bishop];
+	bishopsBB = normalBrain.PiecesBB[0][Bishop];
 	while (bishopsBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[0][Bishop] ^ normalBrain.piecesBB[0][Queen] ^ normalBrain.piecesBB[1][Bishop] ^ normalBrain.piecesBB[1][Queen]);
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB ^ normalBrain.PiecesBB[0][Bishop] ^ normalBrain.PiecesBB[0][Queen] ^ normalBrain.PiecesBB[1][Bishop] ^ normalBrain.PiecesBB[1][Queen]);
 		//if (attacksBB & kingPerimeterBBSide1)
 		//{
 		//	enemyKingAttacksCountSide0++;
 		//	enemyKingAttacksWeightSide0 += 2;
 		//}
-		attacksBB = attacksBB & ~normalBrain.piecesBB[0][AllPieces] & ~pawnAttacks1;
+		attacksBB = attacksBB & ~normalBrain.PiecesBB[0][AllPieces] & ~pawnAttacks1;
 		if (attacksBB == 0)
 			mobility0 -= 20;
 		else
 			mobility0 += PopulationCountX(attacksBB) + PopulationCountX(attacksBB & Side1HalfBB);
 		ClearLS1B(bishopsBB);
 	}
-	bishopsBB = normalBrain.piecesBB[1][Bishop];
+	bishopsBB = normalBrain.PiecesBB[1][Bishop];
 	while (bishopsBB)
 	{
 		fromSquare = GetLS1BIndex(bishopsBB);
-		attacksBB = BishopAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[0][Bishop] ^ normalBrain.piecesBB[0][Queen] ^ normalBrain.piecesBB[1][Bishop] ^ normalBrain.piecesBB[1][Queen]);
+		attacksBB = BishopAttacksBB(fromSquare, occupiedBB ^ normalBrain.PiecesBB[0][Bishop] ^ normalBrain.PiecesBB[0][Queen] ^ normalBrain.PiecesBB[1][Bishop] ^ normalBrain.PiecesBB[1][Queen]);
 		//if (attacksBB & kingPerimeterBBSide0)
 		//{
 		//	enemyKingAttacksCountSide1++;
 		//	enemyKingAttacksWeightSide1 += 2;
 		//}
-		attacksBB = attacksBB & ~normalBrain.piecesBB[1][AllPieces] & ~pawnAttacks0;
+		attacksBB = attacksBB & ~normalBrain.PiecesBB[1][AllPieces] & ~pawnAttacks0;
 		if (attacksBB == 0)
 			mobility1 -= 20;
 		else
@@ -659,36 +659,36 @@ int Normal::EvaluateInner(int sideToMove)
 
 	// Rooks
 	uint64_t rooksBB;
-	rooksBB = normalBrain.piecesBB[0][Rook];
+	rooksBB = normalBrain.PiecesBB[0][Rook];
 	while (rooksBB)
 	{
 		fromSquare = GetLS1BIndex(rooksBB);
 		//attacksBB = RookAttacksBB(fromSquare, occupiedBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[0][Rook] ^ normalBrain.piecesBB[0][Queen] ^ normalBrain.piecesBB[1][Rook] ^ normalBrain.piecesBB[1][Queen]); // Allow mobility through own Rs & Qs
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB ^ normalBrain.PiecesBB[0][Rook] ^ normalBrain.PiecesBB[0][Queen] ^ normalBrain.PiecesBB[1][Rook] ^ normalBrain.PiecesBB[1][Queen]); // Allow mobility through own Rs & Qs
 		//if (attacksBB & kingPerimeterBBSide1)
 		//{
 		//	enemyKingAttacksCountSide0++;
 		//	enemyKingAttacksWeightSide0 += 4;
 		//}
-		attacksBB = attacksBB & ~normalBrain.piecesBB[0][AllPieces] & ~pawnAttacks1;// &Side1Half;
+		attacksBB = attacksBB & ~normalBrain.PiecesBB[0][AllPieces] & ~pawnAttacks1;// &Side1Half;
 		if (attacksBB == 0)
 			mobility0 -= 20;//IS THIS VALID WHEN WE ONLY COUNT THE OPPS SIDE OF BOARD???
 		else
 			mobility0 += PopulationCountX(attacksBB & Side1HalfBB);
 		ClearLS1B(rooksBB);
 	}
-	rooksBB = normalBrain.piecesBB[1][Rook];
+	rooksBB = normalBrain.PiecesBB[1][Rook];
 	while (rooksBB)
 	{
 		fromSquare = GetLS1BIndex(rooksBB);
 		//attacksBB = RookAttacksBB(fromSquare, occupiedBB);
-		attacksBB = RookAttacksBB(fromSquare, occupiedBB ^ normalBrain.piecesBB[1][Rook] ^ normalBrain.piecesBB[1][Queen] ^ normalBrain.piecesBB[0][Rook] ^ normalBrain.piecesBB[0][Queen]);
+		attacksBB = RookAttacksBB(fromSquare, occupiedBB ^ normalBrain.PiecesBB[1][Rook] ^ normalBrain.PiecesBB[1][Queen] ^ normalBrain.PiecesBB[0][Rook] ^ normalBrain.PiecesBB[0][Queen]);
 		//if (attacksBB & kingPerimeterBBSide0)
 		//{
 		//	enemyKingAttacksCountSide1++;
 		//	enemyKingAttacksWeightSide1 += 4;
 		//}
-		attacksBB = attacksBB & ~normalBrain.piecesBB[1][AllPieces] & ~pawnAttacks0;// &Side0Half;
+		attacksBB = attacksBB & ~normalBrain.PiecesBB[1][AllPieces] & ~pawnAttacks0;// &Side0Half;
 		if (attacksBB == 0)
 			mobility1 -= 20;
 		else
@@ -786,10 +786,10 @@ int Normal::EvaluateInner(int sideToMove)
 	if (gamePhase <= 10)
 	{
 		// Opposite coloured Bishop endings are drawish
-		if ((PopulationCountX(normalBrain.piecesBB[0][Bishop]) == 1) && (PopulationCountX(normalBrain.piecesBB[1][Bishop]) == 1) && (PopulationCountX(normalBrain.piecesBB[0][Bishop] & LightBB) != PopulationCountX(normalBrain.piecesBB[1][Bishop] & LightBB)))
+		if ((PopulationCountX(normalBrain.PiecesBB[0][Bishop]) == 1) && (PopulationCountX(normalBrain.PiecesBB[1][Bishop]) == 1) && (PopulationCountX(normalBrain.PiecesBB[0][Bishop] & LightBB) != PopulationCountX(normalBrain.PiecesBB[1][Bishop] & LightBB)))
 		{
 			scaleFactor = 248;
-			if ((normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight] | normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[1][Rook] | normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen]) == 0)
+			if ((normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight] | normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook] | normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen]) == 0)
 				scaleFactor = 192;
 			//scaleFactor = 64;
 			//scaleFactor = 128;
@@ -797,8 +797,8 @@ int Normal::EvaluateInner(int sideToMove)
 		}
 
 		// Rook + Pawn endings are drawish (+0.5, +/-3.6, 20000)
-		if ((PopulationCountX(normalBrain.piecesBB[0][Rook]) > 0) && (PopulationCountX(normalBrain.piecesBB[1][Rook]) > 0) && (PopulationCountX(normalBrain.piecesBB[0][Rook]) == PopulationCountX(normalBrain.piecesBB[1][Rook])))
-			if ((normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight] | normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[1][Bishop] | normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen]) == 0)
+		if ((PopulationCountX(normalBrain.PiecesBB[0][Rook]) > 0) && (PopulationCountX(normalBrain.PiecesBB[1][Rook]) > 0) && (PopulationCountX(normalBrain.PiecesBB[0][Rook]) == PopulationCountX(normalBrain.PiecesBB[1][Rook])))
+			if ((normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight] | normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop] | normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen]) == 0)
 			{
 				scaleFactor = 240;
 			}
@@ -856,7 +856,7 @@ exitScaleFactor:
 	//int totalOpeningScore = max(min(openingScoreMaterial[sideToMove] - openingScoreMaterial[sideToMove ^ 1], ceilingMaterial), floorMaterial);
 	//int totalOpeningScore = openingScoreMaterial[sideToMove] - openingScoreMaterial[sideToMove ^ 1];
 	int totalOpeningScore, totalEndgameScore;
-	totalOpeningScore = totalEndgameScore = normalBrain.gameRecordPointer->totalMaterial[sideToMove] - normalBrain.gameRecordPointer->totalMaterial[sideToMove ^ 1];
+	totalOpeningScore = totalEndgameScore = normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1];
 	totalOpeningScore += openingScore[sideToMove] - openingScore[sideToMove ^ 1];
 	//int totalEndgameScore = max(min(endgameScoreMaterial[sideToMove] - endgameScoreMaterial[sideToMove ^ 1], ceilingMaterial), floorMaterial);
 	//int totalEndgameScore = endgameScoreMaterial[sideToMove] - endgameScoreMaterial[sideToMove ^ 1];
@@ -1108,14 +1108,14 @@ void Normal::StaticEvaluation()
 
 	normalBrain.CopyFrom(&EngineBrain);
 
-	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
-	InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-	InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-	InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-	Output("info string normalBrain.gameRecordPointer->totalMaterial[0] = " + MyITOA(normalBrain.gameRecordPointer->totalMaterial[0]));
-	Output("info string normalBrain.gameRecordPointer->totalMaterial[1] = " + MyITOA(normalBrain.gameRecordPointer->totalMaterial[1]));
-	Output("info string normalBrain.gameRecordPointer->gamePhase[0] = " + MyITOA(normalBrain.gameRecordPointer->gamePhase[0]));
-	Output("info string normalBrain.gameRecordPointer->gamePhase[1] = " + MyITOA(normalBrain.gameRecordPointer->gamePhase[1]));
+	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
+	InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	Output("info string normalBrain.gameRecordPointer->totalMaterial[0] = " + MyITOA(normalBrain.GameRecordPointer->totalMaterial[0]));
+	Output("info string normalBrain.gameRecordPointer->totalMaterial[1] = " + MyITOA(normalBrain.GameRecordPointer->totalMaterial[1]));
+	Output("info string normalBrain.gameRecordPointer->gamePhase[0] = " + MyITOA(normalBrain.GameRecordPointer->gamePhase[0]));
+	Output("info string normalBrain.gameRecordPointer->gamePhase[1] = " + MyITOA(normalBrain.GameRecordPointer->gamePhase[1]));
 
 	score = Evaluate(0);
 	Output("info string Static Evaluation WTM = " + MyITOA(score));
@@ -1133,7 +1133,7 @@ void Normal::TestSymmetry0()
 
 	normalBrain.CopyFrom(&EngineBrain);
 
-	normalBrain.gameRecordPointer = &normalBrain.gameRecord[2];
+	normalBrain.GameRecordPointer = &normalBrain.GameRecord[2];
 
 	for (int count = 1; count <= 10000000; count++)
 	{
@@ -1157,27 +1157,27 @@ void Normal::TestSymmetry0()
 		file = square % 8;
 		normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -King;
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 1;
 		if (normalBrain.MailboxBoard64[E1] == King)
 		{
 			if (normalBrain.MailboxBoard64[H1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
 			if (normalBrain.MailboxBoard64[A1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
 		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
 			if (normalBrain.MailboxBoard64[H8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
 			if (normalBrain.MailboxBoard64[A8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
 		//WriteMailboxBoard64(normalBrain.mailboxBoard64);
@@ -1206,7 +1206,7 @@ void Normal::TestSymmetry1()
 
 	normalBrain.CopyFrom(&EngineBrain);
 
-	normalBrain.gameRecordPointer = &normalBrain.gameRecord[2];
+	normalBrain.GameRecordPointer = &normalBrain.GameRecord[2];
 
 	for (int count = 1; count <= 10000000; count++)
 	{
@@ -1266,27 +1266,27 @@ void Normal::TestSymmetry1()
 		file = square % 8;
 		normalBrain.MailboxBoard64[(7 - rank) * 8 + file] = -King;
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 1;
 		if (normalBrain.MailboxBoard64[E1] == King)
 		{
 			if (normalBrain.MailboxBoard64[H1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
 			if (normalBrain.MailboxBoard64[A1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
 		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
 			if (normalBrain.MailboxBoard64[H8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
 			if (normalBrain.MailboxBoard64[A8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
 		//WriteMailboxBoard64(normalBrain.mailboxBoard64);
@@ -1315,7 +1315,7 @@ void Normal::TestSymmetry2()
 
 	normalBrain.CopyFrom(&EngineBrain);
 
-	normalBrain.gameRecordPointer = &normalBrain.gameRecord[2];
+	normalBrain.GameRecordPointer = &normalBrain.GameRecord[2];
 
 	for (int count = 1; count <= 10000000; count++)
 	{
@@ -1393,27 +1393,27 @@ void Normal::TestSymmetry2()
 		normalBrain.MailboxBoard64[square] = -King;
 
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 1;
 		if (normalBrain.MailboxBoard64[E1] == King)
 		{
 			if (normalBrain.MailboxBoard64[H1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
 			if (normalBrain.MailboxBoard64[A1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
 		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
 			if (normalBrain.MailboxBoard64[H8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
 			if (normalBrain.MailboxBoard64[A8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
 		score1 = Evaluate(0);
@@ -1428,27 +1428,27 @@ void Normal::TestSymmetry2()
 				normalBrain.MailboxBoard64[(8 - rank) * 8 + file - 1] = -piece;
 			}
 
-		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
-		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 1;
-		normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 1;
+		ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
+		InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 1;
+		normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 1;
 		if (normalBrain.MailboxBoard64[E1] == King)
 		{
 			if (normalBrain.MailboxBoard64[H1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
 			if (normalBrain.MailboxBoard64[A1] == Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[0][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
 		}
 		if (normalBrain.MailboxBoard64[E8] == -King)
 		{
 			if (normalBrain.MailboxBoard64[H8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][0] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
 			if (normalBrain.MailboxBoard64[A8] == -Rook)
-				normalBrain.gameRecord[2].castlingStatus.ui8[1][1] = 0;
+				normalBrain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
 		}
 
 		score2 = Evaluate(1);

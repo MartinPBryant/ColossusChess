@@ -431,7 +431,7 @@ bool Mate::AllTWM(int ply)
 	for (int i = 0; i < ply; i += 2)
 	{
 		//if (!(mateBrain.gameRecordPointer - i)->dangerConditions.dc.isTWM)
-		if (!(mateBrain.gameRecordPointer - i)->dangerConditions & TTFlagThreatenedWithMate)
+		if (!(mateBrain.GameRecordPointer - i)->dangerConditions & TTFlagThreatenedWithMate)
 			return false;
 	}
 
@@ -462,13 +462,13 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 
 	if (isInCheck) // Attacker in check?
 	{
-		int defenderKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove ^ 1][King]);
+		int defenderKingSquare = GetLS1BIndex(mateBrain.PiecesBB[sideToMove ^ 1][King]);
 		int attackerMovesCount = (int)(mateBrain.GenerateAllMovesOutOfCheck(sideToMove, attackerMoveList, true) - attackerMoveList);
 
 		for (int moveListIndexIterator = 0; moveListIndexIterator < attackerMovesCount; moveListIndexIterator++)
 		{
 			attackerCurrentMove.ui32 = attackerMoveList[moveListIndexIterator].ui32;
-			mateBrain.gameRecordPointer->move.ui32 = attackerCurrentMove.ui32;
+			mateBrain.GameRecordPointer->move.ui32 = attackerCurrentMove.ui32;
 			mateBrain.MakeMove(sideToMove); // N.B. MakeMove increments MateBrain.gameRecordPointer!
 
 			bool givesCheck = mateBrain.IsEnemyKingAttacked(defenderKingSquare, sideToMove);
@@ -483,7 +483,7 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 
 			if (!anyMoves)
 			{
-				result.ui32 = mateBrain.gameRecordPointer->move.ui32;
+				result.ui32 = mateBrain.GameRecordPointer->move.ui32;
 				break;
 			}
 		}
@@ -496,7 +496,7 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 		for (int moveListIndexIterator = 0; moveListIndexIterator < attackerMovesCount; moveListIndexIterator++)
 		{
 			attackerCurrentMove.ui32 = attackerMoveList[moveListIndexIterator].ui32;
-			mateBrain.gameRecordPointer->move.ui32 = attackerCurrentMove.ui32;
+			mateBrain.GameRecordPointer->move.ui32 = attackerCurrentMove.ui32;
 			mateBrain.MakeMove(sideToMove); // N.B. MakeMove increments MateBrain.gameRecordPointer!
 
 			mateBrain.CalculatePinnedPieces(sideToMove ^ 1); // Required for legal move generation
@@ -508,14 +508,14 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 			else
 			{
 				anyMoves = false;
-				int attackerKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove][King]);
+				int attackerKingSquare = GetLS1BIndex(mateBrain.PiecesBB[sideToMove][King]);
 				uint32_t defenderMovesCount = mateBrain.GenerateAllMoves(sideToMove ^ 1, true, defenderMoveList);
 				if (defenderMovesCount <= 1)
 				{
 					for (int moveListIndexIterator = 0; moveListIndexIterator < defenderMovesCount; moveListIndexIterator++)
 					{
 						defenderCurrentMove.ui32 = defenderMoveList[moveListIndexIterator].ui32;
-						mateBrain.gameRecordPointer->move.ui32 = defenderCurrentMove.ui32;
+						mateBrain.GameRecordPointer->move.ui32 = defenderCurrentMove.ui32;
 						mateBrain.MakeMove(sideToMove ^ 1); // N.B. MakeMove increments MateBrain.gameRecordPointer!
 
 						bool givesCheck = mateBrain.IsEnemyKingAttacked(attackerKingSquare, sideToMove ^ 1);
@@ -538,7 +538,7 @@ Move_Struct Mate::CanGiveMateInN(int N, int sideToMove, int isInCheck, int &chec
 
 			if (!anyMoves)
 			{
-				result.ui32 = mateBrain.gameRecordPointer->move.ui32;
+				result.ui32 = mateBrain.GameRecordPointer->move.ui32;
 				break;
 			}
 		}
@@ -685,7 +685,7 @@ void Mate::AddToMateTranspositionTable(int8_t depthRemaining, short ply, short s
 		if (ply < TC.MateInN * 2 - 1)//SHOULD ALWAYS BE TRUE???
 		{
 			MateTranspositionTableEntry_Struct* tte0;
-			uint64_t hash64 = mateBrain.gameRecordPointer->transpositionTableHash64WithEP;
+			uint64_t hash64 = mateBrain.GameRecordPointer->transpositionTableHash64WithEP;
 			tte0 = (MateTranspositionTableEntry_Struct*)(MateTranspositionTablePointer + (hash64 & MateTranspositionTableBucketsMask));
 
 			// Find candidate entry for replacement
@@ -769,17 +769,17 @@ void Mate::AddToMateTranspositionTable(int8_t depthRemaining, short ply, short s
 
 short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck, int freeMoves)//, bool allowNull, bool isCutNode, int currentLineExpense)
 {
-	assert(CompareMailboxBoard64ToPiecesBB(mateBrain.MailboxBoard64, mateBrain.piecesBB));
-	assert((PopulationCountX(mateBrain.piecesBB[0][King]) == 1) && (PopulationCountX(mateBrain.piecesBB[1][King]) == 1));
-	assert((PopulationCountX(mateBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(mateBrain.piecesBB[1][Queen]) <= 9));
-	assert((PopulationCountX(mateBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(mateBrain.piecesBB[1][Rook]) <= 10));
-	assert((PopulationCountX(mateBrain.piecesBB[0][Bishop]) <= 10) && (PopulationCountX(mateBrain.piecesBB[1][Bishop]) <= 10));
-	assert((PopulationCountX(mateBrain.piecesBB[0][Knight]) <= 10) && (PopulationCountX(mateBrain.piecesBB[1][Knight]) <= 10));
-	assert((PopulationCountX(mateBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(mateBrain.piecesBB[1][Pawn]) <= 8));
-	assert(mateBrain.piecesBB[0][AllPieces] == (mateBrain.piecesBB[0][Pawn] | mateBrain.piecesBB[0][Knight] | mateBrain.piecesBB[0][Bishop] | mateBrain.piecesBB[0][Rook] | mateBrain.piecesBB[0][Queen] | mateBrain.piecesBB[0][King]));
-	assert(mateBrain.piecesBB[1][AllPieces] == (mateBrain.piecesBB[1][Pawn] | mateBrain.piecesBB[1][Knight] | mateBrain.piecesBB[1][Bishop] | mateBrain.piecesBB[1][Rook] | mateBrain.piecesBB[1][Queen] | mateBrain.piecesBB[1][King]));
-	assert(mateBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer)));
-	assert(mateBrain.gameRecordPointer->transpositionTableHash64WithEP == (mateBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[mateBrain.gameRecordPointer->epSquare]));
+	assert(CompareMailboxBoard64ToPiecesBB(mateBrain.MailboxBoard64, mateBrain.PiecesBB));
+	assert((PopulationCountX(mateBrain.PiecesBB[0][King]) == 1) && (PopulationCountX(mateBrain.PiecesBB[1][King]) == 1));
+	assert((PopulationCountX(mateBrain.PiecesBB[0][Queen]) <= 9) && (PopulationCountX(mateBrain.PiecesBB[1][Queen]) <= 9));
+	assert((PopulationCountX(mateBrain.PiecesBB[0][Rook]) <= 10) && (PopulationCountX(mateBrain.PiecesBB[1][Rook]) <= 10));
+	assert((PopulationCountX(mateBrain.PiecesBB[0][Bishop]) <= 10) && (PopulationCountX(mateBrain.PiecesBB[1][Bishop]) <= 10));
+	assert((PopulationCountX(mateBrain.PiecesBB[0][Knight]) <= 10) && (PopulationCountX(mateBrain.PiecesBB[1][Knight]) <= 10));
+	assert((PopulationCountX(mateBrain.PiecesBB[0][Pawn]) <= 8) && (PopulationCountX(mateBrain.PiecesBB[1][Pawn]) <= 8));
+	assert(mateBrain.PiecesBB[0][AllPieces] == (mateBrain.PiecesBB[0][Pawn] | mateBrain.PiecesBB[0][Knight] | mateBrain.PiecesBB[0][Bishop] | mateBrain.PiecesBB[0][Rook] | mateBrain.PiecesBB[0][Queen] | mateBrain.PiecesBB[0][King]));
+	assert(mateBrain.PiecesBB[1][AllPieces] == (mateBrain.PiecesBB[1][Pawn] | mateBrain.PiecesBB[1][Knight] | mateBrain.PiecesBB[1][Bishop] | mateBrain.PiecesBB[1][Rook] | mateBrain.PiecesBB[1][Queen] | mateBrain.PiecesBB[1][King]));
+	assert(mateBrain.GameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer) : ~GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer)));
+	assert(mateBrain.GameRecordPointer->transpositionTableHash64WithEP == (mateBrain.GameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[mateBrain.GameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply <= MaximumPly));
 	assert(depthRemaining <= MaximumPly);
 	assert((sideToMove >= 0) && (sideToMove < Sides));
@@ -806,15 +806,15 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	//----------------------------------------------------------------------------------------------------
 
 	if (ply & 1)
-		if (mateBrain.gameRecordPointer->totalMaterial[sideToMove] < (TC.MateMinimumAttackerMaterial * 100))
+		if (mateBrain.GameRecordPointer->totalMaterial[sideToMove] < (TC.MateMinimumAttackerMaterial * 100))
 		{
-			*mateBrain.gameRecordPointer->principalVariationPointer = PVTFailedMateCondition;
+			*mateBrain.GameRecordPointer->principalVariationPointer = PVTFailedMateCondition;
 			return -EGTBWinningScore;
 		}
 
 
-	int standPatScore = mateBrain.gameRecordPointer->totalMaterial[sideToMove] - mateBrain.gameRecordPointer->totalMaterial[sideToMove ^ 1];
-	int kingDistance = ManhattanDistance[GetLS1BIndex(mateBrain.piecesBB[0][King])][GetLS1BIndex(mateBrain.piecesBB[1][King])];
+	int standPatScore = mateBrain.GameRecordPointer->totalMaterial[sideToMove] - mateBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1];
+	int kingDistance = ManhattanDistance[GetLS1BIndex(mateBrain.PiecesBB[0][King])][GetLS1BIndex(mateBrain.PiecesBB[1][King])];
 	if (ply & 1)
 		standPatScore -= kingDistance; // Give small bonus for the attacking K approaching the defending K
 	else
@@ -844,15 +844,15 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 					//Move_Struct tmi1 = CanGiveMateInN(((TC.MateInN * 2) - ply + 1) / 2, sideToMove, isInCheck, checksCount);
 					if (tmi1.ui32)
 					{
-						*mateBrain.gameRecordPointer->principalVariationPointer = tmi1.ui32; // Return mating move as part of pv
-						*(mateBrain.gameRecordPointer->principalVariationPointer + 1) = PVTCheckmate;
+						*mateBrain.GameRecordPointer->principalVariationPointer = tmi1.ui32; // Return mating move as part of pv
+						*(mateBrain.GameRecordPointer->principalVariationPointer + 1) = PVTCheckmate;
 
 						MatingMoves[ply] = tmi1;
 
 						return (MatingIn0Score - ply - 1);
 					}
 
-					*mateBrain.gameRecordPointer->principalVariationPointer = PVTStandPat;
+					*mateBrain.GameRecordPointer->principalVariationPointer = PVTStandPat;
 					return standPatScore;
 				}
 			}
@@ -866,12 +866,12 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 					if (!mateBrain.AnyMoves(sideToMove, true))
 					{
 						// Checkmated at the final ply
-						*mateBrain.gameRecordPointer->principalVariationPointer = PVTCheckmate;
+						*mateBrain.GameRecordPointer->principalVariationPointer = PVTCheckmate;
 						return (short)(-MatingIn0Score + ply);
 					}
 				}
 
-				*mateBrain.gameRecordPointer->principalVariationPointer = PVTStandPat;
+				*mateBrain.GameRecordPointer->principalVariationPointer = PVTStandPat;
 				return standPatScore;
 			}
 		}
@@ -886,7 +886,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	if (ply > 1)
 	{
 		// Drawn?
-		int pliesSinceIrreversible = mateBrain.gameRecordPointer->pliesSinceIrreversible;
+		int pliesSinceIrreversible = mateBrain.GameRecordPointer->pliesSinceIrreversible;
 		if (pliesSinceIrreversible >= 3)
 		{
 			short ds = EGTBWinningScore / 2;
@@ -896,13 +896,13 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 				if (ds > alpha) // Immediate repetition possible?
 				{
 					if (
-						(((mateBrain.gameRecordPointer - 1)->move.mf.fromSquare) == ((mateBrain.gameRecordPointer - 3)->move.mf.toSquare))
-						&& (((mateBrain.gameRecordPointer - 1)->move.mf.toSquare) == ((mateBrain.gameRecordPointer - 3)->move.mf.fromSquare))
+						(((mateBrain.GameRecordPointer - 1)->move.mf.fromSquare) == ((mateBrain.GameRecordPointer - 3)->move.mf.toSquare))
+						&& (((mateBrain.GameRecordPointer - 1)->move.mf.toSquare) == ((mateBrain.GameRecordPointer - 3)->move.mf.fromSquare))
 						) // Did the opponent just undo his previous move?
 					{
 						if (ds >= beta)
 						{
-							*mateBrain.gameRecordPointer->principalVariationPointer = PVTDrawImmediateRepetition;
+							*mateBrain.GameRecordPointer->principalVariationPointer = PVTDrawImmediateRepetition;
 							return ds;
 						}
 					}
@@ -912,9 +912,9 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 			if (pliesSinceIrreversible >= 4)
 			{
 				for (int i = 4; i <= pliesSinceIrreversible; i += 2) // Repetition?
-					if ((mateBrain.gameRecordPointer - i)->transpositionTableHash64 == mateBrain.gameRecordPointer->transpositionTableHash64)
+					if ((mateBrain.GameRecordPointer - i)->transpositionTableHash64 == mateBrain.GameRecordPointer->transpositionTableHash64)
 					{
-						*mateBrain.gameRecordPointer->principalVariationPointer = PVTDrawByRepetition;
+						*mateBrain.GameRecordPointer->principalVariationPointer = PVTDrawByRepetition;
 						short result = ds;
 						if (ply & 1)
 							result = -ds;
@@ -923,7 +923,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 				if ((pliesSinceIrreversible >= 100) || (pliesSinceIrreversible >= TC.MateMaximumReversibleMoves)) // 50-move?
 				{
-					*mateBrain.gameRecordPointer->principalVariationPointer = PVTDrawBy50MoveRule;
+					*mateBrain.GameRecordPointer->principalVariationPointer = PVTDrawBy50MoveRule;
 					short result = ds;
 					if (ply & 1)
 						result = -ds;
@@ -969,7 +969,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	int legalMovesMade;
 	Move_Struct currentMove;
 	short currentMoveScore;
-	GameRecordEntry_Struct* currentGameRecordPointer = mateBrain.gameRecordPointer;
+	GameRecordEntry_Struct* currentGameRecordPointer = mateBrain.GameRecordPointer;
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -1008,7 +1008,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	//if (0)
 	if ((MateTranspositionTableBuckets > 0) && (ply > 1)) // ply will always be < TC.MateInN * 2 - 1
 	{
-		uint64_t hash64 = mateBrain.gameRecordPointer->transpositionTableHash64WithEP;
+		uint64_t hash64 = mateBrain.GameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (MateTranspositionTableEntry_Struct*)(MateTranspositionTablePointer + (hash64 & MateTranspositionTableBucketsMask));
 
 		for (int entry = 0; entry < MateTranspositionTableEntriesPerBucket; entry++) // Do we already have this position in the table?
@@ -1086,8 +1086,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 								PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -2, tteScore, 0, bestMoveScore););
 								if (tteBestMove.ui32 != 0) // Sometimes there won't be a move stored as it might be a checkmate/stalemate/DBR position
 								{
-									*mateBrain.gameRecordPointer->principalVariationPointer = tteBestMove.ui32; // Return best move as part of pv
-									*(mateBrain.gameRecordPointer->principalVariationPointer + 1) = PVTTTExact;
+									*mateBrain.GameRecordPointer->principalVariationPointer = tteBestMove.ui32; // Return best move as part of pv
+									*(mateBrain.GameRecordPointer->principalVariationPointer + 1) = PVTTTExact;
 								}
 								return tteScore; // We can exit because we have an exact value
 							}
@@ -1102,7 +1102,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 
 	//----------------------------------------------------------------------------------------------------
 
-	if ((mateBrain.KnownLowMaterialDraws(sideToMove) == PVTDrawMinimumMaterial) || ((ply & 1) && (mateBrain.piecesBB[sideToMove][AllPieces] == mateBrain.piecesBB[sideToMove][King])))
+	if ((mateBrain.KnownLowMaterialDraws(sideToMove) == PVTDrawMinimumMaterial) || ((ply & 1) && (mateBrain.PiecesBB[sideToMove][AllPieces] == mateBrain.PiecesBB[sideToMove][King])))
 	{
 		*currentGameRecordPointer->principalVariationPointer = PVTDrawMinimumMaterial;
 		short result = EGTBWinningScore / 2;
@@ -1259,7 +1259,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	if ((ply & 1) == 0) // At even ply? (Defender's move)
 	{
 		// Calculate the number of king moves, whether only one piece can move and whether fixed pieces have been released
-		int defenderKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove][King]);
+		int defenderKingSquare = GetLS1BIndex(mateBrain.PiecesBB[sideToMove][King]);
 		int defenderMoveablePieces = 0;
 		uint64_t defenderMoveablePiecesBB = 0;
 
@@ -1407,16 +1407,16 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							currentGameRecordPointer->move.fromSquarePiece = Pawn; // Ensure CMH treats all previous null moves as Px0
 							currentGameRecordPointer->move.toSquarePiece = Empty; // Ensure recapture extensions don't mistakenly kick in
 
-							mateBrain.gameRecordPointer++; // Normally done in make/unmake-move
-							mateBrain.gameRecordPointer->castlingStatus = (mateBrain.gameRecordPointer - 1)->castlingStatus;
-							mateBrain.gameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO) // (NormalGenerate.gameRecordPointer - 1)->pliesSinceIrreversible + 1;
-							mateBrain.gameRecordPointer->transpositionTableHash64 = ~(mateBrain.gameRecordPointer - 1)->transpositionTableHash64;
-							mateBrain.gameRecordPointer->transpositionTableHash64WithEP = mateBrain.gameRecordPointer->transpositionTableHash64;
-							mateBrain.gameRecordPointer->epSquare = 0;
-							*(uint32_t*)(&mateBrain.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(mateBrain.gameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides! DOUBLE CHECK THIS WORKS!!!!
-							*(uint64_t*)(&mateBrain.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(mateBrain.gameRecordPointer - 1)->gamePhase[0]);
-							*(uint32_t*)(&mateBrain.gameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(mateBrain.gameRecordPointer - 1)->totalOpeningPST[0]);
-							*(uint32_t*)(&mateBrain.gameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(mateBrain.gameRecordPointer - 1)->totalEndgamePST[0]);
+							mateBrain.GameRecordPointer++; // Normally done in make/unmake-move
+							mateBrain.GameRecordPointer->castlingStatus = (mateBrain.GameRecordPointer - 1)->castlingStatus;
+							mateBrain.GameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO) // (NormalGenerate.gameRecordPointer - 1)->pliesSinceIrreversible + 1;
+							mateBrain.GameRecordPointer->transpositionTableHash64 = ~(mateBrain.GameRecordPointer - 1)->transpositionTableHash64;
+							mateBrain.GameRecordPointer->transpositionTableHash64WithEP = mateBrain.GameRecordPointer->transpositionTableHash64;
+							mateBrain.GameRecordPointer->epSquare = 0;
+							*(uint32_t*)(&mateBrain.GameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides! DOUBLE CHECK THIS WORKS!!!!
+							*(uint64_t*)(&mateBrain.GameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(mateBrain.GameRecordPointer - 1)->gamePhase[0]);
+							*(uint32_t*)(&mateBrain.GameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalOpeningPST[0]);
+							*(uint32_t*)(&mateBrain.GameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalEndgamePST[0]);
 							PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore);)
 
 								//int R = std::max(3, ((depthRemaining + 1) >> 1));
@@ -1435,7 +1435,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							// About 89% of nodes after a null move are 'all' nodes
 
 							// Unmake null move
-							mateBrain.gameRecordPointer--;
+							mateBrain.GameRecordPointer--;
 
 							if (nullMoveScore >= beta)
 							{
@@ -1479,7 +1479,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 	assert((fupt1 >= 0) && (fupt1 <= 5));
 	futs1 = (currentGameRecordPointer - 2)->move.mf.toSquare;
 
-	int enemyKingSquare = GetLS1BIndex(mateBrain.piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(mateBrain.PiecesBB[sideToMove ^ 1][King]);
 
 	if (ply == 1)
 		ScoreRootMoveList(moveList);
@@ -1549,10 +1549,10 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		legalMovesMade++;
 		int8_t toSquarePiece = mateBrain.MailboxBoard64[currentMove.mf.toSquare]; // Needed later to determine if the move is a capture
 		mateBrain.MakeMove(sideToMove); // N.B. MakeMove increments mateBrain.gameRecordPointer!
-		mateBrain.gameRecordPointer->fixedPiecesAttackerBB = (mateBrain.gameRecordPointer - 1)->fixedPiecesAttackerBB;
-		mateBrain.gameRecordPointer->fixedPiecesDefenderBB = (mateBrain.gameRecordPointer - 1)->fixedPiecesDefenderBB;
-		mateBrain.gameRecordPointer->fixedPiecesAttackerBB = mateBrain.gameRecordPointer->fixedPiecesAttackerBB & ~(CreateBitboardFromSquare(currentMove.mf.fromSquare) | CreateBitboardFromSquare(currentMove.mf.toSquare));
-		mateBrain.gameRecordPointer->fixedPiecesDefenderBB = mateBrain.gameRecordPointer->fixedPiecesDefenderBB & ~(CreateBitboardFromSquare(currentMove.mf.fromSquare) | CreateBitboardFromSquare(currentMove.mf.toSquare));
+		mateBrain.GameRecordPointer->fixedPiecesAttackerBB = (mateBrain.GameRecordPointer - 1)->fixedPiecesAttackerBB;
+		mateBrain.GameRecordPointer->fixedPiecesDefenderBB = (mateBrain.GameRecordPointer - 1)->fixedPiecesDefenderBB;
+		mateBrain.GameRecordPointer->fixedPiecesAttackerBB = mateBrain.GameRecordPointer->fixedPiecesAttackerBB & ~(CreateBitboardFromSquare(currentMove.mf.fromSquare) | CreateBitboardFromSquare(currentMove.mf.toSquare));
+		mateBrain.GameRecordPointer->fixedPiecesDefenderBB = mateBrain.GameRecordPointer->fixedPiecesDefenderBB & ~(CreateBitboardFromSquare(currentMove.mf.fromSquare) | CreateBitboardFromSquare(currentMove.mf.toSquare));
 		//if (mateBrain.gameRecordPointer->fixedPiecesBB != (mateBrain.gameRecordPointer - 1)->fixedPiecesBB)
 		//	AC8++;
 
@@ -1584,7 +1584,7 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 		PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, currentMove.ui32, bestSortScore, 0, bestMoveScore););
 
 		// Initiate the retrieval of the next transposition table cache line as soon as possible
-		_mm_prefetch((char*)(MateTranspositionTablePointer + (mateBrain.gameRecordPointer->transpositionTableHash64 & MateTranspositionTableBucketsMask)), _MM_HINT_T0);
+		_mm_prefetch((char*)(MateTranspositionTablePointer + (mateBrain.GameRecordPointer->transpositionTableHash64 & MateTranspositionTableBucketsMask)), _MM_HINT_T0);
 
 		bool quietMove = ((currentMove.mf.flag < MFPromotion) && (currentGameRecordPointer->move.toSquarePiece == Empty)); // N.B. toSquarePiece gets set in MakeMove
 
@@ -2374,11 +2374,11 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	mateBrain.CopyFrom(&EngineBrain);
 
 	// Set up the bit boards from the 64-square mailbox board
-	ConvertMailboxBoard64ToPiecesBB(mateBrain.MailboxBoard64, mateBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(mateBrain.MailboxBoard64, mateBrain.PiecesBB);
 
 	// Initialise the PV array pointers in the GameRecord array
 	for (uint32_t index = 0; index < MaximumPly; index++)
-		mateBrain.gameRecord[mateBrain.GameRecordIndexRoot + index].principalVariationPointer = &PrincipalVariation[(MaximumPly + 1) * index];
+		mateBrain.GameRecord[mateBrain.GameRecordIndexRoot + index].principalVariationPointer = &PrincipalVariation[(MaximumPly + 1) * index];
 
 	//----------------------------------------------------------------------------------------------------
 
@@ -2388,7 +2388,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	MessagesLastDisplayedClock = StartClock;
 
 	// Initialise any variables required for the search
-	mateBrain.gameRecordPointer = &mateBrain.gameRecord[mateBrain.GameRecordIndexRoot];
+	mateBrain.GameRecordPointer = &mateBrain.GameRecord[mateBrain.GameRecordIndexRoot];
 
 	uint64_t totalNodes[MaximumPly];
 	totalNodes[0] = 1;
@@ -2401,16 +2401,16 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	StopImmediately = false;
 	StopWhenIterationComplete = false;
 	ReplyImmediately = false;
-	InitialiseMaterialValues(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
+	InitialiseMaterialValues(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
 	//*(uint32_t*)(&MateGenerate.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&RootTotalMaterial[0]);
-	InitialisePSTValues(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
-	InitialiseGamePhase(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
+	InitialisePSTValues(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
+	InitialiseGamePhase(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
 	//*(uint64_t*)(&MateGenerate.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&GamePhase[0]);
-	uint64_t hash64 = GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.gameRecordPointer);
+	uint64_t hash64 = GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
 	if (SideToMove == 1)
 		hash64 = ~hash64;
-	mateBrain.gameRecordPointer->transpositionTableHash64 = hash64;
-	mateBrain.gameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[mateBrain.gameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
+	mateBrain.GameRecordPointer->transpositionTableHash64 = hash64;
+	mateBrain.GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[mateBrain.GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 	TranspositionTableAge++;
 	TranspositionTableAge &= TTFlagAgeMask;
 
@@ -2420,7 +2420,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	MoveWithScore_Struct moveList[220];
 	RootMoveList[0].mws.ui32 = 0;
 	mateBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-	RootMovesCount = mateBrain.GenerateAllMoves(SideToMove, mateBrain.IsEnemyKingAttacked(GetLS1BIndex(mateBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	RootMovesCount = mateBrain.GenerateAllMoves(SideToMove, mateBrain.IsEnemyKingAttacked(GetLS1BIndex(mateBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 	for (int moveListIndexIterator = 0; moveListIndexIterator < RootMovesCount; moveListIndexIterator++)
 	{
 		RootMoveList[moveListIndexIterator].mws = moveList[moveListIndexIterator];
@@ -2432,7 +2432,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	int movesCount;
 	movesCount = mateBrain.GenerateAllMoves(SideToMove ^ 1, false, moveList); // Generate defender's moves
 
-	int kingSquare = GetLS1BIndex(mateBrain.piecesBB[SideToMove ^ 1][King]);
+	int kingSquare = GetLS1BIndex(mateBrain.PiecesBB[SideToMove ^ 1][King]);
 	int kingMoves = 0;
 	for (int square = A1; square <= H8; square++) // Mark all SNTM pieces as fixed
 	{
@@ -2443,16 +2443,16 @@ Mate::MateResult_Struct Mate::ComputeMate()
 			)
 			RootZLMPiecesMailboxBoard64[square] = true;
 	}
-	(mateBrain.gameRecordPointer - 1)->zLMPiecesBB = mateBrain.piecesBB[SideToMove ^ 1][AllPieces];
+	(mateBrain.GameRecordPointer - 1)->zLMPiecesBB = mateBrain.PiecesBB[SideToMove ^ 1][AllPieces];
 	for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 	{
 		RootZLMPiecesMailboxBoard64[moveList[moveListIndexIterator].mf.fromSquare] = false;
-		(mateBrain.gameRecordPointer - 1)->zLMPiecesBB &= !CreateBitboardFromSquare(moveList[moveListIndexIterator].mf.fromSquare);
+		(mateBrain.GameRecordPointer - 1)->zLMPiecesBB &= !CreateBitboardFromSquare(moveList[moveListIndexIterator].mf.fromSquare);
 		if (moveList[moveListIndexIterator].mf.fromSquare == kingSquare)
 			kingMoves++;
 	}
-	(mateBrain.gameRecordPointer - 1)->DefenderKingMovesBefore = kingMoves;
-	(mateBrain.gameRecordPointer - 1)->TotalDefenderKingMovesBefore = kingMoves;
+	(mateBrain.GameRecordPointer - 1)->DefenderKingMovesBefore = kingMoves;
+	(mateBrain.GameRecordPointer - 1)->TotalDefenderKingMovesBefore = kingMoves;
 	//(mateBrain.gameRecordPointer - 1)->isZLKM = (kingMoves == 0);
 	RootFixedPiecesBB = 0;
 	RootFixedPiecesAttackerBB = 0;
@@ -2468,13 +2468,13 @@ Mate::MateResult_Struct Mate::ComputeMate()
 			RootFixedPiecesDefenderBB ^= CreateBitboardFromSquare(squareIndex);
 		s = s.substr(2);
 	}
-	mateBrain.gameRecordPointer->fixedPiecesAttackerBB = RootFixedPiecesAttackerBB;
-	mateBrain.gameRecordPointer->fixedPiecesDefenderBB = RootFixedPiecesDefenderBB;
+	mateBrain.GameRecordPointer->fixedPiecesAttackerBB = RootFixedPiecesAttackerBB;
+	mateBrain.GameRecordPointer->fixedPiecesDefenderBB = RootFixedPiecesDefenderBB;
 
 	autoTune = (TC.MateMaximumDefenderKingMoves == 8) && (TC.MateMaximumDefenderMovablePieces == 16) && (TC.MateMaximumDefenderMoves == 218);
 	mateMaximumDefenderKingMoves = TC.MateMaximumDefenderKingMoves;
 	//mateMaximumDefenderMovablePieces = TC.MateMaximumDefenderMovablePieces;
-	mateMaximumDefenderMovablePieces = std::min(TC.MateMaximumDefenderMovablePieces, (int)PopulationCountX(mateBrain.piecesBB[SideToMove ^ 1][AllPieces]));
+	mateMaximumDefenderMovablePieces = std::min(TC.MateMaximumDefenderMovablePieces, (int)PopulationCountX(mateBrain.PiecesBB[SideToMove ^ 1][AllPieces]));
 	mateMaximumDefenderMoves = TC.MateMaximumDefenderMoves;
 
 	// Clear any killers
@@ -2491,8 +2491,8 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	RootScore = 0;
 	RootBestMove.ui32 = 0;
 	RootDefenderKingMoves = mateBrain.CountKingMoves(SideToMove ^ 1); //REALLY SHOULD USE THE KINGMOVES AFTER THE PLY1 MOVE !!!
-	RootGameRecordPointer = mateBrain.gameRecordPointer;
-	RootMaterialBalance = mateBrain.gameRecordPointer->totalMaterial[SideToMove] - mateBrain.gameRecordPointer->totalMaterial[SideToMove ^ 1];
+	RootGameRecordPointer = mateBrain.GameRecordPointer;
+	RootMaterialBalance = mateBrain.GameRecordPointer->totalMaterial[SideToMove] - mateBrain.GameRecordPointer->totalMaterial[SideToMove ^ 1];
 	IterationPly = 0;
 	int backedOffIterationPly = 0;
 	int freeMoves = -1;
@@ -2539,7 +2539,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 		PVMessageChecked = false;
 
 		// Do the search
-		RootScore = TreeSearchMate(RootAlpha, RootBeta, 1, IterationPly, SideToMove, mateBrain.IsEnemyKingAttacked(GetLS1BIndex(mateBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), freeMoves);// , false, false, 0);
+		RootScore = TreeSearchMate(RootAlpha, RootBeta, 1, IterationPly, SideToMove, mateBrain.IsEnemyKingAttacked(GetLS1BIndex(mateBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), freeMoves);// , false, false, 0);
 
 		if (autoTune)
 		{
@@ -2697,7 +2697,7 @@ Mate::MateResult_Struct Mate::ComputeMateMT()
 	//mapPly1[0] = 99;
 	//mapPly1[1] = 88;
 
-	ConvertMailboxBoard64ToPiecesBB(EngineBrain.MailboxBoard64, EngineBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(EngineBrain.MailboxBoard64, EngineBrain.PiecesBB);
 
 	StopImmediately = false;
 

@@ -69,10 +69,10 @@ public:
 	uint32_t SYZYGYPYRRHICMoveToColossusMove(uint16_t SYZYGYmove, uint32_t epSquare);
 
 	alignas(64) int8_t MailboxBoard64[64];
-	uint64_t piecesBB[Sides][King + 2]; // Making the size of the second dimension a power of 2 (in this case 8) gives about a 5% speed improvement!
-	//static const int gameRecordSize = 800; // This used to be 600 but crashed when it played a game to move 288 without GUI EGTB adjudication (it got to move 239 before getting into the EGTBs anyway!)
-	static const int gameRecordSize = 1000; // This used to be 800 but crashed when it played a game to move 344 in an opposite coloured bishop ending! But I can't be certain this was the problem!
-	GameRecordEntry_Struct* gameRecord; // Created and initialised in the constructor.
-	GameRecordEntry_Struct* gameRecordPointer; // Gets incremented in MakeMove and decremented in UnMakeMove
+	uint64_t PiecesBB[Sides][King + 2]; // Making the size of the second dimension a power of 2 (in this case 8) gives about a 5% speed improvement!
+	//static const int GameRecordSize = 800; // This used to be 600 but crashed when it played a game to move 288 without GUI EGTB adjudication (it got to move 239 before getting into the EGTBs anyway!)
+	static const int GameRecordSize = 1000; // This used to be 800 but crashed when it played a game to move 344 in an opposite coloured bishop ending! But I can't be certain this was the problem!
+	GameRecordEntry_Struct* GameRecord; // Created and initialised in the constructor.
+	GameRecordEntry_Struct* GameRecordPointer; // Gets incremented in MakeMove and decremented in UnMakeMove
 	int GameRecordIndexRoot; // Set to 2 when the game record is cleared. Set to the index of the position in the game record from where a search is made e.g. after e4 e5 it will be 4
 };

@@ -76,11 +76,11 @@ Normal::~Normal()
 void Normal::TestSEE()
 {
 	normalBrain.CopyFrom(&EngineBrain);
-	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
 
 	MoveWithScore_Struct moveList[220];
 	normalBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-	int movesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	int movesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 
 	for (int moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 	{
@@ -640,7 +640,7 @@ void Normal::TimeUp(float divisor)
 		if (IterationPly < MinimumIterationPly) // Typically 4
 			break;
 		if (IterationPly == MinimumIterationPly)
-			if (*normalBrain.gameRecord[normalBrain.GameRecordIndexRoot].principalVariationPointer == PVTUnknown) // Has at least one move returned a usable value?
+			if (*normalBrain.GameRecord[normalBrain.GameRecordIndexRoot].principalVariationPointer == PVTUnknown) // Has at least one move returned a usable value?
 				break;
 
 		// Use signed integers for time calculations in case we go below zero!
@@ -734,8 +734,8 @@ short Normal::DrawScore(int sideToMove)
 	if (SideToMove == sideToMove) // The contempt value is relative to the side to move at the root i.e. the computer!
 		ds = -ds;
 
-	ds += (normalBrain.gameRecordPointer->totalMaterial[sideToMove] > normalBrain.gameRecordPointer->totalMaterial[sideToMove ^ 1]);
-	ds -= (normalBrain.gameRecordPointer->totalMaterial[sideToMove] < normalBrain.gameRecordPointer->totalMaterial[sideToMove ^ 1]);
+	ds += (normalBrain.GameRecordPointer->totalMaterial[sideToMove] > normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]);
+	ds -= (normalBrain.GameRecordPointer->totalMaterial[sideToMove] < normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]);
 
 	return ds;
 }
@@ -885,7 +885,7 @@ void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, sho
 		GATHERSTATS(TranspositionTableStores++;);
 
 		NormalTranspositionTableEntry_Struct* tte0;
-		uint64_t hash64 = normalBrain.gameRecordPointer->transpositionTableHash64WithEP;
+		uint64_t hash64 = normalBrain.GameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (NormalTranspositionTableEntry_Struct*)(NormalTranspositionTablePointer + (hash64 & NormalTranspositionTableBucketsMask));
 
 
@@ -995,22 +995,22 @@ void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, sho
 
 short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck, bool allowNull, bool isCutNode)
 {
-	assert(CompareMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB));
-	assert((PopulationCountX(normalBrain.piecesBB[0][King]) == 1) && (PopulationCountX(normalBrain.piecesBB[1][King]) == 1));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Queen]) <= 9) && (PopulationCountX(normalBrain.piecesBB[1][Queen]) <= 9));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Rook]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Rook]) <= 10));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Bishop]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Bishop]) <= 10));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Knight]) <= 10) && (PopulationCountX(normalBrain.piecesBB[1][Knight]) <= 10));
-	assert((PopulationCountX(normalBrain.piecesBB[0][Pawn]) <= 8) && (PopulationCountX(normalBrain.piecesBB[1][Pawn]) <= 8));
-	assert(normalBrain.piecesBB[0][AllPieces] == (normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[0][King]));
-	assert(normalBrain.piecesBB[1][AllPieces] == (normalBrain.piecesBB[1][Pawn] | normalBrain.piecesBB[1][Knight] | normalBrain.piecesBB[1][Bishop] | normalBrain.piecesBB[1][Rook] | normalBrain.piecesBB[1][Queen] | normalBrain.piecesBB[1][King]));
-	assert(normalBrain.gameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer) : ~GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer)));
-	assert(normalBrain.gameRecordPointer->transpositionTableHash64WithEP == (normalBrain.gameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[normalBrain.gameRecordPointer->epSquare]));
+	assert(CompareMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][King]) == 1) && (PopulationCountX(normalBrain.PiecesBB[1][King]) == 1));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Queen]) <= 9) && (PopulationCountX(normalBrain.PiecesBB[1][Queen]) <= 9));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Rook]) <= 10) && (PopulationCountX(normalBrain.PiecesBB[1][Rook]) <= 10));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Bishop]) <= 10) && (PopulationCountX(normalBrain.PiecesBB[1][Bishop]) <= 10));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Knight]) <= 10) && (PopulationCountX(normalBrain.PiecesBB[1][Knight]) <= 10));
+	assert((PopulationCountX(normalBrain.PiecesBB[0][Pawn]) <= 8) && (PopulationCountX(normalBrain.PiecesBB[1][Pawn]) <= 8));
+	assert(normalBrain.PiecesBB[0][AllPieces] == (normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[0][King]));
+	assert(normalBrain.PiecesBB[1][AllPieces] == (normalBrain.PiecesBB[1][Pawn] | normalBrain.PiecesBB[1][Knight] | normalBrain.PiecesBB[1][Bishop] | normalBrain.PiecesBB[1][Rook] | normalBrain.PiecesBB[1][Queen] | normalBrain.PiecesBB[1][King]));
+	assert(normalBrain.GameRecordPointer->transpositionTableHash64 == ((sideToMove == 0) ? GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer) : ~GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer)));
+	assert(normalBrain.GameRecordPointer->transpositionTableHash64WithEP == (normalBrain.GameRecordPointer->transpositionTableHash64 ^ TranspositionTableRandomsEnPassant[normalBrain.GameRecordPointer->epSquare]));
 	assert((ply >= 1) && (ply <= MaximumPlyInMain));
 	assert(depthRemaining <= MaximumPlyInMain);
 	assert((sideToMove >= 0) && (sideToMove < Sides));
 	assert(-MatingIn0Score <= alpha && alpha < beta && beta <= MatingIn0Score);
-	assert((normalBrain.gameRecordPointer->gamePhase[0] >= 0) && (normalBrain.gameRecordPointer->gamePhase[0] <= 103) && (normalBrain.gameRecordPointer->gamePhase[1] >= 0) && (normalBrain.gameRecordPointer->gamePhase[1] <= 103));
+	assert((normalBrain.GameRecordPointer->gamePhase[0] >= 0) && (normalBrain.GameRecordPointer->gamePhase[0] <= 103) && (normalBrain.GameRecordPointer->gamePhase[1] >= 0) && (normalBrain.GameRecordPointer->gamePhase[1] <= 103));
 
 	//----------------------------------------------------------------------------------------------------
 	CRASHLOCATION(100);
@@ -1134,7 +1134,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	short originalAlpha = alpha;
 	assert(!(isPVNode && isCutNode));
 	short bestMoveScore = -MatingIn0Score; // If anything takes over as best (a 'pv' or 'cut' node) then bestMoveScore will be equal to alpha. If nothing takes over as best (an 'all' node) then bestMoveScore will be less than alpha and will be a more accurate upper bound.
-	GameRecordEntry_Struct* currentGameRecordPointer = normalBrain.gameRecordPointer;
+	GameRecordEntry_Struct* currentGameRecordPointer = normalBrain.GameRecordPointer;
 	short drawScore = DrawScore(sideToMove);
 
 	//----------------------------------------------------------------------------------------------------
@@ -1190,7 +1190,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				for (int i = 4; i <= pliesSinceIrreversible; i += 2) // Repetition?
 				{
 					// Make sure we haven't gone past the start of the array. This could happen if a position is setup from a FEN string which provides a high half-move count (for the 50-move rule).
-					if ((currentGameRecordPointer - i) < &normalBrain.gameRecord[2])
+					if ((currentGameRecordPointer - i) < &normalBrain.GameRecord[2])
 						break;
 
 					if ((currentGameRecordPointer - i)->transpositionTableHash64 == currentGameRecordPointer->transpositionTableHash64)
@@ -1474,7 +1474,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		{
 			// (Size of .rtbw files: 3pc: 8K, 4pc: 1.2M, 5pc: 376M, 6pc: 67.8G)
 			// (N.B. it is perfectly reasonable to query the EGTBs differently (in the tree) when we are in an EGTB position at the root!)
-			int totalPieces = PopulationCountX(normalBrain.piecesBB[0][AllPieces] | normalBrain.piecesBB[1][AllPieces]); // Get how many pieces remain on the board
+			int totalPieces = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]); // Get how many pieces remain on the board
 			if (
 				(totalPieces <= EndgameTablebasesTreeProbeLimitMain)
 				&& (currentGameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases when no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13)
@@ -1485,14 +1485,14 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 				uint32_t result;
 				result = tb_probe_wdl(
-					normalBrain.piecesBB[0][AllPieces],
-					normalBrain.piecesBB[1][AllPieces],
-					normalBrain.piecesBB[0][King] | normalBrain.piecesBB[1][King],
-					normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen],
-					normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[1][Rook],
-					normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[1][Bishop],
-					normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight],
-					normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[1][Pawn],
+					normalBrain.PiecesBB[0][AllPieces],
+					normalBrain.PiecesBB[1][AllPieces],
+					normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
+					normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
+					normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
+					normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
+					normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
+					normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
 					currentGameRecordPointer->epSquare,
 					(sideToMove == 0)
 				);
@@ -1571,7 +1571,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	}
 
 	int improving = 0; // Used in LMP and reductions
-	if ((ply > 2) && (currentGameRecordPointer->staticEvaluation > (normalBrain.gameRecordPointer - 2)->staticEvaluation))
+	if ((ply > 2) && (currentGameRecordPointer->staticEvaluation > (normalBrain.GameRecordPointer - 2)->staticEvaluation))
 		improving = 1;
 
 	short bestGuessScore = currentGameRecordPointer->staticEvaluation;
@@ -1699,7 +1699,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				currentGameRecordPointer->dangerConditions |= TTFlagOnlyOneMove;
 				allowNull = false;
 			}
-			else if (count < PopulationCountX(normalBrain.piecesBB[sideToMove][AllPieces])) // FMTP
+			else if (count < PopulationCountX(normalBrain.PiecesBB[sideToMove][AllPieces])) // FMTP
 			{
 				//currentGameRecordPointer->dangerConditions.dc.isFMTP = TTFlagFewerMovesThanPieces;
 				currentGameRecordPointer->dangerConditions |= TTFlagFewerMovesThanPieces;
@@ -1715,36 +1715,36 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			currentGameRecordPointer->move.fromSquarePiece = Pawn; // Ensure CMH treats all previous null moves as Px0
 			currentGameRecordPointer->move.toSquarePiece = Empty; // Ensure recapture extensions don't mistakenly kick in
 
-			normalBrain.gameRecordPointer++; // Normally done in make/unmake-move
-			normalBrain.gameRecordPointer->castlingStatus = (normalBrain.gameRecordPointer - 1)->castlingStatus;
-			normalBrain.gameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO)
-			normalBrain.gameRecordPointer->transpositionTableHash64 = ~(normalBrain.gameRecordPointer - 1)->transpositionTableHash64;
-			normalBrain.gameRecordPointer->transpositionTableHash64WithEP = normalBrain.gameRecordPointer->transpositionTableHash64;
-			normalBrain.gameRecordPointer->epSquare = 0;
-			*(uint32_t*)(&normalBrain.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides!
-			*(uint64_t*)(&normalBrain.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(normalBrain.gameRecordPointer - 1)->gamePhase[0]);
-			*(uint32_t*)(&normalBrain.gameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalOpeningPST[0]);
-			*(uint32_t*)(&normalBrain.gameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(normalBrain.gameRecordPointer - 1)->totalEndgamePST[0]);
+			normalBrain.GameRecordPointer++; // Normally done in make/unmake-move
+			normalBrain.GameRecordPointer->castlingStatus = (normalBrain.GameRecordPointer - 1)->castlingStatus;
+			normalBrain.GameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO)
+			normalBrain.GameRecordPointer->transpositionTableHash64 = ~(normalBrain.GameRecordPointer - 1)->transpositionTableHash64;
+			normalBrain.GameRecordPointer->transpositionTableHash64WithEP = normalBrain.GameRecordPointer->transpositionTableHash64;
+			normalBrain.GameRecordPointer->epSquare = 0;
+			*(uint32_t*)(&normalBrain.GameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides!
+			*(uint64_t*)(&normalBrain.GameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(normalBrain.GameRecordPointer - 1)->gamePhase[0]);
+			*(uint32_t*)(&normalBrain.GameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalOpeningPST[0]);
+			*(uint32_t*)(&normalBrain.GameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalEndgamePST[0]);
 			PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore););
 
 
 			int R;
 			R = 3 + (depthRemaining / 5) + std::min(9, ((bestGuessScore - beta) / 128));
-			normalBrain.gameRecordPointer->move.ui32 = 0;
+			normalBrain.GameRecordPointer->move.ui32 = 0;
 			short nullMoveScore = (short)-TreeSearchNormal((short)-beta, (short)(-beta + 1), ply + 1, depthRemaining - R - 1, sideToMove ^ 1, false, false, !isCutNode);
 
 			// About 89% of nodes after a null move are 'all' nodes
 
 			// Unmake null move
-			normalBrain.gameRecordPointer--;
+			normalBrain.GameRecordPointer--;
 
 			if (nullMoveScore >= beta)
 				return nullMoveScore;
 
 			if (nullMoveScore <= alpha - 80)
 			{
-				if ((normalBrain.gameRecordPointer + 1)->move.ui32 != 0)
-					threatenedSquare = (normalBrain.gameRecordPointer + 1)->move.mf.toSquare;
+				if ((normalBrain.GameRecordPointer + 1)->move.ui32 != 0)
+					threatenedSquare = (normalBrain.GameRecordPointer + 1)->move.mf.toSquare;
 				if (nullMoveScore < MatedScore)
 					//currentGameRecordPointer->dangerConditions.dc.isTWM = TTFlagThreatenedWithMate;
 					currentGameRecordPointer->dangerConditions |= TTFlagThreatenedWithMate;
@@ -1843,7 +1843,7 @@ GenerateMoveList:
 		currentGameRecordPointer->dangerConditions |= TTFlagOnlyOneMove;
 
 	// Useful for avoiding null move in potential zugzwang positions
-	if (movesCount < PopulationCountX(normalBrain.piecesBB[sideToMove][AllPieces]))
+	if (movesCount < PopulationCountX(normalBrain.PiecesBB[sideToMove][AllPieces]))
 		//currentGameRecordPointer->dangerConditions.dc.isFMTP = TTFlagFewerMovesThanPieces;
 		currentGameRecordPointer->dangerConditions |= TTFlagFewerMovesThanPieces;
 
@@ -1906,7 +1906,7 @@ GenerateMoveList:
 	// Loop through move list
 	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // Default PV terminator (setting this again here as razoring can disturb it!)
 	legalMovesMade = 0;
-	int enemyKingSquare = GetLS1BIndex(normalBrain.piecesBB[sideToMove ^ 1][King]);
+	int enemyKingSquare = GetLS1BIndex(normalBrain.PiecesBB[sideToMove ^ 1][King]);
 	int winningCaptureIndex = 999;
 	//uint64_t passedPawnsBB = (sideToMove == 0) ? passedSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]) : passedSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
 	//uint64_t passedPawnRunnersBB = 0;
@@ -1984,7 +1984,7 @@ GenerateMoveList:
 		legalMovesMade++;
 
 		// Initiate the retrieval of the next transposition table cache line as soon as possible
-		_mm_prefetch((char*)(NormalTranspositionTablePointer + (normalBrain.gameRecordPointer->transpositionTableHash64 & NormalTranspositionTableBucketsMask)), _MM_HINT_T0);
+		_mm_prefetch((char*)(NormalTranspositionTablePointer + (normalBrain.GameRecordPointer->transpositionTableHash64 & NormalTranspositionTableBucketsMask)), _MM_HINT_T0);
 
 #ifdef SEARCHINGFORLINE
 		if (TargetLineLength == ply)
@@ -2037,9 +2037,9 @@ GenerateMoveList:
 		{
 			uint64_t passedBB;
 			if (sideToMove == 0)
-				passedBB = passedSide1(normalBrain.piecesBB[0][Pawn], normalBrain.piecesBB[1][Pawn]);
+				passedBB = passedSide1(normalBrain.PiecesBB[0][Pawn], normalBrain.PiecesBB[1][Pawn]);
 			else
-				passedBB = passedSide2(normalBrain.piecesBB[1][Pawn], normalBrain.piecesBB[0][Pawn]);
+				passedBB = passedSide2(normalBrain.PiecesBB[1][Pawn], normalBrain.PiecesBB[0][Pawn]);
 			//passedBB = passedSTM[sideToMove](normalBrain.piecesBB[sideToMove][Pawn], normalBrain.piecesBB[sideToMove ^ 1][Pawn]); // Tried using a function array but it was slower!
 			safePassedPawnMove = (passedBB & CreateBitboardFromSquare(currentGameRecordPointer->move.mf.toSquare));
 		}
@@ -2587,16 +2587,16 @@ std::string Normal::ComputeNormal()
 
 
 	// Set up the bit boards from the 64-square mailbox board
-	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.piecesBB);
+	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
 
 	// Initialise the PV array pointers in the GameRecord array
-	for (int index = 0; index < normalBrain.gameRecordSize; index++)
-		normalBrain.gameRecord[index].principalVariationPointer = nullptr;
+	for (int index = 0; index < normalBrain.GameRecordSize; index++)
+		normalBrain.GameRecord[index].principalVariationPointer = nullptr;
 	for (int index = 0; index < MaximumPly; index++)
 	{
-		if (normalBrain.GameRecordIndexRoot + index >= normalBrain.gameRecordSize)
+		if (normalBrain.GameRecordIndexRoot + index >= normalBrain.GameRecordSize)
 			break;
-		normalBrain.gameRecord[normalBrain.GameRecordIndexRoot + index].principalVariationPointer = &PrincipalVariation[(MaximumPly + 1) * index];
+		normalBrain.GameRecord[normalBrain.GameRecordIndexRoot + index].principalVariationPointer = &PrincipalVariation[(MaximumPly + 1) * index];
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -2607,7 +2607,7 @@ std::string Normal::ComputeNormal()
 	MessagesLastDisplayedClock = StartClock;
 
 	// Initialise any variables required for the search
-	normalBrain.gameRecordPointer = &normalBrain.gameRecord[normalBrain.GameRecordIndexRoot];
+	normalBrain.GameRecordPointer = &normalBrain.GameRecord[normalBrain.GameRecordIndexRoot];
 
 	uint64_t totalNodes[MaximumPly];
 	totalNodes[0] = 1;
@@ -2619,16 +2619,16 @@ std::string Normal::ComputeNormal()
 	ConsistentBestMoves = 0;
 	uint32_t previousIterationsRootBestMove = 0;
 	ReplyImmediately = false;
-	InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-	InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-	InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
-	uint64_t hash64 = GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.gameRecordPointer);
+	InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	uint64_t hash64 = GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
 	if (SideToMove == 1)
 		hash64 = ~hash64;
-	normalBrain.gameRecordPointer->transpositionTableHash64 = hash64;
-	normalBrain.gameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[normalBrain.gameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
+	normalBrain.GameRecordPointer->transpositionTableHash64 = hash64;
+	normalBrain.GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[normalBrain.GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 	//normalBrain.gameRecordPointer->dangerConditions.dc.isZLKM = 0;
-	normalBrain.gameRecordPointer->dangerConditions &= ~TTFlagZeroLegalKingMoves;
+	normalBrain.GameRecordPointer->dangerConditions &= ~TTFlagZeroLegalKingMoves;
 
 	lastPawnScoreWhite.bb = 0;
 	lastPawnScoreWhite.pawnStructureOpeningScore = 0;
@@ -2636,7 +2636,7 @@ std::string Normal::ComputeNormal()
 	lastPawnScoreBlack.bb = 0;
 	lastPawnScoreBlack.pawnStructureOpeningScore = 0;
 	lastPawnScoreBlack.pawnStructureEndgameScore = 0;
-	(normalBrain.gameRecordPointer - 1)->staticEvaluation = Evaluate(SideToMove ^ 1);
+	(normalBrain.GameRecordPointer - 1)->staticEvaluation = Evaluate(SideToMove ^ 1);
 
 	TranspositionTableStores = 0;
 	TranspositionTableStoresSuccessful = 0;
@@ -2653,7 +2653,7 @@ std::string Normal::ComputeNormal()
 	MoveWithScore_Struct moveList[220];
 	RootMoveList[0].mws.ui32 = 0; //WHY???
 	normalBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
-	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 	if (RootMovesCount == 0) // Sometimes the GUI or the user provide positions with zero legal moves! (e.g. checkmates/stalemates in chess)
 	{
 		Output("info string *** Error! There are zero moves in the position provided!");
@@ -2676,7 +2676,7 @@ std::string Normal::ComputeNormal()
 	EndgameTablebasesProbes = 0;
 	EndgameTablebasesHeavyProbes = 0;
 	EndgameTablebasesHits = 0;
-	EndgameTablebasesPiecesRoot = PopulationCountX(normalBrain.piecesBB[0][AllPieces] | normalBrain.piecesBB[1][AllPieces]);
+	EndgameTablebasesPiecesRoot = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]);
 
 	EndgameTablebasesTreeProbeLimitMain = EndgameTablebasesPiecesFound;
 	if (EndgameTablebasesTreeProbeLimitMain == 7)
@@ -2695,12 +2695,12 @@ std::string Normal::ComputeNormal()
 	for (int index = 0; index < 8; index++)
 		EndgameTablebasesErrorCounts[index] = 0;
 	LichessMoves[0].move = "";
-	RootFEN = ConvertPositionToFEN(normalBrain.MailboxBoard64, SideToMove, normalBrain.gameRecordPointer->castlingStatus, normalBrain.gameRecordPointer->epSquare, 0, 1);
+	RootFEN = ConvertPositionToFEN(normalBrain.MailboxBoard64, SideToMove, normalBrain.GameRecordPointer->castlingStatus, normalBrain.GameRecordPointer->epSquare, 0, 1);
 
 	if (ThreadId == 0) // Only the main thread will modify its root move list based on the EGTBs
 	{
 		if (EndgameTablebasesPiecesRoot <= EndgameTablebasesPiecesFound) // Are we in the EGTBs at this root position?
-			if (normalBrain.gameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases if no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13)
+			if (normalBrain.GameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases if no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13)
 			{
 				// Only probe the lesser EGTBs once we're in them
 				EndgameTablebasesTreeProbeLimitMain = std::min(EndgameTablebasesTreeProbeLimitMain, EndgameTablebasesPiecesRoot - 1);
@@ -2712,16 +2712,16 @@ std::string Normal::ComputeNormal()
 
 				// Try to get accurate DTZ info
 				result = tb_probe_root_dtz(
-					normalBrain.piecesBB[0][AllPieces],
-					normalBrain.piecesBB[1][AllPieces],
-					normalBrain.piecesBB[0][King] | normalBrain.piecesBB[1][King],
-					normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen],
-					normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[1][Rook],
-					normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[1][Bishop],
-					normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight],
-					normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[1][Pawn],
+					normalBrain.PiecesBB[0][AllPieces],
+					normalBrain.PiecesBB[1][AllPieces],
+					normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
+					normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
+					normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
+					normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
+					normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
+					normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
 					0,
-					normalBrain.gameRecordPointer->epSquare,
+					normalBrain.GameRecordPointer->epSquare,
 					(SideToMove == 0),
 					false,
 					&results
@@ -2741,16 +2741,16 @@ std::string Normal::ComputeNormal()
 					//EndgameTablebasesErrors = true;
 					EndgameTablebasesErrorCounts[0]++;
 					result = tb_probe_root_wdl(
-						normalBrain.piecesBB[0][AllPieces],
-						normalBrain.piecesBB[1][AllPieces],
-						normalBrain.piecesBB[0][King] | normalBrain.piecesBB[1][King],
-						normalBrain.piecesBB[0][Queen] | normalBrain.piecesBB[1][Queen],
-						normalBrain.piecesBB[0][Rook] | normalBrain.piecesBB[1][Rook],
-						normalBrain.piecesBB[0][Bishop] | normalBrain.piecesBB[1][Bishop],
-						normalBrain.piecesBB[0][Knight] | normalBrain.piecesBB[1][Knight],
-						normalBrain.piecesBB[0][Pawn] | normalBrain.piecesBB[1][Pawn],
+						normalBrain.PiecesBB[0][AllPieces],
+						normalBrain.PiecesBB[1][AllPieces],
+						normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
+						normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
+						normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
+						normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
+						normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
+						normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
 						0,
-						normalBrain.gameRecordPointer->epSquare,
+						normalBrain.GameRecordPointer->epSquare,
 						(SideToMove == 0),
 						false,
 						&results
@@ -2767,7 +2767,7 @@ std::string Normal::ComputeNormal()
 						// If we have the DTZ info (.rtbz files) : move.tbRank will be +262144-1-DTZ (0x40000) for wins, -262144+1+DTZ for losses and 0 for draws
 						// If we don't have the DTZ info (.rtbz files) : move.tbRank will be +262144 (0x40000) for wins, -262144 for losses and 0 for draws, so dtz will be 0 for all moves
 						Move_Struct colossusMove;
-						colossusMove.ui32 = normalBrain.SYZYGYPYRRHICMoveToColossusMove(move.move, normalBrain.gameRecordPointer->epSquare);
+						colossusMove.ui32 = normalBrain.SYZYGYPYRRHICMoveToColossusMove(move.move, normalBrain.GameRecordPointer->epSquare);
 						int wdl; // win=1, draw=0, loss=-1 : this is deduced by the sign of tbRank : no distinction is made for cursed-wins and blessed-losses
 						int dtz; // >0 for wins, 0 for draws, <0 for losses : we want to select the lowest value, so for wins the lowest +ve dtz, for losses the lowest -ve dtz
 						if (move.tbRank > 0)
@@ -2966,7 +2966,7 @@ std::string Normal::ComputeNormal()
 
 		// Do the tree search
 		// N.B. RootScore is relative to the side-to-move so e.g. if black is moving and mating this will a large +ve score
-		RootScore = TreeSearchNormal(RootAlpha, RootBeta, 1, IterationPly, SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.piecesBB[SideToMove][King]), SideToMove ^ 1), false, false);
+		RootScore = TreeSearchNormal(RootAlpha, RootBeta, 1, IterationPly, SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), false, false);
 
 		CRASHLOCATION(50);
 
@@ -3086,9 +3086,9 @@ std::string Normal::ComputeNormal()
 		bestMoveMessage = "bestmove " + MoveNotation(RootBestMove.ui32);
 		if (Ponder)
 			if ((TC.CurrentType != TCTFixedTime) && (TC.CurrentType != TCTFixedDepth) && (TC.CurrentType != TCTFixedNodes)) // Don't ponder in any 'fixed' modes
-				if ((uint16_t)normalBrain.gameRecordPointer->principalVariationPointer[1] > 0) // May be any of the PVT* terminators (which all have the bottom 16 bits set to 0)
+				if ((uint16_t)normalBrain.GameRecordPointer->principalVariationPointer[1] > 0) // May be any of the PVT* terminators (which all have the bottom 16 bits set to 0)
 					if (RootScore > -MatingIn0Score + 3) // Don't ponder if we're being mated in 1 else the GUI might give us the mated position and tell us to search it!
-						bestMoveMessage += " ponder " + MoveNotation(normalBrain.gameRecordPointer->principalVariationPointer[1]);
+						bestMoveMessage += " ponder " + MoveNotation(normalBrain.GameRecordPointer->principalVariationPointer[1]);
 		if (ShowBlankLines)
 			bestMoveMessage += "\n";
 
