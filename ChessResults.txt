@@ -398,6 +398,9 @@ Rank Name                             Elo        +/-       nElo        +/-      
 
 2026aNonPGO v 114 {3s+0.025s N.B. non PEXT!} (-45.34) PCS2
 
+114 v 114 {5s+0.042s for NNUE training 200,000 games} (0.59, +/-1.06, 200000) PCS2
+
+***114 ISREADY made more robust --> 115
 
 
 

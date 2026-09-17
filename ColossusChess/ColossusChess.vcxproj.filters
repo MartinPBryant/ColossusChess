@@ -54,6 +54,9 @@
     <ClCompile Include="NNUE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UInt128.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h">
@@ -99,6 +102,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NNUE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UInt128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

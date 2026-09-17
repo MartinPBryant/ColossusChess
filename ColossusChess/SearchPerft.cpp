@@ -978,7 +978,7 @@ void Perft::ClearPerftTranspositionTable()
 
 	// N.B. once the memory has been cached this executes about 2 to 3 times faster! But still a good reason not to use excessively large tables!
 
-	//Output("info string Time: " + MyUI64TOA(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count()) + "ms");
+	//Output("info string Time: " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count()) + "ms");
 }
 
 __declspec(noinline)
@@ -988,10 +988,9 @@ void Perft::AllocatePerftTranspositionTable()
 	assert(sizeof(PerftTranspositionTableEntry_Struct) == 16);
 
 	// Calculate the largest 'power of 2' number of entries/buckets that will fit in the specified number of bytes
-	PerftTranspositionTableBuckets = 1;
-	while ((PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct)) <= (TranspositionTableMemory * 1024ULL * 1024ULL))
-		PerftTranspositionTableBuckets <<= 1;
-	PerftTranspositionTableBuckets >>= 1;
+	PerftTranspositionTableBuckets = (TranspositionTableMemory * 1024ULL * 1024ULL) / sizeof(PerftTranspositionTableBucket_Struct);
+	PerftTranspositionTableBuckets = 1ULL << GetMS1BIndex(PerftTranspositionTableBuckets);
+
 	// N.B. Increasing the transposition table size may be counter-productive beyond some margin.
 	// Once the table is not being completely filled after the search you are just storing the same info spread over more memory.
 	// Some testing indicates that once you get more than about 50% of the table not being used you will suffer a slow down.
@@ -1001,36 +1000,45 @@ void Perft::AllocatePerftTranspositionTable()
 	PerftTranspositionTablePointer = nullptr;
 
 	// Allocate transposition table memory
+	MemoryAlocatedViaLargePages = false;
 	if (PerftTranspositionTableBuckets > 0)
 	{
 		PerftTranspositionTableBucketsMask = PerftTranspositionTableBuckets - 1;
-		if (LargePagesAvailable)
+		if (LargePagesAvailable && UseLargePages)
 		{
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)VirtualAlloc(NULL, PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			if (PerftTranspositionTablePointer == nullptr)
 			{
+				uint32_t errorCode = GetLastError();
+				Output("info string *** Error! Perft 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.");
 				Output("info string *** Error! Perft 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
 				OutputError("Perft 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
 			}
+			else
+				MemoryAlocatedViaLargePages = true;
 		}
 		if (PerftTranspositionTablePointer == nullptr)
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)AlignedAllocateMemory(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), 64);
 		if (PerftTranspositionTablePointer == nullptr)
 		{
-			Output("info string *** Error! Perft transposition table memory could not be allocated!");
+			uint32_t errorCode = GetLastError();
+			Output("info string *** Error! Perft transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ")");
 			OutputError("Perft transposition table memory could not be allocated!");
 			PerftTranspositionTableBuckets = 0;
 		}
 	}
 	if (IsDebug && (PerftTranspositionTablePointer != nullptr))
 	{
-		Output("info string Transposition table memory = " + MyUI64TOA(TranspositionTableMemory) + "MB (" + MyUI64TOA(TranspositionTableMemory * 1024ULL * 1024ULL) + " bytes)");
-		Output("info string Perft transposition table bucket size = " + MyUI64TOA(sizeof(PerftTranspositionTableBucket_Struct)) + " bytes");
-		Output("info string Perft transposition table entry size = " + MyUI64TOA(sizeof(PerftTranspositionTableEntry_Struct)) + " bytes");
-		Output("info string Perft transposition table entries per bucket = " + MyUI64TOA(PerftTranspositionTableEntriesPerBucket));
-		Output("info string Perft transposition table buckets = " + MyUI64TOA(PerftTranspositionTableBuckets));
-		Output("info string Perft transposition table entries = " + MyITOA(PerftTranspositionTableBuckets * PerftTranspositionTableEntriesPerBucket));
-		Output("info string Perft transposition table memory allocated = " + MyUI64TOA(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct) / (1024ULL * 1024ULL)) + "MB (" + MyUI64TOA(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct)) + " bytes)");
+		Output("info string Transposition table memory = " + std::to_string(TranspositionTableMemory) + "MB (" + std::to_string(TranspositionTableMemory * 1024ULL * 1024ULL) + " bytes)");
+		Output("info string Perft transposition table bucket size = " + std::to_string(sizeof(PerftTranspositionTableBucket_Struct)) + " bytes");
+		Output("info string Perft transposition table entry size = " + std::to_string(sizeof(PerftTranspositionTableEntry_Struct)) + " bytes");
+		Output("info string Perft transposition table entries per bucket = " + std::to_string(PerftTranspositionTableEntriesPerBucket));
+		Output("info string Perft transposition table buckets = " + std::to_string(PerftTranspositionTableBuckets));
+		Output("info string Perft transposition table entries = " + std::to_string(PerftTranspositionTableBuckets * PerftTranspositionTableEntriesPerBucket));
+		std::string lp = "";
+		if (MemoryAlocatedViaLargePages)
+			lp = " via 'large pages'";
+		Output("info string Perft transposition table memory allocated = " + std::to_string(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct) / (1024ULL * 1024ULL)) + "MB (" + std::to_string(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct)) + " bytes)" + lp);
 	}
 }
 
@@ -1072,7 +1080,7 @@ std::string Perft::StatsPerftTranspositionTable()
 
 	std::string result = "";
 	for (int index = 0; index < PerftDepth - 1; index++)
-		result += MySI64TOA(index) + "=" + MyUI64TOA(counts[index]) + " ";
+		result += std::to_string(index) + "=" + std::to_string(counts[index]) + " ";
 
 	return result;
 }
@@ -1290,14 +1298,14 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 				)
 			{
 				std::string s = "info string " + MoveNotation(perftBrain.GameRecordPointer->move.ui32);
-				s += ": " + MyUI64TOA(perftNodes - previousPerftNodes);
+				s += ": " + std::to_string(perftNodes - previousPerftNodes);
 				if (IsDebug)
 				{
 					nowClock = std::chrono::steady_clock::now();
 					uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(nowClock - previousClock).count();
 					previousClock = nowClock;
 
-					s += " (" + MyUI64TOA(ms) + "ms, Hashfull = " + MyITOA(HashfullPerftTranspositionTable()) + ", ThreadId = " + MyITOA(ThreadId) + " CurrentProcessorNumber = " + std::to_string(GetCurrentProcessorNumber()) + ")";
+					s += " (" + std::to_string(ms) + "ms, Hashfull = " + std::to_string(HashfullPerftTranspositionTable()) + ", ThreadId = " + std::to_string(ThreadId) + " CurrentProcessorNumber = " + std::to_string(GetCurrentProcessorNumber()) + ")";
 				}
 				previousPerftNodes = perftNodes;
 				Output(s);
@@ -1437,19 +1445,19 @@ Perft::PerftResult_Struct Perft::ComputePerftMT(bool clearTT)
 		uint64_t ms = std::max(pr.ms, 1ULL); // To avoid a divide-by-zero error when calculating the nodes/second!
 		Output(
 			"info string Total: "
-			+ MyUI64TOA(pr.perftNodes)
-			+ " (" + MyUI64TOA(ms) + "ms, " + MyUI64TOA(pr.perftNodes * 1000 / ms) + " leaves/s)"
+			+ std::to_string(pr.perftNodes)
+			+ " (" + std::to_string(ms) + "ms, " + std::to_string(pr.perftNodes * 1000 / ms) + " leaves/s)"
 		);
 		if (PerftTranspositionTableBuckets > 0)
 		{
-			Output("info string Transposition table node count overflows = " + MyUI64TOA(pr.perftNodesOverflows));
-			Output("info string Transposition table hashfull = " + MyITOA(HashfullPerftTranspositionTable()));
-			Output("info string Transposition table stores = " + MyUI64TOA(pr.perftStores));
-			Output("info string Transposition table stores successful = " + MyUI64TOA(pr.perftStoresSuccessful) + " (" + MyFTOA((float(pr.perftStoresSuccessful) * 100) / pr.perftStores) + "%)");
-			Output("info string Transposition table probes = " + MyUI64TOA(pr.perftProbes));
-			Output("info string Transposition table probes successful = " + MyUI64TOA(pr.perftProbesSuccessful) + " (" + MyFTOA((float(pr.perftProbesSuccessful) * 100) / pr.perftProbes) + "%)");
-			Output("info string Positions counted in search = " + MyUI64TOA(pr.perftNodes - pr.perftPositionsFromTranspositionTable) + " (" + MyFTOA((float(pr.perftNodes - pr.perftPositionsFromTranspositionTable) * 100) / pr.perftNodes) + "%)");
-			Output("info string Positions counted from transposition table = " + MyUI64TOA(pr.perftPositionsFromTranspositionTable) + " (" + MyFTOA((float(pr.perftPositionsFromTranspositionTable) * 100) / pr.perftNodes) + "%)");
+			Output("info string Transposition table node count overflows = " + std::to_string(pr.perftNodesOverflows));
+			Output("info string Transposition table hashfull = " + std::to_string(HashfullPerftTranspositionTable()));
+			Output("info string Transposition table stores = " + std::to_string(pr.perftStores));
+			Output("info string Transposition table stores successful = " + std::to_string(pr.perftStoresSuccessful) + " (" + MyFTOA((float(pr.perftStoresSuccessful) * 100) / pr.perftStores) + "%)");
+			Output("info string Transposition table probes = " + std::to_string(pr.perftProbes));
+			Output("info string Transposition table probes successful = " + std::to_string(pr.perftProbesSuccessful) + " (" + MyFTOA((float(pr.perftProbesSuccessful) * 100) / pr.perftProbes) + "%)");
+			Output("info string Positions counted in search = " + std::to_string(pr.perftNodes - pr.perftPositionsFromTranspositionTable) + " (" + MyFTOA((float(pr.perftNodes - pr.perftPositionsFromTranspositionTable) * 100) / pr.perftNodes) + "%)");
+			Output("info string Positions counted from transposition table = " + std::to_string(pr.perftPositionsFromTranspositionTable) + " (" + MyFTOA((float(pr.perftPositionsFromTranspositionTable) * 100) / pr.perftNodes) + "%)");
 			Output("info string Transposition entries by depth: " + StatsPerftTranspositionTable());
 		}
 		Output("");
@@ -1466,7 +1474,7 @@ Perft::PerftResult_Struct Perft::ComputePerftMT(bool clearTT)
 		{
 			std::string results = "Perft thread results not consistent! ";
 			for (int threadId = 0; threadId < Threads; threadId++)
-				results += MyITOA(threadId) + " = " + MyUI64TOA(ThreadResults[threadId].perftNodes) + "\n";
+				results += std::to_string(threadId) + " = " + std::to_string(ThreadResults[threadId].perftNodes) + "\n";
 			Output(results);
 			OutputError(results);
 		}
@@ -1506,14 +1514,14 @@ void Perft::ComputePerftFile(std::string filename)
 
 			PerftResult_Struct pr = ComputePerftMT(false);
 
-			Output("info string " + MyITOA(positionsCount) + ": " + tokens[0] + " : " + MyUI64TOA(pr.perftNodes) + " (" + MyUI64TOA(pr.ms) + "ms)");
+			Output("info string " + std::to_string(positionsCount) + ": " + tokens[0] + " : " + std::to_string(pr.perftNodes) + " (" + std::to_string(pr.ms) + "ms)");
 			ms += pr.ms;
 
-			if (MyUI64TOA(pr.perftNodes) != tokens[PerftDepth])
+			if (std::to_string(pr.perftNodes) != tokens[PerftDepth])
 			{
 				// If the value we just computed doesn't match the given correct value given in the file then output an error message
 				Output("*** Error!");
-				Output("Calculated: " + MyUI64TOA(pr.perftNodes));
+				Output("Calculated: " + std::to_string(pr.perftNodes));
 				Output("Correct:    " + tokens[PerftDepth]);
 				errors++;
 			}
@@ -1524,8 +1532,8 @@ void Perft::ComputePerftFile(std::string filename)
 		fclose(PerftFile);
 
 		// Show closing statistics
-		Output("info string Time: " + MyUI64TOA(ms) + "ms");
-		Output("info string errors = " + MyITOA(errors));
+		Output("info string Time: " + std::to_string(ms) + "ms");
+		Output("info string errors = " + std::to_string(errors));
 		Output("");
 	}
 }
@@ -1578,8 +1586,8 @@ void Perft::ComputePerftUnique()
 	uint64_t totalms = 0;
 
 nextfile:
-	//std::string filename = "D:\\Developer\\Games\\UGIConsoles\\CC20NNx\\Solution\\x64\\Release\\Perft\\Perft8FENsUniqueAllByFrequency\\Perft8FENsUniqueAllByFrequency0" + MyITOA(frequency) + ".txt";
-	std::string filename = "D:\\Chess\\Perft\\Perft8FENsUniqueAllByFrequencyTEST\\Perft8FENsUniqueAllByFrequency0" + MyITOA(frequency) + ".txt";
+	//std::string filename = "D:\\Developer\\Games\\UGIConsoles\\CC20NNx\\Solution\\x64\\Release\\Perft\\Perft8FENsUniqueAllByFrequency\\Perft8FENsUniqueAllByFrequency0" + std::to_string(frequency) + ".txt";
+	std::string filename = "D:\\Chess\\Perft\\Perft8FENsUniqueAllByFrequencyTEST\\Perft8FENsUniqueAllByFrequency0" + std::to_string(frequency) + ".txt";
 	fopen_s(&PerftFile, filename.c_str(), "r");
 	if (PerftFile == NULL)
 	{
@@ -1605,9 +1613,9 @@ nextfile:
 		//Perft::PerftResult_Struct pr = ComputePerftMT(true); // Because the positions are related, allow the TT entries to persist DOESN'T SEEM TO WORK!!!
 		totalms += pr.ms;
 
-		//PerftOutputFile = fopen(((std::string)"D:\\Developer\\Games\\UGIConsoles\\CC20NNx\\Solution\\x64\\Release\\Perft\\Perft8FENsUniqueAllByFrequency\\Perft8FENsUniqueAllByFrequency0" + MyITOA(frequency) + "Results.txt").c_str(), "a");
-		PerftOutputFile = fopen(((std::string)"D:\\Chess\\Perft\\Perft8FENsUniqueAllByFrequencyTEST\\Perft8FENsUniqueAllByFrequency0" + MyITOA(frequency) + "Results.txt").c_str(), "a");
-		s = (std::string)line + "," + MyUI64TOA(pr.perftNodes) + "\n";
+		//PerftOutputFile = fopen(((std::string)"D:\\Developer\\Games\\UGIConsoles\\CC20NNx\\Solution\\x64\\Release\\Perft\\Perft8FENsUniqueAllByFrequency\\Perft8FENsUniqueAllByFrequency0" + std::to_string(frequency) + "Results.txt").c_str(), "a");
+		PerftOutputFile = fopen(((std::string)"D:\\Chess\\Perft\\Perft8FENsUniqueAllByFrequencyTEST\\Perft8FENsUniqueAllByFrequency0" + std::to_string(frequency) + "Results.txt").c_str(), "a");
+		s = (std::string)line + "," + std::to_string(pr.perftNodes) + "\n";
 		fprintf(PerftOutputFile, "%s", s.c_str());
 		fclose(PerftOutputFile);
 	}
@@ -1617,7 +1625,7 @@ nextfile:
 		goto nextfile;
 
 exit:
-	Output("Done! " + MyUI64TOA(totalms));
+	Output("Done! " + std::to_string(totalms));
 }
 
 void Perft::ComputePerftUnique2()
@@ -1642,7 +1650,7 @@ void Perft::ComputePerftUnique2()
 	uint64_t totalPerftCount2 = 0;
 
 nextfile:
-	std::string frequencyString = MyITOA(frequency);
+	std::string frequencyString = std::to_string(frequency);
 	if (frequency < 10000)
 	{
 		frequencyString = "0" + frequencyString;
@@ -1682,7 +1690,7 @@ nextfile:
 	fclose(PerftFile);
 	files++;
 
-	Output("Files=" + MyUI64TOA(files) + ", Unique Positions=" + MyUI64TOA(uniquePositions) + "(" + MyDTOA(((long double)(uniquePositions * 100)) / 988187354) + "%), Total Positions=" + MyUI64TOA(totalPositions) + "(" + MyDTOA(((long double)(totalPositions * 100)) / 84998978956) + "%), Total Perft Count=" + MyDTOA(totalPerftCount));
+	Output("Files=" + std::to_string(files) + ", Unique Positions=" + std::to_string(uniquePositions) + "(" + MyDTOA(((long double)(uniquePositions * 100)) / 988187354) + "%), Total Positions=" + std::to_string(totalPositions) + "(" + MyDTOA(((long double)(totalPositions * 100)) / 84998978956) + "%), Total Perft Count=" + MyDTOA(totalPerftCount));
 	//Output("Average Perft Count=" + std::to_string(totalPerftCount / totalPositions) + ", Estimated Perft(16)=" + std::to_string((totalPerftCount / totalPositions) * 84998978956));
 	Output("Average Perft Count=" + std::to_string(totalPerftCount / totalPositions) + ", Estimated Perft(16)=" + std::to_string(((totalPerftCount * 84998978956) / totalPositions)));
 
@@ -1732,10 +1740,10 @@ void UniquesByFrequency()
 		int occurred = std::stoi(tokens[1]);
 
 		if ((positionsCount & 65535) == 0)
-			Output(MyITOA(positionsCount) + ": " + line);
+			Output(std::to_string(positionsCount) + ": " + line);
 
 		std::string filename;
-		filename = "0000" + MyITOA(occurred);
+		filename = "0000" + std::to_string(occurred);
 		filename = filename.substr(filename.length() - 5);
 		filename = "C:\\Perft\\Perft8FENsUniqueAllByFrequency\\Perft8FENsUniqueAllByFrequency" + filename + ".txt";
 
@@ -1755,7 +1763,7 @@ void UniquesByFrequency()
 void PrintUniques(UniqueFEN_struct* currentNode)
 {
 	std::string s;
-	s = currentNode->FEN + "," + MyITOA(currentNode->count) + "\n";
+	s = currentNode->FEN + "," + std::to_string(currentNode->count) + "\n";
 	total += currentNode->count;
 	lines++;
 	fprintf(PerftFENsFileOutput, s.c_str());
@@ -1817,7 +1825,7 @@ void Unique()
 			int occurred = std::stoi(tokens[1]);
 
 			if ((positionsCount & 65535) == 0)
-				Output(MyITOA(positionsCount) + ": " + line);
+				Output(std::to_string(positionsCount) + ": " + line);
 
 			// Set up the bit boards from the 64-square mailbox board
 			ConvertMailboxBoard64ToPiecesBB(EngineBrain.mailboxBoard64, EngineBrain.piecesBB);
@@ -1825,7 +1833,7 @@ void Unique()
 			//uint64_t hash64 = GenerateTranspositionTableHash64(UGIBrain.mailboxBoard64, UGIBrain.gameRecordPointer);
 			//if (sideToMove == 1)
 			//	hash64 = ~hash64;
-			//Output(MyUI64TOA(hash64));
+			//Output(std::to_string(hash64));
 			//UGIBrain.gameRecordPointer->transpositionTableHash64 = hash64;
 			//UGIBrain.gameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[UGIBrain.gameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 			bool isInCheck = EngineBrain.IsEnemyKingAttacked(GetLS1BIndex(EngineBrain.piecesBB[sideToMove][King]), sideToMove ^ 1);
@@ -1833,7 +1841,7 @@ void Unique()
 			EngineBrain.CalculatePinnedPieces(sideToMove); // Required for legal move generation
 			uint32_t movesCount = EngineBrain.GenerateAllMoves(sideToMove, isInCheck, moveList);
 
-			//Output(MyITOA(movesCount));
+			//Output(std::to_string(movesCount));
 
 			for (uint32_t moveListIndexIterator = 0; moveListIndexIterator < movesCount; moveListIndexIterator++)
 			{
@@ -1965,11 +1973,11 @@ void Unique()
 		Output("Writing...");
 		if (rootNode->gt != NULL)
 			PrintUniques(rootNode->gt);
-		Output(MyUI64TOA(lines));
+		Output(std::to_string(lines));
 		if (rootNode->lt != NULL)
 			PrintUniques(rootNode->lt);
-		Output(MyUI64TOA(lines));
-		Output(MyUI64TOA(total));
+		Output(std::to_string(lines));
+		Output(std::to_string(total));
 		Output("Done!");
 	}
 

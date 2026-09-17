@@ -132,9 +132,7 @@ public:
 
 private:
 	Brain normalBrain;
-	//Mate sm;
-
-	NNUE nnue;
+	//NNUE nnue;
 
 	TwoGoodMoves_Struct KillerMoves[MaximumPly];
 	TwoGoodMoves_Struct CounterMoves[6][64];

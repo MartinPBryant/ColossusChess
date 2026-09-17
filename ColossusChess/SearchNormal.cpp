@@ -778,12 +778,12 @@ void Normal::AllocateNormalTranspositionTable()
 	NormalTranspositionTablePointer = nullptr;
 
 	// Allocate transposition table memory
+	MemoryAlocatedViaLargePages = false;
 	if (NormalTranspositionTableBuckets > 0)
 	{
 		NormalTranspositionTableBucketsMask = NormalTranspositionTableBuckets - 1;
 		if (LargePagesAvailable && UseLargePages)
 		{
-			MemoryAlocatedViaLargePages = true;
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)VirtualAlloc(NULL, NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			if (NormalTranspositionTablePointer == nullptr)
 			{
@@ -791,12 +791,11 @@ void Normal::AllocateNormalTranspositionTable()
 				Output("info string *** Error! Normal 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.");
 				OutputError("Normal 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
 			}
+			else
+				MemoryAlocatedViaLargePages = true;
 		}
 		if (NormalTranspositionTablePointer == nullptr)
-		{
-			MemoryAlocatedViaLargePages = false;
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)AlignedAllocateMemory(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), 64);
-		}
 		if ((NormalTranspositionTablePointer == nullptr))
 		{
 			uint32_t errorCode = GetLastError();
@@ -815,7 +814,10 @@ void Normal::AllocateNormalTranspositionTable()
 		Output("info string Normal transposition table entries per bucket = " + MyUI64TOA(NormalTranspositionTableEntriesPerBucket));
 		Output("info string Normal transposition table buckets = " + MyUI64TOA(NormalTranspositionTableBuckets));
 		Output("info string Normal transposition table entries = " + MyUI64TOA(NormalTranspositionTableBuckets * NormalTranspositionTableEntriesPerBucket));
-		Output("info string Normal transposition table memory allocated = " + MyUI64TOA(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct) / (1024ULL * 1024ULL)) + "MB (" + MyUI64TOA(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct)) + " bytes)");
+		std::string lp = "";
+		if (MemoryAlocatedViaLargePages)
+			lp = " via 'large pages'";
+		Output("info string Normal transposition table memory allocated = " + MyUI64TOA(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct) / (1024ULL * 1024ULL)) + "MB (" + MyUI64TOA(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct)) + " bytes)" + lp);
 	}
 }
 

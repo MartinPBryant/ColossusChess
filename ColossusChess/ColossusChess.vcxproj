@@ -34,6 +34,7 @@
     <ClCompile Include="SearchPerft.cpp" />
     <ClCompile Include="SYZYGYPYRRHIC\tbprobe.cpp" />
     <ClCompile Include="UGI.cpp" />
+    <ClCompile Include="UInt128.cpp" />
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +52,7 @@
     <ClInclude Include="SYZYGYPYRRHIC\tbconfig.h" />
     <ClInclude Include="SYZYGYPYRRHIC\tbprobe.h" />
     <ClInclude Include="UGI.h" />
+    <ClInclude Include="UInt128.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>

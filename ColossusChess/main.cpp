@@ -12,6 +12,22 @@
 // Program entry point
 int main(int argc, char * argv[])
 {
+	// Get the application's path/filename and construct various utility file paths
+	std::string ApplicationPath = argv[0];
+	size_t index = ApplicationPath.rfind("\\");
+	std::string EXEName = ApplicationPath.substr(index + 1);
+	auto threadID = std::this_thread::get_id();
+	std::stringstream ss;
+	ss << threadID;
+	std::string UniqueID = ss.str(); // Use the thread ID as a unique identifier to distinguish instances
+	LogFileName = EXEName + "." + UniqueID + ".log.txt"; // e.g. Colossus2024b.exe.29128.log.txt
+	Logging = false;
+	SyzygyPathLogFileName = EXEName + ".SyzygyPathLog.txt";
+	ErrorFileName = EXEName + "." + UniqueID + ".error.txt";
+	INIPath = ApplicationPath.substr(0, index) + "\\ColossusChess.ini";
+
+	//----------------------------------------------------------------------------------------------------
+
 	// Determine and display this computer's CPU information
 	CPUInfo();
 
@@ -49,7 +65,9 @@ int main(int argc, char * argv[])
 		{
 			Output("info string ***** This version of the executable does not use the BMI2:PEXT instruction but this CPU IS capable of using it.");
 			Output("info string ***** Please use the correct BMI2 executable.\n");
-			//runnable = false;
+			ReadINI("Executable", "AllowSubOptimal");
+			if (std::string(INIValue) != "1")
+				runnable = false;
 		}
 #endif
 	}
@@ -66,20 +84,6 @@ int main(int argc, char * argv[])
 
 	//----------------------------------------------------------------------------------------------------
 	
-	// Get the application's path/filename and construct various utility file paths
-	std::string ApplicationPath = argv[0];
-	size_t index = ApplicationPath.rfind("\\");
-	std::string EXEName = ApplicationPath.substr(index + 1);
-	auto threadID = std::this_thread::get_id();
-	std::stringstream ss;
-	ss << threadID;
-	std::string UniqueID = ss.str(); // Use the thread ID as a unique identifier to distinguish instances
-	LogFileName = EXEName + "." + UniqueID + ".log.txt"; // e.g. Colossus2024b.exe.29128.log.txt
-	Logging = false;
-	SyzygyPathLogFileName = EXEName + ".SyzygyPathLog.txt";
-	ErrorFileName = EXEName + "." + UniqueID + ".error.txt";
-	INIPath = ApplicationPath.substr(0, index) + "\\ColossusChess.ini";
-
 	// No I/O buffering on stdin and stdout (required to work with GUIs)
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);

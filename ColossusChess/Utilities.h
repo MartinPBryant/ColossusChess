@@ -10,7 +10,7 @@ extern std::ofstream LogFile;
 extern std::string SyzygyPathLogFileName;
 extern std::ofstream SyzygyPathLogFile;
 extern std::string ErrorFileName;
-extern FILE *ErrorFile;
+extern std::ofstream ErrorFile;
 
 extern int LastPrintTreePly;
 
@@ -59,6 +59,8 @@ void PrintTree2(int iterationPly, int ply, std::string s);
 uint64_t Random64();
 int BoardRand(int min, int max);
 int BoardRand0To63();
+
+//----------------------------------------------------------------------------------------------------
 
 void CPUInfo();
 void LargePages();
