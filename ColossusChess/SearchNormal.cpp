@@ -17,7 +17,6 @@
 #include "GlobalTypes.h"
 #include "Engine.h"
 #include "UGI.h"
-//#include "Brain.h"
 #include "Evaluate.h"
 #include "Utilities.h"
 #include "SearchNormal.h"
@@ -32,20 +31,23 @@ Normal::NormalTranspositionTableBucket_Struct* Normal::NormalTranspositionTableP
 uint32_t Normal::NormalTranspositionTableBuckets = 0;
 uint32_t Normal::NormalTranspositionTableBucketsMask;
 
-httplib::Client LichessEGTBClient("http://tablebase.lichess.org");
-bool LichessEGTBProbing = false;
-bool LichessEGTBThrottling = false;
-std::chrono::time_point<std::chrono::steady_clock> LichessEGTBThrottlingStartClock;
-int LichessEGTBMax = 8;
-std::string LichessQueryFEN = "";
-std::string RootFEN = "";
-struct LichessMove
-{
-	std::string move;
-	int rank;
-};
-LichessMove LichessMoves[256];
+// THIS LICHESS CODE SEEMS TO CAUSE STALLS IN MT GAMES!!! DECLARING THEM HERE IS LIKE USING CrashLocation CAUSES PROBLEMS???
+// ALSO THEY SHOULD ONLY EVER BE PROBED IN THREAD 0???
+//httplib::Client LichessEGTBClient("http://tablebase.lichess.org");
+//bool LichessEGTBProbing = false;
+//bool LichessEGTBThrottling = false;
+//std::chrono::time_point<std::chrono::steady_clock> LichessEGTBThrottlingStartClock;
+//int LichessEGTBMax = 8;
+//std::string LichessQueryFEN = "";
+//std::string RootFEN = "";
+//struct LichessMove
+//{
+//	std::string move;
+//	int rank;
+//};
+//LichessMove LichessMoves[256];
 
+// N.B. CRASHLOCATIONDEF must be undefined for multi-threaded play else the constant dirtying of the cache line causes huge overhead negating any lazy-SMP benefit!
 int Normal::CrashLocation;
 
 //----------------------------------------------------------------------------------------------------
@@ -94,72 +96,72 @@ void Normal::TestSEE()
 
 //----------------------------------------------------------------------------------------------------
 
-void Normal::LichessEGTBProbe(std::string fen)
-{
-	// N.B. you can pass any FEN you like to Lichess (e.g. the original position!) and if it doesn't have an EGTB for that position it still returns a Json document with all the moves but just nulls for all the data
-
-	// If we are being throttled, wait at least 61 seconds before issuing another request
-	if (LichessEGTBThrottling)
-	{
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - LichessEGTBThrottlingStartClock).count() < 61000)
-			goto exit;
-		//Output("LichessEGTBThrottling finish!");
-		LichessEGTBThrottling = false;
-	}
-
-	try
-	{
-		//Output("Entered LichessEGTBProbe");
-
-
-		// Probe the Lichess EGTBs
-		auto httpResult = LichessEGTBClient.Get("/standard?fen=" + fen);
-
-		// Did we get anything back?
-		if (httpResult)
-		{
-			if (httpResult->status == 429) // The server is throttling us!
-			{
-				LichessQueriesThrottled++;
-				LichessEGTBThrottling = true;
-				LichessEGTBThrottlingStartClock = std::chrono::steady_clock::now();
-				//Output("LichessEGTBThrottling start!");
-			}
-			else if (httpResult->status == 200) // Status OK
-			{
-				// Get the result string and convert it into a Json object
-				RSJresource jsonResults(httpResult->body);
-
-				// Get the 'moves' array from within the outer Json objectrank
-				RSJresource moves = jsonResults["moves"];
-
-				// Iterate over the moves array and copy the required data into the Normal engine thread's variables
-				// N.B. moves.size() will be 0 if the query failed in any way
-				int moveCount;
-				for (moveCount = 0; moveCount < moves.size(); moveCount++)
-				{
-					//Output(moves[i]["uci"].as<std::string>() + " : " + moves[i]["dtz"].as<std::string>() + " : " + moves[i]["dtc"].as<std::string>());
-					LichessMoves[moveCount].move = moves[moveCount]["uci"].as<std::string>();
-					int rank;
-					if (moves[moveCount]["dtz"].as<std::string>() != "null")
-						rank = atoi(moves[moveCount]["dtz"].as<std::string>().c_str());
-					else
-						rank = atoi(moves[moveCount]["dtc"].as<std::string>().c_str());
-					LichessMoves[moveCount].rank = rank;
-				}
-				LichessMoves[moveCount].move = "";
-			}
-		}
-		//Output("Exited LichessEGTBProbe");
-	}
-	catch (...)
-	{
-	}
-
-exit:
-	LichessQueriesReturned++;
-	LichessEGTBProbing = false;
-}
+//void Normal::LichessEGTBProbe(std::string fen)
+//{
+//	// N.B. you can pass any FEN you like to Lichess (e.g. the original position!) and if it doesn't have an EGTB for that position it still returns a Json document with all the moves but just nulls for all the data
+//
+//	// If we are being throttled, wait at least 61 seconds before issuing another request
+//	if (LichessEGTBThrottling)
+//	{
+//		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - LichessEGTBThrottlingStartClock).count() < 61000)
+//			goto exit;
+//		//Output("LichessEGTBThrottling finish!");
+//		LichessEGTBThrottling = false;
+//	}
+//
+//	try
+//	{
+//		//Output("Entered LichessEGTBProbe");
+//
+//
+//		// Probe the Lichess EGTBs
+//		auto httpResult = LichessEGTBClient.Get("/standard?fen=" + fen);
+//
+//		// Did we get anything back?
+//		if (httpResult)
+//		{
+//			if (httpResult->status == 429) // The server is throttling us!
+//			{
+//				LichessQueriesThrottled++;
+//				LichessEGTBThrottling = true;
+//				LichessEGTBThrottlingStartClock = std::chrono::steady_clock::now();
+//				//Output("LichessEGTBThrottling start!");
+//			}
+//			else if (httpResult->status == 200) // Status OK
+//			{
+//				// Get the result string and convert it into a Json object
+//				RSJresource jsonResults(httpResult->body);
+//
+//				// Get the 'moves' array from within the outer Json objectrank
+//				RSJresource moves = jsonResults["moves"];
+//
+//				// Iterate over the moves array and copy the required data into the Normal engine thread's variables
+//				// N.B. moves.size() will be 0 if the query failed in any way
+//				int moveCount;
+//				for (moveCount = 0; moveCount < moves.size(); moveCount++)
+//				{
+//					//Output(moves[i]["uci"].as<std::string>() + " : " + moves[i]["dtz"].as<std::string>() + " : " + moves[i]["dtc"].as<std::string>());
+//					LichessMoves[moveCount].move = moves[moveCount]["uci"].as<std::string>();
+//					int rank;
+//					if (moves[moveCount]["dtz"].as<std::string>() != "null")
+//						rank = atoi(moves[moveCount]["dtz"].as<std::string>().c_str());
+//					else
+//						rank = atoi(moves[moveCount]["dtc"].as<std::string>().c_str());
+//					LichessMoves[moveCount].rank = rank;
+//				}
+//				LichessMoves[moveCount].move = "";
+//			}
+//		}
+//		//Output("Exited LichessEGTBProbe");
+//	}
+//	catch (...)
+//	{
+//	}
+//
+//exit:
+//	LichessQueriesReturned++;
+//	LichessEGTBProbing = false;
+//}
 
 //----------------------------------------------------------------------------------------------------
 
@@ -1951,7 +1953,7 @@ GenerateMoveList:
 		currentMove.ui32 = moveList[bestSortIndex].ui32;
 
 		// Calculate the SEE result
-		// N.B. Only captures/proms can be SEE winning
+		// N.B. Only captures/proms can be SEE winning (>0)
 		int SEEResult;
 		SEEResult = normalBrain.SEE(currentMove.mf.fromSquare, currentMove.mf.toSquare, sideToMove);
 		currentGameRecordPointer->SEEResult = SEEResult;
@@ -2030,7 +2032,7 @@ GenerateMoveList:
 		BREAKONCURRENTVARIATION("a4b4 ");
 
 		bool safePassedPawnMove = false;
-		// Have we just pushed a passed pawn safely? (captures excluded)
+		// Have we just pushed a passed pawn safely? (captures/promotions(inherently) excluded)
 		if (
 			(SEEResult == 0)
 			&& (std::abs(currentGameRecordPointer->move.fromSquarePiece) == Pawn)
@@ -2373,8 +2375,8 @@ GenerateMoveList:
 			if (EndgameTablebasesRootMove.ui32 != 0)
 				if (std::abs(currentMoveScore) < MatingScore) // No mate found?
 				{
-					int dtz = RetrieveRootMoveDTZStatus(currentMove.ui32); // +ve for wins, 0 for draws, -ve for losses
-					if (dtz > EndgameTablebasesRootDTZ) // Sub-optimal DTZ? (For wins EndgameTablebasesRootDTZ will be the lowest +ve dtz, for losses EndgameTablebasesRootDTZ will be the lowest -ve dtz)
+					int dtz = RetrieveRootMoveDTZStatus(currentMove.ui32); // >=0 for wins, 0 for draws, <=0 for losses
+					if (dtz > EndgameTablebasesRootDTZ) // Sub-optimal DTZ? (For wins EndgameTablebasesRootDTZ will be the lowest dtz >=0, for losses EndgameTablebasesRootDTZ will be the lowest dtz <=0)
 						currentMoveScore = -MatingIn0Score; // Discard
 					// Only moves which preserve the EGTB result and optimal DTZ use their actual search scores
 				}
@@ -2587,7 +2589,6 @@ std::string Normal::ComputeNormal()
 
 
 
-
 	// Set up the bit boards from the 64-square mailbox board
 	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
 
@@ -2659,7 +2660,7 @@ std::string Normal::ComputeNormal()
 	if (RootMovesCount == 0) // Sometimes the GUI or the user provide positions with zero legal moves! (e.g. checkmates/stalemates in chess)
 	{
 		Output("info string *** Error! There are zero moves in the position provided!");
-		OutputError("*** Error! There are zero moves in the position provided!");
+		OutputError("There are zero moves in the position provided!");
 		return "";
 	}
 	for (int moveListIndexIterator = 0; moveListIndexIterator < RootMovesCount; moveListIndexIterator++)
@@ -2696,8 +2697,8 @@ std::string Normal::ComputeNormal()
 	EndgameTablebasesErrors = false;
 	for (int index = 0; index < 8; index++)
 		EndgameTablebasesErrorCounts[index] = 0;
-	LichessMoves[0].move = "";
-	RootFEN = ConvertPositionToFEN(normalBrain.MailboxBoard64, SideToMove, normalBrain.GameRecordPointer->castlingStatus, normalBrain.GameRecordPointer->epSquare, 0, 1);
+	//LichessMoves[0].move = "";
+	//RootFEN = ConvertPositionToFEN(normalBrain.MailboxBoard64, SideToMove, normalBrain.GameRecordPointer->castlingStatus, normalBrain.GameRecordPointer->epSquare, 0, 1);
 
 	if (ThreadId == 0) // Only the main thread will modify its root move list based on the EGTBs
 	{
@@ -2766,17 +2767,17 @@ std::string Normal::ComputeNormal()
 					for (uint32_t index = 0; index < results.size; index++)
 					{
 						TbRootMove move = results.moves[index];
-						// If we have the DTZ info (.rtbz files) : move.tbRank will be +262144-1-DTZ (0x40000) for wins, -262144+1+DTZ for losses and 0 for draws
+						// If we have the DTZ info (.rtbz files) : move.tbRank will be +262144-1-DTZ (0x40000) for wins, -262144+1-DTZ for losses and 0 for draws
 						// If we don't have the DTZ info (.rtbz files) : move.tbRank will be +262144 (0x40000) for wins, -262144 for losses and 0 for draws, so dtz will be 0 for all moves
 						Move_Struct colossusMove;
 						colossusMove.ui32 = normalBrain.SYZYGYPYRRHICMoveToColossusMove(move.move, normalBrain.GameRecordPointer->epSquare);
 						int wdl; // win=1, draw=0, loss=-1 : this is deduced by the sign of tbRank : no distinction is made for cursed-wins and blessed-losses
-						int dtz; // >0 for wins, 0 for draws, <0 for losses : we want to select the lowest value, so for wins the lowest +ve dtz, for losses the lowest -ve dtz
+						int dtz; // >=0 for wins, 0 for draws, <=0 for losses : we want to select the lowest value, so for wins the lowest +ve dtz, for losses the lowest -ve dtz
 						if (move.tbRank > 0)
 						{
 							wdl = 1;
 							dtz = 0x40000 - 1 - move.tbRank; // The -1 brings the DTZ in line with that displayed on the SYZYGY website https://syzygy-tables.info/
-							assert(dtz > 0); // For wins we want to play the lowest dtz
+							assert(dtz >= 0); // For wins we want to play the lowest +ve dtz to convert as fast as possible
 						}
 						else if (move.tbRank == 0)
 						{
@@ -2787,7 +2788,7 @@ std::string Normal::ComputeNormal()
 						{
 							wdl = -1;
 							dtz = -(0x40000 - 1 + move.tbRank);
-							assert(dtz > 0); // For losses we want to play the highest dtz
+							assert(dtz <= 0); // For losses we want to play the lowest -ve dtz to avoid conversion as long as possible
 						}
 						bool found = UpdateRootMoveEGTBStatus(colossusMove.ui32, wdl, dtz);// , move.tbRank);
 						if (!found)
@@ -3060,6 +3061,8 @@ std::string Normal::ComputeNormal()
 
 	} while ((!StopWhenIterationComplete && (ThreadId == 0)) || (!StopImmediately && (ThreadId > 0)));
 
+	//----------------------------------------------------------------------------------------------------
+	
 	std::string bestMoveMessage = "";
 
 	if (ThreadId == 0)
@@ -3084,7 +3087,15 @@ std::string Normal::ComputeNormal()
 
 		// Report best move
 		if (RootBestMove.ui32 == 0)
-			OutputError("No best move returned by search! (RootBestMove.ui32 == 0)");
+		{
+			// THIS SEEMS TO HAPPEN ON LICHESS WHEN IN THE ENDGAME TABLEBASES
+			// SO DUMP SOME EGTB INFO TO TRY TO DIAGNOSE!
+			std::string s = "\n";
+			s += "EndgameTablebasesRootMove=" + MoveNotation(EndgameTablebasesRootMove.ui32) + "\n";
+			s += "EndgameTablebasesRootWDL=" + std::to_string(EndgameTablebasesRootWDL) + "\n";
+			s += "EndgameTablebasesRootDTZ=" + std::to_string(EndgameTablebasesRootDTZ) + "\n";
+			OutputError("No best move returned by search! (RootBestMove.ui32 == 0)" + s);
+		}
 		bestMoveMessage = "bestmove " + MoveNotation(RootBestMove.ui32);
 		if (Ponder)
 			if ((TC.CurrentType != TCTFixedTime) && (TC.CurrentType != TCTFixedDepth) && (TC.CurrentType != TCTFixedNodes)) // Don't ponder in any 'fixed' modes

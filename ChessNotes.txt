@@ -56,7 +56,7 @@ PGO Instructions
 To produce a PGO exe... (About a 5-6% improvement {8.2 ELO})
 Build/Profile Guided Optimization/Instrument (creates a .pgd file)
 Build/Profile Guided Optimization/Run Instrumented Application
-go perft 8 AND go depth 21 (or some other suitable command(s) to get it to do some work) (creates a !1.pgc file)
+go perft 8 AND go depth 25 (or some other suitable command(s) to get it to do some work) (creates a !1.pgc file)
 quit {and hit any key to close the window}
 Build/Profile Guided Optimization/Optimize
 (N.B. 1 : the 'Profile Guided Optimization' option only appears on the 'Build' menu if you have a file in the project selected!)
@@ -144,22 +144,24 @@ Same ratio...
 
 BEFORE RELEASING A NEW VERSION...
 =================================
-For future release versions it may be useful to keep a non-PGO version for testing against future versions!!!
+For future releases it will be useful to keep a non-PGO version for testing against future versions!!!
 Set AC1=1 and do a long search to ensure we're not incrementing any other counters anywhere
-Undefine EXPERIMENTAL (in GlobalConstants.h)
-Make sure CRASHLOCATIONDEF is undefined (in SearchNormal.h)
-Make sure PRINTTREEDEF is undefined (in Utilities.h)
+Make sure EXPERIMENTAL is undefined (in Engine.h)
+Make sure CRASHLOCATIONDEF is undefined (in Engine.h)
+Make sure PRINTTREEDEF is undefined (in Engine.h)
+Make sure GATHERSTATSDEF is undefined (in Engine.h)
+Make sure BREAKONCURRENTVARIATIONDEF is undefined (in Engine.h)
 Do a go depth 9 to make sure we don't get any printtree files generated
 Check .ini file doesn't have 'logging' on!
-Try it in several GUIs! (Arena, ChessGUI, CuteChess, Banksia)
 Run debug version overnight on infinite search to see if any asserts fail (apart from assert(standPatScore == Evaluate(sideToMove)) and assert(normalBrain.gameRecordPointer->staticEvaluation == Evaluate(sideToMove)) - put back after testing!)
-Compile engine (PGO version!) into 'new' folder and rename ready to go and confirm it identifies itself correctly
+Compile engine (PGO AND NonPGO version!) into 'new' folder and rename ready to go and confirm it identifies itself correctly
+{N.B. now need to compile baseline and BMI2 versions!}
+Try it in several GUIs! (Arena, ChessGUI, CuteChess, Banksia)
 Verify complete Perft file for normal and FRC chess (in release AND debug modes) (e.g. go perft 6 file)
 Run -TS0, -TS1 & -TS2
 Run test tourneys for normal and FRC chess from the 'new' folder using 1'+1"{tc=60+1} AND 40/40s{tc=40/40}
 Run test tourney for normal with 4 threads v 1 thread to ensure we haven't got the 'StopImmediately slowdown' issue back! or messaging crashes!
-Check pondering working manually!
-Run human test game in Arena with ponder on to ensure I can see it pondering while I'm thinking!
+Check pondering working manually - i.e. run human test game in Arena with ponder on to ensure I can see it pondering while I'm thinking!
 Watch it play as lichess bot for any oddities
 Set threads to 16 and go infinite to ensure multi-threading doesn't crash
 Run a quick tourney in Arena {against previous version} with EGTBs and multi-threads and ponder
@@ -246,6 +248,11 @@ export_nnue.py converts nnue_model.pt to nnue_weights.bin
 
 
 
+We had settled on the classic Stockfish NNUE architecture, specifically the SFNNv1 / Stockfish 12 design for your own engine.
+
+The model was:
+
+HalfKP - 256×2 - 32 - 32 - 1
 
 
 ---------------------------------------------------------------------------------------------------------
@@ -253,13 +260,26 @@ export_nnue.py converts nnue_model.pt to nnue_weights.bin
 ALL
 ===
 
+Still getting these errors on Lichess when we get down to 7 pieces
+*** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
+-IS IT BECAUSE NIPOGI1 HAS INCOMPLETE 7-PC???? :O
+-AND MAYBE EXCLUDES EVERYTHING FROM ROOT SEARCH!???
+-CHECK IF THEY ARE ENDGAMES WHERE IT DOESN'T HAVE THE PARTICULAR TABLEBASE - NO AS IT DOES HAVE KQPPvKQP
+-ONE WAS A 5PC, MOST WERE 6PC AND SOMWE WERE 7PC WHERE IT DID HAVE THE EGTB!
+-CHECK THE ROOTMOVE FILTERING CODE! ADD SOME ERRORS INSTEAD OF ASSERTS BECAUSE ITS RELEASE BUILD
 
-eval all the EGTB posns
+
+
+
+NNUE
+-might still need genfsl command?
+-could use chess960 starting posns
+-could use unique perft starting posns
 
 
 errors on lichess PC...
 test again to see if we get any now that isready is more robust
-v115
+v116
 
 
 
@@ -268,20 +288,9 @@ tidy up again
 
 
 
-
-safe passed P move should exclude promotions themselves!
-
-
-(movesCount == 1) doesn't always get extended BUT should always not prune/reduce - but it has the >1 move searched test already
-
-
-
 don't prune any bestSortScore special moves?
 
-
 use dangerconditions more fully but lower down, say <=ID/2?
-
-
 
 fut pruning/lmp - do they need to respect dangerconditions?
 -also winning/losing
@@ -291,7 +300,6 @@ don't do things based on DR? but distance from root e.g. ply>ID/2
 
 testing 3-fold repetition twice at the root can be counter productive because it doesn't repeat moves so easily when losing!
 (because it thinks the opp will avoid it but should at least give it the ooportunity to repeat) aestra v colossus Rc4c7
-
 
 
 fudge losing scores now that we have nnue madness! use similar formula to egtb draw scores

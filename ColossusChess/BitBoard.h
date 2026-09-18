@@ -4,7 +4,7 @@
 
 //----------------------------------------------------------------------------------------------------
 
-//#define PEXT // N.B. the PEXT instruction is VERY slow on AMD Zen2 architecture and Intel 'efficiency' cores!
+//#define BMI2 // N.B. the BMI2:PEXT instruction is VERY slow on AMD architectures prior to Zen3 and Intel 'efficiency' cores!
 
 extern uint64_t RanksListBB[64];
 extern uint64_t FilesListBB[64];

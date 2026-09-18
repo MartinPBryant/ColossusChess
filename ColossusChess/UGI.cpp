@@ -347,12 +347,16 @@ std::string ProcessInput(std::string currentLine)
 		if (commandToken == "ISREADY")
 		{
 			// Give any running search a chance to finish up (at most 1 second)
-			for (int count = 0; count < 100; count++)
+			int count = 0;
+			while (count < 100)
 			{
 				if (ComputingMove)
 					Sleep(10);
 				else
 					break;
+				count++;
+				if (count == 100)
+					OutputError("ISREADY timed out!");
 			}
 			Output("readyok");
 		}
@@ -582,13 +586,9 @@ std::string ProcessInput(std::string currentLine)
 			else if ((commandToken == "UCI") || (commandToken == "UGI"))
 			{
 				// Display program information
-				std::string softwarePopulationCount = "";
-#ifdef TB_NO_HW_POP_COUNT
-				SoftwarePopulationCount = "SOFTWAREPOPULATIONCOUNT";
-#endif
-				std::string bitness = "";
-#ifndef _WIN64
-				bitness = " (32-bit)";
+				std::string bmi2 = "";
+#ifdef BMI2
+				bmi2 = "-BMI2";
 #endif
 				std::string debug = "";
 #ifdef _DEBUG
@@ -596,9 +596,9 @@ std::string ProcessInput(std::string currentLine)
 #endif
 				std::string logging = "";
 				if (Logging)
-					logging = " Logging Enabled!";
+					logging = "-Logging Enabled!";
 
-				Output("id name Colossus Chess " + std::string(VersionX) + softwarePopulationCount + bitness + debug + logging);
+				Output("id name Colossus Chess " + std::string(VersionX) + bmi2 + debug + logging);
 				Output("id author Martin Bryant");
 				SendOptions();
 				Output("uciok");

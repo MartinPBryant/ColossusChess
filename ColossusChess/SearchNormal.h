@@ -93,7 +93,7 @@ public:
 	void ShowBestLineMessage(short alpha, uint8_t eul);
 	std::string BestLine();
 
-	static void LichessEGTBProbe(std::string fen);
+	//static void LichessEGTBProbe(std::string fen);
 
 	void ClearKillerMoves();
 	void ClearCounterMoves();

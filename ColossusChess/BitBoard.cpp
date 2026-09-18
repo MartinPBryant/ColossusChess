@@ -159,34 +159,6 @@ alignas(64) int8_t DirectAttacksByPiece[8][64][64];
 
 alignas(64) uint64_t PassedPawnCatchableByKing[2][2][64]; // side to move, king colour, king square
 
-#if !defined _WIN64 || defined TB_NO_HW_POP_COUNT
-int Ms1b[256];
-void init_Ms1b()
-{
-	int i;
-	for (i = 0; i < 256; i++) {
-		Ms1b[i] = (
-			(i > 127) ? 7 :
-			(i > 63) ? 6 :
-			(i > 31) ? 5 :
-			(i > 15) ? 4 :
-			(i > 7) ? 3 :
-			(i > 3) ? 2 :
-			(i > 1) ? 1 :
-			0
-			);
-	};
-}
-
-uint8_t PopulationCount16[1 << 16];
-void InitialisePopulationCount16()
-{
-	for (int index = 0; index < (1 << 16); index++)
-		PopulationCount16[index] = uint8_t(std::bitset<16>(index).count());
-}
-
-#endif
-
 // Return a bitboard containing all the squares attacked by the king in the provided bitboard
 // This is only used here to initialise the KingAttacksBBList array
 uint64_t KingAttacksBB(uint64_t kingSquareBB)
@@ -231,7 +203,7 @@ struct Magic
 {
 	uint64_t InnerRay;
 	uint64_t* AttacksFancyPointer;
-#ifndef PEXT
+#ifndef BMI2
 	uint64_t MagicMultipler;
 	int BlockerPermutationBitsPreAdjusted;
 #endif
@@ -414,7 +386,7 @@ const uint64_t BishopMagicMultipliers[64] = {
 
 // Return a bitboard containing all the squares attacked by the rook on the provided square with the provided blockers
 // This is used by the move generators
-#ifdef PEXT
+#ifdef BMI2
 inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
 	return *(RookMagics[square].AttacksFancyPointer + _pext_u64(occupiedSquaresBB, RookMagics[square].InnerRay));
@@ -431,7 +403,7 @@ inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
 
 // Return a bitboard containing all the squares attacked by the bishop on the provided square with the provided blockers
 // This is used by the move generators
-#ifdef PEXT
+#ifdef BMI2
 inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
 {
 	return *(BishopMagics[square].AttacksFancyPointer + _pext_u64(occupiedSquaresBB, BishopMagics[square].InnerRay));
@@ -602,7 +574,7 @@ void InitialiseBitBoardLists()
 		// Rooks
 		RookMagics[square].InnerRay = GenerateRookInnerRay(square); // Create a bitboard showing the moves by a rook on 'square' on an empty board excluding edges
 		RookMagics[square].AttacksFancyPointer = &RookAttacksFancyBB[rookFancyIndex]; // Save the address within the RookAttacksFancyBB table of the 0th entry for this 'square'
-#ifndef PEXT
+#ifndef BMI2
 		RookMagics[square].MagicMultipler = RookMagicMultipliers[square];
 		RookMagics[square].BlockerPermutationBitsPreAdjusted = 64 - RookBlockerPermutationBits[square];
 #endif
@@ -612,7 +584,7 @@ void InitialiseBitBoardLists()
 			uint64_t blockersBB;
 			blockersBB = PermutationIndexToBB(permutationIndex, RookBlockerPermutationBits[square], RookMagics[square].InnerRay);
 			int keyIndex;
-#ifdef PEXT
+#ifdef BMI2
 			keyIndex = (int)_pext_u64(blockersBB, RookMagics[square].InnerRay);
 #else
 			keyIndex = (int)((blockersBB * RookMagics[square].MagicMultipler) >> RookMagics[square].BlockerPermutationBitsPreAdjusted);
@@ -627,7 +599,7 @@ void InitialiseBitBoardLists()
 		// Bishops
 		BishopMagics[square].InnerRay = GenerateBishopInnerRay(square);
 		BishopMagics[square].AttacksFancyPointer = &BishopAttacksFancyBB[bishopFancyIndex];
-#ifndef PEXT
+#ifndef BMI2
 		BishopMagics[square].MagicMultipler = BishopMagicMultipliers[square];
 		BishopMagics[square].BlockerPermutationBitsPreAdjusted = 64 - BishopBlockerPermutationBits[square];
 #endif
@@ -637,7 +609,7 @@ void InitialiseBitBoardLists()
 			uint64_t blockersBB;
 			blockersBB = PermutationIndexToBB(permutationIndex, BishopBlockerPermutationBits[square], BishopMagics[square].InnerRay);
 			int keyIndex;
-#ifdef PEXT
+#ifdef BMI2
 			keyIndex = (int)_pext_u64(blockersBB, BishopMagics[square].InnerRay);
 #else
 			keyIndex = (int)((blockersBB * BishopMagics[square].MagicMultipler) >> BishopMagics[square].BlockerPermutationBitsPreAdjusted);
@@ -762,10 +734,4 @@ void InitialiseBitBoardLists()
 		}
 	}
 
-
-#if !defined _WIN64 || defined TB_NO_HW_POP_COUNT
-	// Initialise array for software bit scan reverse
-	init_Ms1b();
-	InitialisePopulationCount16();
-#endif
 }

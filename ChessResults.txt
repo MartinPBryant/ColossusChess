@@ -329,11 +329,13 @@ Rank Name                             Elo        +/-       nElo        +/-      
 ***Switching time control to 3"+0.025"
 
 100 v 101 {Razoring tests <=alpha rather than <} (1.91) PCS2 (02:07:23)
+100 v 101 {Razoring tests <=alpha rather than <} (-2.00) PCS1
+100 v 101 {Razoring tests <=alpha rather than <} (1.75) ASUS1
 
 2026aNonPGO v 101 {3s+0.025s N.B. non PEXT!} (-35.81) PCS2
 2026aNonPGO v 101 {3s+0.025s N.B. non PEXT!} (-35.54) ASUS1
 
-2026aNonPGO v 70 {3s+0.025s N.B. non PEXT!} (-38.43) PCS2
+2026aNonPGO v 70 {3s+0.025s N.B. non PEXT!} (-38.43) PCS2 - was -43.13 at 2s+0.022s
 
 70 v 101 {} (-3.21) PCS2
 70 v 101 {} (-3.20) PCS1
@@ -401,6 +403,21 @@ Rank Name                             Elo        +/-       nElo        +/-      
 114 v 114 {5s+0.042s for NNUE training 200,000 games} (0.59, +/-1.06, 200000) PCS2
 
 ***114 ISREADY made more robust --> 115
+
+2026aNonPGO v 115 {100ms/move N.B. non PEXT!} (-42.97) PCS2 - ??? I thought most of it was just time control stuff???
+
+Puffin-5.0(CCRL:2989) v 115 {3s+0.025s N.B. non PEXT!} (-43.40, +/-13.13, 2000) PCS2
+Gogobello 2.2(CCRL:2918) v 115 {3s+0.025s N.B. non PEXT! 2000 games} (5.73) PCS2
+Inanis(CCRL:3047) v 115 {3s+0.025s N.B. non PEXT! 2000 games} (217) PCS2
+Inanis(CCRL:3047) v 115(2 threads) {3s+0.025s N.B. non PEXT! 2000 games} (153.44) PCS2 - lots of stalls!
+115 v 115(2 threads) {3s+0.025s N.B. non PEXT! 2000 games} (-75) PCS2 - several stalls
+
+RUNNING TMT AGAIN WITH 115 - STALLED!!!!!!!!!!!!!!!!!!!!!
+
+***115 All traces of Lichess probing commented out --> 116 (now MT seems ok)
+
+2026a v 2026bBMI2 {FRC} () PCS2
+
 
 
 

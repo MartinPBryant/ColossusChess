@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
 	}
 	else
 	{
-#ifdef PEXT
+#ifdef BMI2
 		// Next check that the current CPU supports BMI2 (because we are running the executable that requires it!)
 		if (ThisCPUSupports & EISBMI2)
 		{
@@ -97,12 +97,6 @@ int main(int argc, char * argv[])
 	}
 
 	// Various warnings!
-#ifndef _WIN64
-	Output("info string *** Warning! 32-bit!");
-#endif
-#ifdef TB_NO_HW_POP_COUNT
-	Output("info string *** Warning! Software population count! 10% SLOWER!");
-#endif
 #ifdef SEARCHINGFORLINE
 	Output("info string *** Warning! SEARCHINGFORLINE is on!");
 #endif
@@ -113,8 +107,6 @@ int main(int argc, char * argv[])
 #ifdef CRASHLOCATIONDEF
 	Output("info string *** Warning! CRASHLOCATIONDEF defined!");
 #endif
-
-
 
 	//----------------------------------------------------------------------------------------------------
 
