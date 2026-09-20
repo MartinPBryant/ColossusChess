@@ -1009,10 +1009,11 @@ void Perft::AllocatePerftTranspositionTable()
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)VirtualAlloc(NULL, PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			if (PerftTranspositionTablePointer == nullptr)
 			{
+				std::string errorMessage;
 				uint32_t errorCode = GetLastError();
-				Output("info string *** Error! Perft 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.");
-				Output("info string *** Error! Perft 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
-				OutputError("Perft 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
+				errorMessage = "Perft 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.";
+				Output("info string *** Error! " + errorMessage);
+				OutputError(errorMessage);
 			}
 			else
 				MemoryAlocatedViaLargePages = true;
@@ -1021,9 +1022,11 @@ void Perft::AllocatePerftTranspositionTable()
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)AlignedAllocateMemory(PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), 64);
 		if (PerftTranspositionTablePointer == nullptr)
 		{
+			std::string errorMessage;
 			uint32_t errorCode = GetLastError();
-			Output("info string *** Error! Perft transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ")");
-			OutputError("Perft transposition table memory could not be allocated!");
+			errorMessage = "Perft transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ")";
+			Output("info string *** Error! " + errorMessage);
+			OutputError(errorMessage);
 			PerftTranspositionTableBuckets = 0;
 		}
 	}

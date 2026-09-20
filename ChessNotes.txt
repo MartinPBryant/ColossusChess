@@ -154,8 +154,8 @@ Make sure BREAKONCURRENTVARIATIONDEF is undefined (in Engine.h)
 Do a go depth 9 to make sure we don't get any printtree files generated
 Check .ini file doesn't have 'logging' on!
 Run debug version overnight on infinite search to see if any asserts fail (apart from assert(standPatScore == Evaluate(sideToMove)) and assert(normalBrain.gameRecordPointer->staticEvaluation == Evaluate(sideToMove)) - put back after testing!)
-Compile engine (PGO AND NonPGO version!) into 'new' folder and rename ready to go and confirm it identifies itself correctly
-{N.B. now need to compile baseline and BMI2 versions!}
+Compile engine (PGO AND NonPGO version!) into 'new' folder and rename ready to go and confirm it identifies itself correctly with the UCI command
+{N.B. now need to compile Basic and Advanced versions!}
 Try it in several GUIs! (Arena, ChessGUI, CuteChess, Banksia)
 Verify complete Perft file for normal and FRC chess (in release AND debug modes) (e.g. go perft 6 file)
 Run -TS0, -TS1 & -TS2
@@ -260,6 +260,13 @@ HalfKP - 256×2 - 32 - 32 - 1
 ALL
 ===
 
+
+
+the engine could accumulate all the messages from the UI in the current game and dump them upon error too!
+-CommandsSinceLastNewGame string
+
+
+
 Still getting these errors on Lichess when we get down to 7 pieces
 *** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
 -IS IT BECAUSE NIPOGI1 HAS INCOMPLETE 7-PC???? :O
@@ -275,12 +282,7 @@ NNUE
 -might still need genfsl command?
 -could use chess960 starting posns
 -could use unique perft starting posns
-
-
-errors on lichess PC...
-test again to see if we get any now that isready is more robust
-v116
-
+-have downloaded lichess db
 
 
 

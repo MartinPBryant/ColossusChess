@@ -386,37 +386,31 @@ const uint64_t BishopMagicMultipliers[64] = {
 
 // Return a bitboard containing all the squares attacked by the rook on the provided square with the provided blockers
 // This is used by the move generators
+inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
+{
 #ifdef BMI2
-inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
-{
 	return *(RookMagics[square].AttacksFancyPointer + _pext_u64(occupiedSquaresBB, RookMagics[square].InnerRay));
-}
 #else
-inline uint64_t RookAttacksBB(int square, uint64_t occupiedSquaresBB)
-{
 	occupiedSquaresBB &= RookMagics[square].InnerRay; // Get the relevant blockers for the rook on 'square'
 	occupiedSquaresBB *= RookMagics[square].MagicMultipler; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
 	occupiedSquaresBB >>= RookMagics[square].BlockerPermutationBitsPreAdjusted;
 	return *(RookMagics[square].AttacksFancyPointer + occupiedSquaresBB);
-}
 #endif
+}
 
 // Return a bitboard containing all the squares attacked by the bishop on the provided square with the provided blockers
 // This is used by the move generators
+inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
+{
 #ifdef BMI2
-inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
-{
 	return *(BishopMagics[square].AttacksFancyPointer + _pext_u64(occupiedSquaresBB, BishopMagics[square].InnerRay));
-}
 #else
-inline uint64_t BishopAttacksBB(int square, uint64_t occupiedSquaresBB)
-{
 	occupiedSquaresBB &= BishopMagics[square].InnerRay; // Get the relevant blockers for the rook on 'square'
 	occupiedSquaresBB *= BishopMagics[square].MagicMultipler; // The multiplication and shift give us an index into the table of pre-calculated moves from the square with the relevant blockers
 	occupiedSquaresBB >>= BishopMagics[square].BlockerPermutationBitsPreAdjusted;
 	return *(BishopMagics[square].AttacksFancyPointer + occupiedSquaresBB);
-}
 #endif
+}
 
 // Generate the inner rays bitboard for a rook on the given square, e.g. for f6 ...
 // . . . . . . . .

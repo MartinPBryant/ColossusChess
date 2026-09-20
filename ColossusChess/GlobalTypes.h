@@ -126,7 +126,7 @@ struct GameRecordEntry_Struct
 
 	uint64_t zLMPiecesBB; // Bitboard indicating the defenders pieces that have zero moves at the root
 
-	int gamePhase[2]; // Keeps a running total of pieces (not pawns) for each side. At the start of the game this is 31 (3x4 + 5x2 + 9x1) but can be higher after promotions to a maximum of 103. The evaluation function limits the sum of both sides to a total of 64
+	int gamePhase[2]; // Keeps a running total of pieces (not pawns) for each side. At the start of the game this is 31 (3x2 + 3x2 + 5x2 + 9x1) but can be higher after promotions to a maximum of 103. The evaluation function limits the sum of both sides to a total of 64
 	short staticEvaluation;
 	short totalMaterial[2];
 	short totalOpeningPST[2];

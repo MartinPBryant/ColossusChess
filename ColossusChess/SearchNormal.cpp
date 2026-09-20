@@ -789,9 +789,11 @@ void Normal::AllocateNormalTranspositionTable()
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)VirtualAlloc(NULL, NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			if (NormalTranspositionTablePointer == nullptr)
 			{
+				std::string errorMessage;
 				uint32_t errorCode = GetLastError();
-				Output("info string *** Error! Normal 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.");
-				OutputError("Normal 'large pages' transposition table memory could not be allocated! Falling back to standard pages.");
+				errorMessage = "Normal 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.";
+				Output("info string *** Error! " + errorMessage);
+				OutputError(errorMessage);
 			}
 			else
 				MemoryAlocatedViaLargePages = true;
@@ -800,9 +802,11 @@ void Normal::AllocateNormalTranspositionTable()
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)AlignedAllocateMemory(NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), 64);
 		if ((NormalTranspositionTablePointer == nullptr))
 		{
+			std::string errorMessage;
 			uint32_t errorCode = GetLastError();
-			Output("info string *** Error! Normal transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ")");
-			OutputError("Normal transposition table memory could not be allocated!");
+			errorMessage = "Normal transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ")";
+			Output("info string *** Error! " + errorMessage);
+			OutputError(errorMessage);
 			NormalTranspositionTableBuckets = 0;
 		}
 		else
@@ -1689,8 +1693,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 
 		if (
 			(currentGameRecordPointer->gamePhase[sideToMove] <= 8) // In the endgame?
-			//&& (currentGameRecordPointer->dangerConditions.dc.isZLKM = !normalBrain.KingCanLegallyMove(sideToMove)) // Have we got any legal king moves (and save it)
-			&& (currentGameRecordPointer->dangerConditions |= (TTFlagZeroLegalKingMoves * (!normalBrain.KingCanLegallyMove(sideToMove)))) // Have we got any legal king moves (and save it)
+			//&& (currentGameRecordPointer->dangerConditions.dc.isZLKM = !normalBrain.KingCanLegallyMove(sideToMove)) // Have we got no legal king moves (and save it)
+			&& (currentGameRecordPointer->dangerConditions |= (TTFlagZeroLegalKingMoves * (!normalBrain.KingCanLegallyMove(sideToMove)))) // Have we got no legal king moves (and save it)
 			) // Helps find mates when the defending K is constrained (so the defender can't just 'null' to slash the search depth and hide the fact that it's being mated)
 			allowNull = false;
 		else if (depthRemaining > 10)
@@ -2029,7 +2033,7 @@ GenerateMoveList:
 		//----------------------------------------------------------------------------------------------------
 		CRASHLOCATION(251);
 
-		BREAKONCURRENTVARIATION("a4b4 ");
+		BREAKONCURRENTVARIATION("f3e4 a1b1 d3e5 ");
 
 		bool safePassedPawnMove = false;
 		// Have we just pushed a passed pawn safely? (captures/promotions(inherently) excluded)

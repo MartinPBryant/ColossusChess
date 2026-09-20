@@ -1,6 +1,0 @@
->>setoption name SBL value true
-info string ShowBlankLines set to true
->>setoption name SyzygyPath value c:\_Chess\EndgameTablebases\Syzygy\3456
-info string 6-piece endgame tablebases found at c:\_Chess\EndgameTablebases\Syzygy\3456 (510 .rtbw {win/draw/loss} files, 510 .rtbz {distance to zero} files)
->>setoption name UseLargePages value false
-info string UseLargePages set to false

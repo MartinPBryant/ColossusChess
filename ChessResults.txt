@@ -416,7 +416,22 @@ RUNNING TMT AGAIN WITH 115 - STALLED!!!!!!!!!!!!!!!!!!!!!
 
 ***115 All traces of Lichess probing commented out --> 116 (now MT seems ok)
 
-2026a v 2026bBMI2 {FRC} () PCS2
+2026a v 2026bBMI2 {FRC 5s+42ms} (-79.15, +/-11.92, 1920) PCS2
+2026a v 2026bBMI2 {5s+42ms} (-53.72) PCS2
+2026b v 2026bBMI2 {3s+25ms} (-7.09) PCS2
+
+One last test :D so recompiled to 117
+
+117 v 118 {no null move in endgames at all} (18.49, +/-10.71, 2215) PCS2
+117 v 119 {null move in endgames even if ZLKM} (-1.53) PCS2
+
+***Abandoned BMI2 version for this release! Removed BMI2 code tests at startup and recompiled.
+
+2026a v 2026b {FRC 5s+42ms} (-53.07) PCS2
+2026a v 2026b {3s+25ms} () PCS2
+
+
+
 
 
 
