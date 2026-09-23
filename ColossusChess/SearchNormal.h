@@ -107,6 +107,7 @@ public:
 	int EvaluateInner(int sideToMove);
 	short EvaluateNN(int sideToMove, int epSquare);
 	short Evaluate(int sideToMove);
+	short EvaluateNNUE(int sideToMove);
 
 	void TimeUp(float divisor);
 	short DrawScore(int sideToMove);
@@ -132,7 +133,7 @@ public:
 
 private:
 	Brain normalBrain;
-	//NNUE nnue;
+	NNUE nnue;
 
 	TwoGoodMoves_Struct KillerMoves[MaximumPly];
 	TwoGoodMoves_Struct CounterMoves[6][64];

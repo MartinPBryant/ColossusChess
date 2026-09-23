@@ -64,6 +64,10 @@ Normal::Normal()
 	//}
 	//else
 	//	Output("Loaded NNUE!");
+	if (!nnue.LoadWeights("nnue_epoch_40.bin"))
+	{
+		std::printf("ERROR: Failed to load NNUE weights!\n");
+	}
 }
 
 Normal::~Normal()
@@ -1568,13 +1572,13 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	// N.B. staticEvaluation is just a material/positional evaluation so can never be in the winning/losing range
 	if (currentGameRecordPointer->staticEvaluation == INT16_MIN) // The value may already have been retrieved from the TT
 	{
-		if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
-		{
-			currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
-			//currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation;// + Tempo * 2;//TEMP TESTING NNUE
-			assert(currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove));
-		}
-		else
+		//if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
+		//{
+		//	//currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
+		//	currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation;// + Tempo * 2;//TEMP TESTING NNUE
+		//	assert(currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove));
+		//}
+		//else
 			currentGameRecordPointer->staticEvaluation = Evaluate(sideToMove);
 	}
 
@@ -2585,11 +2589,8 @@ std::string Normal::ComputeNormal()
 
 
 
-	//int score = nnue.evaluate(
-	//	normalBrain.mailboxBoard64,
-	//	SideToMove
-	//);
-	//Output("NNUE=" + std::to_string(score));
+	float f = nnue.Evaluate(normalBrain, SideToMove);
+	Output("NNUE=" + std::to_string(f));
 
 
 

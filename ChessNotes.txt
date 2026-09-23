@@ -255,11 +255,17 @@ The model was:
 HalfKP - 256×2 - 32 - 32 - 1
 
 
+To convert a .pth file to a .bin file run...
+export_nnue.py
+You may have to change the hard-coded filename.
+
+
 ---------------------------------------------------------------------------------------------------------
 
 ALL
 ===
 
+remember to put tempo back in the eval!
 
 
 the engine could accumulate all the messages from the UI in the current game and dump them upon error too!

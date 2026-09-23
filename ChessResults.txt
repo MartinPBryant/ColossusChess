@@ -9,6 +9,16 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 20NNx
 =====
 
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------
+2026b
+=====
+
 2026aNonPGO v 1 {uses .75 of divisor for timeup} (21.85, +/-8.28, 3311) PCS2
 2026aNonPGO v 1 {uses .75 of divisor for timeup} (14.70, +/-11.99, 1656) PCS1
 2026aNonPGO v 1 {uses .75 of divisor for timeup} (18.28, 11.98, 1720) ASUS1
@@ -428,14 +438,7 @@ One last test :D so recompiled to 117
 ***Abandoned BMI2 version for this release! Removed BMI2 code tests at startup and recompiled.
 
 2026a v 2026b {FRC 5s+42ms} (-53.07) PCS2
-2026a v 2026b {3s+25ms} () PCS2
-
-
-
-
-
-
-
+2026a v 2026b {3s+25ms} (-48.8) PCS2
 
 
 ---------------------------------------------------------------------------------------------------------

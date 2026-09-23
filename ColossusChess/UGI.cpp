@@ -674,6 +674,7 @@ std::string ProcessInput(std::string currentLine)
 				normal->TestSymmetry2();
 				delete normal;
 			}
+
 #ifdef EXPERIMENTAL
 			else if (commandToken == "-MMQ")
 			{

@@ -1,0 +1,166 @@
+I've been exploring more materially imbalance positions to try to identify a pattern that might help us isolate the problem.
+
+Using the standard chess starting position I edited the board to remove various back rank pieces leaving the pawns on their initial squares to rule out any possible tactics.
+
+In this position...
+4k3/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1
+I have removed all of black's back rank pieces leaving its pawns.
+Using the standard recognised values for the pieces (queen=9, etc) this gives white a material advantage of 31 pawns.
+The network evaluation with white to move is 30.150152 which makes sense. Also it demonstrates that the network can extrapolate scores for material imbalances greater than the +/-10 it was trained on.
+The network evaluation with black to move is -3.856020 which is obviously wrong.
+I reflected and colour swapped the position to this...
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/4K3 b - - 0 1
+Now the evaluation with black to move is 30.150152 (correct) and with white to move is -3.856020 (wrong).
+I think this shows that the issue is not colour related (i.e. anything to do with white/black) but side-to-move related.
+
+Further I tried other material imbalances.
+I noticed that the network was roughly correct if the material imbalance was smaller than about +/-10 pawns but got progressively worse the higher the material imbalance became.
+Also the wrong values seemed less erroneous if the material imbalance was comprised of a single piece plus many pawns even beyond the +/-10 barrier
+e.g. in this position...
+4k3/8/8/8/8/8/PPPPPPPP/3QK3 w - - 0 1
+white is ahead by a queen and 8 pawns for a material imbalance of 17.
+The network gives 18.272493 for white to move and -14.218922 for black to move.
+But in this position...
+4k3/pppppppp/8/8/8/8/PPPPPPPP/RN1QK3 w - - 0 1
+where white is a queen, rook and knight up (also 17 pawns up), the network gives 17.802629 for white to move and -7.296466 for black to move.
+
+So i think there are two things we can identify here...
+1. The network evaluates the position correctly if the side-to-move has the material advantage but wrongly if the side-to-move has the material deficit.
+2. If the material imbalance is composed of pawns the network is much closer to being correct than if the material imbalance is composed of non-pawns.
+
+What are your thoughts?
+
+==========
+
+Games processed:          200,000
+
+Huge training positions:   14,482,747
+Huge testing positions:    1,609,129
+
+Total positions:          16,091,876
+Book moves ignored:       2,400,000
+Scores outside +/-1000:   176,439
+In check positions:   1,680,821
+Capture best move positions:   3,784,551
+Checking moves:   1,400,431
+Promotions:   15,481
+Unrecognised comments:    203,613
+
+Output files:
+C:\Chess\PGN\QuietHugeTrainingPositions.csv
+C:\Chess\PGN\QuietHugeTestingPositions.csv
+
+==========
+
+While we're waiting can you answer this question.
+If the new network plays better than my HCE, can i then play a new set of 200,000 games using the network as the evaluation function and then convert those PGN into FEN and train the engine again iteratively?
+Is there are public documentation stating that this is beneficial?
+
+==========
+
+You can just feel the AI goodness!
+
+"When training an nnue for chess should you only use quiet positions?"
+
+ChatGPT says:
+No. For an NNUE chess evaluation function, you generally should not train only on quiet positions.
+
+Gemini says:
+Yes, you should train NNUE models exclusively (or overwhelmingly) on quiet positions
+
+==========
+
+The python script to convert a .pth into a .bin is export_nnue.py
+
+==========
+
+I think it would be easier if I just gave you the relevant information rather than the whole source.
+
+The board is represented in two ways in a class called 'Brain'.
+
+1.
+There is a 64 byte array declared as...
+int8_t MailboxBoard64[64];
+Index 0 is the square a1
+Index 63 is the square h8
+The values of each piece type are defined by this enum...
+enum PiecesEnum {
+	AllPieces = 0, // For bitboards
+	Empty = 0, Pawn, Knight, Bishop, Rook, Queen, King
+};
++ve values are use for white pieces, -ve values for black pieces
+So e.g. a white pawn on e2 would mean a value of 1 at index 12
+
+2.
+There are bitboards declared as...
+uint64_t PiecesBB[2][King + 1];
+Index 0 is for white. Index 1 is for black.
+So e.g. PiecesBB[1][Rook] would give us all the black rooks.
+
+
+There are two functions in a class called 'Brain' to make/unmake as follows...
+void Brain::MakeMove(int sideToMove)
+void Brain::UnMakeMove(int sideToMove)
+Inside both of those functions they access the current move from a stack pointed to by...
+&GameRecordPointer->move
+Where 'move' is of type 'MoveUndo_Struct' defined as follows...
+struct MoveUndo_Struct
+{
+	union {
+		uint32_t ui32;
+		MoveFields_Struct mf;
+	};
+	uint64_t fromToXor;
+	int8_t fromSquarePiece;
+	int8_t toSquarePiece;
+};
+...and 'MoveFields_Struct' is defined as follows...
+struct MoveFields_Struct
+{
+	SquaresEnum fromSquare;
+	SquaresEnum toSquare;
+	uint16_t flag;
+};
+'SquaresEnum' is defined as...
+enum SquaresEnum : int8_t
+{
+	A1, B1, C1, D1, E1, F1, G1, H1,
+	A2, B2, C2, D2, E2, F2, G2, H2,
+	A3, B3, C3, D3, E3, F3, G3, H3,
+	A4, B4, C4, D4, E4, F4, G4, H4,
+	A5, B5, C5, D5, E5, F5, G5, H5,
+	A6, B6, C6, D6, E6, F6, G6, H6,
+	A7, B7, C7, D7, E7, F7, G7, H7,
+	A8, B8, C8, D8, E8, F8, G8, H8
+};
+The 'flag' field uses the bottom four bits as follows...
+// 0-1: 0=normal move, 1=EP, 2=castling, 3=pawn promotion
+// 2-3: if pawn promotion: 0=Q, 1=R, 2=B, 3=N
+#define MFNormal 0
+#define MFEnPassant 1
+#define MFCastling 2
+#define MFPromotion 3
+#define MFPromoteToQueen ((0 << 2) + MFPromotion)
+#define MFPromoteToRook ((1 << 2) + MFPromotion)
+#define MFPromoteToBishop ((2 << 2) + MFPromotion)
+#define MFPromoteToKnight ((3 << 2) + MFPromotion)
+
+
+There is a function in a class called 'Normal' to evaluate the position as follows...
+short Normal::Evaluate(int sideToMove)
+The 'Normal' class has an instance of the 'Brain' class defined as follows...
+Brain normalBrain;
+The 'Evaluate' function uses 'normalBrain' to access the board information e.g. normalBrain.PiecesBB[0][Pawn]
+
+
+I think that should be enough?
+
+==========
+
+
+
+
+
+
+
+

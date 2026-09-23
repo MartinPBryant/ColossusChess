@@ -383,12 +383,12 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		// Get the 'stand pat' evaluation (About 77% of all QS nodes get evaluated here)
 		if (standPatScore == INT16_MIN) // The value may already have been retrieved from the TT
 		{
-			if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
-			{
-				standPatScore = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
-				assert(standPatScore == Evaluate(sideToMove));
-			}
-			else
+			//if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
+			//{
+			//	standPatScore = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
+			//	assert(standPatScore == Evaluate(sideToMove));
+			//}
+			//else
 				standPatScore = Evaluate(sideToMove);
 		}
 		bestMoveScore = standPatScore;

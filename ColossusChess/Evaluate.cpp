@@ -1037,7 +1037,17 @@ short Normal::Evaluate(int sideToMove)
 	//return EvaluateNN(sideToMove, 0);
 
 	// Get the simple symmetrical part
-	int result = EvaluateInner(sideToMove);
+	//int result = EvaluateInner(sideToMove);
+	
+	
+		
+	//NNUETEST
+	int result = 100 * nnue.Evaluate(normalBrain, sideToMove);
+
+
+
+
+
 
 	//int result;
 	//int kingSquare;
@@ -1095,9 +1105,16 @@ short Normal::Evaluate(int sideToMove)
 	//result = (result / 8) * 8;
 
 	// Add in the tempo
-	result += Tempo;
+	//result += Tempo;
 
 	return (short)result;
+}
+
+short Normal::EvaluateNNUE(int sideToMove)
+{
+	return static_cast<short>(
+		nnue.Evaluate(normalBrain, sideToMove)
+		);
 }
 
 //----------------------------------------------------------------------------------------------------
