@@ -2944,6 +2944,12 @@ void Brain::MakeMove(int sideToMove)
 	GameRecordPointer->transpositionTableHash64 = hash64;
 	GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 
+	//std::memcpy(GameRecordPointer->nnueAccumulatorsHalfKP, (GameRecordPointer - 1)->nnueAccumulatorsHalfKP, sizeof(float) * NNUE::FEATURE_DIM_HALFKP * 2);
+	//Nnue.UpdateAccumulatorHalfKP((*this));
+	std::memcpy(GameRecordPointer->nnueAccumulatorsChess768, (GameRecordPointer - 1)->nnueAccumulatorsChess768, sizeof(int16_t) * 2 * NNUE::FEATURES_WEIGHTS_COUNT_CHESS768);
+	Nnue.UpdateAccumulatorsChess768((*this));
+	assert(Nnue.VerifyAccumulatorsChess768(*this));
+
 	assert(!IsAttacked(GetLS1BIndex(PiecesBB[sideToMove][King]), sideToMove ^ 1));
 }
 

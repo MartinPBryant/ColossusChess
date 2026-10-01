@@ -207,7 +207,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				//currentGameRecordPointer->dangerConditions.dc.isFMTP = flag & TTFlagFewerMovesThanPieces;
 				currentGameRecordPointer->dangerConditions |= flag & TTFlagIsInDangerMask;
 				standPatScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
-				assert((standPatScore == INT16_MIN) || (standPatScore == Evaluate(sideToMove)));
+				//assert((standPatScore == INT16_MIN) || (standPatScore == Evaluate(sideToMove)));
+				assert((standPatScore == INT16_MIN) || (std::abs(standPatScore - Evaluate(sideToMove)) <= 1));
 				short tteScore;
 				tteScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->score;
 

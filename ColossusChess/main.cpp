@@ -71,6 +71,23 @@ int main(int argc, char * argv[])
 //		}
 //#endif
 //	}
+
+	//----------------------------------------------------------------------------------------------------
+
+	// Load the NNUE
+	std::string result;
+	//if ((result = Nnue.ReadNNUEFromFileChess768(EvalFile.c_str())) != "")
+	if ((result = Nnue.ReadNNUEFromResourceChess768()) != "")
+	{
+		std::string errorMessage;
+		errorMessage = "Unable to load NNUE: '" + EvalFile + "': " + result;
+		Output("info string *** Error! " + errorMessage);
+		OutputError(errorMessage);
+		runnable = false;
+	}
+
+	//----------------------------------------------------------------------------------------------------
+
 	if (!runnable)
 	{
 		Output("Press return to exit.");
@@ -78,10 +95,7 @@ int main(int argc, char * argv[])
 		std::getline(std::cin, s);
 		return EXIT_FAILURE;
 	}
-
-	// Determine if 'large pages' are available
-	LargePages();
-
+	
 	//----------------------------------------------------------------------------------------------------
 	
 	// No I/O buffering on stdin and stdout (required to work with GUIs)
@@ -110,10 +124,12 @@ int main(int argc, char * argv[])
 
 	//----------------------------------------------------------------------------------------------------
 
+
 	// Initialise
 	ProcessingCommandFile = false;
 	ComputingMove = false;
 	InitialiseOneOffStuff();
+	LargePages(); // Determine if 'large pages' are available
 	NewGame(true); // Do this at startup so that an interactive user (i.e. me!) can enter UCI GO commands immediately
 
 	// Process any initialisation commands in the .INI file

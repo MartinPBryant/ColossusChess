@@ -104,6 +104,8 @@ extern const uint64_t FilesBB[8];
 // lzcnt, tzcnt: 2013(ABM/BMI1)
 // blsr: 2013(BMI1)
 // pext: 2013(BMI2) n.b. was slow on pre 2020 (Zen 2) AMD CPUs
+// avx2: 2013
+// avx512: ~2016/17 but inconsistently supported!
 
 extern uint32_t BitScanForwardPOPCNT(uint64_t bb);
 extern uint32_t BitScanForwardBSF(uint64_t bb);

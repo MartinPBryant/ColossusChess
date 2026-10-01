@@ -1,0 +1,3 @@
+#define IDR_CHESS768 101
+
+IDR_CHESS768 RCDATA "ColossusChess.NNUE"

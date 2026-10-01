@@ -33,6 +33,7 @@ void SendOptions()
 	Output("option name SyzygyProbe7PieceInTree type check default false");
 	Output("option name UCI_Chess960 type check default false");
 	Output("option name UseLargePages type check default true");
+	Output("option name EvalFile type string default " + EvalFileDefault);
 	//Output("option name UseLichessEGTB type check default true");
 	//Output("option name MateFullWidth type check default false");
 	Output("option name MateAllChecks type check default false");
@@ -57,12 +58,13 @@ void SendOptionValues()
 	Output("info string SyzygyProbe7PieceInTree: " + MyBooleanTOA(SyzygyProbe7PieceInTree));
 	Output("info string UCI_Chess960: " + MyBooleanTOA(UCI_Chess960));
 	Output("info string UseLargePages: " + MyBooleanTOA(UseLargePages));
-	Output("info string UseLichessEGTB: " + MyBooleanTOA(UseLichessEGTB));
+	Output("info string EvalFile: " + EvalFile);
+	//Output("info string UseLichessEGTB: " + MyBooleanTOA(UseLichessEGTB));
 	Output("info string MateMaximumDefenderKingMoves: " + MyITOA(TC.MateMaximumDefenderKingMoves));
-	Output("info string MateMaximumDefenderMovablePieces: " + MyITOA(TC.MateMaximumDefenderMovablePieces));
 	Output("info string MateMaximumDefenderMoves: " + MyITOA(TC.MateMaximumDefenderMoves));
+	Output("info string MateMaximumDefenderMovablePieces: " + MyITOA(TC.MateMaximumDefenderMovablePieces));
 	Output("info string MateMaximumReversibleMoves: " + MyITOA(TC.MateMaximumReversibleMoves));
-	Output("info string MateMinimumAttackerMaterial: " + MyITOA(TC.MateMinimumAttackerMaterial));
+	//Output("info string MateMinimumAttackerMaterial: " + MyITOA(TC.MateMinimumAttackerMaterial));
 	Output("info string MateFixedPieces: " + TC.MateFixedPieces);
 	Output("info string ShowPVTerminators: " + MyBooleanTOA(ShowPVTerminators));
 	Output("info string ShowBlankLines: " + MyBooleanTOA(ShowBlankLines));
@@ -209,6 +211,23 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 		UseLargePages = (UpperCase(value) == "TRUE");
 		//if (IsDebug)
 		Output("info string UseLargePages set to " + MyBooleanTOA(UseLargePages));
+	}
+
+	else if (nameUpperCase == "EVALFILE")
+	{
+		std::string result;	
+		if ((result = Nnue.ReadNNUEFromFileChess768(value.c_str())) == "")
+		{
+			EvalFile = value;
+			//if (IsDebug)
+			Output("info string EvalFile set to '" + EvalFile + "'");
+		}
+		else
+		{
+			std::string errorMesage = "Invalid NNUE file : " + value + ": " + result;
+			Output("info string *** Error! " + errorMesage);
+			OutputError(errorMesage);
+		}
 	}
 
 	else if (nameUpperCase == "USELICHESSEGTB")

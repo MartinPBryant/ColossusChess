@@ -3,6 +3,7 @@
 #include <string>
 
 #include "GlobalConstants.h"
+//#include "NNUE.h"
 
 //----------------------------------------------------------------------------------------------------
 
@@ -100,6 +101,8 @@ union GameRecordCastlingStatusUnion
 
 struct GameRecordEntry_Struct
 {
+	alignas(32) int16_t nnueAccumulatorsChess768[Sides][128];
+
 	// N.B. Microsoft pack structures to be a multiple of the largest field
 	uint64_t transpositionTableHash64; // N.B. This is the hash BEFORE any move has been played at this ply
 	uint64_t transpositionTableHash64WithEP;

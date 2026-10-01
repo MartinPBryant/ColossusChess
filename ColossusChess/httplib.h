@@ -5314,7 +5314,7 @@ inline std::string base64_encode(const std::string &in) {
   return out;
 }
 
-inline std::string sha1(const std::string &input) {
+inline std::string sha1(const std::string &inputHalfKP) {
   // RFC 3174 SHA-1 implementation
   auto left_rotate = [](uint32_t x, uint32_t n) -> uint32_t {
     return (x << n) | (x >> (32 - n));
@@ -5327,7 +5327,7 @@ inline std::string sha1(const std::string &input) {
   uint32_t h4 = 0xC3D2E1F0;
 
   // Pre-processing: adding padding bits
-  std::string msg = input;
+  std::string msg = inputHalfKP;
   uint64_t original_bit_len = static_cast<uint64_t>(msg.size()) * 8;
   msg.push_back(static_cast<char>(0x80u));
   while (msg.size() % 64 != 56) {

@@ -107,8 +107,16 @@
     <ClInclude Include="UInt128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RSJparser.tcc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ColossusChessNNUE.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

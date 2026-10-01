@@ -1,845 +1,623 @@
+#define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
+#include <algorithm> // Needed to make max/min compile!
+#include <assert.h>
+#include <windows.h>
+#include <cstdint>
+#include <vector>
+#include <stdexcept>
+
 #include "nnue.h"
-
-// ------------------------------------------------------------
-// IMPORTANT:
-//
-// Replace this include with the header containing your Brain
-// class definition.
-//
-// For example:
-//
-// #include "Brain.h"
-//
-// ------------------------------------------------------------
-
+#include "BitBoard.h"
+#include "Engine.h"
+#include "GlobalTypes.h"
+#include "Utilities.h"
 #include "Brain.h"
 
-#include <cstdio>
-#include <cstring>
-#include <cmath>
-
-
-// ============================================================
-// Constructor / destructor
-// ============================================================
+//----------------------------------------------------------------------------------------------------
 
 NNUE::NNUE()
 {
-	featureWeights = nullptr;
-
-	std::memset(fc1Weights, 0, sizeof(fc1Weights));
-	std::memset(fc1Bias, 0, sizeof(fc1Bias));
-
-	std::memset(fc2Weights, 0, sizeof(fc2Weights));
-	std::memset(fc2Bias, 0, sizeof(fc2Bias));
-
-	std::memset(fc3Weights, 0, sizeof(fc3Weights));
-	fc3Bias = 0.0f;
-
-	std::memset(whiteAccumulator, 0, sizeof(whiteAccumulator));
-	std::memset(blackAccumulator, 0, sizeof(blackAccumulator));
-
-	std::memset(input, 0, sizeof(input));
-	std::memset(hidden1, 0, sizeof(hidden1));
-	std::memset(hidden2, 0, sizeof(hidden2));
+	featureWeightsChess768 = nullptr;
 }
-
 
 NNUE::~NNUE()
 {
-	delete[] featureWeights;
-	featureWeights = nullptr;
+	// Delete dynamically allocated array
+	delete[] featureWeightsChess768;
+	featureWeightsChess768 = nullptr;
 }
 
+//----------------------------------------------------------------------------------------------------
 
-// ============================================================
-// LoadWeights
-// ============================================================
-
-bool NNUE::LoadWeights(const char* filename)
+std::string NNUE::ReadNNUEFromFileChess768(std::string filename)
 {
 	FILE* file = nullptr;
 
-#ifdef _MSC_VER
-	if (fopen_s(&file, filename, "rb") != 0)
-		file = nullptr;
-#else
-	file = std::fopen(filename, "rb");
-#endif
-
-	if (file == nullptr)
+	if (fopen_s(&file, filename.c_str(), "rb") != 0)
+		return "File not found";
+	
+	fseek(file, 0L, SEEK_END);
+	long size = ftell(file);
+	fseek(file, 0L, SEEK_SET);
+	if (size != 197440)
 	{
-		std::printf(
-			"NNUE: Could not open weight file: %s\n",
-			filename
-		);
-
-		return false;
+		fclose(file);
+		return "File length wrong";
 	}
 
-
-	// --------------------------------------------------------
-	// Read and verify magic
-	// --------------------------------------------------------
-
-	char magic[8];
-
-	if (std::fread(magic, 1, 8, file) != 8)
-	{
-		std::printf("NNUE: Could not read file header.\n");
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::memcmp(magic, "NNUEF32\0", 8) != 0)
-	{
-		std::printf("NNUE: Invalid file magic.\n");
-		std::fclose(file);
-		return false;
-	}
-
-
-	// --------------------------------------------------------
-	// Read version
-	// --------------------------------------------------------
-
-	uint32_t version;
-
-	if (std::fread(&version, sizeof(uint32_t), 1, file) != 1)
-	{
-		std::printf("NNUE: Could not read version.\n");
-		std::fclose(file);
-		return false;
-	}
-
-	if (version != 1)
-	{
-		std::printf(
-			"NNUE: Unsupported version: %u\n",
-			version
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-
-	// --------------------------------------------------------
-	// Read dimensions
-	// --------------------------------------------------------
-
-	uint32_t numFeatures;
-	uint32_t featureDim;
-	uint32_t hidden1;
-	uint32_t hidden2;
-	uint32_t outputDim;
-
-	if (std::fread(
-		&numFeatures,
-		sizeof(uint32_t),
-		1,
-		file
-	) != 1)
-	{
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		&featureDim,
-		sizeof(uint32_t),
-		1,
-		file
-	) != 1)
-	{
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		&hidden1,
-		sizeof(uint32_t),
-		1,
-		file
-	) != 1)
-	{
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		&hidden2,
-		sizeof(uint32_t),
-		1,
-		file
-	) != 1)
-	{
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		&outputDim,
-		sizeof(uint32_t),
-		1,
-		file
-	) != 1)
-	{
-		std::fclose(file);
-		return false;
-	}
-
-
-	// --------------------------------------------------------
-	// Verify dimensions
-	// --------------------------------------------------------
-
-	if (numFeatures != NUM_FEATURES + 1)
-	{
-		std::printf(
-			"NNUE: Unexpected number of feature rows: %u\n",
-			numFeatures
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (featureDim != FEATURE_DIM)
-	{
-		std::printf(
-			"NNUE: Unexpected feature dimension: %u\n",
-			featureDim
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (hidden1 != HIDDEN1)
-	{
-		std::printf(
-			"NNUE: Unexpected hidden1 dimension: %u\n",
-			hidden1
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (hidden2 != HIDDEN2)
-	{
-		std::printf(
-			"NNUE: Unexpected hidden2 dimension: %u\n",
-			hidden2
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (outputDim != 1)
-	{
-		std::printf(
-			"NNUE: Unexpected output dimension: %u\n",
-			outputDim
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-
-	// --------------------------------------------------------
 	// Allocate feature weights
-	// --------------------------------------------------------
+	delete[] featureWeightsChess768;
+	featureWeightsChess768 = new int16_t[FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768];
 
-	delete[] featureWeights;
+	// Read feature weights and biases
+	std::fread(featureWeightsChess768, sizeof(int16_t), FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768, file);
+	std::fread(featureBiasesChess768, sizeof(int16_t), FEATURES_WEIGHTS_COUNT_CHESS768, file);
 
-	featureWeights = new float[
-		static_cast<size_t>(NUM_FEATURES + 1)
-			* FEATURE_DIM
-	];
+	// Read output layer weights and biases
+	std::fread(outputWeightsChess768, sizeof(int16_t), OUTPUT_WEIGHTS_COUNT_CHESS768, file);
+	std::fread(&outputBiasChess768, sizeof(int16_t), 1, file);
 
-
-	// --------------------------------------------------------
-	// Read feature weights
-	// --------------------------------------------------------
-
-	const size_t featureWeightCount =
-		static_cast<size_t>(NUM_FEATURES + 1)
-		* FEATURE_DIM;
-
-	if (std::fread(
-		featureWeights,
-		sizeof(float),
-		featureWeightCount,
-		file
-	) != featureWeightCount)
+	// Ensure we've read everything correctly and that this is a Bullet trainer file! This should be 'bulletbullet...bu'
+	char tail[62];
+	std::fread(&tail, 1, 62, file);
+	if (memcmp(tail, "bullet", 6))
 	{
-		std::printf(
-			"NNUE: Could not read feature weights.\n"
-		);
-
-		std::fclose(file);
-
-		delete[] featureWeights;
-		featureWeights = nullptr;
-
-		return false;
+		fclose(file);
+		return "File format wrong";
 	}
 
+	fclose(file);
 
-	// --------------------------------------------------------
-	// Read FC1
-	//
-	// [32][512]
-	// --------------------------------------------------------
-
-	const size_t fc1WeightCount =
-		static_cast<size_t>(HIDDEN1)
-		* FEATURE_DIM
-		* 2;
-
-	if (std::fread(
-		fc1Weights,
-		sizeof(float),
-		fc1WeightCount,
-		file
-	) != fc1WeightCount)
-	{
-		std::printf(
-			"NNUE: Could not read fc1 weights.\n"
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		fc1Bias,
-		sizeof(float),
-		HIDDEN1,
-		file
-	) != HIDDEN1)
-	{
-		std::printf(
-			"NNUE: Could not read fc1 bias.\n"
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-
-	// --------------------------------------------------------
-	// Read FC2
-	// --------------------------------------------------------
-
-	const size_t fc2WeightCount =
-		static_cast<size_t>(HIDDEN2)
-		* HIDDEN1;
-
-	if (std::fread(
-		fc2Weights,
-		sizeof(float),
-		fc2WeightCount,
-		file
-	) != fc2WeightCount)
-	{
-		std::printf(
-			"NNUE: Could not read fc2 weights.\n"
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		fc2Bias,
-		sizeof(float),
-		HIDDEN2,
-		file
-	) != HIDDEN2)
-	{
-		std::printf(
-			"NNUE: Could not read fc2 bias.\n"
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-
-	// --------------------------------------------------------
-	// Read FC3
-	// --------------------------------------------------------
-
-	if (std::fread(
-		fc3Weights,
-		sizeof(float),
-		HIDDEN2,
-		file
-	) != HIDDEN2)
-	{
-		std::printf(
-			"NNUE: Could not read fc3 weights.\n"
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-	if (std::fread(
-		&fc3Bias,
-		sizeof(float),
-		1,
-		file
-	) != 1)
-	{
-		std::printf(
-			"NNUE: Could not read fc3 bias.\n"
-		);
-
-		std::fclose(file);
-		return false;
-	}
-
-
-	std::fclose(file);
-
-
-	std::printf(
-		"NNUE: Loaded weights from %s\n",
-		filename
-	);
-
-	std::printf(
-		"NNUE: Feature weights: %u x %u\n",
-		numFeatures,
-		featureDim
-	);
-
-	std::printf(
-		"NNUE: Network: 512 -> 32 -> 32 -> 1\n"
-	);
-
-
-	return true;
+	return "";
 }
 
-
-// ============================================================
-// HalfKP helpers
-// ============================================================
-
-int NNUE::FlipSquare(int square)
+std::string NNUE::ReadNNUEFromResourceChess768()
 {
-	/*
-		Python:
+#define IDR_CHESS768 101
 
-			return square ^ 56
+	HMODULE hModule = GetModuleHandle(nullptr);
+	HRSRC hResource = FindResource(hModule, MAKEINTRESOURCE(IDR_CHESS768), RT_RCDATA);
+	if (!hResource)
+		return "NNUE resource not found";
 
-		a1 -> a8
-		b1 -> b8
-		etc.
-	*/
+	DWORD size = SizeofResource(hModule, hResource);
+	if (size != 197440)
+		return "Resource length wrong";
 
-	return square ^ 56;
+	HGLOBAL hLoaded = LoadResource(hModule, hResource);
+	if (!hLoaded)
+		return "Unable to load resource";
+
+	const int16_t* data = (int16_t*)LockResource(hLoaded);
+
+	delete[] featureWeightsChess768;
+	featureWeightsChess768 = new int16_t[FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768];
+	memcpy(featureWeightsChess768, data, FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768 * 2);
+	memcpy(featureBiasesChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768), FEATURES_WEIGHTS_COUNT_CHESS768 * 2);
+	memcpy(outputWeightsChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + (FEATURES_WEIGHTS_COUNT_CHESS768), OUTPUT_WEIGHTS_COUNT_CHESS768 * 2);
+	memcpy(&outputBiasChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + FEATURES_WEIGHTS_COUNT_CHESS768 + OUTPUT_WEIGHTS_COUNT_CHESS768, 1 * 2);
+
+	return "";
 }
 
+//----------------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------
-// Convert engine piece value to HalfKP piece type:
+// Calculate the evaluation for the position
+//int NNUE::RunNetworkChess768(const Brain& brain, int sideToMove)
+//{
+//	const int16_t* stm;
+//	const int16_t* sntm;
 //
-// Pawn   = 0
-// Knight = 1
-// Bishop = 2
-// Rook   = 3
-// Queen  = 4
+//	if (sideToMove == 0)
+//	{
+//		stm = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
+//		sntm = &brain.GameRecordPointer->nnueAccumulatorsChess768[1][0];
+//	}
+//	else
+//	{
+//		stm = &brain.GameRecordPointer->nnueAccumulatorsChess768[1][0];
+//		sntm = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
+//	}
 //
-// King is not a feature.
-// ------------------------------------------------------------
-
-int NNUE::PieceType(int piece)
-{
-	int absolutePiece = piece;
-
-	if (absolutePiece < 0)
-		absolutePiece = -absolutePiece;
-
-	switch (absolutePiece)
-	{
-	case Pawn:
-		return 0;
-
-	case Knight:
-		return 1;
-
-	case Bishop:
-		return 2;
-
-	case Rook:
-		return 3;
-
-	case Queen:
-		return 4;
-
-	default:
-		return -1;
-	}
-}
-
-
-// ------------------------------------------------------------
-// Engine piece colour:
+//	int32_t output = 0;
 //
-// 0 = White
-// 1 = Black
-// ------------------------------------------------------------
-
-int NNUE::PieceColour(int piece)
-{
-	if (piece > 0)
-		return 0;
-
-	return 1;
-}
-
-
-// ------------------------------------------------------------
-// Exact Python halfkp_index()
+//	// Side-to-move accumulator
+//	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; ++i)
+//	{
+//		int32_t x = stm[i];
 //
-// piece_index = piece_type * 2 + piece_colour
+//		// SCReLU: clamp(x, 0, QA) then square it
+//		x = std::max(0, std::min(QA, x));
 //
-// feature_index = piece_square
-//               + (piece_index + king_square * 10) * 64
-// ------------------------------------------------------------
+//		output += x * x * static_cast<int32_t>(outputWeightsChess768[i]);		
+//	}
+//
+//	// Side-not-to-move accumulator
+//	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; ++i)
+//	{
+//		int32_t x = sntm[i];
+//
+//		// SCReLU: clamp(x, 0, QA) then square it
+//		x = std::max(0, std::min(QA, x));
+//
+//		output += x * x * static_cast<int32_t>(outputWeightsChess768[FEATURES_WEIGHTS_COUNT_CHESS768 + i]);
+//	}
+//
+//	// --------------------------------------------------------
+//	// SCReLU gives us a QA� scale.
+//	//
+//	// l1 (output) weights have QB scale.
+//	//
+//	// Therefore output currently has:
+//	//     QA� * QB
+//	//
+//	// But l1 bias was quantized at:
+//	//     QA * QB
+//	//
+//	// Reduce by QA before adding the bias.
+//	// --------------------------------------------------------
+//
+//	output /= QA;
+//
+//	output += static_cast<int32_t>(outputBiasChess768);
+//
+//	// Convert network output to centipawns (eval_scale = 400)
+//	output *= EVAL_SCALE;
+//
+//	output /= (QA * QB);
+//
+//	return output;
+//}
 
-int NNUE::HalfKPIndex(
-	int kingSquare,
-	int pieceSquare,
-	int pieceType,
-	int colour
-)
+// Calculate the evaluation for the position
+// This AVX2 function was provided by ChatGPT. I haven't tried to totally understand it but it seems to behave identically to the scalar function above and is much faster!
+int NNUE::RunNetworkChess768(const Brain& brain, int sideToMove)
 {
-	const int pieceIndex =
-		pieceType * 2 + colour;
-
-	return pieceSquare
-		+ (pieceIndex + kingSquare * 10) * 64;
-}
-
-
-// ============================================================
-// Accumulator handling
-// ============================================================
-
-void NNUE::ClearAccumulators()
-{
-	std::memset(
-		whiteAccumulator,
-		0,
-		sizeof(whiteAccumulator)
-	);
-
-	std::memset(
-		blackAccumulator,
-		0,
-		sizeof(blackAccumulator)
-	);
-}
-
-
-// ------------------------------------------------------------
-// Add one HalfKP feature to an accumulator.
-// ------------------------------------------------------------
-
-void NNUE::AddFeature(
-	float* accumulator,
-	int feature
-)
-{
-	const float* weights =
-		featureWeights
-		+ static_cast<size_t>(feature) * FEATURE_DIM;
-
-	for (int i = 0; i < FEATURE_DIM; ++i)
-	{
-		accumulator[i] += weights[i];
-	}
-}
-
-
-// ============================================================
-// Build both HalfKP accumulators
-// ============================================================
-
-void NNUE::BuildAccumulators(const Brain& brain)
-{
-	ClearAccumulators();
-
-
-	// --------------------------------------------------------
-	// Find both kings.
-	//
-	// MailboxBoard64:
-	//
-	//   0 = a1
-	//   ...
-	//   63 = h8
-	//
-	// White pieces are positive.
-	// Black pieces are negative.
-	// --------------------------------------------------------
-
-	int whiteKingSquare = -1;
-	int blackKingSquare = -1;
-
-
-	for (int square = 0; square < 64; ++square)
-	{
-		const int piece =
-			static_cast<int>(brain.MailboxBoard64[square]);
-
-		if (piece == King)
-		{
-			whiteKingSquare = square;
-		}
-		else if (piece == -King)
-		{
-			blackKingSquare = square;
-		}
-	}
-
-
-	if (whiteKingSquare < 0 ||
-		blackKingSquare < 0)
-	{
-		return;
-	}
-
-
-	// --------------------------------------------------------
-	// Build features for every non-king piece.
-	// --------------------------------------------------------
-
-	for (int square = 0; square < 64; ++square)
-	{
-		const int piece =
-			static_cast<int>(brain.MailboxBoard64[square]);
-
-		if (piece == Empty)
-			continue;
-
-		// ----------------------------------------------------
-		// Kings are the HalfKP reference square and are not
-		// themselves HalfKP features.
-		// ----------------------------------------------------
-
-		if (piece == King ||
-			piece == -King)
-		{
-			continue;
-		}
-
-
-		const int ptype =
-			PieceType(piece);
-
-		if (ptype < 0)
-			continue;
-
-
-		const int originalColour =
-			PieceColour(piece);
-
-
-		// ====================================================
-		// WHITE PERSPECTIVE
-		//
-		// No board transformation.
-		// ====================================================
-
-		const int whiteFeature =
-			HalfKPIndex(
-				whiteKingSquare,
-				square,
-				ptype,
-				originalColour
-			);
-
-		AddFeature(
-			whiteAccumulator,
-			whiteFeature
-		);
-
-
-		// ====================================================
-		// BLACK PERSPECTIVE
-		//
-		// Board vertically flipped.
-		// Piece colours reversed.
-		// ====================================================
-
-		const int blackKingSquareFlipped =
-			FlipSquare(blackKingSquare);
-
-		const int flippedPieceSquare =
-			FlipSquare(square);
-
-		const int blackPerspectiveColour =
-			1 - originalColour;
-
-		const int blackFeature =
-			HalfKPIndex(
-				blackKingSquareFlipped,
-				flippedPieceSquare,
-				ptype,
-				blackPerspectiveColour
-			);
-
-		AddFeature(
-			blackAccumulator,
-			blackFeature
-		);
-	}
-}
-
-
-// ============================================================
-// ReLU
-// ============================================================
-
-float NNUE::ReLU(float value)
-{
-	return value > 0.0f
-		? value
-		: 0.0f;
-}
-
-
-// ============================================================
-// Run network
-// ============================================================
-
-float NNUE::RunNetwork(int sideToMove)
-{
-	// --------------------------------------------------------
-	// Input ordering must exactly match Python:
-	//
-	//     first = black if stm else white
-	//     second = white if stm else black
-	//
-	// Assuming:
-	//
-	//     0 = White
-	//     1 = Black
-	// --------------------------------------------------------
-
-	const float* first;
-	const float* second;
-
+	const int16_t* stm;
+	const int16_t* sntm;
 
 	if (sideToMove == 0)
 	{
-		first = whiteAccumulator;
-		second = blackAccumulator;
+		stm = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
+		sntm = &brain.GameRecordPointer->nnueAccumulatorsChess768[1][0];
 	}
 	else
 	{
-		first = blackAccumulator;
-		second = whiteAccumulator;
+		stm = &brain.GameRecordPointer->nnueAccumulatorsChess768[1][0];
+		sntm = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
 	}
 
+	const __m256i zero = _mm256_setzero_si256();
+	const __m256i qa = _mm256_set1_epi16(QA);
 
-	// --------------------------------------------------------
-	// Concatenate the two accumulators.
-	// --------------------------------------------------------
+	// We have 128 STM inputs + 128 SNTM inputs = 256 l1 inputs.
+	//
+	// Accumulate in 64 bits to avoid overflow.
+	__m256i sum0 = _mm256_setzero_si256();
+	__m256i sum1 = _mm256_setzero_si256();
+	__m256i sum2 = _mm256_setzero_si256();
+	__m256i sum3 = _mm256_setzero_si256();
 
-	for (int i = 0; i < FEATURE_DIM; ++i)
+	// ------------------------------------------------------------
+	// Process both accumulators.
+	//
+	// Each accumulator contains 128 int16 values.
+	// There are 16 values per AVX2 register.
+	// ------------------------------------------------------------
+
+	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i += 16)
 	{
-		input[i] = first[i];
-		input[FEATURE_DIM + i] = second[i];
+		// ============================================================
+		// STM
+		// ============================================================
+
+		__m256i x = _mm256_loadu_si256(
+			reinterpret_cast<const __m256i*>(stm + i)
+		);
+
+		// SCReLU: clamp(x, 0, QA)
+		x = _mm256_max_epi16(x, zero);
+		x = _mm256_min_epi16(x, qa);
+
+		// Convert 16 x int16 -> two groups of 8 x int32
+		__m256i xlo = _mm256_cvtepi16_epi32(
+			_mm256_castsi256_si128(x)
+		);
+
+		__m256i xhi = _mm256_cvtepi16_epi32(
+			_mm256_extracti128_si256(x, 1)
+		);
+
+		// Square
+		__m256i x2lo = _mm256_mullo_epi32(xlo, xlo);
+		__m256i x2hi = _mm256_mullo_epi32(xhi, xhi);
+
+		// Load 16 l1 weights
+		__m256i w = _mm256_loadu_si256(
+			reinterpret_cast<const __m256i*>(
+				outputWeightsChess768 + i
+				)
+		);
+
+		__m256i wlo = _mm256_cvtepi16_epi32(
+			_mm256_castsi256_si128(w)
+		);
+
+		__m256i whi = _mm256_cvtepi16_epi32(
+			_mm256_extracti128_si256(w, 1)
+		);
+
+		// x� * weight
+		__m256i plo = _mm256_mullo_epi32(x2lo, wlo);
+		__m256i phi = _mm256_mullo_epi32(x2hi, whi);
+
+		// Widen to int64 and accumulate
+		sum0 = _mm256_add_epi64(
+			sum0,
+			_mm256_cvtepi32_epi64(
+				_mm256_castsi256_si128(plo)
+			)
+		);
+
+		sum1 = _mm256_add_epi64(
+			sum1,
+			_mm256_cvtepi32_epi64(
+				_mm256_extracti128_si256(plo, 1)
+			)
+		);
+
+		sum2 = _mm256_add_epi64(
+			sum2,
+			_mm256_cvtepi32_epi64(
+				_mm256_castsi256_si128(phi)
+			)
+		);
+
+		sum3 = _mm256_add_epi64(
+			sum3,
+			_mm256_cvtepi32_epi64(
+				_mm256_extracti128_si256(phi, 1)
+			)
+		);
+
+
+		// ============================================================
+		// SNTM
+		// ============================================================
+
+		x = _mm256_loadu_si256(
+			reinterpret_cast<const __m256i*>(sntm + i)
+		);
+
+		// SCReLU
+		x = _mm256_max_epi16(x, zero);
+		x = _mm256_min_epi16(x, qa);
+
+		// int16 -> int32
+		xlo = _mm256_cvtepi16_epi32(
+			_mm256_castsi256_si128(x)
+		);
+
+		xhi = _mm256_cvtepi16_epi32(
+			_mm256_extracti128_si256(x, 1)
+		);
+
+		// Square
+		x2lo = _mm256_mullo_epi32(xlo, xlo);
+		x2hi = _mm256_mullo_epi32(xhi, xhi);
+
+		// SNTM weights start after the first 128 weights
+		w = _mm256_loadu_si256(
+			reinterpret_cast<const __m256i*>(
+				outputWeightsChess768 +
+				FEATURES_WEIGHTS_COUNT_CHESS768 + i
+				)
+		);
+
+		wlo = _mm256_cvtepi16_epi32(
+			_mm256_castsi256_si128(w)
+		);
+
+		whi = _mm256_cvtepi16_epi32(
+			_mm256_extracti128_si256(w, 1)
+		);
+
+		// x� * weight
+		plo = _mm256_mullo_epi32(x2lo, wlo);
+		phi = _mm256_mullo_epi32(x2hi, whi);
+
+		// Widen to int64 and accumulate
+		sum0 = _mm256_add_epi64(
+			sum0,
+			_mm256_cvtepi32_epi64(
+				_mm256_castsi256_si128(plo)
+			)
+		);
+
+		sum1 = _mm256_add_epi64(
+			sum1,
+			_mm256_cvtepi32_epi64(
+				_mm256_extracti128_si256(plo, 1)
+			)
+		);
+
+		sum2 = _mm256_add_epi64(
+			sum2,
+			_mm256_cvtepi32_epi64(
+				_mm256_castsi256_si128(phi)
+			)
+		);
+
+		sum3 = _mm256_add_epi64(
+			sum3,
+			_mm256_cvtepi32_epi64(
+				_mm256_extracti128_si256(phi, 1)
+			)
+		);
 	}
 
+	// ------------------------------------------------------------
+	// Horizontally sum the four int64 vectors.
+	// ------------------------------------------------------------
 
-	// --------------------------------------------------------
-	// FC1 + ReLU
-	// --------------------------------------------------------
+	__m256i total01 = _mm256_add_epi64(sum0, sum1);
+	__m256i total23 = _mm256_add_epi64(sum2, sum3);
+	__m256i total = _mm256_add_epi64(total01, total23);
 
-	for (int out = 0; out < HIDDEN1; ++out)
-	{
-		float sum = fc1Bias[out];
+	alignas(32) int64_t temp[4];
+	_mm256_store_si256(
+		reinterpret_cast<__m256i*>(temp),
+		total
+	);
 
-		for (int in = 0; in < FEATURE_DIM * 2; ++in)
-		{
-			sum +=
-				fc1Weights[out][in]
-				* input[in];
-		}
+	int64_t output =
+		temp[0] + temp[1] + temp[2] + temp[3];
 
-		hidden1[out] = ReLU(sum);
-	}
+	// ------------------------------------------------------------
+	// SCReLU gives us a QA� scale.
+	//
+	// l1 weights have QB scale.
+	//
+	// l1 bias has QA * QB scale.
+	// Therefore divide the accumulated l1 result by QA
+	// before adding the bias.
+	// ------------------------------------------------------------
 
+	output /= QA;
 
-	// --------------------------------------------------------
-	// FC2 + ReLU
-	// --------------------------------------------------------
+	output += static_cast<int32_t>(outputBiasChess768);
 
-	for (int out = 0; out < HIDDEN2; ++out)
-	{
-		float sum = fc2Bias[out];
+	// Convert network output to centipawns.
+	output *= EVAL_SCALE;
 
-		for (int in = 0; in < HIDDEN1; ++in)
-		{
-			sum +=
-				fc2Weights[out][in]
-				* hidden1[in];
-		}
+	output /= (QA * QB);
 
-		hidden2[out] = ReLU(sum);
-	}
-
-
-	// --------------------------------------------------------
-	// FC3
-	// --------------------------------------------------------
-
-	float output = fc3Bias;
-
-	for (int in = 0; in < HIDDEN2; ++in)
-	{
-		output +=
-			fc3Weights[in]
-			* hidden2[in];
-	}
-
-
-	return output;
+	return static_cast<int>(output);
 }
 
 
-// ============================================================
-// Public evaluation function
-// ============================================================
 
-float NNUE::Evaluate(
-	const Brain& brain,
-	int sideToMove
-)
+
+int16_t NNUE::EvaluateChess768(const Brain& brain, int sideToMove)
 {
-	if (featureWeights == nullptr)
-	{
-		std::printf(
-			"NNUE: Evaluate called before weights loaded.\n"
-		);
+	//BuildAccumulatorsChess768(brain);//THESE SHOULD BE INCREMENTALLY UPDATED - NEED TO COMPARE!!! AND TIME!
 
-		return 0.0f;
+	//bool result = true;
+	//for (int i = 0; i < FEATURE_DIM_CHESS768; i++)
+	//{
+	//	if (whiteAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[0][i])
+	//	{
+	//		result = false;
+	//	}
+	//	if (blackAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[1][i])
+	//	{
+	//		result = false;
+	//	}
+	//}
+
+	//DON'T NOW NEED THIS FN AS A WRAPPER! CAN JUST CALL RunNetworkChess768 FROM MY EVALUATE.CPP
+	int16_t result = RunNetworkChess768(brain, sideToMove);
+
+	return result;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+inline int NNUE::FeatureIndexChess768(int square, int pieceType, int colour)
+{
+	int result = ((colour * 6) + pieceType) * 64 + square;
+	assert((result >= 0) && (result < 768));
+	return result;
+}
+
+// Add one feature to an accumulator
+void NNUE::AddFeatureToAccumulatorChess768(int16_t* accumulator, int featureIndex)
+{
+	// Get a pointer to the weights corresponding to this feature
+	alignas(32) const int16_t* weights = featureWeightsChess768 + static_cast<size_t>(featureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
+
+	//for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; ++i)
+	//	accumulator[i] += weights[i];
+	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i += 16)
+	{
+		__m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(accumulator + i));
+		__m256i w = _mm256_load_si256(reinterpret_cast<const __m256i*>(weights + i));
+		a = _mm256_add_epi16(a, w);
+		_mm256_store_si256(reinterpret_cast<__m256i*>(accumulator + i), a);
+	}
+}
+
+// Subtract one feature from an accumulator
+void NNUE::SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, int featureIndex)
+{
+	// Get a pointer to the weights corresponding to this feature
+	const int16_t* weights = featureWeightsChess768 + static_cast<size_t>(featureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
+
+	//for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; ++i)
+	//	accumulator[i] -= weights[i];
+	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i += 16)
+	{
+		__m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(accumulator + i));
+		__m256i w = _mm256_load_si256(reinterpret_cast<const __m256i*>(weights + i));
+		a = _mm256_sub_epi16(a, w);
+		_mm256_store_si256(reinterpret_cast<__m256i*>(accumulator + i), a);
+	}
+}
+
+// Incrementally update both accumulators
+void NNUE::UpdateAccumulatorsChess768(const Brain& brain)
+{
+	int16_t* nnueAccumulatorsChess768 = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
+	MoveUndo_Struct* currentMove = &(brain.GameRecordPointer - 1)->move;
+
+	int movingPieceColour, movingPieceType;
+
+	if (currentMove->mf.flag != MFCastling)
+	{
+		movingPieceType = std::abs(currentMove->fromSquarePiece) - 1;
+		movingPieceColour = (currentMove->fromSquarePiece > 0) ? 0 : 1;
+		// Subtract the fromSquarePiece from the fromSquare from the accumulators
+		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.fromSquare, movingPieceType, movingPieceColour));
+		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.fromSquare ^ 56, movingPieceType, 1 - movingPieceColour));
+		if (currentMove->mf.flag >= MFPromotion)
+		{
+			// Add the promoted piece to the accumulators
+			movingPieceType = PromotedPieces[currentMove->mf.flag >> 2] - 1;
+			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
+			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
+		}
+		else if (currentMove->mf.flag != MFEnPassant)
+		{
+			// Add the fromSquarePiece to the toSquare to the accumulators
+			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
+			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
+		}
+		// Capture?
+		if (currentMove->toSquarePiece != Empty)
+		{
+			// Subtract the toSquarePiece from the toSquare from the accumulators
+			int capturedPieceType = std::abs(currentMove->toSquarePiece) - 1;
+			int capturedPieceColour = movingPieceColour ^ 1;
+			SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, capturedPieceType, capturedPieceColour));
+			SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, capturedPieceType, 1 - capturedPieceColour));
+			if (currentMove->mf.flag == MFEnPassant)
+			{ // An EP move is stored as e.g. fromSquare=d5, toSquare = e5 (not e6), so we have to move the capturing pawn forward one square
+				// Add the fromSquarePiece to the TRUE toSquare to the accumulators
+				int toSquare = currentMove->mf.toSquare + 8;
+				if (currentMove->mf.fromSquare <= H4)
+					toSquare = currentMove->mf.toSquare - 8;
+				AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(toSquare, movingPieceType, movingPieceColour));
+				AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
+			}
+		}
+	}
+	else
+	{
+		// Castling
+		movingPieceType = King -1;
+		movingPieceColour = (currentMove->fromSquarePiece > 0) ? 0 : 1;
+
+		// Subtract the fromSquarePiece from the fromSquare from the accumulators
+		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.fromSquare, movingPieceType, movingPieceColour));
+		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.fromSquare ^ 56, movingPieceType, 1 - movingPieceColour));
+		// Add the fromSquarePiece to the toSquare to the accumulators
+		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
+		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
+
+		// Move the rooks too
+		int initialRookSquare, finalRookSquare;
+		if (currentMove->mf.toSquare == BackRankBaseSquareIndex[movingPieceColour] + G) // King-side?
+		{
+			initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialKingSideRookFile;
+			finalRookSquare = BackRankBaseSquareIndex[movingPieceColour] + F;
+		}
+		else
+		{
+			initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialQueenSideRookFile;
+			finalRookSquare = BackRankBaseSquareIndex[movingPieceColour] + D;
+		}
+		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(initialRookSquare, Rook - 1, movingPieceColour));
+		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(finalRookSquare, Rook - 1, movingPieceColour));
+		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(initialRookSquare ^ 56, Rook - 1, 1 - movingPieceColour));
+		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(finalRookSquare ^ 56, Rook - 1, 1 - movingPieceColour));
+	}
+}
+
+// Initialise the accumulators based on the root position
+void NNUE::InitialiseAccumulatorsChess768(const Brain& brain)
+{
+	int16_t* nnueAccumulatorsChess768 = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
+
+	// Clear the accumulators
+	std::memset(nnueAccumulatorsChess768, 0, sizeof(int16_t) * NNUE::FEATURES_WEIGHTS_COUNT_CHESS768 * 2);
+
+	// Copy the biases
+	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i++)
+	{
+		nnueAccumulatorsChess768[i] = featureBiasesChess768[i];
+		nnueAccumulatorsChess768[FEATURES_WEIGHTS_COUNT_CHESS768 + i] = featureBiasesChess768[i];
 	}
 
+	// Add all the features (32 in the initial position) into both accumulators
+	for (int square = 0; square < 64; ++square)
+	{
+		const int8_t piece = brain.MailboxBoard64[square];
+		if (piece == Empty)
+			continue;
 
-	BuildAccumulators(brain);
+		const int pieceType = std::abs(piece) - 1;
+		const int pieceColour = (piece > 0) ? 0 : 1;
+		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(square, pieceType, pieceColour));
+		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(square ^ 56, pieceType, 1 - pieceColour));
+	}
+}
 
-	return RunNetwork(sideToMove);
+// Verify the incrementally updated accumulators against locally recreated accumulators (used in Debug mode)
+bool NNUE::VerifyAccumulatorsChess768(const Brain& brain)
+{
+	int16_t nnueAccumulatorsChess768[Sides][128];
+
+	// Clear the accumulators
+	std::memset(nnueAccumulatorsChess768, 0, sizeof(int16_t) * FEATURES_WEIGHTS_COUNT_CHESS768 * 2);
+
+	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i++)
+	{
+		nnueAccumulatorsChess768[0][i] = featureBiasesChess768[i];
+		nnueAccumulatorsChess768[1][i] = featureBiasesChess768[i];
+	}
+
+	// Add all the features (32 in the initial position) into both accumulators
+	for (int square = 0; square < 64; ++square)
+	{
+		const int8_t piece = brain.MailboxBoard64[square];
+		if (piece == Empty)
+			continue;
+
+		const int pieceType = std::abs(piece) - 1;
+		const int pieceColour = (piece > 0) ? 0 : 1;
+		AddFeatureToAccumulatorChess768(&nnueAccumulatorsChess768[0][0], FeatureIndexChess768(square, pieceType, pieceColour));
+		AddFeatureToAccumulatorChess768(&nnueAccumulatorsChess768[0][0] + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(square ^ 56, pieceType, 1 - pieceColour));
+	}
+
+	// Compare them
+	bool result = true;
+	for (int side = 0; side < Sides; side++)
+		for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i++)
+			if (nnueAccumulatorsChess768[side][i] != brain.GameRecordPointer->nnueAccumulatorsChess768[side][i])
+			{
+				result = false;
+				goto exit;
+			}
+
+exit:
+	return result;
+}
+
+void NNUE::DumpAccumulatorsChess768(int16_t* acc)
+{
+	std::string s = "";
+	for (int side = 0; side < Sides; side++)
+		for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i++)
+			s += std::to_string((acc + (side * FEATURES_WEIGHTS_COUNT_CHESS768))[i]) + " ";
+	Output(s);
 }

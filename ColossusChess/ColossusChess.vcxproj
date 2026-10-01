@@ -46,6 +46,7 @@
     <ClInclude Include="GlobalTypes.h" />
     <ClInclude Include="httplib.h" />
     <ClInclude Include="NNUE.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SearchMate.h" />
     <ClInclude Include="SearchNormal.h" />
     <ClInclude Include="SearchPerft.h" />
@@ -57,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="RSJparser.tcc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ColossusChessNNUE.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

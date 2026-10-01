@@ -1042,9 +1042,15 @@ short Normal::Evaluate(int sideToMove)
 	
 		
 	//NNUETEST
-	int result = 100 * nnue.Evaluate(normalBrain, sideToMove);
+	//float f1;
+	//f1 = Nnue.Evaluate(normalBrain, sideToMove);
+	//int result1 = f1 * 100;
+	
+	//float f2;
+	//f2 = Nnue.EvaluateHalfKPWITHOUTREGEN(normalBrain, sideToMove);
+	//int result = f2 * 100;
 
-
+	int result = Nnue.EvaluateChess768(normalBrain, sideToMove);
 
 
 
@@ -1110,12 +1116,12 @@ short Normal::Evaluate(int sideToMove)
 	return (short)result;
 }
 
-short Normal::EvaluateNNUE(int sideToMove)
-{
-	return static_cast<short>(
-		nnue.Evaluate(normalBrain, sideToMove)
-		);
-}
+//short Normal::EvaluateNNUE(int sideToMove)
+//{
+//	return static_cast<short>(
+//		Nnue.EvaluateHalfKP(normalBrain, sideToMove)
+//		);
+//}
 
 //----------------------------------------------------------------------------------------------------
 

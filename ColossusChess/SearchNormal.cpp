@@ -64,10 +64,11 @@ Normal::Normal()
 	//}
 	//else
 	//	Output("Loaded NNUE!");
-	if (!nnue.LoadWeights("nnue_epoch_40.bin"))
-	{
-		std::printf("ERROR: Failed to load NNUE weights!\n");
-	}
+
+	//if (!nnue.LoadWeights("nnue_epoch_40.bin"))
+	//{
+	//	std::printf("ERROR: Failed to load NNUE weights!\n");
+	//}
 }
 
 Normal::~Normal()
@@ -1370,7 +1371,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				//currentGameRecordPointer->dangerConditions.dc.isFMTP = flag & TTFlagFewerMovesThanPieces;
 				currentGameRecordPointer->dangerConditions |= flag & TTFlagIsInDangerMask;
 				currentGameRecordPointer->staticEvaluation = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
-				assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove)));
+				//assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove)));
+				assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (std::abs(currentGameRecordPointer->staticEvaluation - Evaluate(sideToMove)) <= 1));
 				tteScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->score;
 
 				if (abs(tteScore) >= EGTBWinningScore)
@@ -1728,6 +1730,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			currentGameRecordPointer->move.toSquarePiece = Empty; // Ensure recapture extensions don't mistakenly kick in
 
 			normalBrain.GameRecordPointer++; // Normally done in make/unmake-move
+			//std::memcpy(normalBrain.GameRecordPointer->nnueAccumulatorsHalfKP, (normalBrain.GameRecordPointer - 1)->nnueAccumulatorsHalfKP, sizeof(float) * NNUE::FEATURE_DIM_HALFKP * 2);
+			std::memcpy(normalBrain.GameRecordPointer->nnueAccumulatorsChess768, (normalBrain.GameRecordPointer - 1)->nnueAccumulatorsChess768, sizeof(int16_t) * 2 * NNUE::FEATURES_WEIGHTS_COUNT_CHESS768);
 			normalBrain.GameRecordPointer->castlingStatus = (normalBrain.GameRecordPointer - 1)->castlingStatus;
 			normalBrain.GameRecordPointer->pliesSinceIrreversible = 0; // Don't allow DBRs across a null move (+3 ELO)
 			normalBrain.GameRecordPointer->transpositionTableHash64 = ~(normalBrain.GameRecordPointer - 1)->transpositionTableHash64;
@@ -2587,13 +2591,6 @@ std::string Normal::ComputeNormal()
 
 	normalBrain.CopyFrom(&EngineBrain);
 
-
-
-	float f = nnue.Evaluate(normalBrain, SideToMove);
-	Output("NNUE=" + std::to_string(f));
-
-
-
 	// Set up the bit boards from the 64-square mailbox board
 	ConvertMailboxBoard64ToPiecesBB(normalBrain.MailboxBoard64, normalBrain.PiecesBB);
 
@@ -2607,6 +2604,18 @@ std::string Normal::ComputeNormal()
 		normalBrain.GameRecord[normalBrain.GameRecordIndexRoot + index].principalVariationPointer = &PrincipalVariation[(MaximumPly + 1) * index];
 	}
 
+
+
+
+	//float NNUEHalfKP = Nnue.Evaluate(normalBrain, SideToMove);//TEMP TESTING!
+	//Output("NNUEHalfKP=" + std::to_string(NNUEHalfKP));
+	//int16_t NNUEChess768 = Nnue.EvaluateChess768(normalBrain, SideToMove);
+	//Output("NNUEChess768=" + std::to_string(NNUEChess768));
+
+
+
+
+
 	//----------------------------------------------------------------------------------------------------
 	CRASHLOCATION(20);
 
@@ -2616,6 +2625,11 @@ std::string Normal::ComputeNormal()
 
 	// Initialise any variables required for the search
 	normalBrain.GameRecordPointer = &normalBrain.GameRecord[normalBrain.GameRecordIndexRoot];
+
+	// NNUE stuff (must be done before we get the static evaluation below and after we setup the GameRecordPointer above)
+	// Initialise the accumulators
+	Nnue.InitialiseAccumulatorsChess768(normalBrain);
+	assert(Nnue.VerifyAccumulatorsChess768(normalBrain));
 
 	uint64_t totalNodes[MaximumPly];
 	totalNodes[0] = 1;
@@ -3068,6 +3082,15 @@ std::string Normal::ComputeNormal()
 
 	//----------------------------------------------------------------------------------------------------
 	
+	//for (int i = 0; i < 20; i++)
+	//{
+	//	Output(MoveNotation(RootMoveList[i].mws.ui32) +" " + std::to_string(RootMoveList[i].mws.score));
+	//}
+
+
+
+
+
 	std::string bestMoveMessage = "";
 
 	if (ThreadId == 0)

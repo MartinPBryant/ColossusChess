@@ -9,7 +9,34 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 20NNx
 =====
 
+NNUE: a=1000,b=10000, etc
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess1e               443.32      13.16     651.72       7.73       7760      92.8%       6.0%
+   2 ColossusChess1d               174.66       8.31     191.25       7.73       7761      73.2%       7.3%
+   3 ColossusChess2026bNonPGO      170.77       8.34     185.03       7.73       7760      72.8%       6.1%
+   4 ColossusChess1c               -62.25       7.83     -62.81       7.73       7762      41.1%       0.7%
+   5 ColossusChess1b              -239.37       9.64    -258.87       7.73       7763      20.1%       0.1%
+   6 ColossusChess1a             -1315.25     398.04   -7650.49       7.73       7770       0.1%       0.0%
 
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess5-64             239.47       6.51     308.44       6.22      12000      79.9%      19.0%
+   2 ColossusChess5-32             213.73       6.35     266.25       6.22      12000      77.4%      18.9%
+   3 ColossusChess5-16             154.39       6.00     181.97       6.22      12000      70.9%      19.1%
+   4 ColossusChess5-8               47.69       5.70      52.64       6.22      12000      56.8%      17.1%
+   5 ColossusChess5-4              -68.66       5.91     -74.11       6.22      12000      40.2%      12.6%
+   6 ColossusChess5-2             -235.40       7.34    -266.14       6.22      12000      20.5%       5.9%
+   7 ColossusChess5-1             -538.80      14.26    -841.62       6.22      12000       4.3%       2.2%
+Finished match
+Total Time: 01:11:12 (hours:minutes:seconds)
+(303.4, 166.74, 116.35, 106.7, 59.34, 25.74)
+(ChatGPT extrapolated +12.9 and +6.4 for 128m/256m)
+
+2026bNonPGO v 5 {64million NNUE 30s+25ms} (-404.36, +/-13.70, 5839) PCS1
+2026bNonPGO v 5 {64million NNUE} (-376.08) PCS1
+2026bNonPGO v 5 {64million NNUE} (-362.40) ASUS1
+2026bNonPGO v 5 {64million NNUE} (-369.68) NIPOGI1
+
+Nirvana 2.5 v 5 {30s+0.25s} (-210.85, +/-18.91, 1327)
 
 
 

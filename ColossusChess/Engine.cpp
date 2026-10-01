@@ -33,6 +33,11 @@ Normal EngineNormal;
 Perft EnginePerft;
 Mate EngineMate;
 
+// The outer 'engine' creates an instance of the NNUE class which is initialised on loading
+NNUE Nnue;
+std::string EvalFileDefault = "ColossusChess.NNUE";
+std::string EvalFile = EvalFileDefault;
+
 // Miscellaneous
 bool Quit;
 bool ComputingMove;

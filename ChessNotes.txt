@@ -265,6 +265,37 @@ You may have to change the hard-coded filename.
 ALL
 ===
 
+
+
+
+how can you make the fastchess working dir be the same as the exe???
+-put the .bat files in the Release folder and run fastchess via the full path? but then might not be able to read its own files?
+
+
+
+embed 4pc in exe (1.2MB FOR THE RTBW files {3MB for the RTBZ})
+-embed as resource
+-can we edit the probe code to point at memory???
+-ASK CHATGPT TO CHANGE THE CODE!!!
+
+
+
+how am i going to name nnue files?
+-not related to engine version?
+-prod and dev might be different?
+--dev: incorporate info about the network e.g. 10K, 100K, 10M, Shuffled etc
+--prod: e.g. ColossusChess2026c.NNUE
+-where? put them all in same folder as engine exe
+-add a version header to the nnue file
+-what if they change the NNUE filename to something not found???!!! don't change it and keep default?
+-add an nnuepath option - use EvalFile to conform with SF
+-embed the nnue default file in the exe then it can't ever not find it (only 193KB!!!)
+--also then don't really need an EvalFile option! :O
+
+
+
+
+
 remember to put tempo back in the eval!
 
 
@@ -596,10 +627,6 @@ run a tourney in cgm with the debug version - if it crashes, attach the debugger
 can syzygy stats be used to enhance eval scores in the QS??? e.g. if the particular 6pc (7pc!) posn is largely wins then multiply it by 1.1? largly draw/losses by 0.9???
 -also can they enhance egtb probing!? distinguish the 150s! e.g. a 150 with 99% wins is better than a 150 with 99% draws (even better for distinguishing draw?)
 -see stats.json file for the full stats! (compress to just useful data for actual use)
-
-embed 4pc in exe
--then write them to a subfolder when run! and point syzygypath at them
--or can we edit the probe code to point at memory???
 
 
 crash if illegal command in ini file

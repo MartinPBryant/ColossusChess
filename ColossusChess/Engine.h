@@ -55,6 +55,10 @@ extern Normal EngineNormal;
 extern Perft EnginePerft;
 extern Mate EngineMate;
 
+extern NNUE Nnue;
+extern std::string EvalFileDefault;
+extern std::string EvalFile;
+
 // Miscellaneous
 extern bool Quit;
 extern bool ComputingMove;
