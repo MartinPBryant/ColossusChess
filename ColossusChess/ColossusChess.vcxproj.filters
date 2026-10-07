@@ -57,6 +57,9 @@
     <ClCompile Include="UInt128.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SYZYGYPYRRHIC\tbchess.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h">

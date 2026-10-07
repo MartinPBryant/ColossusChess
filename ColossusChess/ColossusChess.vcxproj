@@ -32,6 +32,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SearchPerft.cpp" />
+    <ClCompile Include="SYZYGYPYRRHIC\tbchess.c">
+      <DeploymentContent>false</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </DeploymentContent>
+    </ClCompile>
     <ClCompile Include="SYZYGYPYRRHIC\tbprobe.cpp" />
     <ClCompile Include="UGI.cpp" />
     <ClCompile Include="UInt128.cpp" />

@@ -59,6 +59,7 @@ void PrintTree2(int iterationPly, int ply, std::string s);
 uint64_t Random64();
 int BoardRand(int min, int max);
 int BoardRand0To63();
+void ListEmbeddedResources();
 
 //----------------------------------------------------------------------------------------------------
 

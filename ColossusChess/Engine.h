@@ -62,7 +62,9 @@ extern std::string EvalFile;
 // Miscellaneous
 extern bool Quit;
 extern bool ComputingMove;
-extern std::string LastPositionAndMoves;
+extern std::string LastPositionCommand;
+extern std::string LastGoCommand;
+extern std::string LastCommand;
 
 // UCI debug mode
 extern bool IsDebug;

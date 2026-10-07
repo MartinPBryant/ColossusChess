@@ -1557,6 +1557,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 				}
 				else
 				{
+					// THESE AREN'T NECESSARILY 'ERRORS' AS IT COULD BE CAUSED BY A MISSING EGTB FILE!
 					EndgameTablebasesErrors = true;
 					EndgameTablebasesErrorCounts[totalPieces]++;
 				}
@@ -2604,18 +2605,6 @@ std::string Normal::ComputeNormal()
 		normalBrain.GameRecord[normalBrain.GameRecordIndexRoot + index].principalVariationPointer = &PrincipalVariation[(MaximumPly + 1) * index];
 	}
 
-
-
-
-	//float NNUEHalfKP = Nnue.Evaluate(normalBrain, SideToMove);//TEMP TESTING!
-	//Output("NNUEHalfKP=" + std::to_string(NNUEHalfKP));
-	//int16_t NNUEChess768 = Nnue.EvaluateChess768(normalBrain, SideToMove);
-	//Output("NNUEChess768=" + std::to_string(NNUEChess768));
-
-
-
-
-
 	//----------------------------------------------------------------------------------------------------
 	CRASHLOCATION(20);
 
@@ -2678,8 +2667,12 @@ std::string Normal::ComputeNormal()
 	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
 	if (RootMovesCount == 0) // Sometimes the GUI or the user provide positions with zero legal moves! (e.g. checkmates/stalemates in chess)
 	{
-		Output("info string *** Error! There are zero moves in the position provided!");
-		OutputError("There are zero moves in the position provided!");
+		if (ThreadId == 0) // Only the main thread will report the error
+		{
+			std::string error = "There are zero moves in the position provided!";
+			Output("info string *** Error! " + error);
+			OutputError(error);
+		}
 		return "";
 	}
 	for (int moveListIndexIterator = 0; moveListIndexIterator < RootMovesCount; moveListIndexIterator++)
@@ -2786,27 +2779,28 @@ std::string Normal::ComputeNormal()
 					for (uint32_t index = 0; index < results.size; index++)
 					{
 						TbRootMove move = results.moves[index];
-						// If we have the DTZ info (.rtbz files) : move.tbRank will be +262144-1-DTZ (0x40000) for wins, -262144+1-DTZ for losses and 0 for draws
-						// If we don't have the DTZ info (.rtbz files) : move.tbRank will be +262144 (0x40000) for wins, -262144 for losses and 0 for draws, so dtz will be 0 for all moves
+						// If we have the DTZ info (.rtbz files) : move.tbRank will be +262144-DTZ (0x40000) for wins, -262144-DTZ for losses and 0 for draws
+						// move.tbRank does not seem to be quite in line with the SYZYGY website https://syzygy-tables.info/ for all moves
+						// If we don't have the DTZ info (.rtbz files) : move.tbRank will be +262144 (0x40000) for wins, -262144 for losses and 0 for draws
 						Move_Struct colossusMove;
 						colossusMove.ui32 = normalBrain.SYZYGYPYRRHICMoveToColossusMove(move.move, normalBrain.GameRecordPointer->epSquare);
 						int wdl; // win=1, draw=0, loss=-1 : this is deduced by the sign of tbRank : no distinction is made for cursed-wins and blessed-losses
 						int dtz; // >=0 for wins, 0 for draws, <=0 for losses : we want to select the lowest value, so for wins the lowest +ve dtz, for losses the lowest -ve dtz
 						if (move.tbRank > 0)
-						{
+						{ // Win
 							wdl = 1;
-							dtz = 0x40000 - 1 - move.tbRank; // The -1 brings the DTZ in line with that displayed on the SYZYGY website https://syzygy-tables.info/
+							dtz = 0x40000 - move.tbRank;
 							assert(dtz >= 0); // For wins we want to play the lowest +ve dtz to convert as fast as possible
 						}
 						else if (move.tbRank == 0)
-						{
+						{ // Draw
 							wdl = 0;
 							dtz = 0;
 						}
 						else
-						{
+						{ // Loss
 							wdl = -1;
-							dtz = -(0x40000 - 1 + move.tbRank);
+							dtz = -(0x40000 + move.tbRank);
 							assert(dtz <= 0); // For losses we want to play the lowest -ve dtz to avoid conversion as long as possible
 						}
 						bool found = UpdateRootMoveEGTBStatus(colossusMove.ui32, wdl, dtz);// , move.tbRank);
@@ -3116,31 +3110,37 @@ std::string Normal::ComputeNormal()
 		// Report best move
 		if (RootBestMove.ui32 == 0)
 		{
-			// THIS SEEMS TO HAPPEN ON LICHESS WHEN IN THE ENDGAME TABLEBASES
-			// SO DUMP SOME EGTB INFO TO TRY TO DIAGNOSE!
-			std::string s = "\n";
-			s += "EndgameTablebasesRootMove=" + MoveNotation(EndgameTablebasesRootMove.ui32) + "\n";
-			s += "EndgameTablebasesRootWDL=" + std::to_string(EndgameTablebasesRootWDL) + "\n";
-			s += "EndgameTablebasesRootDTZ=" + std::to_string(EndgameTablebasesRootDTZ) + "\n";
-			OutputError("No best move returned by search! (RootBestMove.ui32 == 0)" + s);
+			if (LastCommand != "STOP") // When pondering the UI could validly send a 'stop' command before we have established a move
+			{
+				// Genuine error!
+				std::string s = "\n";
+				s += "EndgameTablebasesRootMove=" + MoveNotation(EndgameTablebasesRootMove.ui32) + "\n";
+				s += "EndgameTablebasesRootWDL=" + std::to_string(EndgameTablebasesRootWDL) + "\n";
+				s += "EndgameTablebasesRootDTZ=" + std::to_string(EndgameTablebasesRootDTZ) + "\n";
+				OutputError("No best move returned by search! (RootBestMove.ui32 == 0)" + s);
+			}
 		}
-		bestMoveMessage = "bestmove " + MoveNotation(RootBestMove.ui32);
-		if (Ponder)
-			if ((TC.CurrentType != TCTFixedTime) && (TC.CurrentType != TCTFixedDepth) && (TC.CurrentType != TCTFixedNodes)) // Don't ponder in any 'fixed' modes
-				if ((uint16_t)normalBrain.GameRecordPointer->principalVariationPointer[1] > 0) // May be any of the PVT* terminators (which all have the bottom 16 bits set to 0)
-					if (RootScore > -MatingIn0Score + 3) // Don't ponder if we're being mated in 1 else the GUI might give us the mated position and tell us to search it!
-						bestMoveMessage += " ponder " + MoveNotation(normalBrain.GameRecordPointer->principalVariationPointer[1]);
-		if (ShowBlankLines)
-			bestMoveMessage += "\n";
-
-		// Save any output from -FILE command for analysis in spreadsheet
-		if (ProcessingCommandFile)
+		else
 		{
-			FILE *sw;
-			fopen_s(&sw, "output.csv", "a+");
-			std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
-			fprintf(sw, "%s\n", s.c_str());
-			fclose(sw);
+			bestMoveMessage = "bestmove " + MoveNotation(RootBestMove.ui32);
+			if (Ponder)
+				if ((TC.CurrentType != TCTFixedTime) && (TC.CurrentType != TCTFixedDepth) && (TC.CurrentType != TCTFixedNodes)) // Don't ponder in any 'fixed' modes
+					if ((uint16_t)normalBrain.GameRecordPointer->principalVariationPointer[1] > 0) // Hopefully the opponent's best move (the 'ponder' move) but may be any of the PVT* terminators (which all have the bottom 16 bits set to 0)
+						if ((uint16_t)normalBrain.GameRecordPointer->principalVariationPointer[2] > 0) // Did we definitely have a reply to the ponder move? May not exist if we're being mated in 1 or stalemated!
+						//if (RootScore > -MatingIn0Score + 3) // Don't ponder if we're being mated in 1 else the GUI might give us the mated position and tell us to search it!
+							bestMoveMessage += " ponder " + MoveNotation(normalBrain.GameRecordPointer->principalVariationPointer[1]);
+			if (ShowBlankLines)
+				bestMoveMessage += "\n";
+
+			// Save any output from -FILE command for analysis in spreadsheet
+			if (ProcessingCommandFile)
+			{
+				FILE *sw;
+				fopen_s(&sw, "output.csv", "a+");
+				std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
+				fprintf(sw, "%s\n", s.c_str());
+				fclose(sw);
+			}
 		}
 	}
 

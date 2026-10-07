@@ -5,11 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "20NNx6"
-
-// NNUE filename
-//const std::string NNUEFilenameHalfKP = "ColossusChessNNUEv1.bin";
-const std::string NNUEFilenameChess768 = "quantised.bin";
+#define VersionX "20NNx12"
 
 #define Sides 2
 

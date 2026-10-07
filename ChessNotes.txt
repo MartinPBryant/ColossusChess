@@ -266,41 +266,22 @@ ALL
 ===
 
 
-
-
-how can you make the fastchess working dir be the same as the exe???
--put the .bat files in the Release folder and run fastchess via the full path? but then might not be able to read its own files?
-
-
-
-embed 4pc in exe (1.2MB FOR THE RTBW files {3MB for the RTBZ})
--embed as resource
--can we edit the probe code to point at memory???
--ASK CHATGPT TO CHANGE THE CODE!!!
-
-
-
-how am i going to name nnue files?
--not related to engine version?
--prod and dev might be different?
---dev: incorporate info about the network e.g. 10K, 100K, 10M, Shuffled etc
---prod: e.g. ColossusChess2026c.NNUE
--where? put them all in same folder as engine exe
--add a version header to the nnue file
--what if they change the NNUE filename to something not found???!!! don't change it and keep default?
--add an nnuepath option - use EvalFile to conform with SF
--embed the nnue default file in the exe then it can't ever not find it (only 193KB!!!)
---also then don't really need an EvalFile option! :O
+tidy up old HCE?
+remember to put tempo back in the eval! - redundant now
 
 
 
 
+div losing scores by 2?
 
-remember to put tempo back in the eval!
+
+-gen tens of millions of 7-PC(!) egtb posns? no point in doing 6 or fewer? because most people have them now and so you'll just look the answers up and branches terminate when you hit them.
+-how about K&P endings?
 
 
-the engine could accumulate all the messages from the UI in the current game and dump them upon error too!
--CommandsSinceLastNewGame string
+
+does root EGTB stuff respect syzygyprobelimit?
+-no but it's not quite meant to e.g. syzygyprobelimit defaults to 6 as it's referring to the tree search!
 
 
 
@@ -311,15 +292,24 @@ Still getting these errors on Lichess when we get down to 7 pieces
 -CHECK IF THEY ARE ENDGAMES WHERE IT DOESN'T HAVE THE PARTICULAR TABLEBASE - NO AS IT DOES HAVE KQPPvKQP
 -ONE WAS A 5PC, MOST WERE 6PC AND SOMWE WERE 7PC WHERE IT DID HAVE THE EGTB!
 -CHECK THE ROOTMOVE FILTERING CODE! ADD SOME ERRORS INSTEAD OF ASSERTS BECAUSE ITS RELEASE BUILD
+is the lichess egtb bug when it is told to ponder a move but then it's not played and it's still got the same EGTB root stuff as if the ponder move was played somehow???
+-is it just some nonsense from the lichess controller???
+the engine could accumulate all the messages from the UI in the current game and dump them upon error too!
+-CommandsSinceLastNewGame string
+-WERE THEY TIMEUP POSN?!!!! BECAUSE STOPIMMEDIATELY WAS 1 ! :O  DID IT TIMEUP AND EXIT BEFORE GETTING A BEST MOVE?
+-N.B. THERE ARE TWO DIFFERENT ERRORS! 'No best move returned' AND 'ZERO MOVES'
+-the 'no best move' errors do seem to be in the endgame after probing the 7 pc when the timer will be running!!!!! but surely we have to do at least 4 ply?!!!
+-did the lichess controller send a STOP command??? :O DID IT RUN OUT OF TIME PROBING THE 7-PC???
+-is it because the opp didn't play the ponder move so the UI tells Colossus to stop before it's got any move but it doesn't matter?
 
 
 
 
-NNUE
--might still need genfsl command?
--could use chess960 starting posns
--could use unique perft starting posns
--have downloaded lichess db
+document training process completely!!! for next time :D
+
+how can you make the fastchess working dir be the same as the exe???
+-put the .bat files in the Release folder and run fastchess via the full path? but then might not be able to read its own files?
+
 
 
 

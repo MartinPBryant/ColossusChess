@@ -145,6 +145,8 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 
 	else if (nameUpperCase == "SYZYGYPATH")
 	{
+		tb_free();
+
 		if (value == "")
 		{
 			EndgameTablebasesPath[0] = '\0';
@@ -173,6 +175,7 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 				}
 				else
 				{
+					// *** This is no longer required as the embedded EGTBs will always be found whatever the path given above!
 					Output("info string *** Error! No endgame tablebases found at " + value);
 					OutputError("No endgame tablebases found at " + value);
 				}
@@ -227,6 +230,8 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 			std::string errorMesage = "Invalid NNUE file : " + value + ": " + result;
 			Output("info string *** Error! " + errorMesage);
 			OutputError(errorMesage);
+			// Ensure the embedded NNUE is relaoded
+			Nnue.ReadNNUEFromResourceChess768();
 		}
 	}
 
@@ -358,6 +363,9 @@ std::string ProcessInput(std::string currentLine)
 
 	if (currentLine != "")
 	{
+		// Save for error reporting
+		LastCommand = originalCurrentLine;
+
 		trim(currentLine);
 		commandToken = UpperCase(GetNextToken(&currentLine));
 
@@ -390,6 +398,9 @@ std::string ProcessInput(std::string currentLine)
 				}
 				else
 				{
+					// Save for error reporting
+					LastGoCommand = originalCurrentLine;
+
 					// Start computing a move for the current position
 					std::string subCommand;
 					bool validSubCommand = false;
@@ -575,8 +586,10 @@ std::string ProcessInput(std::string currentLine)
 					}
 				}
 			}
-			else if ((commandToken == "POSITION") || (commandToken == "P")) // syntax: position [fen <fenstring> | startpos] moves <move1> ... <movei>
+			else if ((commandToken == "POSITION") || (commandToken == "P"))
 			{
+				// syntax: position [fen <fenstring> | startpos] moves <move1> ... <movei>
+				// e.g. position startpos moves e2e4 e7e5
 				if (ComputingMove)
 				{
 					result = "Cannot process a POSITION command whilst a GO command is still active";
@@ -584,6 +597,9 @@ std::string ProcessInput(std::string currentLine)
 				}
 				else
 				{
+					// Save for error reporting
+					LastPositionCommand = originalCurrentLine;
+
 					// Set up position from FEN std::string (the information is stored in the idleing engine object)
 					SetPositionAndMoves(originalCurrentLine);
 				}

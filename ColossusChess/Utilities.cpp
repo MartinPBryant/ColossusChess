@@ -105,7 +105,9 @@ void OutputError(std::string s)
 		ErrorFile << "*** Error!: " + s + "\n";
 		ErrorFile << ConvertPositionToFEN(EngineBrain.MailboxBoard64, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].sideToMove, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].castlingStatus, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].epSquare, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].pliesSinceIrreversible, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].moveNumber) + "\n";
 
-		ErrorFile << LastPositionAndMoves << "\n";
+		ErrorFile << "LastPositionCommand: " + LastPositionCommand << "\n";
+		ErrorFile << "LastGoCommand: " + LastGoCommand << "\n";
+		ErrorFile << "LastCommand: " + LastCommand << "\n";
 		ErrorFile << "TranspositionTableMemory=" + std::to_string(TranspositionTableMemory) << "\n";
 		ErrorFile << "StopImmediately=" + std::to_string(StopImmediately) << "\n";
 		ErrorFile << "StopWhenIterationComplete=" + std::to_string(StopWhenIterationComplete) << "\n";
@@ -385,6 +387,27 @@ int BoardRand(int min, int max)
 int BoardRand0To63()
 {
 	return BoardRand(0, 63);
+}
+
+void ListEmbeddedResources()
+{
+	HMODULE hModule = GetModuleHandleA(nullptr);
+
+	EnumResourceNamesA(
+		hModule,
+		RT_RCDATA,
+		[](HMODULE, LPCSTR, LPSTR name, LONG_PTR) -> BOOL
+	{
+		if (IS_INTRESOURCE(name))
+			printf("Resource ID: %u\n",
+			(unsigned)(ULONG_PTR)name);
+		else
+			printf("Resource name: %s\n", name);
+
+		return TRUE;
+	},
+		0
+		);
 }
 
 //----------------------------------------------------------------------------------------------------

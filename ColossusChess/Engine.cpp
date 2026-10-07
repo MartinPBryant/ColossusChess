@@ -41,7 +41,9 @@ std::string EvalFile = EvalFileDefault;
 // Miscellaneous
 bool Quit;
 bool ComputingMove;
-std::string LastPositionAndMoves = "";
+std::string LastPositionCommand = "";
+std::string LastGoCommand = "";
+std::string LastCommand = "";
 
 // UCI debug mode
 bool IsDebug = false;
@@ -875,12 +877,9 @@ void InitialiseOneOffStuff()
 	for (int i = 0; i < EngineBrain.GameRecordSize; i++)
 		EngineBrain.GameRecord[i].excludedMove = 0;
 
-	// NNUE
-	//nnue_init("nn-62ef826d1a6d.nnue");
-	////nncpu_init("nn-62ef826d1a6d.nnue"); //SF13
-	////nnue_init("nn-3475407dc199.nnue");
-	////nncpu_init("nn-3475407dc199.nnue"); //SF14
-	////nncpu_init("nn-13406b1dcbe0.nnue"); //SF14.1
+	// Embedded EGTBs
+	EndgameTablebasesInitialised = tb_init("NUL");
+	EndgameTablebasesPiecesFound = TB_LARGEST;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1254,9 +1253,6 @@ void SetPositionAndMoves(std::string positionAndMoves)
 	std::string move;
 	std::string bufferSTRING;
 
-	// Save for error reporting
-	LastPositionAndMoves = positionAndMoves;
-
 	// Split console line into tokens
 	token = GetNextToken(&positionAndMoves);
 
@@ -1311,6 +1307,7 @@ void SetPositionAndMoves(std::string positionAndMoves)
 	// Ensure that the root game record entry has correct values
 	InitialiseMaterialValues(EngineBrain.MailboxBoard64, EngineBrain.GameRecordPointer);
 	InitialiseGamePhase(EngineBrain.MailboxBoard64, EngineBrain.GameRecordPointer);
+	Nnue.InitialiseAccumulatorsChess768(EngineBrain);
 
 	EngineBrain.GameRecordPointer->transpositionTableHash64 = GenerateTranspositionTableHash64(EngineBrain.MailboxBoard64, EngineBrain.GameRecordPointer);
 	if (SideToMove == 1)
@@ -1330,7 +1327,7 @@ void SetPositionAndMoves(std::string positionAndMoves)
 			move = UpperCase(GetNextToken(&positionAndMoves));
 			MakeMove(move);
 
-			EngineBrain.GameRecordIndexRoot++; // UGIGenerate.gameRecordPointer gets incremented in the internal MakeMove call above
+			EngineBrain.GameRecordIndexRoot++; // EngineBrain.GameRecordPointer gets incremented in the internal MakeMove call above
 			AdvanceSideToMove();
 
 			EngineBrain.GameRecordPointer->moveNumber = EngineBrain.GameRecord[2].moveNumber + ((EngineBrain.GameRecordIndexRoot - 2) / 2);

@@ -29,6 +29,7 @@ NNUE::~NNUE()
 
 //----------------------------------------------------------------------------------------------------
 
+// Load the specified NNUE file
 std::string NNUE::ReadNNUEFromFileChess768(std::string filename)
 {
 	FILE* file = nullptr;
@@ -71,6 +72,8 @@ std::string NNUE::ReadNNUEFromFileChess768(std::string filename)
 	return "";
 }
 
+// Load the NNUE embedded resource
+// The file 'ColossusChess.NNUE' is embedded at compile time
 std::string NNUE::ReadNNUEFromResourceChess768()
 {
 #define IDR_CHESS768 101

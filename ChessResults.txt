@@ -9,6 +9,7 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 20NNx
 =====
 
+PCS2
 NNUE: a=1000,b=10000, etc
 Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
    1 ColossusChess1e               443.32      13.16     651.72       7.73       7760      92.8%       6.0%
@@ -18,6 +19,7 @@ Rank Name                             Elo        +/-       nElo        +/-      
    5 ColossusChess1b              -239.37       9.64    -258.87       7.73       7763      20.1%       0.1%
    6 ColossusChess1a             -1315.25     398.04   -7650.49       7.73       7770       0.1%       0.0%
 
+PCS2
 Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
    1 ColossusChess5-64             239.47       6.51     308.44       6.22      12000      79.9%      19.0%
    2 ColossusChess5-32             213.73       6.35     266.25       6.22      12000      77.4%      18.9%
@@ -36,7 +38,39 @@ Total Time: 01:11:12 (hours:minutes:seconds)
 2026bNonPGO v 5 {64million NNUE} (-362.40) ASUS1
 2026bNonPGO v 5 {64million NNUE} (-369.68) NIPOGI1
 
-Nirvana 2.5 v 5 {30s+0.25s} (-210.85, +/-18.91, 1327)
+Nirvana 2.5 v 5 {30s+0.25s} (-210.85, +/-18.91, 1327) PCS2
+Vajolet2_3.2.0 v 5 {30s+0.25s} (29.16, +/-9.31, 3359) PCS2
+
+ColossusChess5-64 v ColossusChess5-128 (-22.11) ASUS1
+
+ASUS1
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess5-128            210.33       5.65     270.81       5.76      14000      77.0%      22.6%
+   2 ColossusChess5-64             188.74       5.59     234.93       5.76      14000      74.8%      21.8%
+   3 ColossusChess5-32             173.29       5.59     209.46       5.76      14000      73.1%      20.2%
+   4 ColossusChess5-16             113.57       5.25     133.46       5.76      14000      65.8%      22.5%
+   5 ColossusChess5-8                9.53       5.20      10.56       5.76      14000      51.4%      18.5%
+   6 ColossusChess5-4             -103.30       5.60    -112.63       5.76      14000      35.6%      12.3%
+   7 ColossusChess5-2             -259.41       7.10    -297.86       5.76      14000      18.3%       5.4%
+   8 ColossusChess5-1             -548.88      13.64    -863.78       5.76      14000       4.1%       2.0%
+Finished match
+
+Rank Name                             Elo        +/-       nElo        +/-      Games      Score       Draw
+   1 ColossusChess5-128            223.94       5.53     283.55       5.38      16000      78.4%      19.3%
+   2 ColossusChess5-64             211.38       5.45     264.39       5.38      16000      77.1%      19.6%
+   3 ColossusChess5-32             183.40       5.30     222.86       5.38      16000      74.2%      19.7%
+   4 ColossusChess5-16             128.75       5.03     150.72       5.38      16000      67.7%      20.6%
+   5 ColossusChess5-8               24.80       4.93      27.16       5.38      16000      53.6%      16.4%
+   6 ColossusChess5-4              -82.65       5.18     -89.26       5.38      16000      38.3%      11.9%
+   7 ColossusChess2026bNonPGO      -98.26       5.40    -103.27       5.38      16000      36.2%       6.5%
+   8 ColossusChess5-2             -248.67       6.51    -283.43       5.38      16000      19.3%       5.6%
+   9 ColossusChess5-1             -506.54      11.57    -744.78       5.38      16000       5.1%       2.0%
+Finished match
+
+8 v 8withEGTBNNUEinput (47.72, +/-11.86, 2000) ASUS1 - :O it made it worse?!!!!
+
+9 v 10 {no embedded EGTBs v embedded EGTBs} (-0.31) ASUS1
+
 
 
 
