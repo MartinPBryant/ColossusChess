@@ -3,6 +3,9 @@
 #include <sstream>
 #include <thread>
 
+#include <windows.h>
+#include <sysinfoapi.h>
+
 #include "Engine.h"
 #include "UGI.h"
 #include "Utilities.h"
@@ -74,10 +77,9 @@ int main(int argc, char * argv[])
 
 	//----------------------------------------------------------------------------------------------------
 
-	// Load the NNUE
-	std::string result;
-	//if ((result = Nnue.ReadNNUEFromFileChess768(EvalFile.c_str())) != "")
-	if ((result = Nnue.ReadNNUEFromResourceChess768()) != "")
+	// Load the NNUE from the embedded resource
+	std::string result, version;
+	if ((result = Nnue.ReadNNUEFromResourceChess768(version)) != "")
 	{
 		std::string errorMessage;
 		errorMessage = "Unable to load NNUE: '" + EvalFile + "': " + result;
@@ -85,6 +87,8 @@ int main(int argc, char * argv[])
 		OutputError(errorMessage);
 		runnable = false;
 	}
+	else
+		Output("info string Loaded embedded NNUE: " + version);
 
 	//----------------------------------------------------------------------------------------------------
 

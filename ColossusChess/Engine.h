@@ -56,7 +56,6 @@ extern Perft EnginePerft;
 extern Mate EngineMate;
 
 extern NNUE Nnue;
-extern std::string EvalFileDefault;
 extern std::string EvalFile;
 
 // Miscellaneous
@@ -158,6 +157,8 @@ extern bool Ponder;
 extern bool Pondering;
 extern bool ReplyImmediately;
 
+extern LARGE_INTEGER PerformanceCounterFrequency;
+
 extern uint8_t SideToMove;
 extern bool StopImmediately;
 extern bool StopWhenIterationComplete;
@@ -258,7 +259,7 @@ extern std::string ThisCPUSupportsEISNames;
 extern std::string EISNames[14];
 
 // Large pages
-extern bool LargePagesAvailable;
+extern bool LargePagesEnabled;
 extern size_t LargePageMinimum;
 
 
@@ -268,8 +269,6 @@ void ClearMailboxBoard64(int8_t MailboxBoard64[64]);
 
 void InitialiseMaterialValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 bool MaterialValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
-void InitialisePSTValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
-bool PSTValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 extern const int GamePhaseIncrement[8];
 void InitialiseGamePhase(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 
@@ -279,6 +278,7 @@ std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, Game
 //std::string ConvertPositionToFENForPerft(Brain* brain);
 
 void InitialiseOneOffStuff();
+uint64_t GetMS();
 void* AlignedAllocateMemory(size_t size, size_t alignment);
 void AlignedFreeMemory(void* p);
 void FreeAnyTranspositionTableMemory();

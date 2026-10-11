@@ -44,7 +44,6 @@ void Split(std::string command, std::string *tokens, int *tokenCount, char separ
 
 std::string MyITOA(int i);
 std::string MyUI64TOA(uint64_t i);
-std::string MySI64TOA(int64_t i);
 std::string MyBooleanTOA(bool b);
 std::string MyFTOA(float f, std::string format = "%.2f");
 std::string MyDTOA(double d);

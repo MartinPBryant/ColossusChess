@@ -13,7 +13,6 @@
 #include "Engine.h"
 //#include "BitBoard.h"
 //#include "Brain.h"
-#include "Evaluate.h"
 #include "Utilities.h"
 //#include "SearchNormal.h"
 //#include "SearchPerft.h"
@@ -35,8 +34,7 @@ Mate EngineMate;
 
 // The outer 'engine' creates an instance of the NNUE class which is initialised on loading
 NNUE Nnue;
-std::string EvalFileDefault = "ColossusChess.NNUE";
-std::string EvalFile = EvalFileDefault;
+std::string EvalFile = "";
 
 // Miscellaneous
 bool Quit;
@@ -130,6 +128,8 @@ bool Ponder = false;
 bool Pondering;
 bool ReplyImmediately;
 
+LARGE_INTEGER PerformanceCounterFrequency;
+
 bool StopImmediately;
 bool StopWhenIterationComplete;
 
@@ -161,7 +161,7 @@ std::string ThisCPUSupportsEISNames;
 std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE42", "AVX", "AVX2", "AVX512", "BMI1", "BMI2", "POPCNT", "LZCNT"};
 
 // Large pages
-bool LargePagesAvailable = false;
+bool LargePagesEnabled = false;
 size_t LargePageMinimum = 0;
 
 
@@ -757,54 +757,54 @@ bool MaterialValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* gr
 }
 
 
-void CalculatePSTValues(int8_t MailboxBoard64[64], int openingPST[Sides], int endgamePST[Sides])
-{
-	openingPST[0] = 0;
-	openingPST[1] = 0;
-	endgamePST[0] = 0;
-	endgamePST[1] = 0;
+//void CalculatePSTValues(int8_t MailboxBoard64[64], int openingPST[Sides], int endgamePST[Sides])
+//{
+//	openingPST[0] = 0;
+//	openingPST[1] = 0;
+//	endgamePST[0] = 0;
+//	endgamePST[1] = 0;
+//
+//	for (int square = A1; square <= H8; square++)
+//	{
+//		int8_t piece = MailboxBoard64[square];
+//		if (piece != Empty)
+//		{
+//			if (piece > 0)
+//			{
+//				openingPST[0] += OpeningPSTs[piece - 1][square ^ 56];
+//				endgamePST[0] += EndgamePSTs[piece - 1][square ^ 56];
+//			}
+//			else
+//			{
+//				openingPST[1] += OpeningPSTs[-piece - 1][square];
+//				endgamePST[1] += EndgamePSTs[-piece - 1][square];
+//			}
+//		}
+//	}
+//}
 
-	for (int square = A1; square <= H8; square++)
-	{
-		int8_t piece = MailboxBoard64[square];
-		if (piece != Empty)
-		{
-			if (piece > 0)
-			{
-				openingPST[0] += OpeningPSTs[piece - 1][square ^ 56];
-				endgamePST[0] += EndgamePSTs[piece - 1][square ^ 56];
-			}
-			else
-			{
-				openingPST[1] += OpeningPSTs[-piece - 1][square];
-				endgamePST[1] += EndgamePSTs[-piece - 1][square];
-			}
-		}
-	}
-}
+//bool PSTValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
+//{
+//	int openingPST[Sides];
+//	int endgamePST[Sides];
+//
+//	CalculatePSTValues(MailboxBoard64, openingPST, endgamePST);
+//
+//	return (openingPST[0] == grp->totalOpeningPST[0]) && (openingPST[1] == grp->totalOpeningPST[1]) && (endgamePST[0] == grp->totalEndgamePST[0]) && (endgamePST[1] == grp->totalEndgamePST[1]);
+//}
 
-bool PSTValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
-{
-	int openingPST[Sides];
-	int endgamePST[Sides];
-
-	CalculatePSTValues(MailboxBoard64, openingPST, endgamePST);
-
-	return (openingPST[0] == grp->totalOpeningPST[0]) && (openingPST[1] == grp->totalOpeningPST[1]) && (endgamePST[0] == grp->totalEndgamePST[0]) && (endgamePST[1] == grp->totalEndgamePST[1]);
-}
-
-void InitialisePSTValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
-{
-	int openingPST[Sides];
-	int endgamePST[Sides];
-
-	CalculatePSTValues(MailboxBoard64, openingPST, endgamePST);
-
-	grp->totalOpeningPST[0] = openingPST[0];
-	grp->totalOpeningPST[1] = openingPST[1];
-	grp->totalEndgamePST[0] = endgamePST[0];
-	grp->totalEndgamePST[1] = endgamePST[1];
-}
+//void InitialisePSTValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp)
+//{
+//	int openingPST[Sides];
+//	int endgamePST[Sides];
+//
+//	CalculatePSTValues(MailboxBoard64, openingPST, endgamePST);
+//
+//	grp->totalOpeningPST[0] = openingPST[0];
+//	grp->totalOpeningPST[1] = openingPST[1];
+//	grp->totalEndgamePST[0] = endgamePST[0];
+//	grp->totalEndgamePST[1] = endgamePST[1];
+//}
 
 const int GamePhaseIncrement[8] = { 0, 0, 3, 3, 5, 9, 0, 0 };
 
@@ -860,6 +860,9 @@ void InitialiseOneOffStuff()
 	TC.MateMaximumReversibleMoves = 100;
 	TC.MateFixedPieces = "";
 
+	// Get the PerformanceCounterFrequency once here for use in the timer function later
+	QueryPerformanceFrequency(&PerformanceCounterFrequency);
+
 	// Initialise data structures
 
 	// Initialise transposition table (N.B. can't 'clear' it here because it won't have been allocated yet!)
@@ -880,6 +883,14 @@ void InitialiseOneOffStuff()
 	// Embedded EGTBs
 	EndgameTablebasesInitialised = tb_init("NUL");
 	EndgameTablebasesPiecesFound = TB_LARGEST;
+}
+
+uint64_t GetMS()
+{
+	// GetTickCount64() only has a 16ms resolution so we use a performance counter
+	LARGE_INTEGER now;
+	QueryPerformanceCounter(&now);
+	return (now.QuadPart * 1000.0) / PerformanceCounterFrequency.QuadPart;
 }
 
 //----------------------------------------------------------------------------------------------------

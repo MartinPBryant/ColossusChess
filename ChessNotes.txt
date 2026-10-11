@@ -145,7 +145,7 @@ Same ratio...
 BEFORE RELEASING A NEW VERSION...
 =================================
 For future releases it will be useful to keep a non-PGO version for testing against future versions!!!
-Set AC1=1 and do a long search to ensure we're not incrementing any other counters anywhere
+Set AC1=1 (in ClearAnalysisCounters in Utilities.cpp) and do a long search to ensure we're not incrementing any other counters anywhere
 Make sure EXPERIMENTAL is undefined (in Engine.h)
 Make sure CRASHLOCATIONDEF is undefined (in Engine.h)
 Make sure PRINTTREEDEF is undefined (in Engine.h)
@@ -153,12 +153,13 @@ Make sure GATHERSTATSDEF is undefined (in Engine.h)
 Make sure BREAKONCURRENTVARIATIONDEF is undefined (in Engine.h)
 Do a go depth 9 to make sure we don't get any printtree files generated
 Check .ini file doesn't have 'logging' on!
+Ensure we have binary edited embedded network file with version info e.g. "Chess768 : 128 million : 01/10/26 14:53:10"
 Run debug version overnight on infinite search to see if any asserts fail (apart from assert(standPatScore == Evaluate(sideToMove)) and assert(normalBrain.gameRecordPointer->staticEvaluation == Evaluate(sideToMove)) - put back after testing!)
 Compile engine (PGO AND NonPGO version!) into 'new' folder and rename ready to go and confirm it identifies itself correctly with the UCI command
-{N.B. now need to compile Basic and Advanced versions!}
+{N.B. may need to compile Basic and Advanced versions if we support different extended instruction sets!}
 Try it in several GUIs! (Arena, ChessGUI, CuteChess, Banksia)
 Verify complete Perft file for normal and FRC chess (in release AND debug modes) (e.g. go perft 6 file)
-Run -TS0, -TS1 & -TS2
+Run -TS0, -TS1 & -TS2 (now removed since NNUE)
 Run test tourneys for normal and FRC chess from the 'new' folder using 1'+1"{tc=60+1} AND 40/40s{tc=40/40}
 Run test tourney for normal with 4 threads v 1 thread to ensure we haven't got the 'StopImmediately slowdown' issue back! or messaging crashes!
 Check pondering working manually - i.e. run human test game in Arena with ponder on to ensure I can see it pondering while I'm thinking!
@@ -266,16 +267,37 @@ ALL
 ===
 
 
-tidy up old HCE?
-remember to put tempo back in the eval! - redundant now
+still getting lichess ponder errors!!!
+
+
+egtb draw scores - prefer piece count?
+
+
+run an FRC tourney using SF19? for training
+
+do some FRC tests!
 
 
 
+sometimes instead of taking quick DBR it sacs material thinking it can still DBR but finds out it can't!!!!
+offset DBRs by ply somehow??? distinguish main/QS? <=ID / >ID?
+are DBRs causing blunders??? maybe use 2nd repeat?
+offset DBRs by number of Ps difference? use gamephase/material vars? use mat difference/128? also do for EGTB draws
 
-div losing scores by 2?
+
+do blunder analysis on ALL Lichess lost games! it's still doing them!
+-you can use Lichess or Myracle
+
+
+scale NNUE values somehow for display (outside of draw scores?)
+
+
+
+div losing scores by 2? for display only
 
 
 -gen tens of millions of 7-PC(!) egtb posns? no point in doing 6 or fewer? because most people have them now and so you'll just look the answers up and branches terminate when you hit them.
+--seemed to play worse! :O
 -how about K&P endings?
 
 
@@ -300,7 +322,7 @@ the engine could accumulate all the messages from the UI in the current game and
 -N.B. THERE ARE TWO DIFFERENT ERRORS! 'No best move returned' AND 'ZERO MOVES'
 -the 'no best move' errors do seem to be in the endgame after probing the 7 pc when the timer will be running!!!!! but surely we have to do at least 4 ply?!!!
 -did the lichess controller send a STOP command??? :O DID IT RUN OUT OF TIME PROBING THE 7-PC???
--is it because the opp didn't play the ponder move so the UI tells Colossus to stop before it's got any move but it doesn't matter?
+-is it because the opp didn't play the ponder move so the UI tells Colossus to stop before it's got any move but it doesn't matter?!!
 
 
 

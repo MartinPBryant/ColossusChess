@@ -2741,8 +2741,8 @@ void Brain::MakeMove(int sideToMove)
 	(GameRecordPointer + 1)->castlingStatus = GameRecordPointer->castlingStatus;
 	*(uint32_t*)(&(GameRecordPointer + 1)->totalMaterial[0]) = *(uint32_t*)(&GameRecordPointer->totalMaterial[0]);
 	*(uint64_t*)(&(GameRecordPointer + 1)->gamePhase[0]) = *(uint64_t*)(&GameRecordPointer->gamePhase[0]);
-	*(uint32_t*)(&(GameRecordPointer + 1)->totalOpeningPST[0]) = *(uint32_t*)(&GameRecordPointer->totalOpeningPST[0]);
-	*(uint32_t*)(&(GameRecordPointer + 1)->totalEndgamePST[0]) = *(uint32_t*)(&GameRecordPointer->totalEndgamePST[0]);
+	//*(uint32_t*)(&(GameRecordPointer + 1)->totalOpeningPST[0]) = *(uint32_t*)(&GameRecordPointer->totalOpeningPST[0]);
+	//*(uint32_t*)(&(GameRecordPointer + 1)->totalEndgamePST[0]) = *(uint32_t*)(&GameRecordPointer->totalEndgamePST[0]);
 
 	GameRecordPointer++;
 
@@ -2763,8 +2763,8 @@ void Brain::MakeMove(int sideToMove)
 	hash64 ^= TranspositionTableRandoms[sideToMove][abs(currentMove->fromSquarePiece)][currentMove->mf.toSquare] ^ TranspositionTableRandoms[sideToMove][abs(currentMove->fromSquarePiece)][currentMove->mf.fromSquare];
 
 	int pstXOR = (sideToMove ? 0 : 56);
-	GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
-	GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
+	//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
+	//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[abs(currentMove->fromSquarePiece) - 1][currentMove->mf.fromSquare ^ pstXOR];
 
 
 	// Piece specific updates
@@ -2788,8 +2788,8 @@ void Brain::MakeMove(int sideToMove)
 			// Update the material etc
 			GameRecordPointer->totalMaterial[sideToMove] += MaterialValue[promotionPiece] - MVPawn;
 			GameRecordPointer->gamePhase[sideToMove] += GamePhaseIncrement[promotionPiece];// -GamePhaseIncrement[Pawn];
-			GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
-			GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
+			//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - OpeningPSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
+			//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[promotionPiece - 1][currentMove->mf.toSquare ^ pstXOR] - EndgamePSTs[Pawn - 1][currentMove->mf.toSquare ^ pstXOR];
 		}
 		else if (
 			(abs(currentMove->mf.toSquare - currentMove->mf.fromSquare) == 16)
@@ -2835,8 +2835,8 @@ void Brain::MakeMove(int sideToMove)
 					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile];
-					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
-					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
+					//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
+					//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ pstXOR];
 				}
 				else
 				{
@@ -2846,8 +2846,8 @@ void Brain::MakeMove(int sideToMove)
 					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile];
-					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
-					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
+					//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
+					//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ pstXOR];
 				}
 			}
 			else
@@ -2859,8 +2859,8 @@ void Brain::MakeMove(int sideToMove)
 					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + H];
-					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
-					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
+					//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
+					//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + F) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + H) ^ pstXOR];
 				}
 				else
 				{
@@ -2869,8 +2869,8 @@ void Brain::MakeMove(int sideToMove)
 					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
 					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + A];
-					GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
-					GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
+					//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - OpeningPSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
+					//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + D) ^ pstXOR] - EndgamePSTs[Rook - 1][(BackRankBaseSquareIndex[sideToMove] + A) ^ pstXOR];
 				}
 			}
 		}
@@ -2884,8 +2884,8 @@ void Brain::MakeMove(int sideToMove)
 		PiecesBB[sideToMove ^ 1][AllPieces] ^= CreateBitboardFromSquare(currentMove->mf.toSquare);
 		GameRecordPointer->totalMaterial[sideToMove ^ 1] -= MaterialValue[abs(currentMove->toSquarePiece)];
 		GameRecordPointer->gamePhase[sideToMove ^ 1] -= GamePhaseIncrement[abs(currentMove->toSquarePiece)];
-		GameRecordPointer->totalOpeningPST[sideToMove ^ 1] -= OpeningPSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
-		GameRecordPointer->totalEndgamePST[sideToMove ^ 1] -= EndgamePSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
+		//GameRecordPointer->totalOpeningPST[sideToMove ^ 1] -= OpeningPSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
+		//GameRecordPointer->totalEndgamePST[sideToMove ^ 1] -= EndgamePSTs[abs(currentMove->toSquarePiece) - 1][currentMove->mf.toSquare ^ pstXOR ^ 56];
 
 		// Remove the to square piece from the to square
 		hash64 ^= TranspositionTableRandoms[sideToMove ^ 1][abs(currentMove->toSquarePiece)][currentMove->mf.toSquare];
@@ -2901,8 +2901,8 @@ void Brain::MakeMove(int sideToMove)
 				MailboxBoard64[currentMove->mf.toSquare] = Empty;
 				hash64 ^= TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare + PawnMoveOffset[sideToMove]] ^ TranspositionTableRandoms[sideToMove][Pawn][currentMove->mf.toSquare];
 
-				GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
-				GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
+				//GameRecordPointer->totalOpeningPST[sideToMove] += OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - OpeningPSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
+				//GameRecordPointer->totalEndgamePST[sideToMove] += EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare + PawnMoveOffset[sideToMove]) ^ pstXOR] - EndgamePSTs[Pawn - 1][(currentMove->mf.toSquare) ^ pstXOR];
 			}
 		}
 		else
@@ -2944,8 +2944,6 @@ void Brain::MakeMove(int sideToMove)
 	GameRecordPointer->transpositionTableHash64 = hash64;
 	GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
 
-	//std::memcpy(GameRecordPointer->nnueAccumulatorsHalfKP, (GameRecordPointer - 1)->nnueAccumulatorsHalfKP, sizeof(float) * NNUE::FEATURE_DIM_HALFKP * 2);
-	//Nnue.UpdateAccumulatorHalfKP((*this));
 	std::memcpy(GameRecordPointer->nnueAccumulatorsChess768, (GameRecordPointer - 1)->nnueAccumulatorsChess768, sizeof(int16_t) * 2 * NNUE::FEATURES_WEIGHTS_COUNT_CHESS768);
 	Nnue.UpdateAccumulatorsChess768((*this));
 	assert(Nnue.VerifyAccumulatorsChess768(*this));
@@ -3786,24 +3784,6 @@ int Brain::KnownLowMaterialDraws(int sideToMove)
 	//	}
 
 	return 0;
-}
-
-bool Brain::KnownLowMaterialWins()
-{
-	// Lone white king?
-	if (GameRecordPointer->totalMaterial[0] == 0)
-	{
-		if (PiecesBB[1][Queen] | PiecesBB[1][Rook])
-			return true;
-	}
-	// Lone black king?
-	if (GameRecordPointer->totalMaterial[1] == 0)
-	{
-		if (PiecesBB[0][Queen] | PiecesBB[0][Rook])
-			return true;
-	}
-
-	return false;
 }
 
 bool Brain::KingCanLegallyMove(int sideToMove)

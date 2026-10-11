@@ -1,5 +1,9 @@
 #pragma once
 
+#define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
+#include <windows.h>
+#include <winnt.h>
+
 //----------------------------------------------------------------------------------------------------
 
 class Normal
@@ -75,13 +79,10 @@ public:
 	void Normal::TestSEE();
 
 	std::string Normal::ThreadIdSuffix();
-	//void AddMessageToQueue(std::string message, bool lastMessageWasAProgressMessage);
-	//void ReverseMessageQueueIndex();
 	void ShowIterationStartMessage();
 	void ShowProgressMessage(uint32_t move, int movesMade, short bestMoveScore, short alpha, short beta);
 	void ShowFailedLowMessage(short rootAlpha);
 	void ShowIterationFinishMessage(uint32_t hashfull);
-	//void ShowQueuedMessages();
 
 	void SaveRootMoveData(uint32_t move, uint64_t totalNodes, short score);
 	void UpdateRootMovePriority(uint32_t move);
@@ -101,13 +102,7 @@ public:
 	void ClearCounterMoveHistory();
 
 	void StaticEvaluation();
-	void TestSymmetry0();
-	void TestSymmetry1();
-	void TestSymmetry2();
-	int EvaluateInner(int sideToMove);
-	short EvaluateNN(int sideToMove, int epSquare);
 	short Evaluate(int sideToMove);
-	short EvaluateNNUE(int sideToMove);
 
 	void TimeUp(float divisor);
 	short DrawScore(int sideToMove);
@@ -174,7 +169,6 @@ private:
 	std::string LongestLineWithoutQS;
 	std::string PreviousIterationsMessages;
 	std::string CurrentIterationsMessages;
-	uint64_t LastTickCount; // Set in TimeUp method
 
 	uint64_t LastProgressMessageTickCount;
 	uint32_t UseTTAndPruning;
@@ -189,7 +183,8 @@ private:
 	int MessageQueueIndex = 0;
 	bool LastMessageWasAProgressMessage = false;
 	bool MessagesQueued = false;
-	std::chrono::time_point<std::chrono::steady_clock> StartClock, MessagesLastDisplayedClock;
+	uint64_t StartTickCount, CurrentTickCount, PreviousTickCount; // Set in TimeUp method
+	float PreviousDivisor;
 
 	static int CrashLocation;
 	static std::string ThreadResults[ThreadsMax];
@@ -197,8 +192,6 @@ private:
 	int lateMovePruningMargins[2][9] = { 2,2,2,3,3,3,3,3,3, 4,4,5,8,10,14,18,22,27 };
 
 	uint64_t TranspositionTableStores, TranspositionTableStoresSuccessful, TranspositionTableProbes, TranspositionTableProbesSuccessful;
-
-	//uint64_t(*passedSTM[Sides])(uint64_t stmPpawns, uint64_t sntmPawns) = { passedSide1 , passedSide2 };
 
 	//bool SingularExtending;
 };

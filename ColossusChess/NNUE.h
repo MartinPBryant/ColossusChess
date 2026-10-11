@@ -27,12 +27,13 @@ public:
 	NNUE();
 	~NNUE();
 
-	std::string ReadNNUEFromFileChess768(std::string filename);
-	std::string ReadNNUEFromResourceChess768();
+	std::string ReadNNUEFromFileChess768(std::string filename, std::string& version);
+	std::string ReadNNUEFromResourceChess768(std::string& version);
 	void UpdateAccumulatorsChess768(const Brain& brain);
 	void InitialiseAccumulatorsChess768(const Brain& brain);
 	bool VerifyAccumulatorsChess768(const Brain& brain);
-	int16_t EvaluateChess768(const Brain& brain, int sideToMove);
+	int16_t RunNetworkChess768(const Brain& brain, int sideToMove);
+	//int16_t EvaluateChess768(const Brain& brain, int sideToMove);
 	void NNUE::DumpAccumulatorsChess768(int16_t* acc);
 
 private:
@@ -42,7 +43,6 @@ private:
 	alignas(32) int16_t outputWeightsChess768[OUTPUT_WEIGHTS_COUNT_CHESS768];
 	int16_t outputBiasChess768;
 
-	int RunNetworkChess768(const Brain& brain, int sideToMove);
 	void AddFeatureToAccumulatorChess768(int16_t* accumulator, int featureIndex);
 	void SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, int featureIndex);
 	int FeatureIndexChess768(int pieceSquare, int pieceType, int colour);

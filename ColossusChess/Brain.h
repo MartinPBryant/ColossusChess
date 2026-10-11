@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GlobalTypes.h"
-#include "Evaluate.h"
 
 class Brain
 {
@@ -56,7 +55,6 @@ public:
 	bool SEETargetPieceUnsafe(int toSquare, int sideToMove, int offset);
 
 	int KnownLowMaterialDraws(int sideToMove);
-	bool KnownLowMaterialWins();
 	bool KingCanLegallyMove(int sideToMove);
 	bool ForcingLine(int ply, int offset);
 	int SafePawnMoves(int sideToMove);

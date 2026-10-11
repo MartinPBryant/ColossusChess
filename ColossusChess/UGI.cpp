@@ -9,7 +9,6 @@
 //#include "SearchMate.h"
 //#include "SearchPerft.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
-#include "Evaluate.h"
 #include "Utilities.h"
 
 //----------------------------------------------------------------------------------------------------
@@ -33,7 +32,7 @@ void SendOptions()
 	Output("option name SyzygyProbe7PieceInTree type check default false");
 	Output("option name UCI_Chess960 type check default false");
 	Output("option name UseLargePages type check default true");
-	Output("option name EvalFile type string default " + EvalFileDefault);
+	Output("option name EvalFile type string default");
 	//Output("option name UseLichessEGTB type check default true");
 	//Output("option name MateFullWidth type check default false");
 	Output("option name MateAllChecks type check default false");
@@ -219,19 +218,21 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 	else if (nameUpperCase == "EVALFILE")
 	{
 		std::string result;	
-		if ((result = Nnue.ReadNNUEFromFileChess768(value.c_str())) == "")
+		std::string version;
+		if ((result = Nnue.ReadNNUEFromFileChess768(value.c_str(), version)) == "")
 		{
 			EvalFile = value;
 			//if (IsDebug)
-			Output("info string EvalFile set to '" + EvalFile + "'");
+			Output("info string EvalFile set to '" + EvalFile + "': Loaded NNUE: " + version);
 		}
 		else
 		{
-			std::string errorMesage = "Invalid NNUE file : " + value + ": " + result;
+			// Ensure the embedded NNUE is reloaded
+			Nnue.ReadNNUEFromResourceChess768(version);
+
+			std::string errorMesage = "Invalid NNUE file : " + value + ": " + result + ": Reverting to embedded network: " + version;
 			Output("info string *** Error! " + errorMesage);
 			OutputError(errorMesage);
-			// Ensure the embedded NNUE is relaoded
-			Nnue.ReadNNUEFromResourceChess768();
 		}
 	}
 
@@ -645,13 +646,19 @@ std::string ProcessInput(std::string currentLine)
 			}
 			else if (commandToken == "QUIT")
 			{
-				// Quit the program
-				Quit = true;
+				// Tell the engine to finish any running search
+				StopImmediately = true;
+				StopWhenIterationComplete = true;
+				Pondering = false;
+				Sleep(100); // Give it a chance to finish
 
 				FreeAnyTranspositionTableMemory();
 
 				// SYZYGY EGTBs
 				tb_free();
+
+				// Quit the program
+				Quit = true;
 			}
 			else if (commandToken == "-STOPAFTERITERATION")
 			{
@@ -686,27 +693,6 @@ std::string ProcessInput(std::string currentLine)
 				// Static evaluation
 				Normal* normal = new Normal;
 				normal->StaticEvaluation();
-				delete normal;
-			}
-			else if (commandToken == "-TS0")
-			{
-				// Test evaluation function symmetry #0
-				Normal* normal = new Normal;
-				normal->TestSymmetry0();
-				delete normal;
-			}
-			else if (commandToken == "-TS1")
-			{
-				// Test evaluation function symmetry #1
-				Normal* normal = new Normal;
-				normal->TestSymmetry1();
-				delete normal;
-			}
-			else if (commandToken == "-TS2")
-			{
-				// Test evaluation function symmetry #2
-				Normal* normal = new Normal;
-				normal->TestSymmetry2();
 				delete normal;
 			}
 

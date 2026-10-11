@@ -211,11 +211,6 @@ std::string MyUI64TOA(uint64_t i)
 	return std::to_string(i);
 }
 
-inline std::string MySI64TOA(int64_t i)
-{
-	return std::to_string(i);
-}
-
 std::string MyBooleanTOA(bool b)
 {
 	return b ? "true" : "false";
@@ -256,15 +251,15 @@ void DisplayAnalysisCounters()
 {
 	if (AC1 != 0)
 	{
-		Output("AC1=" + MySI64TOA(AC1));
-		Output("AC2=" + MySI64TOA(AC2));
-		Output("AC3=" + MySI64TOA(AC3));
-		Output("AC4=" + MySI64TOA(AC4));
-		Output("AC5=" + MySI64TOA(AC5));
-		Output("AC6=" + MySI64TOA(AC6));
-		Output("AC7=" + MySI64TOA(AC7));
-		Output("AC8=" + MySI64TOA(AC8));
-		Output("AC9=" + MySI64TOA(AC9));
+		Output("AC1=" + std::to_string(AC1));
+		Output("AC2=" + std::to_string(AC2));
+		Output("AC3=" + std::to_string(AC3));
+		Output("AC4=" + std::to_string(AC4));
+		Output("AC5=" + std::to_string(AC5));
+		Output("AC6=" + std::to_string(AC6));
+		Output("AC7=" + std::to_string(AC7));
+		Output("AC8=" + std::to_string(AC8));
+		Output("AC9=" + std::to_string(AC9));
 	}
 }
 
@@ -508,13 +503,15 @@ void CPUInfo()
 			ThisCPUSupportsEISNames += EISNames[i] + " ";
 	trim(ThisCPUSupportsEISNames);
 
-	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported=" + ThisCPUSupportsEISNames + "\n");
+	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported=" + ThisCPUSupportsEISNames);
 }
 
 void LargePages()
 {
 	HANDLE TokenHandle{};
 	LUID luid{};
+
+	LargePagesEnabled = false;
 
 	LargePageMinimum = GetLargePageMinimum(); // Typically 2MB
 
@@ -535,14 +532,16 @@ void LargePages()
 				{
 					// Was it actually enabled?
 					if (GetLastError() == ERROR_SUCCESS)
-						LargePagesAvailable = true;
+						LargePagesEnabled = true;
 				}
 				CloseHandle(TokenHandle);
 			}
 	
 	//LargePagesAvailable = false; //TEMP
 	std::string s = "";
-	if (!LargePagesAvailable)
+	if (!LargePagesEnabled)
 		s = "NOT ";
-	Output("info string 'Large pages' " + s + "available\n");
+	else
+		s = "(" + std::to_string(LargePageMinimum) + " bytes) ";
+	Output("info string 'Large pages' " + s + "enabled");
 }

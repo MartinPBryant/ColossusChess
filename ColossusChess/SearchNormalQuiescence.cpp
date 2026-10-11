@@ -43,6 +43,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		//OutputError("Reached MaximumPly in QS!\nIterationPly=" + MyITOA(IterationPly) + "\nCurrent line=" + normalBrain.CurrentLine(ply));
 		return Evaluate(sideToMove);
 	}
+	
+	//----------------------------------------------------------------------------------------------------
 
 	NodeCountQuiescenceSearch++; // About 67% of all searched nodes are in the QS
 
@@ -84,8 +86,10 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		}
 
 		// Draw-by-repetition (assume a DBR after first repeat in the QS)
-		int cycles = 4;
-		int requiredRepeats = 1;
+		int cycles;
+		int requiredRepeats;
+		cycles = 4;
+		requiredRepeats = 1;
 		//cycles = 8; // For testing
 		//requiredRepeats = 2;
 
@@ -161,7 +165,6 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	short futilityBaseScore;
 	short standPatScore = INT16_MIN; // This may be retrieved from the TT below
 
-	//currentGameRecordPointer->dangerConditions.ui64 = 0; // These may get set if we find a TT entry
 	currentGameRecordPointer->dangerConditions = 0; // These may get set if we find a TT entry
 	*currentGameRecordPointer->principalVariationPointer = PVTUnknown; // Default PV terminator
 #ifdef _DEBUG
@@ -201,13 +204,8 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				tteSubTreeDepth = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->subTreeDepth;
 				uint8_t flag = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->flag;
 				uint8_t tteEUL = (flag & TTFlagEULMask);
-				//currentGameRecordPointer->dangerConditions.dc.isO1PCM = flag & TTFlagOnlyOnePieceCanMove;
-				//currentGameRecordPointer->dangerConditions.dc.isTWM = flag & TTFlagThreatenedWithMate;
-				//currentGameRecordPointer->dangerConditions.dc.isO1M = flag & TTFlagOnlyOneMove;
-				//currentGameRecordPointer->dangerConditions.dc.isFMTP = flag & TTFlagFewerMovesThanPieces;
 				currentGameRecordPointer->dangerConditions |= flag & TTFlagIsInDangerMask;
 				standPatScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
-				//assert((standPatScore == INT16_MIN) || (standPatScore == Evaluate(sideToMove)));
 				assert((standPatScore == INT16_MIN) || (std::abs(standPatScore - Evaluate(sideToMove)) <= 1));
 				short tteScore;
 				tteScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->score;
@@ -284,95 +282,85 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 #pragma region EGTB
 	// Is this position in the endgame tablebases?
 	short egtbScore = -MatingIn0Score; // This may be tested at the end of the node
-	if (EndgameTablebasesPiecesFound == 0)
+	int totalPieces = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]); // Get how many pieces remain on the board
+	if (
+		(totalPieces <= EndgameTablebasesTreeProbeLimitQS)
+		//&& (currentGameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases when no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13) : This condition would realistically never fail in the QS in a real game so it is commented out for efficiency!
+		&& ((alpha < EGTBWinningScore + 1000 - ply) && (beta > EGTBLosingScore - 1000 + ply)) // Is the current window such that no EGTB score can possibly be in it? If so, skip the EGTB probe. This allows us to 'see-thru' the EGTBs to find any mates in this subtree.
+		)
 	{
-		// Just in case we don't have any EGTBs
-		if (normalBrain.KnownLowMaterialDraws(sideToMove) == PVTDrawMinimumMaterial)
+		GATHERSTATS(EndgameTablebasesProbes++;);
+
+		uint32_t result;
+		result = tb_probe_wdl(
+			normalBrain.PiecesBB[0][AllPieces],
+			normalBrain.PiecesBB[1][AllPieces],
+			normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
+			normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
+			normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
+			normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
+			normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
+			normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
+			currentGameRecordPointer->epSquare,
+			(sideToMove == 0)
+		);
+
+		// Probing the EGTB (even on a SSDD) can be very slow (>>100ms)
+		// We want the QS to be as fast as possible so we don't check TimeUp/StopImmediately at the start of the function
+		// Therefore we must do it after an EGTB probe to minimise any overstep of the time control (especially at hyper-bullet speeds) as we might probe the EGTB many times in a single QS
+		// Even with this, we sometimes overstep at my standard 100ms/move testing. It's minimal with the 4pc but naturally increases as we move to the 5pc and 6pc.
+		TimeUp(0.2f);
+		if (StopImmediately)
+			return alpha;
+
+		if (result != TB_RESULT_FAILED)
 		{
-			*currentGameRecordPointer->principalVariationPointer = PVTDrawMinimumMaterial;
-			return drawScore;
-		}
-	}
-	else
-	{
-		int totalPieces = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]); // Get how many pieces remain on the board
-		if (
-			(totalPieces <= EndgameTablebasesTreeProbeLimitQS)
-			//&& (currentGameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases when no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13) : This condition would realistically never fail in the QS in a real game so it is commented out for efficiency!
-			&& ((alpha < EGTBWinningScore + 1000 - ply) && (beta > EGTBLosingScore - 1000 + ply)) // Is the current window such that no EGTB score can possibly be in it? If so, skip the EGTB probe. This allows us to 'see-thru' the EGTBs to find any mates in this subtree.
-			)
-		{
-			GATHERSTATS(EndgameTablebasesProbes++;);
+			EndgameTablebasesHits++;
 
-			uint32_t result;
-			result = tb_probe_wdl(
-				normalBrain.PiecesBB[0][AllPieces],
-				normalBrain.PiecesBB[1][AllPieces],
-				normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
-				normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
-				normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
-				normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
-				normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
-				normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
-				currentGameRecordPointer->epSquare,
-				(sideToMove == 0)
-			);
-
-			// Probing the EGTB (even on a SSDD) can be very slow (>>100ms)
-			// We want the QS to be as fast as possible so we don't check TimeUp/StopImmediately at the start of the function
-			// Therefore we must do it after an EGTB probe to minimise any overstep of the time control (especially at hyper-bullet speeds) as we might probe the EGTB many times in a single QS
-			// Even with this, we sometimes overstep at my standard 100ms/move testing. It's minimal with the 4pc but naturally increases as we move to the 5pc and 6pc.
-			TimeUp(0.2f);
-			if (StopImmediately)
-				return alpha;
-
-			if (result != TB_RESULT_FAILED)
+			switch (result)
 			{
-				//short egtbScore;
-
-				EndgameTablebasesHits++;
-
-				switch (result)
-				{
-				case TB_LOSS:
-					egtbScore = EGTBLosingScore - 1000 + ply;
-					// If we've already got a 'losing' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
-					if (isPVNode)
-						if (beta <= EGTBLosingScore)
-							goto EGTBExit;
-					break;
-				case TB_BLESSED_LOSS:
-					egtbScore = -5;
-					break;
-				case TB_DRAW:
-					// Bias EGTB draw scores towards the side with the most material (so +4, 0 or -4)
-					// So it prefers a material up EGTB draw (+4) to other draws, e.g. DBR etc (+2...0...-2), to a material down EGTB draw (-4)
-					egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1]) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1]));
-					break;
-				case TB_CURSED_WIN:
-					egtbScore = 5;
-					break;
-				case TB_WIN:
-					egtbScore = EGTBWinningScore + 1000 - ply;
-					// If we've already got a 'winning' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
-					if (isPVNode)
-						if (alpha >= EGTBWinningScore)
-							goto EGTBExit;
-					break;
-				}
-
-				//AddToNormalTranspositionTable(0, ply, egtbScore, TTFlagExact, PVTEGTB, egtbScore); // I tried storing EGTB results in the TT but no significant ELO difference
-				*currentGameRecordPointer->principalVariationPointer = PVTEGTB;
-				return egtbScore;
+			case TB_LOSS:
+				egtbScore = EGTBLosingScore - 1000 + ply;
+				// If we've already got a 'losing' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
+				if (isPVNode)
+					if (beta <= EGTBLosingScore)
+						goto EGTBExit;
+				break;
+			case TB_BLESSED_LOSS:
+				egtbScore = -5;
+				break;
+			case TB_DRAW:
+				// Bias EGTB draw scores towards the side with the most material (so +4, 0 or -4)
+				// So it prefers a material up EGTB draw (+4) to other draws, e.g. DBR etc (+2...0...-2), to a material down EGTB draw (-4)
+				//egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1]) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1]));
+				//egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1] + 2) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1] - 2));
+				//egtbScore = (normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]) / 64;
+				egtbScore = (normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]) / 128;
+				break;
+			case TB_CURSED_WIN:
+				egtbScore = 5;
+				break;
+			case TB_WIN:
+				egtbScore = EGTBWinningScore + 1000 - ply;
+				// If we've already got a 'winning' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
+				if (isPVNode)
+					if (alpha >= EGTBWinningScore)
+						goto EGTBExit;
+				break;
 			}
-			else
-			{
-				EndgameTablebasesErrors = true;
-				EndgameTablebasesErrorCounts[totalPieces]++;
-			}
+
+			//AddToNormalTranspositionTable(0, ply, egtbScore, TTFlagExact, PVTEGTB, egtbScore); // I tried storing EGTB results in the TT but no significant ELO difference
+			*currentGameRecordPointer->principalVariationPointer = PVTEGTB;
+			return egtbScore;
 		}
-	EGTBExit:;
+		//else
+		//{
+		//	// These aren't necessarily 'errors' as it could be caused by a missing EGTB file!
+		//	EndgameTablebasesErrors = true;
+		//	EndgameTablebasesErrorCounts[totalPieces]++;
+		//}
 	}
+EGTBExit:;
 #pragma endregion
 
 	//----------------------------------------------------------------------------------------------------
@@ -383,15 +371,7 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 	{
 		// Get the 'stand pat' evaluation (About 77% of all QS nodes get evaluated here)
 		if (standPatScore == INT16_MIN) // The value may already have been retrieved from the TT
-		{
-			//if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
-			//{
-			//	standPatScore = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
-			//	assert(standPatScore == Evaluate(sideToMove));
-			//}
-			//else
-				standPatScore = Evaluate(sideToMove);
-		}
+			standPatScore = Evaluate(sideToMove);
 		bestMoveScore = standPatScore;
 
 		// tteLowerLimitScore will only have been set if tteSubTreeDepth >= depthRemaining. It is a lower limit from a cut node
@@ -598,7 +578,6 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 				{
 					// This move has returned a score >= beta, therefore this is a 'Cut' node
 					// The currentMoveScore is a lower bound (floor) on the exact score of the node (i.e. the exact score might be greater than currentMoveScore, it is "at least" currentMoveScore)
-					//AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP + currentGameRecordPointer->dangerConditions.dc.isO1PCM, currentMove.ui32, standPatScore, tteFound);
 					AddToNormalTranspositionTable(depthRemaining, ply, currentMoveScore, TTFlagLower + currentGameRecordPointer->dangerConditions, currentMove.ui32, standPatScore, tteFound);
 					return currentMoveScore;
 				}
@@ -653,7 +632,6 @@ short Normal::TreeSearchNormalQuiescence(short alpha, short beta, int ply, int d
 		// The children of an All node are Cut nodes. The parent of an All node is a Cut node. The ply distance of an All node to its PV ancestor is even.
 		assert((bestMoveScore > -MatingIn0Score) && (bestMoveScore <= alpha));
 		assert(*currentGameRecordPointer->principalVariationPointer == PVTUnknown);
-		//AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->dangerConditions.dc.isTWM + currentGameRecordPointer->dangerConditions.dc.isO1M + currentGameRecordPointer->dangerConditions.dc.isFMTP + currentGameRecordPointer->dangerConditions.dc.isO1PCM, tteBestMove.ui32, standPatScore, tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
 		AddToNormalTranspositionTable(depthRemaining, ply, bestMoveScore, TTFlagUpper + currentGameRecordPointer->dangerConditions, tteBestMove.ui32, standPatScore, tteFound); // Keep any existing tteBestMove even though it didn't raise alpha
 	}
 	else

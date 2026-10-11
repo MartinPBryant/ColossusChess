@@ -1004,7 +1004,7 @@ void Perft::AllocatePerftTranspositionTable()
 	if (PerftTranspositionTableBuckets > 0)
 	{
 		PerftTranspositionTableBucketsMask = PerftTranspositionTableBuckets - 1;
-		if (LargePagesAvailable && UseLargePages)
+		if (LargePagesEnabled && UseLargePages)
 		{
 			PerftTranspositionTablePointer = (PerftTranspositionTableBucket_Struct*)VirtualAlloc(NULL, PerftTranspositionTableBuckets * sizeof(PerftTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			if (PerftTranspositionTablePointer == nullptr)
@@ -1304,9 +1304,12 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 				s += ": " + std::to_string(perftNodes - previousPerftNodes);
 				if (IsDebug)
 				{
-					nowClock = std::chrono::steady_clock::now();
-					uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(nowClock - previousClock).count();
-					previousClock = nowClock;
+					//nowClock = std::chrono::steady_clock::now();
+					CurrentTickCount = GetMS();
+					//uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(nowClock - previousClock).count();
+					uint64_t ms = CurrentTickCount - PreviousTickCount;
+					//previousClock = nowClock;
+					PreviousTickCount = CurrentTickCount;
 
 					s += " (" + std::to_string(ms) + "ms, Hashfull = " + std::to_string(HashfullPerftTranspositionTable()) + ", ThreadId = " + std::to_string(ThreadId) + " CurrentProcessorNumber = " + std::to_string(GetCurrentProcessorNumber()) + ")";
 				}
@@ -1335,8 +1338,10 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 
 	// Get timer
 	uint64_t ms = 0;
-	startClock = std::chrono::steady_clock::now();
-	previousClock = startClock;
+	//startClock = std::chrono::steady_clock::now();
+	StartTickCount = GetMS();
+	//previousClock = startClock;
+	PreviousTickCount = StartTickCount;
 
 	// Initialise any variables required for the search
 	perftBrain.GameRecordPointer = &perftBrain.GameRecord[perftBrain.GameRecordIndexRoot];
@@ -1345,6 +1350,10 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 		hash64 = ~hash64;
 	perftBrain.GameRecordPointer->transpositionTableHash64 = hash64;
 	perftBrain.GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[perftBrain.GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
+
+	// Initialise the accumulators (only done in Perft so that the asserts in MakeMove don't fail!)
+	Nnue.InitialiseAccumulatorsChess768(perftBrain);
+	assert(Nnue.VerifyAccumulatorsChess768(perftBrain));
 
 	// Clear Perft counts
 	perftNodes = 0;
@@ -1366,7 +1375,8 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	else
 		TreeSearchPerft(1, SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1));
 
-	ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startClock).count();
+	//ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startClock).count();
+	ms = GetMS() - StartTickCount;
 
 	PerftResult_Struct pr;
 	pr.ms = ms;

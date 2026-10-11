@@ -3,7 +3,6 @@
 #include <string>
 
 #include "GlobalConstants.h"
-//#include "NNUE.h"
 
 //----------------------------------------------------------------------------------------------------
 
@@ -132,8 +131,6 @@ struct GameRecordEntry_Struct
 	int gamePhase[2]; // Keeps a running total of pieces (not pawns) for each side. At the start of the game this is 31 (3x2 + 3x2 + 5x2 + 9x1) but can be higher after promotions to a maximum of 103. The evaluation function limits the sum of both sides to a total of 64
 	short staticEvaluation;
 	short totalMaterial[2];
-	short totalOpeningPST[2];
-	short totalEndgamePST[2];
 
 	uint8_t epSquare;
 	uint8_t pliesSinceIrreversible;
@@ -148,7 +145,6 @@ struct GameRecordEntry_Struct
 	int givesCheck;
 	Move_Struct isThreateningMateInOne;
 	int isAttacking;
-	//int expense;
 	bool forcingMove;
 	int DefenderKingMovesAfter;
 	int TotalDefenderKingMovesAfter;

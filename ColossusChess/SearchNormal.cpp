@@ -12,12 +12,10 @@
 #define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
 #include <windows.h>
 
-//#include "NNUE\NNUE.h"
 #include "GlobalConstants.h"
 #include "GlobalTypes.h"
 #include "Engine.h"
 #include "UGI.h"
-#include "Evaluate.h"
 #include "Utilities.h"
 #include "SearchNormal.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
@@ -57,18 +55,6 @@ Normal::Normal()
 	// Declaring CounterMoveHistory as a class variable loses ELO and crashes occasionally but I don't know why!
 	// Creating it on the heap here seems to work fine though.
 	CounterMoveHistory = new CounterMoveHistory_Struct;
-
-	//if (!nnue.load("nnue_weights.bin"))
-	//{
-	//	Output("Could not load NNUE!");
-	//}
-	//else
-	//	Output("Loaded NNUE!");
-
-	//if (!nnue.LoadWeights("nnue_epoch_40.bin"))
-	//{
-	//	std::printf("ERROR: Failed to load NNUE weights!\n");
-	//}
 }
 
 Normal::~Normal()
@@ -245,7 +231,7 @@ void Normal::ShowIterationStartMessage()
 			iterationStartMessage += ThreadIdSuffix();
 
 #ifndef _DEBUG
-		if (LastTickCount > MessageDelayTickCount)
+		if (CurrentTickCount > MessageDelayTickCount)
 #endif
 			Output(iterationStartMessage);
 #ifndef _DEBUG
@@ -263,17 +249,17 @@ void Normal::ShowProgressMessage(uint32_t move, int movesMade, short bestMoveSco
 	if (ThreadId == 0)
 	{
 #ifndef _DEBUG
-		if (LastTickCount > MessageDelayTickCount)
+		if (CurrentTickCount > MessageDelayTickCount)
 			if (
-				(LastTickCount > LastProgressMessageTickCount + MessageDelayTickCount)
+				(CurrentTickCount > LastProgressMessageTickCount + MessageDelayTickCount)
 				|| (movesMade == 1)
 				|| (movesMade == RootMovesCount)
 				)
 #endif
 			{
-				LastProgressMessageTickCount = LastTickCount;
+				LastProgressMessageTickCount = CurrentTickCount;
 
-				std::string progressMessage = "info time " + std::to_string(LastTickCount)
+				std::string progressMessage = "info time " + std::to_string(CurrentTickCount)
 					+ " nodes " + std::to_string(NodeCount + NodeCountQuiescenceSearch)
 					+ " currmove " + MoveNotation(move)
 					+ " currmovenumber " + std::to_string(movesMade)
@@ -296,7 +282,7 @@ void Normal::ShowFailedLowMessage(short rootAlpha)
 		std::string failedLowMessage = "info depth " + std::to_string(IterationPly) + " score cp " + std::to_string(rootAlpha) + " upperbound";
 
 #ifndef _DEBUG
-		if (LastTickCount > MessageDelayTickCount)
+		if (CurrentTickCount > MessageDelayTickCount)
 #endif
 			Output(failedLowMessage);
 #ifndef _DEBUG
@@ -312,9 +298,9 @@ void Normal::ShowIterationFinishMessage(uint32_t hashfull)
 	{
 		uint64_t totalNodes = NodeCount + NodeCountQuiescenceSearch;
 		std::string iterationFinishMessage = "info depth " + std::to_string(IterationPly)
-			+ " time " + std::to_string(LastTickCount)
+			+ " time " + std::to_string(CurrentTickCount)
 			+ " nodes " + std::to_string(totalNodes)
-			+ " nps " + std::to_string((totalNodes * 1000) / LastTickCount)
+			+ " nps " + std::to_string((totalNodes * 1000) / CurrentTickCount)
 			+ " hashfull " + std::to_string(hashfull)
 			+ (EndgameTablebasesHits > 0 ? " tbhits " + std::to_string(EndgameTablebasesHits) : "");
 		if (IsDebug)
@@ -325,7 +311,7 @@ void Normal::ShowIterationFinishMessage(uint32_t hashfull)
 		if (ShowBlankLines)
 			iterationFinishMessage += "\n";
 #ifndef _DEBUG
-		if (LastTickCount > MessageDelayTickCount)
+		if (CurrentTickCount > MessageDelayTickCount)
 #endif
 			Output(iterationFinishMessage);
 #ifndef _DEBUG
@@ -453,7 +439,7 @@ void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 
 		// Display the constructed message
 		std::string BestLineMessage = "info depth " + std::to_string(IterationPly) // N.B. the 'depth' value is provided here (as well as in the iteration 'start' message) as some GUIs (e.g. Arena, Shredder) don't display it unless it's provided with the PV!
-			+ " time " + std::to_string(LastTickCount)
+			+ " time " + std::to_string(CurrentTickCount)
 			+ " nodes " + std::to_string(totalNodes)
 			+ " score " + scoreMessage + eulMessage
 			+ " pv " + pvMessage + pvTerminatorMessage;
@@ -461,7 +447,7 @@ void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 			BestLineMessage += ThreadIdSuffix();
 
 #ifndef _DEBUG
-		if (LastTickCount > MessageDelayTickCount)
+		if (CurrentTickCount > MessageDelayTickCount)
 #endif
 			Output(BestLineMessage);
 #ifndef _DEBUG
@@ -599,13 +585,21 @@ void Normal::TimeUp(float divisor)
 	// Within the search at ply=1: divisor = 1.0 (Don't start another root move unless we are under budget)
 	// After a complete iteration: divisor = 2.0 (Don't start another iteration unless we are likely to complete it within budget)
 
+	// Get the time consumed so far this move
+	//CurrentTickCount = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count() + 1; // Add 1 millisecond to help on blitz finishes where timer is inaccurate
+	CurrentTickCount = GetMS() - StartTickCount + 1;
+
+	if ((CurrentTickCount == PreviousTickCount) && (PreviousDivisor == divisor))
+		return; // The result won't change unless the tick count has advanced or the divisor has changed
+
+	PreviousTickCount = CurrentTickCount;
+	PreviousDivisor = divisor;
+
 	// Only the main thread is responsible for setting time up flags
 	if (ThreadId > 0)
 		return;
 
-	// Get the time consumed so far this move
-	LastTickCount = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count() + 1; // Add 1 millisecond to help on blitz finishes where timer is inaccurate
-	if (LastTickCount > MessageDelayTickCount)
+	if (CurrentTickCount > MessageDelayTickCount)
 	{
 		if (CurrentIterationsMessages != "")
 		{
@@ -625,7 +619,7 @@ void Normal::TimeUp(float divisor)
 	case TCTFixedTime:
 		if (IterationPly < 2) // Always let it complete the 1st iteration
 			break;
-		if (LastTickCount > TC.FixedTimeMilliSeconds)
+		if (CurrentTickCount > TC.FixedTimeMilliSeconds)
 		{
 			StopWhenIterationComplete = true;
 			StopImmediately = true;
@@ -661,10 +655,10 @@ void Normal::TimeUp(float divisor)
 		else
 			stmTime = BTime;
 		stmTime = std::max(stmTime - 500, (int64_t)0); // Subtract 500ms buffer for a slow EGTB access
-		timeLeft = std::max(stmTime - (int64_t)LastTickCount, (int64_t)0); // Don't allow timeLeft to go -ve
+		timeLeft = std::max(stmTime - (int64_t)CurrentTickCount, (int64_t)0); // Don't allow timeLeft to go -ve
 
 		// 'Panic' time up? (Have we used more than half of our remaining time? {i.e. the time we had at the start of the move})
-		if (LastTickCount > (stmTime / 2))
+		if (CurrentTickCount > (stmTime / 2))
 			divisor = 9999.0f; // Set the divisor very high so that it calls time up!
 		else if (RootAlpha == (short)(-MatingIn0Score)) // Give more time if failed low and still in the middle of the 'retry' iteration (i.e. haven't searched all root moves)
 		{
@@ -719,7 +713,7 @@ void Normal::TimeUp(float divisor)
 		}
 
 		// Have we used enough time yet? (or only one move or done maximum ply search)
-		if ((LastTickCount >= ((float)timeLeft / (float)movesLeft / divisor)) || (RootMovesCount == 1) || (IterationPly >= MaximumIterationPly))
+		if ((CurrentTickCount >= ((float)timeLeft / (float)movesLeft / divisor)) || (RootMovesCount == 1) || (IterationPly >= MaximumIterationPly))
 		{
 			if (Pondering)
 				ReplyImmediately = true;
@@ -741,8 +735,14 @@ short Normal::DrawScore(int sideToMove)
 	if (SideToMove == sideToMove) // The contempt value is relative to the side to move at the root i.e. the computer!
 		ds = -ds;
 
-	ds += (normalBrain.GameRecordPointer->totalMaterial[sideToMove] > normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]);
-	ds -= (normalBrain.GameRecordPointer->totalMaterial[sideToMove] < normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]);
+	//ds += (normalBrain.GameRecordPointer->totalMaterial[sideToMove] > normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]);
+	//ds -= (normalBrain.GameRecordPointer->totalMaterial[sideToMove] < normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]);
+	
+	//ds += (normalBrain.GameRecordPointer->totalMaterial[sideToMove] > normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1] + 2);
+	//ds -= (normalBrain.GameRecordPointer->totalMaterial[sideToMove] < normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1] - 2);
+	
+	//ds += (normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]) / 64;
+	ds += (normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]) / 128;
 
 	return ds;
 }
@@ -789,7 +789,7 @@ void Normal::AllocateNormalTranspositionTable()
 	if (NormalTranspositionTableBuckets > 0)
 	{
 		NormalTranspositionTableBucketsMask = NormalTranspositionTableBuckets - 1;
-		if (LargePagesAvailable && UseLargePages)
+		if (LargePagesEnabled && UseLargePages)
 		{
 			NormalTranspositionTablePointer = (NormalTranspositionTableBucket_Struct*)VirtualAlloc(NULL, NormalTranspositionTableBuckets * sizeof(NormalTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 			if (NormalTranspositionTablePointer == nullptr)
@@ -901,13 +901,6 @@ void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, sho
 		uint64_t hash64 = normalBrain.GameRecordPointer->transpositionTableHash64WithEP;
 		tte0 = (NormalTranspositionTableEntry_Struct*)(NormalTranspositionTablePointer + (hash64 & NormalTranspositionTableBucketsMask));
 
-
-		//if (hash64 == 6547430464751700826)
-		//	AC1++;//TEMP
-
-
-
-
 		// Find candidate entry for replacement
 		int entryToReplace, shallowestSubTreeDepth;
 		uint64_t tteHash, tteData;
@@ -1004,6 +997,7 @@ void Normal::AddToNormalTranspositionTable(int8_t depthRemaining, short ply, sho
 
 //----------------------------------------------------------------------------------------------------
 
+#include "Evaluate.cpp"
 #include "SearchNormalQuiescence.cpp"
 
 short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemaining, int sideToMove, int isInCheck, bool allowNull, bool isCutNode)
@@ -1162,8 +1156,6 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 		if (pliesSinceIrreversible >= 3)
 		{
 			short nonStickyDrawScore = drawScore + (NodeCount & 1) * 2 - 1; // Add +/-1 randomly to avoid DBR stickiness
-			if (ply == 2)
-				nonStickyDrawScore--; // Slightly prefer making a drawing move at the root to drawing moves deeper in the tree i.e. take the draw now rather than possibly screwing up your position!
 
 			// 'Immediate' draw-by-repetition
 			if (nonStickyDrawScore > alpha) // Immediate repetition possible?
@@ -1189,8 +1181,10 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			// Allowing the engine to assess a draw at the FIRST repeat can be dangerous at the root!
 			// e.g. position fen 1nbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk - 0 1 moves e2e4 e7e5 g1f3 b8a6 f3g1 a6b8 g1f3 - the engine will play b8a6? thinking it's a DBR but it allows the opponent to play a better move!
 			// Therefore I have changed it to function at the SECOND repeat at the root
-			int cycles = 4;
-			int requiredRepeats = 1;
+			int cycles;
+			int requiredRepeats;
+			cycles = 4;
+			requiredRepeats = 1;
 			if (ply == 2)
 			{
 				cycles = 8;
@@ -1353,25 +1347,14 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			{
 				tteFound = entry;
 
-
-
-				//if (hash == 16746684170983717740)
-				//	AC1++;//TEMP
-
-
 				// Get the entry's data
 				tteBestMove.ui32 = MGUnCompressMove(((NormalTranspositionTableEntryDataFields_Struct*)&data)->bestMove);
 				assert((tteBestMove.ui32 == 0) == (((uint16_t)tteBestMove.ui32) == 0));
 				tteSubTreeDepth = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->subTreeDepth;
 				uint8_t flag = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->flag;
 				tteEUL = (flag & TTFlagEULMask);
-				//currentGameRecordPointer->dangerConditions.dc.isO1PCM = flag & TTFlagOnlyOnePieceCanMove;
-				//currentGameRecordPointer->dangerConditions.dc.isTWM = flag & TTFlagThreatenedWithMate;
-				//currentGameRecordPointer->dangerConditions.dc.isO1M = flag & TTFlagOnlyOneMove;
-				//currentGameRecordPointer->dangerConditions.dc.isFMTP = flag & TTFlagFewerMovesThanPieces;
 				currentGameRecordPointer->dangerConditions |= flag & TTFlagIsInDangerMask;
 				currentGameRecordPointer->staticEvaluation = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->staticEvaluation;
-				//assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove)));
 				assert((currentGameRecordPointer->staticEvaluation == INT16_MIN) || (std::abs(currentGameRecordPointer->staticEvaluation - Evaluate(sideToMove)) <= 1));
 				tteScore = ((NormalTranspositionTableEntryDataFields_Struct*)&data)->score;
 
@@ -1475,95 +1458,87 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	short egtbScore = -MatingIn0Score; // This may be tested at the end of the node
 	if (ply > 1) // Don't probe the EGTBs at the root node
 	{
-		if (EndgameTablebasesPiecesFound == 0)
+		// (Size of .rtbw files: 3pc: 8K, 4pc: 1.2M, 5pc: 376M, 6pc: 67.8G)
+		// (N.B. it is perfectly reasonable to query the EGTBs differently (in the tree) when we are in an EGTB position at the root!)
+		int totalPieces = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]); // Get how many pieces remain on the board
+		if (
+			(totalPieces <= EndgameTablebasesTreeProbeLimitMain)
+			&& (currentGameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases when no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13)
+			&& ((alpha < EGTBWinningScore + 1000 - ply) && (beta > EGTBLosingScore - 1000 + ply)) // Is the current window such that no EGTB score can possibly be in it? If so, skip the EGTB probe. This allows us to 'see-thru' the EGTBs to find any mates in this subtree.
+			)
 		{
-			// Just in case we don't have any EGTBs
-			if (normalBrain.KnownLowMaterialDraws(sideToMove) == PVTDrawMinimumMaterial)
+			GATHERSTATS(EndgameTablebasesProbes++; if (totalPieces >= 6) EndgameTablebasesHeavyProbes++;);
+
+			uint32_t result;
+			result = tb_probe_wdl(
+				normalBrain.PiecesBB[0][AllPieces],
+				normalBrain.PiecesBB[1][AllPieces],
+				normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
+				normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
+				normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
+				normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
+				normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
+				normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
+				currentGameRecordPointer->epSquare,
+				(sideToMove == 0)
+			);
+
+			// Probing the EGTB (even on a SSDD) can be very slow (>>100ms)
+			// We want the search to be as fast as possible so we only check TimeUp at the start of the function periodically
+			// Therefore we must do it after an EGTB probe to minimise any overstep of the time control (especially at hyper-bullet speeds) as we might probe the EGTB many times
+			// Even with this, we sometimes overstep at my standard 100ms/move testing. It's minimal with the 4pc but naturally increases as we move to the 5pc and 6pc.
+			TimeUp(0.2f);
+			if (StopImmediately)
+				return alpha;
+
+			if (result != TB_RESULT_FAILED)
 			{
-				*currentGameRecordPointer->principalVariationPointer = PVTDrawMinimumMaterial;
-				return drawScore;
-			}
-		}
-		else
-		{
-			// (Size of .rtbw files: 3pc: 8K, 4pc: 1.2M, 5pc: 376M, 6pc: 67.8G)
-			// (N.B. it is perfectly reasonable to query the EGTBs differently (in the tree) when we are in an EGTB position at the root!)
-			int totalPieces = PopulationCountX(normalBrain.PiecesBB[0][AllPieces] | normalBrain.PiecesBB[1][AllPieces]); // Get how many pieces remain on the board
-			if (
-				(totalPieces <= EndgameTablebasesTreeProbeLimitMain)
-				&& (currentGameRecordPointer->castlingStatus.ui32 == 0x01010101) // Only probe the endgame tablebases when no castling possible (8/8/8/8/8/8/1Nr3P1/R3K1k1 b Q - 0 1 Rxb2? O-O-O #13)
-				&& ((alpha < EGTBWinningScore + 1000 - ply) && (beta > EGTBLosingScore - 1000 + ply)) // Is the current window such that no EGTB score can possibly be in it? If so, skip the EGTB probe. This allows us to 'see-thru' the EGTBs to find any mates in this subtree.
-				)
-			{
-				GATHERSTATS(EndgameTablebasesProbes++; if (totalPieces >= 6) EndgameTablebasesHeavyProbes++;);
+				EndgameTablebasesHits++;
 
-				uint32_t result;
-				result = tb_probe_wdl(
-					normalBrain.PiecesBB[0][AllPieces],
-					normalBrain.PiecesBB[1][AllPieces],
-					normalBrain.PiecesBB[0][King] | normalBrain.PiecesBB[1][King],
-					normalBrain.PiecesBB[0][Queen] | normalBrain.PiecesBB[1][Queen],
-					normalBrain.PiecesBB[0][Rook] | normalBrain.PiecesBB[1][Rook],
-					normalBrain.PiecesBB[0][Bishop] | normalBrain.PiecesBB[1][Bishop],
-					normalBrain.PiecesBB[0][Knight] | normalBrain.PiecesBB[1][Knight],
-					normalBrain.PiecesBB[0][Pawn] | normalBrain.PiecesBB[1][Pawn],
-					currentGameRecordPointer->epSquare,
-					(sideToMove == 0)
-				);
-
-				// Probing the EGTB (even on a SSDD) can be very slow (>>100ms)
-				// We want the search to be as fast as possible so we only check TimeUp at the start of the function periodically
-				// Therefore we must do it after an EGTB probe to minimise any overstep of the time control (especially at hyper-bullet speeds) as we might probe the EGTB many times
-				// Even with this, we sometimes overstep at my standard 100ms/move testing. It's minimal with the 4pc but naturally increases as we move to the 5pc and 6pc.
-				TimeUp(0.2f);
-
-
-				if (result != TB_RESULT_FAILED)
+				switch (result)
 				{
-					EndgameTablebasesHits++;
-
-					switch (result)
-					{
-					case TB_LOSS:
-						egtbScore = EGTBLosingScore - 1000 + ply;
-						// If we've already got a 'losing' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
-						if (isPVNode)
-							if (beta <= EGTBLosingScore)
-								goto EGTBExit;
-						break;
-					case TB_BLESSED_LOSS:
-						egtbScore = -5;
-						break;
-					case TB_DRAW:
-						// Bias EGTB draw scores towards the side with the most material (so +4, 0 or -4)
-						// So it prefers a material up EGTB draw (+4) to other draws, e.g. DBR etc (+2...0...-2), to a material down EGTB draw (-4)
-						egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1]) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1]));
-						break;
-					case TB_CURSED_WIN:
-						egtbScore = 5;
-						break;
-					case TB_WIN:
-						egtbScore = EGTBWinningScore + 1000 - ply;
-						// If we've already got a 'winning' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
-						if (isPVNode)
-							if (alpha >= EGTBWinningScore)
-								goto EGTBExit;
-						break;
-					}
-
-					//AddToNormalTranspositionTable(depthRemaining, ply, egtbScore, TTFlagExact, PVTEGTB, egtbScore); // I tried storing EGTB results in the TT but no significant ELO difference
-					*currentGameRecordPointer->principalVariationPointer = PVTEGTB;
-					return egtbScore;
+				case TB_LOSS:
+					egtbScore = EGTBLosingScore - 1000 + ply;
+					// If we've already got a 'losing' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
+					if (isPVNode)
+						if (beta <= EGTBLosingScore)
+							goto EGTBExit;
+					break;
+				case TB_BLESSED_LOSS:
+					egtbScore = -5;
+					break;
+				case TB_DRAW:
+					// Bias EGTB draw scores towards the side with the most material (so +4, 0 or -4)
+					// So it prefers a material up EGTB draw (+4) to other draws, e.g. DBR etc (+2...0...-2), to a material down EGTB draw (-4)
+					//egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1]) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1]));
+					//egtbScore = 4 * ((currentGameRecordPointer->totalMaterial[sideToMove] > currentGameRecordPointer->totalMaterial[sideToMove ^ 1] + 2) - (currentGameRecordPointer->totalMaterial[sideToMove] < currentGameRecordPointer->totalMaterial[sideToMove ^ 1] - 2));
+					//egtbScore = (normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]) / 64;
+					egtbScore = (normalBrain.GameRecordPointer->totalMaterial[sideToMove] - normalBrain.GameRecordPointer->totalMaterial[sideToMove ^ 1]) / 128;
+					break;
+				case TB_CURSED_WIN:
+					egtbScore = 5;
+					break;
+				case TB_WIN:
+					egtbScore = EGTBWinningScore + 1000 - ply;
+					// If we've already got a 'winning' score at a PV node then don't use the EGTB score immediately. Allow this current subtree to be searched (to possibly find a mate) and only then use the EGTB score.
+					if (isPVNode)
+						if (alpha >= EGTBWinningScore)
+							goto EGTBExit;
+					break;
 				}
-				else
-				{
-					// THESE AREN'T NECESSARILY 'ERRORS' AS IT COULD BE CAUSED BY A MISSING EGTB FILE!
-					EndgameTablebasesErrors = true;
-					EndgameTablebasesErrorCounts[totalPieces]++;
-				}
+
+				//AddToNormalTranspositionTable(depthRemaining, ply, egtbScore, TTFlagExact, PVTEGTB, egtbScore); // I tried storing EGTB results in the TT but no significant ELO difference
+				*currentGameRecordPointer->principalVariationPointer = PVTEGTB;
+				return egtbScore;
 			}
-		EGTBExit:;
+			//else
+			//{
+			//	// These aren't necessarily 'errors' as it could be caused by a missing EGTB file!
+			//	EndgameTablebasesErrors = true;
+			//	EndgameTablebasesErrorCounts[totalPieces]++;
+			//}
 		}
+	EGTBExit:;
 	}
 #pragma endregion
 
@@ -1574,16 +1549,7 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 	// Get the 'static' evaluation (our 'best guess' for the score of the current position)
 	// N.B. staticEvaluation is just a material/positional evaluation so can never be in the winning/losing range
 	if (currentGameRecordPointer->staticEvaluation == INT16_MIN) // The value may already have been retrieved from the TT
-	{
-		//if ((currentGameRecordPointer - 1)->move.ui32 == NullMove) // If the previous move was a null move we can use its score (negated and corrected for tempo) to save some time (about 12% of nodes)
-		//{
-		//	//currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation + Tempo * 2;
-		//	currentGameRecordPointer->staticEvaluation = -(currentGameRecordPointer - 1)->staticEvaluation;// + Tempo * 2;//TEMP TESTING NNUE
-		//	assert(currentGameRecordPointer->staticEvaluation == Evaluate(sideToMove));
-		//}
-		//else
-			currentGameRecordPointer->staticEvaluation = Evaluate(sideToMove);
-	}
+		currentGameRecordPointer->staticEvaluation = Evaluate(sideToMove);
 
 	int improving = 0; // Used in LMP and reductions
 	if ((ply > 2) && (currentGameRecordPointer->staticEvaluation > (normalBrain.GameRecordPointer - 2)->staticEvaluation))
@@ -1740,8 +1706,8 @@ short Normal::TreeSearchNormal(short alpha, short beta, int ply, int depthRemain
 			normalBrain.GameRecordPointer->epSquare = 0;
 			*(uint32_t*)(&normalBrain.GameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides!
 			*(uint64_t*)(&normalBrain.GameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(normalBrain.GameRecordPointer - 1)->gamePhase[0]);
-			*(uint32_t*)(&normalBrain.GameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalOpeningPST[0]);
-			*(uint32_t*)(&normalBrain.GameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalEndgamePST[0]);
+			//*(uint32_t*)(&normalBrain.GameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalOpeningPST[0]);
+			//*(uint32_t*)(&normalBrain.GameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(normalBrain.GameRecordPointer - 1)->totalEndgamePST[0]);
 			PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore););
 
 
@@ -2609,8 +2575,12 @@ std::string Normal::ComputeNormal()
 	CRASHLOCATION(20);
 
 	// Get timer
-	StartClock = std::chrono::steady_clock::now();
-	MessagesLastDisplayedClock = StartClock;
+	//StartClock = std::chrono::steady_clock::now();
+	//MessagesLastDisplayedClock = StartClock;
+	StartTickCount = GetMS();
+	//PreviousTickCount = StartTickCount;
+	//MessagesLastDisplayedTickCount = StartTickCount;
+	PreviousDivisor = 0.0f;
 
 	// Initialise any variables required for the search
 	normalBrain.GameRecordPointer = &normalBrain.GameRecord[normalBrain.GameRecordIndexRoot];
@@ -2631,7 +2601,7 @@ std::string Normal::ComputeNormal()
 	uint32_t previousIterationsRootBestMove = 0;
 	ReplyImmediately = false;
 	InitialiseMaterialValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
-	InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
+	//InitialisePSTValues(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
 	InitialiseGamePhase(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
 	uint64_t hash64 = GenerateTranspositionTableHash64(normalBrain.MailboxBoard64, normalBrain.GameRecordPointer);
 	if (SideToMove == 1)
@@ -2688,6 +2658,7 @@ std::string Normal::ComputeNormal()
 	RootPriority = 1;
 
 	// EGTB stuff
+	assert(EndgameTablebasesPiecesFound >= 4); // Now that we have embedded EGTBs!
 	EndgameTablebasesProbes = 0;
 	EndgameTablebasesHeavyProbes = 0;
 	EndgameTablebasesHits = 0;
@@ -2862,7 +2833,7 @@ std::string Normal::ComputeNormal()
 	nullMoveMinimumPly = 0;
 	PreviousIterationsMessages = "";
 	CurrentIterationsMessages = "";
-	LastTickCount = 1; // To avoid any divide by zero errors
+	CurrentTickCount = 1; // To avoid any divide by zero errors
 	LastProgressMessageTickCount = 0;
 	//SingularExtending = false;
 
@@ -3076,14 +3047,9 @@ std::string Normal::ComputeNormal()
 
 	//----------------------------------------------------------------------------------------------------
 	
+	// Dump the RootMoveList for debugging
 	//for (int i = 0; i < 20; i++)
-	//{
-	//	Output(MoveNotation(RootMoveList[i].mws.ui32) +" " + std::to_string(RootMoveList[i].mws.score));
-	//}
-
-
-
-
+	//	Output(MoveNotation(RootMoveList[i].mws.ui32) + " " + std::to_string(RootMoveList[i].mws.score));
 
 	std::string bestMoveMessage = "";
 
@@ -3097,20 +3063,20 @@ std::string Normal::ComputeNormal()
 
 		StopImmediately = true; // As soon as the main thread finishes flag any helper threads to terminate
 
-		if (EndgameTablebasesErrors)
-		{
-			std::string s = "Endgame tablebase errors occurred...\n";
-			for (int count = 0; count < 8; count++)
-				s += " " + std::to_string(EndgameTablebasesErrorCounts[count]);
-			OutputError(s + "\n");
-		}
+		//if (EndgameTablebasesErrors)
+		//{
+		//	std::string s = "Endgame tablebase errors occurred...\n";
+		//	for (int count = 0; count < 8; count++)
+		//		s += " " + std::to_string(EndgameTablebasesErrorCounts[count]);
+		//	OutputError(s + "\n");
+		//}
 
 		CRASHLOCATION(70);
 
 		// Report best move
 		if (RootBestMove.ui32 == 0)
 		{
-			if (LastCommand != "STOP") // When pondering the UI could validly send a 'stop' command before we have established a move
+			if (UpperCase(LastCommand) != "STOP") // When pondering the UI could validly send a 'stop' command before we have established a move
 			{
 				// Genuine error!
 				std::string s = "\n";
@@ -3137,7 +3103,8 @@ std::string Normal::ComputeNormal()
 			{
 				FILE *sw;
 				fopen_s(&sw, "output.csv", "a+");
-				std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
+				//std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
+				std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(GetMS() - StartTickCount);
 				fprintf(sw, "%s\n", s.c_str());
 				fclose(sw);
 			}

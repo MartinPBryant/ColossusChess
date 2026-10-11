@@ -12,7 +12,6 @@
 #include "Engine.h"
 #include "UGI.h"
 #include "Brain.h"
-#include "Evaluate.h"
 #include "Utilities.h"
 #include "SearchMate.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
@@ -635,7 +634,7 @@ void Mate::AllocateMateTranspositionTable()
 	if (MateTranspositionTableBuckets > 0)
 	{
 		MateTranspositionTableBucketsMask = MateTranspositionTableBuckets - 1;
-		if (LargePagesAvailable)
+		if (LargePagesEnabled)
 			MateTranspositionTablePointer = (MateTranspositionTableBucket_Struct*)VirtualAlloc(NULL, MateTranspositionTableBuckets * sizeof(MateTranspositionTableBucket_Struct), MEM_RESERVE | MEM_COMMIT | MEM_LARGE_PAGES, PAGE_READWRITE);
 		else
 			MateTranspositionTablePointer = (MateTranspositionTableBucket_Struct*)AlignedAllocateMemory(MateTranspositionTableBuckets * sizeof(MateTranspositionTableBucket_Struct), 64);
@@ -1415,8 +1414,8 @@ short Mate::TreeSearchMate(short alpha, short beta, int ply, int depthRemaining,
 							mateBrain.GameRecordPointer->epSquare = 0;
 							*(uint32_t*)(&mateBrain.GameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalMaterial[0]); // N.B. Using data type overload at start of line to copy for both sides! DOUBLE CHECK THIS WORKS!!!!
 							*(uint64_t*)(&mateBrain.GameRecordPointer->gamePhase[0]) = *(uint64_t*)(&(mateBrain.GameRecordPointer - 1)->gamePhase[0]);
-							*(uint32_t*)(&mateBrain.GameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalOpeningPST[0]);
-							*(uint32_t*)(&mateBrain.GameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalEndgamePST[0]);
+							//*(uint32_t*)(&mateBrain.GameRecordPointer->totalOpeningPST[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalOpeningPST[0]);
+							//*(uint32_t*)(&mateBrain.GameRecordPointer->totalEndgamePST[0]) = *(uint32_t*)(&(mateBrain.GameRecordPointer - 1)->totalEndgamePST[0]);
 							PRINTTREE(PrintTree(IterationPly, ply, alpha, beta, depthRemaining, -1, -999, currentGameRecordPointer->staticEvaluation, bestMoveScore);)
 
 								//int R = std::max(3, ((depthRemaining + 1) >> 1));
@@ -2403,7 +2402,7 @@ Mate::MateResult_Struct Mate::ComputeMate()
 	ReplyImmediately = false;
 	InitialiseMaterialValues(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
 	//*(uint32_t*)(&MateGenerate.gameRecordPointer->totalMaterial[0]) = *(uint32_t*)(&RootTotalMaterial[0]);
-	InitialisePSTValues(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
+	//InitialisePSTValues(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
 	InitialiseGamePhase(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);
 	//*(uint64_t*)(&MateGenerate.gameRecordPointer->gamePhase[0]) = *(uint64_t*)(&GamePhase[0]);
 	uint64_t hash64 = GenerateTranspositionTableHash64(mateBrain.MailboxBoard64, mateBrain.GameRecordPointer);

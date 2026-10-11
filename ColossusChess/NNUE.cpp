@@ -30,7 +30,7 @@ NNUE::~NNUE()
 //----------------------------------------------------------------------------------------------------
 
 // Load the specified NNUE file
-std::string NNUE::ReadNNUEFromFileChess768(std::string filename)
+std::string NNUE::ReadNNUEFromFileChess768(std::string filename, std::string& version)
 {
 	FILE* file = nullptr;
 
@@ -52,20 +52,23 @@ std::string NNUE::ReadNNUEFromFileChess768(std::string filename)
 
 	// Read feature weights and biases
 	std::fread(featureWeightsChess768, sizeof(int16_t), FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768, file);
-	std::fread(featureBiasesChess768, sizeof(int16_t), FEATURES_WEIGHTS_COUNT_CHESS768, file);
+	std::fread(featureBiasesChess768, sizeof(int16_t), FEATURES_BIASES_COUNT_CHESS768, file);
 
 	// Read output layer weights and biases
 	std::fread(outputWeightsChess768, sizeof(int16_t), OUTPUT_WEIGHTS_COUNT_CHESS768, file);
 	std::fread(&outputBiasChess768, sizeof(int16_t), 1, file);
 
 	// Ensure we've read everything correctly and that this is a Bullet trainer file! This should be 'bulletbullet...bu'
-	char tail[62];
+	char tail[63];
+	tail[62] = '\0';
 	std::fread(&tail, 1, 62, file);
-	if (memcmp(tail, "bullet", 6))
+	if (memcmp(tail, "bullet", 6)) // Returns 0 if match
 	{
 		fclose(file);
 		return "File format wrong";
 	}
+
+	version = tail + 6;
 
 	fclose(file);
 
@@ -74,7 +77,7 @@ std::string NNUE::ReadNNUEFromFileChess768(std::string filename)
 
 // Load the NNUE embedded resource
 // The file 'ColossusChess.NNUE' is embedded at compile time
-std::string NNUE::ReadNNUEFromResourceChess768()
+std::string NNUE::ReadNNUEFromResourceChess768(std::string& version)
 {
 #define IDR_CHESS768 101
 
@@ -95,10 +98,19 @@ std::string NNUE::ReadNNUEFromResourceChess768()
 
 	delete[] featureWeightsChess768;
 	featureWeightsChess768 = new int16_t[FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768];
-	memcpy(featureWeightsChess768, data, FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768 * 2);
-	memcpy(featureBiasesChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768), FEATURES_WEIGHTS_COUNT_CHESS768 * 2);
-	memcpy(outputWeightsChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + (FEATURES_WEIGHTS_COUNT_CHESS768), OUTPUT_WEIGHTS_COUNT_CHESS768 * 2);
-	memcpy(&outputBiasChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + FEATURES_WEIGHTS_COUNT_CHESS768 + OUTPUT_WEIGHTS_COUNT_CHESS768, 1 * 2);
+
+	// Read feature weights and biases
+	memcpy(featureWeightsChess768, data, FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768 * 2); // *2 because the data is int16_t
+	memcpy(featureBiasesChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768), FEATURES_BIASES_COUNT_CHESS768 * 2);
+	
+	// Read output layer weights and biases
+	memcpy(outputWeightsChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + FEATURES_BIASES_COUNT_CHESS768, OUTPUT_WEIGHTS_COUNT_CHESS768 * 2);
+	memcpy(&outputBiasChess768, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + FEATURES_BIASES_COUNT_CHESS768 + OUTPUT_WEIGHTS_COUNT_CHESS768, 1 * 2);
+	
+	char tail[63];
+	tail[62] = '\0';
+	memcpy(tail, data + (FEATURES_COUNT_CHESS768 * FEATURES_WEIGHTS_COUNT_CHESS768) + FEATURES_BIASES_COUNT_CHESS768 + OUTPUT_WEIGHTS_COUNT_CHESS768 + 1, 62);
+	version = tail + 6;
 
 	return "";
 }
@@ -174,7 +186,7 @@ std::string NNUE::ReadNNUEFromResourceChess768()
 
 // Calculate the evaluation for the position
 // This AVX2 function was provided by ChatGPT. I haven't tried to totally understand it but it seems to behave identically to the scalar function above and is much faster!
-int NNUE::RunNetworkChess768(const Brain& brain, int sideToMove)
+int16_t NNUE::RunNetworkChess768(const Brain& brain, int sideToMove)
 {
 	const int16_t* stm;
 	const int16_t* sntm;
@@ -398,31 +410,28 @@ int NNUE::RunNetworkChess768(const Brain& brain, int sideToMove)
 	return static_cast<int>(output);
 }
 
-
-
-
-int16_t NNUE::EvaluateChess768(const Brain& brain, int sideToMove)
-{
-	//BuildAccumulatorsChess768(brain);//THESE SHOULD BE INCREMENTALLY UPDATED - NEED TO COMPARE!!! AND TIME!
-
-	//bool result = true;
-	//for (int i = 0; i < FEATURE_DIM_CHESS768; i++)
-	//{
-	//	if (whiteAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[0][i])
-	//	{
-	//		result = false;
-	//	}
-	//	if (blackAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[1][i])
-	//	{
-	//		result = false;
-	//	}
-	//}
-
-	//DON'T NOW NEED THIS FN AS A WRAPPER! CAN JUST CALL RunNetworkChess768 FROM MY EVALUATE.CPP
-	int16_t result = RunNetworkChess768(brain, sideToMove);
-
-	return result;
-}
+//int16_t NNUE::EvaluateChess768(const Brain& brain, int sideToMove)
+//{
+//	//BuildAccumulatorsChess768(brain);//THESE SHOULD BE INCREMENTALLY UPDATED - NEED TO COMPARE!!! AND TIME!
+//
+//	//bool result = true;
+//	//for (int i = 0; i < FEATURE_DIM_CHESS768; i++)
+//	//{
+//	//	if (whiteAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[0][i])
+//	//	{
+//	//		result = false;
+//	//	}
+//	//	if (blackAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[1][i])
+//	//	{
+//	//		result = false;
+//	//	}
+//	//}
+//
+//	//DON'T NOW NEED THIS FN AS A WRAPPER! CAN JUST CALL RunNetworkChess768 FROM MY EVALUATE.CPP
+//	int16_t result = RunNetworkChess768(brain, sideToMove);
+//
+//	return result;
+//}
 
 //----------------------------------------------------------------------------------------------------
 

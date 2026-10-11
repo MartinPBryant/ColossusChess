@@ -1671,7 +1671,6 @@ int probe_table(const PyrrhicPosition *pos, int s, int *success, const int type)
 {
 	// Obtain the position's material-signature key
 	uint64_t key = pyrrhic_calc_key(pos, false);
-	//printf("probe_table: key=%d\n", key);//TEMP
 
 	// Test for KvK
 	// Note: Cfish has key == 2ULL for KvK but we have 0
@@ -1687,7 +1686,6 @@ int probe_table(const PyrrhicPosition *pos, int s, int *success, const int type)
 	}
 
 	struct BaseEntry *be = tbHash[hashIdx].ptr;
-	//printf("probe_table: be->key=%d\n", be->key);//TEMP
 	if ((type == DTM && !be->hasDtm) || (type == DTZ && !be->hasDtz)) {
 		*success = 0;
 		return 0;
@@ -1725,7 +1723,6 @@ int probe_table(const PyrrhicPosition *pos, int s, int *success, const int type)
 	}
 
 	struct EncInfo *ei = first_ei(be, type);
-	//printf("probe_table: ei->precomp[0]=%d\n", ei->precomp[0]);//TEMP
 	int p[TB_PIECES];
 	size_t idx;
 	int t = 0;
@@ -1762,8 +1759,6 @@ int probe_table(const PyrrhicPosition *pos, int s, int *success, const int type)
 	}
 
 	uint8_t *w = decompress_pairs(ei->precomp, idx);
-	//printf("probe_table: idx=%d\n", idx);//TEMP
-	//printf("probe_table: w=%d\n", w);//TEMP
 
 	if (type == WDL)
 		return (int)w[0] - 2;
@@ -2039,7 +2034,6 @@ int probe_dtz(PyrrhicPosition *pos, int *success)
 			// move was not legal
 			continue;
 		}
-		//printf("   %d-%d (%d)\n", PYRRHIC_MOVE_FROM(*m), PYRRHIC_MOVE_TO(*m), *m);//TEMP
 		int v = -probe_dtz(&pos1, success);
 		// Check for the case of mate in 1
 		if (v == 1 && pyrrhic_is_mate(&pos1))
@@ -2075,7 +2069,6 @@ int root_probe_dtz(const PyrrhicPosition *pos, bool hasRepeated, struct TbRootMo
 		struct TbRootMove *m = &(rm->moves[i]);
 		m->move = rootMoves[i];
 		pyrrhic_do_move(&pos1, pos, m->move);
-		//printf("%d-%d\n", PYRRHIC_MOVE_FROM(rootMoves[i]), PYRRHIC_MOVE_TO(rootMoves[i]));//TEMP
 
 		// Calculate dtz for the current move counting from the root position.
 		if (pos1.rule50 == 0) {
@@ -2090,7 +2083,6 @@ int root_probe_dtz(const PyrrhicPosition *pos, bool hasRepeated, struct TbRootMo
 			if (v > 0) v++;
 			else if (v < 0) v--;
 		}
-		//printf("v: %d\n", v);//TEMP
 		// Make sure that a mating move gets value 1.
 		if (v == 2 && pyrrhic_is_mate(&pos1)) {
 			v = 1;

@@ -1,0 +1,13 @@
+Sun Oct 11 14:07:48 2026
+*** Error!: Invalid NNUE file : : File not found: Reverting to embedded network
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+LastPositionCommand: 
+LastGoCommand: 
+LastCommand: setoption name evalfile value
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
