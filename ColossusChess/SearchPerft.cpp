@@ -1013,7 +1013,7 @@ void Perft::AllocatePerftTranspositionTable()
 				uint32_t errorCode = GetLastError();
 				errorMessage = "Perft 'large pages' transposition table memory could not be allocated! (Code:" + std::to_string(errorCode) + ") Falling back to standard pages.";
 				Output("info string *** Error! " + errorMessage);
-				OutputError(errorMessage);
+				//OutputError(errorMessage);
 			}
 			else
 				MemoryAlocatedViaLargePages = true;

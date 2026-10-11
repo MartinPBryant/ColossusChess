@@ -38,9 +38,9 @@ int main(int argc, char * argv[])
 	bool runnable = true;
 
 	// First check that the current CPU supports POPCNT, LZCNT and TZCNT(part of BMI1)
-	if (((ThisCPUSupports & EISPOPCNT) == 0) || ((ThisCPUSupports & EISLZCNT) == 0) || ((ThisCPUSupports & EISBMI1) == 0))
+	if (((ThisCPUSupports & EISPOPCNT) == 0) || ((ThisCPUSupports & EISLZCNT) == 0) || ((ThisCPUSupports & EISBMI1) == 0) || ((ThisCPUSupports & EISAVX2) == 0))
 	{
-		Output("***** This executable uses the POPCNT, LZCNT and TZCNT instructions which are NOT all supported by this CPU.");
+		Output("***** This executable uses the POPCNT, LZCNT, TZCNT and various AVX2 SIMD instructions which are NOT all supported by this CPU.");
 		runnable = false;
 	}
 //	else

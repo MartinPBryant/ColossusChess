@@ -267,9 +267,6 @@ ALL
 ===
 
 
-still getting lichess ponder errors!!!
-
-
 egtb draw scores - prefer piece count?
 
 
