@@ -15,6 +15,10 @@
 
 //----------------------------------------------------------------------------------------------------
 
+// Before a new release the 'production' network can be edited with the binary editor to embed some useful info for reporting/identification
+// So on loading a network it outputs a message e.g. info string Loaded embedded NNUE: Chess768 : 128 million : 01/10/26 14:53:10
+// The info is placed in the 'bulletbulletbullet...' tail (added by the Bullet trainer as padding) after the first 'bullet' word
+
 NNUE::NNUE()
 {
 	featureWeightsChess768 = nullptr;

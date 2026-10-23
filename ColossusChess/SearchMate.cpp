@@ -239,7 +239,7 @@ void Mate::ShowBestLineMessage(short alpha, uint8_t eul)
 	} while ((PrincipalVariation[i] & 0xFFFF) != 0);
 	
 	lastPV = PVMessage;
-	trim(lastPV);
+	Trim(lastPV);
 
 	// Construct any 'end of PV' suffix
 	std::string pvTerminatorMessage = "";

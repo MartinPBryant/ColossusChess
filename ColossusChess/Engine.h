@@ -75,6 +75,15 @@ extern bool UCI_Chess960;
 extern bool UseLargePages;
 extern bool MemoryAlocatedViaLargePages;
 
+// Book
+extern std::string BookFile;
+extern HANDLE hBookFile;
+extern LARGE_INTEGER BookFileSize;
+extern HANDLE hBookFileMapping;
+extern const char* BookFileData;
+extern bool BookFileFound;
+extern bool ExitedBook;
+
 // Endgame tablebases
 extern bool UseLichessEGTB;
 extern int LichessQueries;
@@ -90,7 +99,6 @@ extern const int EndgameTablebasesCumulativeExpectedFileCounts[8];
 
 // Material/positional scoring
 extern short Contempt;
-extern const short Tempo;
 
 // Castling statuses - Introduced when implementing Chess960/FRC
 extern int8_t InitialKingFile;
@@ -233,6 +241,7 @@ extern int8_t ManhattanDistance[64][64];
 extern double Reductions[256];
 extern const int SeeLowHighValues[7];
 extern const int SeeValues[7];
+extern const int GamePhaseIncrement[8];
 
 // CPU identification
 extern std::string CPUVendor;
@@ -269,16 +278,18 @@ void ClearMailboxBoard64(int8_t MailboxBoard64[64]);
 
 void InitialiseMaterialValues(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 bool MaterialValuesCorrect(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
-extern const int GamePhaseIncrement[8];
 void InitialiseGamePhase(int8_t MailboxBoard64[64], GameRecordEntry_Struct* grp);
 
 //std::string ConvertPositionToFEN(int8_t mailboxBoard64[64]);
-std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber); // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
+std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, GameRecordCastlingStatus_Union castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber); // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
 //std::string ConvertPositionToFEN(Brain* brain);
 //std::string ConvertPositionToFENForPerft(Brain* brain);
 
 void InitialiseOneOffStuff();
 uint64_t GetMS();
+void OpenBookFile();
+void CloseBookFile();
+
 void* AlignedAllocateMemory(size_t size, size_t alignment);
 void AlignedFreeMemory(void* p);
 void FreeAnyTranspositionTableMemory();

@@ -1,9 +1,9 @@
-Thu Oct  8 10:15:59 2026
-*** Error!: Exception occurred! 3221225620 : CrashLocation=0
+Fri Oct 23 09:45:50 2026
+*** Error!: Invalid book file
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 LastPositionCommand: 
-LastGoCommand: go movetime 5000
-LastCommand: go movetime 5000
+LastGoCommand: 
+LastCommand: setoption name bookfile value fred
 TranspositionTableMemory=64
 StopImmediately=0
 StopWhenIterationComplete=0

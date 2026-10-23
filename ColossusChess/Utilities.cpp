@@ -41,7 +41,7 @@ int64_t AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC8, AC9;
 
 //----------------------------------------------------------------------------------------------------
 
-void ReadINI(char* section, char* key)
+void ReadINI(const char* section, const char* key)
 {
 #ifdef _WIN32
 	GetPrivateProfileString(section, key, "", INIValue, sizeof(INIValue), INIPath.c_str());
@@ -51,7 +51,7 @@ void ReadINI(char* section, char* key)
 }
 
 std::atomic<bool> OutputLogLocked = false;
-void OutputLog(std::string s)
+void OutputLog(const std::string& s)
 {
 	// Occasionally the 'main' thread and the outer-engine thread would clash here and crash DESPITE the try/catch clause! So I implemented multi-thread locking.
 	if (!OutputLogLocked.exchange(true)) // The exchange method returns the existing value so if any other thread has already set it to true this block won't be executed
@@ -59,7 +59,7 @@ void OutputLog(std::string s)
 		try
 		{
 			LogFile.open(LogFileName, std::ios_base::app);
-			LogFile << s + "\n";
+			LogFile << s << "\n";
 			LogFile.close();
 		}
 		catch (...)
@@ -70,7 +70,7 @@ void OutputLog(std::string s)
 }
 
 std::atomic<bool> OutputSyzygyPathLogLocked = false;
-void OutputSyzygyPathLog(std::string s)
+void OutputSyzygyPathLog(const std::string& s)
 {
 	if (!OutputSyzygyPathLogLocked.exchange(true)) // The exchange method returns the existing value so if any other thread has already set it to true this block won't be executed
 	{
@@ -82,7 +82,7 @@ void OutputSyzygyPathLog(std::string s)
 			char buffer[100];
 			ctime_s(buffer, sizeof(buffer), &t);
 			SyzygyPathLogFile << buffer;
-			SyzygyPathLogFile << "\n" + s + "\n";
+			SyzygyPathLogFile << "\n" << s << "\n";
 			SyzygyPathLogFile.close();
 		}
 		catch (...)
@@ -92,7 +92,7 @@ void OutputSyzygyPathLog(std::string s)
 	}
 }
 
-void OutputError(std::string s)
+void OutputError(const std::string& s)
 {
 	try
 	{
@@ -102,18 +102,18 @@ void OutputError(std::string s)
 		char buffer[100];
 		ctime_s(buffer, sizeof(buffer), &t);
 		ErrorFile << buffer;
-		ErrorFile << "*** Error!: " + s + "\n";
+		ErrorFile << "*** Error!: " << s << "\n";
 		ErrorFile << ConvertPositionToFEN(EngineBrain.MailboxBoard64, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].sideToMove, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].castlingStatus, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].epSquare, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].pliesSinceIrreversible, EngineBrain.GameRecord[EngineBrain.GameRecordIndexRoot].moveNumber) + "\n";
 
-		ErrorFile << "LastPositionCommand: " + LastPositionCommand << "\n";
-		ErrorFile << "LastGoCommand: " + LastGoCommand << "\n";
-		ErrorFile << "LastCommand: " + LastCommand << "\n";
-		ErrorFile << "TranspositionTableMemory=" + std::to_string(TranspositionTableMemory) << "\n";
-		ErrorFile << "StopImmediately=" + std::to_string(StopImmediately) << "\n";
-		ErrorFile << "StopWhenIterationComplete=" + std::to_string(StopWhenIterationComplete) << "\n";
-		ErrorFile << "Ponder=" + std::to_string(Ponder) << "\n";
-		ErrorFile << "Pondering=" + std::to_string(Pondering) << "\n";
-		ErrorFile << "ReplyImmediately=" + std::to_string(ReplyImmediately) << "\n";
+		ErrorFile << "LastPositionCommand: " << LastPositionCommand << "\n";
+		ErrorFile << "LastGoCommand: " << LastGoCommand << "\n";
+		ErrorFile << "LastCommand: " << LastCommand << "\n";
+		ErrorFile << "TranspositionTableMemory=" << std::to_string(TranspositionTableMemory) << "\n";
+		ErrorFile << "StopImmediately=" << std::to_string(StopImmediately) << "\n";
+		ErrorFile << "StopWhenIterationComplete=" << std::to_string(StopWhenIterationComplete) << "\n";
+		ErrorFile << "Ponder=" << std::to_string(Ponder) << "\n";
+		ErrorFile << "Pondering=" << std::to_string(Pondering) << "\n";
+		ErrorFile << "ReplyImmediately=" << std::to_string(ReplyImmediately) << "\n";
 
 		ErrorFile << "\n";
 		ErrorFile.close();
@@ -124,9 +124,9 @@ void OutputError(std::string s)
 }
 
 // Output a string to stdout (and optionally the log file)
-void Output(std::string s)
+void Output(const std::string& s)
 {
-	std::cout << s + "\n";
+	std::cout << s << "\n";
 	if (Logging)
 		OutputLog(s);
 }
@@ -135,21 +135,21 @@ void Output(std::string s)
 
 #include <cctype>
 
-void ltrim(std::string &s) {
+void Ltrim(std::string& s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}));
 }
 
-void rtrim(std::string &s) {
+void Rtrim(std::string& s) {
 	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}).base(), s.end());
 }
 
-void trim(std::string &s) {
-	rtrim(s);
-	ltrim(s);
+void Trim(std::string& s) {
+	Rtrim(s);
+	Ltrim(s);
 }
 
 // Convert string to uppercase
@@ -174,15 +174,15 @@ std::string GetNextToken(std::string *s)
 	{
 		result = UpperCase((*s).substr(0, firstWhiteSpaceIndex));
 		(*s) = (*s).substr(firstWhiteSpaceIndex);
-		trim((*s));
+		Trim((*s));
 	}
 
-	trim(result);
+	Trim(result);
 	return result;
 }
 
 // Split a line into tokens
-void Split(std::string command, std::string *tokens, int *tokenCount, char separators[])
+void Split(const std::string& command, std::string *tokens, int *tokenCount, char separators[])
 {
 	char *token;
 	char line[10000]; // N.B. sometimes the UCI 'position' commands can be very long as they contain all the moves of the game!
@@ -335,7 +335,7 @@ void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRema
 	}
 }
 
-void PrintTree2(int iterationPly, int ply, std::string s)
+void PrintTree2(int iterationPly, int ply, const std::string& s)
 {
 	if (ply <= 8)
 	{
@@ -495,13 +495,13 @@ void CPUInfo()
 	}
 
 	CPUBrand = std::string(brand);
-	trim(CPUBrand);
+	Trim(CPUBrand);
 
 	ThisCPUSupportsEISNames = "";
 	for (int i = 0; i < std::size(EISNames); i++)
 		if (ThisCPUSupports & (1ULL << i))
 			ThisCPUSupportsEISNames += EISNames[i] + " ";
-	trim(ThisCPUSupportsEISNames);
+	Trim(ThisCPUSupportsEISNames);
 
 	Output("info string CPU Information: Vendor=" + CPUVendor + ", Brand=" + CPUBrand + ", Family=" + MyITOA(CPUFamily) + ", Model=" + MyITOA(CPUModel) + ", EIS supported=" + ThisCPUSupportsEISNames);
 }

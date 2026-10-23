@@ -1305,11 +1305,11 @@ void Perft::TreeSearchPerft(int ply, int sideToMove, int isInCheck)
 				if (IsDebug)
 				{
 					//nowClock = std::chrono::steady_clock::now();
-					CurrentTickCount = GetMS();
+					currentTickCount = GetMS();
 					//uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(nowClock - previousClock).count();
-					uint64_t ms = CurrentTickCount - PreviousTickCount;
+					uint64_t ms = currentTickCount - previousTickCount;
 					//previousClock = nowClock;
-					PreviousTickCount = CurrentTickCount;
+					previousTickCount = currentTickCount;
 
 					s += " (" + std::to_string(ms) + "ms, Hashfull = " + std::to_string(HashfullPerftTranspositionTable()) + ", ThreadId = " + std::to_string(ThreadId) + " CurrentProcessorNumber = " + std::to_string(GetCurrentProcessorNumber()) + ")";
 				}
@@ -1339,9 +1339,9 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 	// Get timer
 	uint64_t ms = 0;
 	//startClock = std::chrono::steady_clock::now();
-	StartTickCount = GetMS();
+	startTickCount = GetMS();
 	//previousClock = startClock;
-	PreviousTickCount = StartTickCount;
+	previousTickCount = startTickCount;
 
 	// Initialise any variables required for the search
 	perftBrain.GameRecordPointer = &perftBrain.GameRecord[perftBrain.GameRecordIndexRoot];
@@ -1376,7 +1376,7 @@ Perft::PerftResult_Struct Perft::ComputePerft()
 		TreeSearchPerft(1, SideToMove, perftBrain.IsEnemyKingAttacked(GetLS1BIndex(perftBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1));
 
 	//ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startClock).count();
-	ms = GetMS() - StartTickCount;
+	ms = GetMS() - startTickCount;
 
 	PerftResult_Struct pr;
 	pr.ms = ms;

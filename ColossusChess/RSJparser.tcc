@@ -71,14 +71,14 @@ std::string strtrim (std::string str, std::string chars=" \t\n\r", int max_count
     if (str.empty()) return(str);
     if (max_count<0) max_count = str.length();
     
-    if (dirs & STRTRIM_L) { // left trim
+    if (dirs & STRTRIM_L) { // left Trim
         int p;
         for (p=0; p<max_count; ++p)
             if (chars.find(str[p])==std::string::npos) break;
         str.erase (0, p); // const_str::l_erase(p)
     }
     
-    if (dirs & STRTRIM_R) { // right trim
+    if (dirs & STRTRIM_R) { // right Trim
         int q, strlenm1=str.length()-1;
         for (q=0; q<max_count; ++q)
             if (chars.find(str[strlenm1-q])==std::string::npos) break;

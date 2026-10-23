@@ -19,6 +19,7 @@
 #include "Utilities.h"
 #include "SearchNormal.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
+#include "Polyglot.h"
 
 //----------------------------------------------------------------------------------------------------
 
@@ -257,9 +258,9 @@ void Normal::ShowProgressMessage(uint32_t move, int movesMade, short bestMoveSco
 				)
 #endif
 			{
-				LastProgressMessageTickCount = CurrentTickCount;
+				LastProgressMessageTickCount = currentTickCount;
 
-				std::string progressMessage = "info time " + std::to_string(CurrentTickCount)
+				std::string progressMessage = "info time " + std::to_string(currentTickCount)
 					+ " nodes " + std::to_string(NodeCount + NodeCountQuiescenceSearch)
 					+ " currmove " + MoveNotation(move)
 					+ " currmovenumber " + std::to_string(movesMade)
@@ -298,9 +299,9 @@ void Normal::ShowIterationFinishMessage(uint32_t hashfull)
 	{
 		uint64_t totalNodes = NodeCount + NodeCountQuiescenceSearch;
 		std::string iterationFinishMessage = "info depth " + std::to_string(IterationPly)
-			+ " time " + std::to_string(CurrentTickCount)
+			+ " time " + std::to_string(currentTickCount)
 			+ " nodes " + std::to_string(totalNodes)
-			+ " nps " + std::to_string((totalNodes * 1000) / CurrentTickCount)
+			+ " nps " + std::to_string((totalNodes * 1000) / currentTickCount)
 			+ " hashfull " + std::to_string(hashfull)
 			+ (EndgameTablebasesHits > 0 ? " tbhits " + std::to_string(EndgameTablebasesHits) : "");
 		if (IsDebug)
@@ -439,7 +440,7 @@ void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 
 		// Display the constructed message
 		std::string BestLineMessage = "info depth " + std::to_string(IterationPly) // N.B. the 'depth' value is provided here (as well as in the iteration 'start' message) as some GUIs (e.g. Arena, Shredder) don't display it unless it's provided with the PV!
-			+ " time " + std::to_string(CurrentTickCount)
+			+ " time " + std::to_string(currentTickCount)
 			+ " nodes " + std::to_string(totalNodes)
 			+ " score " + scoreMessage + eulMessage
 			+ " pv " + pvMessage + pvTerminatorMessage;
@@ -587,19 +588,19 @@ void Normal::TimeUp(float divisor)
 
 	// Get the time consumed so far this move
 	//CurrentTickCount = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count() + 1; // Add 1 millisecond to help on blitz finishes where timer is inaccurate
-	CurrentTickCount = GetMS() - StartTickCount + 1;
+	currentTickCount = GetMS() - startTickCount + 1;
 
-	if ((CurrentTickCount == PreviousTickCount) && (PreviousDivisor == divisor))
+	if ((currentTickCount == previousTickCount) && (PreviousDivisor == divisor))
 		return; // The result won't change unless the tick count has advanced or the divisor has changed
 
-	PreviousTickCount = CurrentTickCount;
+	previousTickCount = currentTickCount;
 	PreviousDivisor = divisor;
 
 	// Only the main thread is responsible for setting time up flags
 	if (ThreadId > 0)
 		return;
 
-	if (CurrentTickCount > MessageDelayTickCount)
+	if (currentTickCount > MessageDelayTickCount)
 	{
 		if (CurrentIterationsMessages != "")
 		{
@@ -619,7 +620,7 @@ void Normal::TimeUp(float divisor)
 	case TCTFixedTime:
 		if (IterationPly < 2) // Always let it complete the 1st iteration
 			break;
-		if (CurrentTickCount > TC.FixedTimeMilliSeconds)
+		if (currentTickCount > TC.FixedTimeMilliSeconds)
 		{
 			StopWhenIterationComplete = true;
 			StopImmediately = true;
@@ -655,10 +656,10 @@ void Normal::TimeUp(float divisor)
 		else
 			stmTime = BTime;
 		stmTime = std::max(stmTime - 500, (int64_t)0); // Subtract 500ms buffer for a slow EGTB access
-		timeLeft = std::max(stmTime - (int64_t)CurrentTickCount, (int64_t)0); // Don't allow timeLeft to go -ve
+		timeLeft = std::max(stmTime - (int64_t)currentTickCount, (int64_t)0); // Don't allow timeLeft to go -ve
 
 		// 'Panic' time up? (Have we used more than half of our remaining time? {i.e. the time we had at the start of the move})
-		if (CurrentTickCount > (stmTime / 2))
+		if (currentTickCount > (stmTime / 2))
 			divisor = 9999.0f; // Set the divisor very high so that it calls time up!
 		else if (RootAlpha == (short)(-MatingIn0Score)) // Give more time if failed low and still in the middle of the 'retry' iteration (i.e. haven't searched all root moves)
 		{
@@ -713,7 +714,8 @@ void Normal::TimeUp(float divisor)
 		}
 
 		// Have we used enough time yet? (or only one move or done maximum ply search)
-		if ((CurrentTickCount >= ((float)timeLeft / (float)movesLeft / divisor)) || (RootMovesCount == 1) || (IterationPly >= MaximumIterationPly))
+		//if ((currentTickCount >= ((float)timeLeft / (float)movesLeft / divisor)) || (RootMovesCount == 1) || (IterationPly >= MaximumIterationPly))
+		if ((currentTickCount >= ((float)timeLeft / (float)movesLeft / divisor)) || (RootMovesViableCount == 1) || (IterationPly >= MaximumIterationPly))
 		{
 			if (Pondering)
 				ReplyImmediately = true;
@@ -1946,6 +1948,9 @@ GenerateMoveList:
 		if (ply == 1)
 		{
 			ShowProgressMessage(currentMove.ui32, moveListIndexIterator + 1, bestMoveScore, alpha, beta); // Display current root move (always display first move)
+			if (BookRootMove.ui32 != 0) // Did we find a book move?
+				if (currentMove.ui32 != BookRootMove.ui32)
+					continue;
 			if (EndgameTablebasesRootMove.ui32 != 0) // Are we in the EGTB at the root
 			{
 				int wdl = RetrieveRootMoveWDLStatus(currentMove.ui32);
@@ -2577,7 +2582,7 @@ std::string Normal::ComputeNormal()
 	// Get timer
 	//StartClock = std::chrono::steady_clock::now();
 	//MessagesLastDisplayedClock = StartClock;
-	StartTickCount = GetMS();
+	startTickCount = GetMS();
 	//PreviousTickCount = StartTickCount;
 	//MessagesLastDisplayedTickCount = StartTickCount;
 	PreviousDivisor = 0.0f;
@@ -2611,12 +2616,12 @@ std::string Normal::ComputeNormal()
 	//normalBrain.gameRecordPointer->dangerConditions.dc.isZLKM = 0;
 	normalBrain.GameRecordPointer->dangerConditions &= ~TTFlagZeroLegalKingMoves;
 
-	lastPawnScoreWhite.bb = 0;
-	lastPawnScoreWhite.pawnStructureOpeningScore = 0;
-	lastPawnScoreWhite.pawnStructureEndgameScore = 0;
-	lastPawnScoreBlack.bb = 0;
-	lastPawnScoreBlack.pawnStructureOpeningScore = 0;
-	lastPawnScoreBlack.pawnStructureEndgameScore = 0;
+	//lastPawnScoreWhite.bb = 0;
+	//lastPawnScoreWhite.pawnStructureOpeningScore = 0;
+	//lastPawnScoreWhite.pawnStructureEndgameScore = 0;
+	//lastPawnScoreBlack.bb = 0;
+	//lastPawnScoreBlack.pawnStructureOpeningScore = 0;
+	//lastPawnScoreBlack.pawnStructureEndgameScore = 0;
 	(normalBrain.GameRecordPointer - 1)->staticEvaluation = Evaluate(SideToMove ^ 1);
 
 	TranspositionTableStores = 0;
@@ -2635,6 +2640,7 @@ std::string Normal::ComputeNormal()
 	RootMoveList[0].mws.ui32 = 0; //WHY???
 	normalBrain.CalculatePinnedPieces(SideToMove); // Required for legal move generation
 	RootMovesCount = normalBrain.GenerateAllMoves(SideToMove, normalBrain.IsEnemyKingAttacked(GetLS1BIndex(normalBrain.PiecesBB[SideToMove][King]), SideToMove ^ 1), moveList);
+	RootMovesViableCount = RootMovesCount;
 	if (RootMovesCount == 0) // Sometimes the GUI or the user provide positions with zero legal moves! (e.g. checkmates/stalemates in chess)
 	{
 		if (ThreadId == 0) // Only the main thread will report the error
@@ -2656,6 +2662,79 @@ std::string Normal::ComputeNormal()
 		//RootMoveList[moveListIndexIterator].EGTBRank = -1;
 	}
 	RootPriority = 1;
+
+	// Book stuff
+	BookRootMove.ui32 = 0;
+	if (BookFileFound) // If we couldn't open a book file this will be false
+		if (!ExitedBook) // If we were unable to find a position in the book this will be true
+		{
+			uint64_t polyglotHash64 = Polyglot::Hash64(normalBrain.MailboxBoard64, SideToMove, normalBrain.GameRecordPointer->castlingStatus, normalBrain.GameRecordPointer->epSquare);
+			PolyglotEntry_Struct bookMove = Polyglot::GetBookMove(polyglotHash64);
+
+			if (bookMove.move != 0)
+			{
+				uint16_t move = _byteswap_ushort(bookMove.move);
+				uint16_t toSquare = move & 0x3F;
+				uint16_t fromSquare = (move >> 6) & 0x3F;
+				uint16_t promotion = (move >> 12) & 0x07;
+
+				BookRootMove.mf.fromSquare = (SquaresEnum)fromSquare;
+				BookRootMove.mf.toSquare = (SquaresEnum)toSquare;
+				BookRootMove.mf.flag = 0;
+
+				int8_t fromSquarePiece = normalBrain.MailboxBoard64[fromSquare];
+				int8_t toSquarePiece = normalBrain.MailboxBoard64[toSquare];
+
+				// Ensure castling move encoded correctly!
+				if (((fromSquarePiece > 0) && (toSquarePiece > 0)) || ((fromSquarePiece < 0) && (toSquarePiece < 0))) // Capturing own piece? (Indicates polyglot castling)
+				{
+					BookRootMove.mf.flag = MFCastling;
+					if (!UCI_Chess960)
+					{
+						// Correct to-square for normal chess
+						if (toSquare > fromSquare)
+							BookRootMove.mf.toSquare = (SquaresEnum)(BookRootMove.mf.toSquare - 1);
+						else
+							BookRootMove.mf.toSquare = (SquaresEnum)(BookRootMove.mf.toSquare + 2);
+					}
+				}
+
+				// En-passent
+				if ((std::abs(fromSquarePiece) == Pawn) && (toSquarePiece == Empty) && ((fromSquare % 8) != (toSquare % 8)))
+					BookRootMove.mf.flag = MFEnPassant;
+
+				// Promotion
+				switch (promotion)
+				{
+				case 0:
+					break;
+				case 1:
+					BookRootMove.mf.flag = MFPromoteToKnight;
+					break;
+				case 2:
+					BookRootMove.mf.flag = MFPromoteToBishop;
+					break;
+				case 3:
+					BookRootMove.mf.flag = MFPromoteToRook;
+					break;
+				case 4:
+					BookRootMove.mf.flag = MFPromoteToQueen;
+					break;
+				}
+
+				// Ensure we can find the book move in the root move list!
+				bool found = UpdateRootMoveEGTBStatus(BookRootMove.ui32, 1, 0);
+				if (!found)
+				{
+					BookRootMove.ui32 = 0;
+					OutputError("Did not find Book move in RootMoveList! " + MoveNotation(BookRootMove.ui32));
+				}
+
+				RootMovesViableCount = 1; // Book moves are treated as 'only one move' and will perform a 4-ply search to obtain a 'ponder' move (if required)
+			}
+			else
+				ExitedBook = true;
+		}
 
 	// EGTB stuff
 	assert(EndgameTablebasesPiecesFound >= 4); // Now that we have embedded EGTBs!
@@ -2747,6 +2826,11 @@ std::string Normal::ComputeNormal()
 				{
 					// Save the EGTB statuses of all root moves
 					// N.B. unlike the Lichess http queries these are not ordered by distance of any sort, rather just how they come out of the move generator
+					assert(results.size = RootMovesCount);
+					int wins = 0;
+					int draws = 0;
+					int losses = 0;
+
 					for (uint32_t index = 0; index < results.size; index++)
 					{
 						TbRootMove move = results.moves[index];
@@ -2761,17 +2845,20 @@ std::string Normal::ComputeNormal()
 						{ // Win
 							wdl = 1;
 							dtz = 0x40000 - move.tbRank;
+							wins++;
 							assert(dtz >= 0); // For wins we want to play the lowest +ve dtz to convert as fast as possible
 						}
 						else if (move.tbRank == 0)
 						{ // Draw
 							wdl = 0;
 							dtz = 0;
+							draws++;
 						}
 						else
 						{ // Loss
 							wdl = -1;
 							dtz = -(0x40000 + move.tbRank);
+							losses++;
 							assert(dtz <= 0); // For losses we want to play the lowest -ve dtz to avoid conversion as long as possible
 						}
 						bool found = UpdateRootMoveEGTBStatus(colossusMove.ui32, wdl, dtz);// , move.tbRank);
@@ -2787,6 +2874,14 @@ std::string Normal::ComputeNormal()
 							EndgameTablebasesRootRank = move.tbRank;
 						}
 					}
+
+					// Set the viable move count (used to cut searches short if only 1 viable move)
+					if (wins > 0)
+						RootMovesViableCount = wins;
+					else if (draws > 0)
+						RootMovesViableCount = draws;
+					else
+						RootMovesViableCount = losses;
 				}
 				else
 				{
@@ -2833,7 +2928,7 @@ std::string Normal::ComputeNormal()
 	nullMoveMinimumPly = 0;
 	PreviousIterationsMessages = "";
 	CurrentIterationsMessages = "";
-	CurrentTickCount = 1; // To avoid any divide by zero errors
+	currentTickCount = 1; // To avoid any divide by zero errors
 	LastProgressMessageTickCount = 0;
 	//SingularExtending = false;
 
@@ -3104,7 +3199,7 @@ std::string Normal::ComputeNormal()
 				FILE *sw;
 				fopen_s(&sw, "output.csv", "a+");
 				//std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - StartClock).count());
-				std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(GetMS() - StartTickCount);
+				std::string s = BestLine() + std::to_string(RootScore) + "," + MyUI64TOA(NodeCount + NodeCountQuiescenceSearch) + "," + std::to_string(GetMS() - startTickCount);
 				fprintf(sw, "%s\n", s.c_str());
 				fclose(sw);
 			}

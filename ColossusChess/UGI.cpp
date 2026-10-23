@@ -3,6 +3,7 @@
 #define NOMINMAX // Need to include this to stop windows.h (below) breaking std::min etc
 #include <Windows.h>
 #include <processthreadsapi.h>
+#include <iostream>
 
 #include "Engine.h"
 //#include "SearchNormal.h"
@@ -10,6 +11,7 @@
 //#include "SearchPerft.h"
 #include "SYZYGYPYRRHIC\tbprobe.h"
 #include "Utilities.h"
+#include "Polyglot.h"
 
 //----------------------------------------------------------------------------------------------------
 
@@ -33,6 +35,7 @@ void SendOptions()
 	Output("option name UCI_Chess960 type check default false");
 	Output("option name UseLargePages type check default true");
 	Output("option name EvalFile type string default");
+	Output("option name BookFile type string default");
 	//Output("option name UseLichessEGTB type check default true");
 	//Output("option name MateFullWidth type check default false");
 	Output("option name MateAllChecks type check default false");
@@ -58,6 +61,7 @@ void SendOptionValues()
 	Output("info string UCI_Chess960: " + MyBooleanTOA(UCI_Chess960));
 	Output("info string UseLargePages: " + MyBooleanTOA(UseLargePages));
 	Output("info string EvalFile: " + EvalFile);
+	Output("info string BookFile: " + BookFile);
 	//Output("info string UseLichessEGTB: " + MyBooleanTOA(UseLichessEGTB));
 	Output("info string MateMaximumDefenderKingMoves: " + MyITOA(TC.MateMaximumDefenderKingMoves));
 	Output("info string MateMaximumDefenderMoves: " + MyITOA(TC.MateMaximumDefenderMoves));
@@ -217,7 +221,7 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 
 	else if (nameUpperCase == "EVALFILE")
 	{
-		std::string result;	
+		std::string result;
 		std::string version;
 		if ((result = Nnue.ReadNNUEFromFileChess768(value.c_str(), version)) == "")
 		{
@@ -231,6 +235,21 @@ void SetOption(std::string currentLine, std::string name, std::string value)
 			Nnue.ReadNNUEFromResourceChess768(version);
 
 			std::string errorMesage = "Invalid NNUE file : " + value + ": " + result + ": Reverting to embedded network: " + version;
+			Output("info string *** Error! " + errorMesage);
+			OutputError(errorMesage);
+		}
+	}
+
+	else if (nameUpperCase == "BOOKFILE")
+	{
+		BookFile = value;
+		OpenBookFile();
+		if (BookFileFound)
+			Output("info string BookFile set to '" + BookFile + "'");
+		else
+		{
+			BookFile = "";
+			std::string errorMesage = "Invalid book file";
 			Output("info string *** Error! " + errorMesage);
 			OutputError(errorMesage);
 		}
@@ -367,7 +386,7 @@ std::string ProcessInput(std::string currentLine)
 		// Save for error reporting
 		LastCommand = originalCurrentLine;
 
-		trim(currentLine);
+		Trim(currentLine);
 		commandToken = UpperCase(GetNextToken(&currentLine));
 
 		// Identify the appropriate command
@@ -696,6 +715,15 @@ std::string ProcessInput(std::string currentLine)
 				delete normal;
 			}
 
+			else if (commandToken == "-MISC")
+			{
+				// Used for any miscellaneous one-off tests
+				//NNUETest();
+				//EGTB7Stats();
+				//std::cout << std::hex << Polyglot::Hash64(EngineBrain.MailboxBoard64, 1, 1 + 2 + 4 + 8, 0) << "\n";
+				//std::cout << std::hex << Polyglot::Hash64(EngineBrain.MailboxBoard64, 0, 0, 0) << "\n";
+			}
+
 #ifdef EXPERIMENTAL
 			else if (commandToken == "-MMQ")
 			{
@@ -772,12 +800,6 @@ std::string ProcessInput(std::string currentLine)
 								// Used for testing SEE routine
 								Normal normal;
 								normal.TestSEE();
-							}
-							else if (commandToken == "-MISC")
-							{
-								// Used for any miscellaneous one-off tests
-								//NNUETest();
-								//EGTB7Stats();
 							}
 #endif // EXPERIMENTAL
 			else

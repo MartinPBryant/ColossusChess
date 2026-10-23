@@ -5853,7 +5853,7 @@ inline bool parse_trailers(stream_line_reader &line_reader, Headers &dest,
   return true;
 }
 
-inline std::pair<size_t, size_t> trim(const char *b, const char *e, size_t left,
+inline std::pair<size_t, size_t> Trim(const char *b, const char *e, size_t left,
                                       size_t right) {
   while (b + left < e && is_space_or_tab(b[left])) {
     left++;
@@ -5865,7 +5865,7 @@ inline std::pair<size_t, size_t> trim(const char *b, const char *e, size_t left,
 }
 
 inline std::string trim_copy(const std::string &s) {
-  auto r = trim(s.data(), s.data() + s.size(), 0, s.size());
+  auto r = Trim(s.data(), s.data() + s.size(), 0, s.size());
   return s.substr(r.first, r.second - r.first);
 }
 
@@ -5910,7 +5910,7 @@ inline void split(const char *b, const char *e, char d, size_t m,
 
   while (e ? (b + i < e) : (b[i] != '\0')) {
     if (b[i] == d && count < m) {
-      auto r = trim(b, e, beg, i);
+      auto r = Trim(b, e, beg, i);
       if (r.first < r.second) { fn(&b[r.first], &b[r.second]); }
       beg = i + 1;
       count++;
@@ -5919,7 +5919,7 @@ inline void split(const char *b, const char *e, char d, size_t m,
   }
 
   if (i) {
-    auto r = trim(b, e, beg, i);
+    auto r = Trim(b, e, beg, i);
     if (r.first < r.second) { fn(&b[r.first], &b[r.second]); }
   }
 }
@@ -5938,7 +5938,7 @@ inline void split_unquoted(const char *b, const char *e, char d, size_t m,
     if (b[i] == '"') {
       in_quotes = !in_quotes;
     } else if (b[i] == d && !in_quotes && count < m) {
-      auto r = trim(b, e, beg, i);
+      auto r = Trim(b, e, beg, i);
       if (r.first < r.second) { fn(&b[r.first], &b[r.second]); }
       beg = i + 1;
       count++;
@@ -5947,7 +5947,7 @@ inline void split_unquoted(const char *b, const char *e, char d, size_t m,
   }
 
   if (i) {
-    auto r = trim(b, e, beg, i);
+    auto r = Trim(b, e, beg, i);
     if (r.first < r.second) { fn(&b[r.first], &b[r.second]); }
   }
 }
@@ -5966,9 +5966,9 @@ inline void divide_param_pair(const char *b, const char *e, std::string &key,
   divide(
       b, static_cast<std::size_t>(e - b), '=',
       [&](const char *kb, std::size_t klen, const char *vb, std::size_t vlen) {
-        const auto kr = trim(kb, kb + klen, 0, klen);
+        const auto kr = Trim(kb, kb + klen, 0, klen);
         key.assign(kb + kr.first, kb + kr.second);
-        const auto vr = trim(vb, vb + vlen, 0, vlen);
+        const auto vr = Trim(vb, vb + vlen, 0, vlen);
         val.assign(vb + vr.first, vb + vr.second);
       });
 }
@@ -5981,7 +5981,7 @@ inline bool split_find(const char *b, const char *e, char d, size_t m,
 
   while (e ? (b + i < e) : (b[i] != '\0')) {
     if (b[i] == d && count < m) {
-      auto r = trim(b, e, beg, i);
+      auto r = Trim(b, e, beg, i);
       if (r.first < r.second) {
         auto found = fn(&b[r.first], &b[r.second]);
         if (found) { return true; }
@@ -5993,7 +5993,7 @@ inline bool split_find(const char *b, const char *e, char d, size_t m,
   }
 
   if (i) {
-    auto r = trim(b, e, beg, i);
+    auto r = Trim(b, e, beg, i);
     if (r.first < r.second) {
       auto found = fn(&b[r.first], &b[r.second]);
       if (found) { return true; }
@@ -7445,7 +7445,7 @@ inline bool parse_quality(const char *b, const char *e, std::string &token,
   divide(
       b, static_cast<std::size_t>(e - b), ';',
       [&](const char *lb, std::size_t llen, const char *rb, std::size_t rlen) {
-        auto r = trim(lb, lb + llen, 0, llen);
+        auto r = Trim(lb, lb + llen, 0, llen);
         if (r.first < r.second) { token.assign(lb + r.first, lb + r.second); }
         params_b = rb;
         params_len = rlen;
@@ -7467,7 +7467,7 @@ inline bool parse_quality(const char *b, const char *e, std::string &token,
                }
 
                // Trim the value portion
-               auto r = trim(pb, pe, 2, len);
+               auto r = Trim(pb, pe, 2, len);
                if (r.first >= r.second) {
                  invalid = true;
                  return true;
@@ -14084,7 +14084,7 @@ get_client_ip(const std::string &x_forwarded_for,
   detail::split(x_forwarded_for.data(),
                 x_forwarded_for.data() + x_forwarded_for.size(), ',',
                 [&](const char *b, const char *e) {
-                  auto r = detail::trim(b, e, 0, static_cast<size_t>(e - b));
+                  auto r = detail::Trim(b, e, 0, static_cast<size_t>(e - b));
                   ip_list.emplace_back(std::string(b + r.first, b + r.second));
                 });
 

@@ -147,12 +147,11 @@ private:
 	RootMoveList_Struct RootMoveList[220];
 	RootMoveList_Struct RootMoveListBackup[220];
 	MoveWithScore_Struct InitialRootMoveList[220];
-	int RootMovesCount;
+	int RootMovesCount, RootMovesViableCount;
 	Move_Struct RootBestMove, CurrentIterationsPreviousRootBestMove;
 	int RootPriority; // Set to 1 before the search starts and incremented every time a root move exceeds alpha
 	int ConsistentBestMoves; // Counts the number of iterations a best move has matched the best move from the previous iteration. The 1st iteration cannot be matched to anything so after ID=2 it may be set to 1. Used to reduce the search time for 'obvious' moves.
-	PawnScore_Struct lastPawnScoreWhite, lastButOnePawnScoreWhite, lastPawnScoreBlack, lastButOnePawnScoreBlack;
-	int whiteMovesToPromote, blackMovesToPromote;
+
 	uint64_t NodeCount, NodeCountQuiescenceSearch, RootCumulativeNodeCount;
 	uint64_t EndgameTablebasesProbes, EndgameTablebasesHeavyProbes, EndgameTablebasesHits;
 	int EndgameTablebasesTreeProbeLimitMain, EndgameTablebasesTreeProbeLimitQS;
@@ -170,6 +169,8 @@ private:
 	std::string PreviousIterationsMessages;
 	std::string CurrentIterationsMessages;
 
+	Move_Struct BookRootMove;
+
 	uint64_t LastProgressMessageTickCount;
 	uint32_t UseTTAndPruning;
 	int TMI1Extensions;
@@ -178,12 +179,12 @@ private:
 
 	const short FutilityMargin[9] = { 0,50,100,150,200,250,300,300,300 };
 
-	const static int MessageQueueSize = 12;
-	std::string MessageQueue[MessageQueueSize] = { "", "", "", "", "", "", "", "", "", "", "", "" };
-	int MessageQueueIndex = 0;
-	bool LastMessageWasAProgressMessage = false;
-	bool MessagesQueued = false;
-	uint64_t StartTickCount, CurrentTickCount, PreviousTickCount; // Set in TimeUp method
+	//const static int MessageQueueSize = 12;
+	//std::string MessageQueue[MessageQueueSize] = { "", "", "", "", "", "", "", "", "", "", "", "" };
+	//int MessageQueueIndex = 0;
+	//bool LastMessageWasAProgressMessage = false;
+	//bool MessagesQueued = false;
+	uint64_t startTickCount, currentTickCount, previousTickCount; // Set in TimeUp method
 	float PreviousDivisor;
 
 	static int CrashLocation;

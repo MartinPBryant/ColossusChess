@@ -68,7 +68,6 @@ const int EndgameTablebasesCumulativeExpectedFileCounts[8] = { 0, 0, 0, 5, 5 + 3
 
 // Material/positional scoring
 short Contempt = 0;
-const short Tempo = 1;
 
 // Castling statuses - Introduced when implementing Chess960/FRC
 int8_t InitialKingFile;
@@ -164,6 +163,14 @@ std::string EISNames[14] = {"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE41", "SSE
 bool LargePagesEnabled = false;
 size_t LargePageMinimum = 0;
 
+// Book
+std::string BookFile = "testbook.bin";// "";
+HANDLE hBookFile = INVALID_HANDLE_VALUE;
+LARGE_INTEGER BookFileSize;
+HANDLE hBookFileMapping = NULL;
+const char* BookFileData;
+bool BookFileFound = false;
+bool ExitedBook = true; // Set to false in NewGame
 
 //----------------------------------------------------------------------------------------------------
 
@@ -182,7 +189,7 @@ void AdvanceSideToMove()
 
 //----------------------------------------------------------------------------------------------------
 
-std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, GameRecordCastlingStatusUnion castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber) // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
+std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, GameRecordCastlingStatus_Union castlingStatus, int epSquare, int pliesSinceIrreversible, int moveNumber) // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
 //std::string ConvertPositionToFEN(Brain* brain) // N.B. this currently only works on the root position! IT SHOULD REALLY HAVE PARAMETERS PASSED IN RATHER THAN WORKING FROM GameRecordIndexRoot
 {
 	std::string fen = "";
@@ -713,6 +720,7 @@ void NewGame(bool clearEverything)
 	{
 		ClearEverythingForDeterminancy(); // Clears TT, killers, etc
 		//OutputError("Lichess: " + MyITOA(LichessQueries) + " " + MyITOA(LichessQueriesReturned) + " " + MyITOA(LichessQueriesThrottled) + " " + MyITOA(LichessQueriesUsed));//TEMP
+		ExitedBook = false;
 	}
 }
 
@@ -883,6 +891,9 @@ void InitialiseOneOffStuff()
 	// Embedded EGTBs
 	EndgameTablebasesInitialised = tb_init("NUL");
 	EndgameTablebasesPiecesFound = TB_LARGEST;
+
+	// Openings book
+	OpenBookFile();
 }
 
 uint64_t GetMS()
@@ -891,6 +902,55 @@ uint64_t GetMS()
 	LARGE_INTEGER now;
 	QueryPerformanceCounter(&now);
 	return (now.QuadPart * 1000.0) / PerformanceCounterFrequency.QuadPart;
+}
+
+void OpenBookFile()
+{
+	BookFileFound = false;
+
+	// Open the book file
+	if (BookFile != "")
+	{
+		hBookFile = CreateFileA(BookFile.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		if (hBookFile != INVALID_HANDLE_VALUE)
+		{
+			// Get file size
+			if (!GetFileSizeEx(hBookFile, &BookFileSize))
+				CloseHandle(hBookFile);
+			else
+			{
+				// Create a mapping object back-ended by the file
+				hBookFileMapping = CreateFileMappingA(hBookFile, NULL, PAGE_READONLY, 0, 0, NULL); // 0, 0 maps the entire file size
+
+				if (hBookFileMapping == NULL)
+					CloseHandle(hBookFile);
+				else
+				{
+					// Map the view into the process's virtual address space
+					BookFileData = static_cast<const char*>(MapViewOfFile(hBookFileMapping, FILE_MAP_READ, 0, 0, 0)); // 0 maps from the start to the end of the file
+
+					if (BookFileData == NULL)
+					{
+						CloseHandle(hBookFileMapping);
+						CloseHandle(hBookFile);
+					}
+					else
+						BookFileFound = true;
+				}
+			}
+		}
+	}
+}
+
+void CloseBookFile()
+{
+	BookFileFound = false;
+	UnmapViewOfFile(BookFileData);
+	if (hBookFileMapping != NULL)
+		CloseHandle(hBookFileMapping);
+	if (hBookFile != INVALID_HANDLE_VALUE)
+		CloseHandle(hBookFile);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1260,7 +1320,7 @@ void SetPositionAndMoves(std::string positionAndMoves)
 
 
 	std::string token;
-	std::string s = positionAndMoves;
+	//std::string s = positionAndMoves;
 	std::string move;
 	std::string bufferSTRING;
 
@@ -1288,7 +1348,7 @@ void SetPositionAndMoves(std::string positionAndMoves)
 		{
 			fen = positionAndMoves.substr(0, movesIndex);
 			positionAndMoves = positionAndMoves.substr(movesIndex);
-			trim(fen);
+			Trim(fen);
 		}
 
 		std::string fenTokens[6];

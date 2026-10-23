@@ -30,17 +30,17 @@ extern int64_t AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC8, AC9;
 
 //----------------------------------------------------------------------------------------------------
 
-void ReadINI(char* section, char* key);
+void ReadINI(const char* section, const char* key);
 
-void OutputLog(std::string s);
-void OutputSyzygyPathLog(std::string s);
-void OutputError(std::string s);
-void Output(std::string s);
+void OutputLog(const std::string& s);
+void OutputSyzygyPathLog(const std::string& s);
+void OutputError(const std::string& s);
+void Output(const std::string& s);
 
-void trim(std::string &s);
+void Trim(std::string& s);
 std::string UpperCase(std::string s);
 std::string GetNextToken(std::string *s);
-void Split(std::string command, std::string *tokens, int *tokenCount, char separators[]);
+void Split(const std::string& command, std::string *tokens, int *tokenCount, char separators[]);
 
 std::string MyITOA(int i);
 std::string MyUI64TOA(uint64_t i);
@@ -54,7 +54,7 @@ bool NoDuplicateMoves(MoveWithScore_Struct* mlp, int movesCount);
 bool TranpositionTableMoveFound(MoveWithScore_Struct* mlp, int movesCount, uint32_t tteBestMove);
 bool PVSearchedFirst(int ply);
 void PrintTree(int iterationPly, int ply, short alpha, short beta, int depthRemaining, int move, int bestSortScore, int staticEvaluation, int bestMoveScore);
-void PrintTree2(int iterationPly, int ply, std::string s);
+void PrintTree2(int iterationPly, int ply, const std::string& s);
 uint64_t Random64();
 int BoardRand(int min, int max);
 int BoardRand0To63();

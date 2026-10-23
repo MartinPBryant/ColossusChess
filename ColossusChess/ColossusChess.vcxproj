@@ -28,6 +28,7 @@
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NNUE.cpp" />
+    <ClCompile Include="Polyglot.cpp" />
     <ClCompile Include="SearchMate.cpp" />
     <ClCompile Include="SearchNormal.cpp" />
     <ClCompile Include="SearchNormalQuiescence.cpp">
@@ -57,7 +58,7 @@
     <ClInclude Include="GlobalTypes.h" />
     <ClInclude Include="httplib.h" />
     <ClInclude Include="NNUE.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Polyglot.h" />
     <ClInclude Include="SearchMate.h" />
     <ClInclude Include="SearchNormal.h" />
     <ClInclude Include="SearchPerft.h" />
@@ -71,7 +72,7 @@
     <None Include="RSJparser.tcc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ColossusChessNNUE.rc" />
+    <ResourceCompile Include="ColossusChess.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

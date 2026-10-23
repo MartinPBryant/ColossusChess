@@ -1,9 +1,9 @@
-Sun Oct 11 14:19:30 2026
-*** Error!: Invalid NNUE file : 1.binx: File not found: Reverting to embedded network: Chess768 : 128 million : 01/10/26 14:53:10
+Fri Oct 23 09:44:31 2026
+*** Error!: Invalid book file
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 LastPositionCommand: 
 LastGoCommand: 
-LastCommand: setoption name evalfile value 1.binx
+LastCommand: setoption name bookfile value fred
 TranspositionTableMemory=64
 StopImmediately=0
 StopWhenIterationComplete=0

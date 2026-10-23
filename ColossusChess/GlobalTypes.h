@@ -91,7 +91,7 @@ struct CounterMoveHistory_Struct
 };
 
 // Castling statuses
-union GameRecordCastlingStatusUnion
+union GameRecordCastlingStatus_Union
 {
 	uint8_t ui8[Sides][2];
 	uint16_t ui16[Sides];
@@ -118,7 +118,7 @@ struct GameRecordEntry_Struct
 	History_Struct* historyPointer;
 
 	// About the position before any move is played at this ply
-	GameRecordCastlingStatusUnion castlingStatus; // Four entries set to 0 at the start of a game to signify all castling possible
+	GameRecordCastlingStatus_Union castlingStatus; // Four entries set to 0 at the start of a game to signify all castling possible
 	int isInCheck;
 
 	uint8_t dangerConditions;
@@ -164,3 +164,13 @@ enum CPUVendorIdEnum
 {
 	CPUVENDORINTEL, CPUVENDORAMD, CPUVENDORUNKNOWN
 };
+
+#pragma pack(push, 1) // Enforces 1-byte alignment so the compiler adds no padding
+struct PolyglotEntry_Struct
+{
+	uint64_t key;    // 64-bit Zobrist hash of the position
+	uint16_t move;   // 16-bit bitfield encoding the move
+	uint16_t weight; // 16-bit weight (move quality / popularity)
+	uint32_t learn;  // 32-bit engine statistic or evaluation metrics
+};
+#pragma pack(pop)

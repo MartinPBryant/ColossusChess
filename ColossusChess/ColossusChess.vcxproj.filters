@@ -60,6 +60,9 @@
     <ClCompile Include="SearchNormalQuiescence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Polyglot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h">
@@ -107,7 +110,7 @@
     <ClInclude Include="UInt128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="Polyglot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -115,7 +118,7 @@
     <None Include="RSJparser.tcc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ColossusChessNNUE.rc">
+    <ResourceCompile Include="ColossusChess.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

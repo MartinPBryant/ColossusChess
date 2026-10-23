@@ -69,7 +69,7 @@ private:
 	uint64_t perftNodesOverflows;
 	uint64_t perftStores, perftStoresSuccessful, perftProbes, perftProbesSuccessful, perftPositionsFromTranspositionTable;
 	//std::chrono::time_point<std::chrono::steady_clock> startClock, previousClock, nowClock;
-	uint64_t StartTickCount, CurrentTickCount, PreviousTickCount; // Set in TimeUp method
+	uint64_t startTickCount, currentTickCount, previousTickCount;
 };
 
 //----------------------------------------------------------------------------------------------------
