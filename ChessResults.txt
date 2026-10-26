@@ -29,15 +29,29 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 128Newer v 128Newer30 {30 epochs not 40} (17.56) PCS2
 128Newer30 v 128Newer50 (-13.17) PCS2 - SANITY CHECK
 128 v SF19vSF18-5ply {~3.6 million games -> 272 million positions} (-86.13) ASUS1
-128 v SF19vSF19-5ply {~1.8 million games -> 128 million positions} (-16.39) ASUS1
+
 128 v SF19vSF19-3ply {~1.8 million games -> 115 million positions} (-19.34) ASUS1
+128 v SF19vSF19-5ply {~1.8 million games -> 128 million positions} (-16.39) ASUS1
 128 v SF19vSF19-3&5ply {~3.6 million games -> 243 million positions} (-33.84) ASUS1
 128 v SF19vSF19-7ply {~1.8 million games -> 133 million positions} (-6.01) ASUS1
 128 v SF19vSF19-3&5&7ply {~5.4 million games -> 376 million positions} (-18.00) ASUS1
+128 v SF19vSF19-9ply {~1.8 million games -> 138 million positions} (-5.65) ASUS1
 
+*** Incredibly it seems the deeper the source game searches the worse the NNUE??? :O
+*** Try 4-ply!
 
+128 v SF19vSF19-4ply {~1.8 million games -> 117 million positions} (-24.92) ASUS1
+128 v SF19vSF19-5plyDFRC {~0.9 million games -> 60 million positions} (78.45) ASUS1 - much worse!
 
+NEED TO TRY 3&4&5PLY TOGETHER
+THEN WITH SF19V18
 
+128 v SF19vSF19-3&4&5ply {~5.4 million games -> 360 million positions} (-11.05) ASUS1
+128 v SF19vSF18-5ply {~3.6 million games -> 272 million positions} (-86.13) ASUS1 - SANITY CHECK - SAME AS ABOVE SO IS DETERMINISTIC
+
+128Shuffled v 227Shuffled (-17.54) PCS2 - Non-shuffled was -17.33
+
+128 v 227PlusSF19vSF18-5ply () ASUS1 - separately was -17.33 and -86.13
 
 
 

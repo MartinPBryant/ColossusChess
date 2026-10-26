@@ -483,12 +483,28 @@ std::string ProcessInput(std::string currentLine)
 							validSubCommand = true;
 							TC.CurrentType = TCTFixedDepth;
 							TC.FixedDepthPly = atoi(GetNextToken(&currentLine).c_str());
+							ExitedBook = true; // Discard book if given a non-timed sub-command
 						}
 						else if (subCommand == "NODES")
 						{
 							validSubCommand = true;
 							TC.CurrentType = TCTFixedNodes;
 							TC.FixedNodesCount = atoi(GetNextToken(&currentLine).c_str());
+							ExitedBook = true; // Discard book if given a non-timed sub-command
+						}
+						else if (subCommand == "MOVETIME")
+						{
+							validSubCommand = true;
+							TC.CurrentType = TCTFixedTime;
+							TC.FixedTimeMilliSeconds = atoi(GetNextToken(&currentLine).c_str());
+							ExitedBook = true; // Discard book if given a non-timed sub-command
+						}
+						else if (subCommand == "INFINITE")
+						{
+							validSubCommand = true;
+							TC.CurrentType = TCTFixedDepth;
+							TC.FixedDepthPly = Normal::MaximumIterationPly + 1; // The '+1' forces it to keep repeating the iteration at max depth
+							ExitedBook = true; // Discard book if given a non-timed sub-command
 						}
 						else if (subCommand == "MATE")
 						{
@@ -536,18 +552,6 @@ std::string ProcessInput(std::string currentLine)
 							}
 							else
 								result = "*** Error: The Perft depth must be from 1 to 63";
-						}
-						else if (subCommand == "MOVETIME")
-						{
-							validSubCommand = true;
-							TC.CurrentType = TCTFixedTime;
-							TC.FixedTimeMilliSeconds = atoi(GetNextToken(&currentLine).c_str());
-						}
-						else if (subCommand == "INFINITE")
-						{
-							validSubCommand = true;
-							TC.CurrentType = TCTFixedDepth;
-							TC.FixedDepthPly = Normal::MaximumIterationPly + 1; // The '+1' forces it to keep repeating the iteration at max depth
 						}
 					}
 
@@ -653,8 +657,8 @@ std::string ProcessInput(std::string currentLine)
 				if (Logging)
 					logging = "-Logging Enabled!";
 
-				Output("id name Colossus Chess " + std::string(VersionX) + bmi2 + debug + logging);
-				Output("id author Martin Bryant");
+				Output("id name Colossus Chess " + Version + bmi2 + debug + logging);
+				Output("id author " + Author);
 				SendOptions();
 				Output("uciok");
 			}

@@ -2728,7 +2728,7 @@ int Brain::CountAllMovesMM(int sideToMove)
 
 //----------------------------------------------------------------------------------------------------
 
-void Brain::MakeMove(int sideToMove)
+void Brain::MakeMove(const int sideToMove)
 {
 	MoveUndo_Struct* currentMove = &GameRecordPointer->move;
 
@@ -2936,7 +2936,7 @@ void Brain::MakeMove(int sideToMove)
 	assert(!IsAttacked(GetLS1BIndex(PiecesBB[sideToMove][King]), sideToMove ^ 1));
 }
 
-void Brain::UnMakeMove(int sideToMove)
+void Brain::UnMakeMove(const int sideToMove)
 {
 	GameRecordPointer--;
 	MoveUndo_Struct* currentMove = &GameRecordPointer->move;
@@ -3114,7 +3114,7 @@ alignas(64) const int MVVLVA[8][8] =
 	{0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-void Brain::ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMove, int ply, TwoGoodMoves_Struct* killerMoves, TwoGoodMoves_Struct* cms, TwoGoodMoves_Struct* fums)
+void Brain::ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMove, int ply, const TwoGoodMoves_Struct* killerMoves, const TwoGoodMoves_Struct* cms, const TwoGoodMoves_Struct* fums)
 {
 	// N.B. All scores for special moves should be > 1<<30. History uses the range +/-1<<30
 	assert(movesCount > 0);
@@ -3316,7 +3316,7 @@ void Brain::SavePrincipalVariation(uint32_t move)
 const int SeeLowHighValues[7] = { 0, 100, 300, 300, 500, 1000, 0 }; // N.B. king is lowest so that all its captures are immediately counted as winning (as they wouldn't be legal otherwise)
 const int SeeValues[7] = { 0, 100, 300, 300, 500, 1000, 3000 };
 
-int Brain::SEE(int fromSquare, int toSquare, int sideToMove)
+int Brain::SEE(const int fromSquare, int toSquare, const int sideToMove)
 {
 	// Returns 1 (a winning capture), 0 (an equal capture/move) or -1 (a losing capture/move)
 	// A non-capture promotion to an undefended square returns 1
@@ -3441,115 +3441,115 @@ exit:
 	return std::min(1, ceiling);
 }
 
-int Brain::SEE2(int fromSquare, int toSquare, int sideToMove, int threshold)
-{
-	// Returns 1 (a winning capture), 0 (an equal capture/move) or -1 (a losing capture/move)
-	// The fromSquare must contain a piece of the sideToMove.
-	// Castling moves return 0
+//int Brain::SEE2(int fromSquare, int toSquare, int sideToMove, int threshold)
+//{
+//	// Returns 1 (a winning capture), 0 (an equal capture/move) or -1 (a losing capture/move)
+//	// The fromSquare must contain a piece of the sideToMove.
+//	// Castling moves return 0
+//
+//	int sideNotToMove = sideToMove ^ 1;
+//	uint64_t attackersBB, occupiedBB;
+//	int latestToSquarePiece = abs(MailboxBoard64[fromSquare]);
+//	int sideToMoveTotalGain = threshold;
+//	int sideNotToMoveTotalGain = 0;
+//	int piece;
+//
+//	occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
+//	occupiedBB ^= CreateBitboardFromSquare(fromSquare); // Remove the initial capturing piece
+//
+//	if (latestToSquarePiece == Pawn)
+//	{
+//		if (abs(toSquare - fromSquare) == 1) // Handle en-passant
+//		{
+//			occupiedBB ^= CreateBitboardFromSquare(toSquare); // Remove the ep captured pawn
+//			toSquare += PawnMoveOffset[sideToMove]; // Adjust the to-square
+//		}
+//		else if ((toSquare >> 3) == EigthRank[sideToMove]) // Handle promotion
+//		{
+//			sideToMoveTotalGain += SeeValues[Queen] - SeeValues[Pawn];
+//			latestToSquarePiece = Queen;
+//		}
+//	}
+//
+//	// Get all the attackers for both sides
+//	attackersBB =
+//		(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+//		(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+//		(KnightAttacksBBList[toSquare] & (PiecesBB[0][Knight] | PiecesBB[1][Knight])) |
+//		(KingAttacksBBList[toSquare] & (PiecesBB[0][King] | PiecesBB[1][King])) |
+//		(PawnAttacksBBList[0][toSquare] & PiecesBB[1][Pawn]) |
+//		(PawnAttacksBBList[1][toSquare] & PiecesBB[0][Pawn]);
+//	attackersBB &= occupiedBB; // Remove all the empty squares along the rays
+//
+//	int floor = -1, ceiling = 1;
+//
+//sideNotToMove:
+//	if (sideNotToMoveTotalGain >= sideToMoveTotalGain)
+//	{
+//		if (sideNotToMoveTotalGain > sideToMoveTotalGain)
+//			goto exit;
+//		ceiling = 0;
+//	}
+//
+//	if (attackersBB & PiecesBB[sideNotToMove][AllPieces]) // Any more defenders?
+//	{
+//		// Find the lowest valued piece type
+//		sideNotToMoveTotalGain += SeeValues[latestToSquarePiece];
+//		if (latestToSquarePiece == King)
+//			goto exit;
+//		piece = Pawn;
+//		while (!(attackersBB & PiecesBB[sideNotToMove][piece]))
+//			piece++;
+//		latestToSquarePiece = piece;
+//		uint64_t bb = attackersBB & PiecesBB[sideNotToMove][piece];
+//		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
+//		// Add any new x-ray attacks by either side behind the just removed piece
+//		attackersBB |=
+//			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+//			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
+//		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
+//	}
+//	else
+//		goto exit;
+//
+//	//sideToMove:
+//	if (sideToMoveTotalGain >= sideNotToMoveTotalGain)
+//	{
+//		if (sideToMoveTotalGain > sideNotToMoveTotalGain)
+//			goto exit;
+//		floor = 0;
+//	}
+//
+//	if (attackersBB & PiecesBB[sideToMove][AllPieces]) // Any more attackers?
+//	{
+//		// Find the lowest valued piece type
+//		sideToMoveTotalGain += SeeValues[latestToSquarePiece];
+//		if (latestToSquarePiece == King)
+//			goto exit;
+//		piece = Pawn;
+//		while (!(attackersBB & PiecesBB[sideToMove][piece]))
+//			piece++;
+//		latestToSquarePiece = piece;
+//		uint64_t bb = attackersBB & PiecesBB[sideToMove][piece];
+//		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
+//		// Add any new x-ray attacks by either side behind the just removed piece
+//		attackersBB |=
+//			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
+//			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
+//		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
+//
+//		goto sideNotToMove;
+//	}
+//
+//exit:
+//	if (sideToMoveTotalGain < sideNotToMoveTotalGain)
+//		return std::max(-1, floor);
+//	if (sideToMoveTotalGain == sideNotToMoveTotalGain)
+//		return 0;
+//	return std::min(1, ceiling);
+//}
 
-	int sideNotToMove = sideToMove ^ 1;
-	uint64_t attackersBB, occupiedBB;
-	int latestToSquarePiece = abs(MailboxBoard64[fromSquare]);
-	int sideToMoveTotalGain = threshold;
-	int sideNotToMoveTotalGain = 0;
-	int piece;
-
-	occupiedBB = PiecesBB[0][AllPieces] | PiecesBB[1][AllPieces];
-	occupiedBB ^= CreateBitboardFromSquare(fromSquare); // Remove the initial capturing piece
-
-	if (latestToSquarePiece == Pawn)
-	{
-		if (abs(toSquare - fromSquare) == 1) // Handle en-passant
-		{
-			occupiedBB ^= CreateBitboardFromSquare(toSquare); // Remove the ep captured pawn
-			toSquare += PawnMoveOffset[sideToMove]; // Adjust the to-square
-		}
-		else if ((toSquare >> 3) == EigthRank[sideToMove]) // Handle promotion
-		{
-			sideToMoveTotalGain += SeeValues[Queen] - SeeValues[Pawn];
-			latestToSquarePiece = Queen;
-		}
-	}
-
-	// Get all the attackers for both sides
-	attackersBB =
-		(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
-		(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
-		(KnightAttacksBBList[toSquare] & (PiecesBB[0][Knight] | PiecesBB[1][Knight])) |
-		(KingAttacksBBList[toSquare] & (PiecesBB[0][King] | PiecesBB[1][King])) |
-		(PawnAttacksBBList[0][toSquare] & PiecesBB[1][Pawn]) |
-		(PawnAttacksBBList[1][toSquare] & PiecesBB[0][Pawn]);
-	attackersBB &= occupiedBB; // Remove all the empty squares along the rays
-
-	int floor = -1, ceiling = 1;
-
-sideNotToMove:
-	if (sideNotToMoveTotalGain >= sideToMoveTotalGain)
-	{
-		if (sideNotToMoveTotalGain > sideToMoveTotalGain)
-			goto exit;
-		ceiling = 0;
-	}
-
-	if (attackersBB & PiecesBB[sideNotToMove][AllPieces]) // Any more defenders?
-	{
-		// Find the lowest valued piece type
-		sideNotToMoveTotalGain += SeeValues[latestToSquarePiece];
-		if (latestToSquarePiece == King)
-			goto exit;
-		piece = Pawn;
-		while (!(attackersBB & PiecesBB[sideNotToMove][piece]))
-			piece++;
-		latestToSquarePiece = piece;
-		uint64_t bb = attackersBB & PiecesBB[sideNotToMove][piece];
-		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
-		// Add any new x-ray attacks by either side behind the just removed piece
-		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
-		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
-	}
-	else
-		goto exit;
-
-	//sideToMove:
-	if (sideToMoveTotalGain >= sideNotToMoveTotalGain)
-	{
-		if (sideToMoveTotalGain > sideNotToMoveTotalGain)
-			goto exit;
-		floor = 0;
-	}
-
-	if (attackersBB & PiecesBB[sideToMove][AllPieces]) // Any more attackers?
-	{
-		// Find the lowest valued piece type
-		sideToMoveTotalGain += SeeValues[latestToSquarePiece];
-		if (latestToSquarePiece == King)
-			goto exit;
-		piece = Pawn;
-		while (!(attackersBB & PiecesBB[sideToMove][piece]))
-			piece++;
-		latestToSquarePiece = piece;
-		uint64_t bb = attackersBB & PiecesBB[sideToMove][piece];
-		occupiedBB ^= (bb & -bb); // Remove the latest attacker(x & -x gives you the LS1B)
-		// Add any new x-ray attacks by either side behind the just removed piece
-		attackersBB |=
-			(RookAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Rook] | PiecesBB[1][Rook] | PiecesBB[0][Queen] | PiecesBB[1][Queen])) |
-			(BishopAttacksBB(toSquare, occupiedBB) & (PiecesBB[0][Bishop] | PiecesBB[1][Bishop] | PiecesBB[0][Queen] | PiecesBB[1][Queen]));
-		attackersBB &= occupiedBB; // Remove all the empty squares and the discarded attacker(s)
-
-		goto sideNotToMove;
-	}
-
-exit:
-	if (sideToMoveTotalGain < sideNotToMoveTotalGain)
-		return std::max(-1, floor);
-	if (sideToMoveTotalGain == sideNotToMoveTotalGain)
-		return 0;
-	return std::min(1, ceiling);
-}
-
-bool Brain::SEETargetPieceUnsafe(int toSquare, int sideToMove, int offset)
+bool Brain::SEETargetPieceUnsafe(const int toSquare, const int sideToMove, const int offset)
 {
 	// The toSquare must contain a piece of the sideNotToMove. The sideToMove is asking "can I WIN material on toSquare?"
 

@@ -33,8 +33,8 @@ public:
 	int CountAllQueenMovesMM(int sideToMove);
 	int CountAllMovesMM(int sideToMove);
 
-	void MakeMove(int sideToMove);
-	void UnMakeMove(int sideToMove);
+	void MakeMove(const int sideToMove);
+	void UnMakeMove(const int sideToMove);
 
 	int IsAttacked(int square, int sideToMove);
 	int IsEnemyKingAttacked(int square, int sideToMove);
@@ -44,15 +44,15 @@ public:
 	uint64_t RankFileDiscovereesBB(int enemyKingSquare, int sideToMove);
 	uint64_t DiagonalDiscovereesBB(int enemyKingSquare, int sideToMove);
 
-	void ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMove, int ply, TwoGoodMoves_Struct* killerMoves, TwoGoodMoves_Struct* cms, TwoGoodMoves_Struct* fums);
+	void ScoreMoves(MoveWithScore_Struct* mlp, int movesCount, int tteBestMove, int ply, const TwoGoodMoves_Struct* killerMoves, const TwoGoodMoves_Struct* cms, const TwoGoodMoves_Struct* fums);
 	void ScoreMovesMVVLVA(MoveWithScore_Struct* mlp, int movesCount);
 	void ScoreMovesMateMode(MoveWithScore_Struct* mlp, int movesCount, int tteBestMove, int ply, TwoGoodMoves_Struct* killerMoves, TwoGoodMoves_Struct* cms, TwoGoodMoves_Struct* fums, int enemyKingSquare, Move_Struct MatingMove);
 
 	void SavePrincipalVariation(uint32_t move);
 
-	int SEE(int fromSquare, int toSquare, int sideToMove);
-	int SEE2(int fromSquare, int toSquare, int sideToMove, int threshold);
-	bool SEETargetPieceUnsafe(int toSquare, int sideToMove, int offset);
+	int SEE(const int fromSquare, int toSquare, const int sideToMove);
+	//int SEE2(int fromSquare, int toSquare, int sideToMove, int threshold);
+	bool SEETargetPieceUnsafe(const int toSquare, const int sideToMove, const int offset);
 
 	int KnownLowMaterialDraws(int sideToMove);
 	bool KingCanLegallyMove(int sideToMove);

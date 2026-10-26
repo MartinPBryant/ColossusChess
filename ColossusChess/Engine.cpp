@@ -164,7 +164,7 @@ bool LargePagesEnabled = false;
 size_t LargePageMinimum = 0;
 
 // Book
-std::string BookFile = "testbook.bin";// "";
+std::string BookFile = "";// "testbook.bin";
 HANDLE hBookFile = INVALID_HANDLE_VALUE;
 LARGE_INTEGER BookFileSize;
 HANDLE hBookFileMapping = NULL;
@@ -1308,7 +1308,6 @@ void SetPositionAndMoves(std::string positionAndMoves)
 	// castling availability, the en passant target square, the halfmove
 	// clock, and the fullmove number as six fields separated by spaces.
 	// For example, the opening position is described in FEN as follows:
-	//
 	// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 	TC.MateFixedPieces = ""; // When we receive a new position ensure we clear any previous mate tuning options
@@ -1318,13 +1317,15 @@ void SetPositionAndMoves(std::string positionAndMoves)
 	TC.MateMinimumAttackerMaterial = 0;
 	TC.MateMaximumReversibleMoves = 100;
 
+	// positionAndMoves will be e.g. ...
+	// position startpos moves e2e4 e7e5
+	// p fen r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3 moves f1b5 a7a6 b5a4 g8f6
 
 	std::string token;
-	//std::string s = positionAndMoves;
 	std::string move;
 	std::string bufferSTRING;
 
-	// Split console line into tokens
+	// Discard the first token ('position' or 'p')
 	token = GetNextToken(&positionAndMoves);
 
 	token = UpperCase(GetNextToken(&positionAndMoves));
@@ -1336,7 +1337,6 @@ void SetPositionAndMoves(std::string positionAndMoves)
 	{
 		// Process FEN std::string
 		EngineBrain.ClearGameRecord(); // Must do BEFORE processing the FEN string below so as not to overwrite any EP square/castling statuses etc specified in the FEN string
-
 
 		std::string fen;
 		size_t movesIndex = positionAndMoves.find("moves");
@@ -1351,6 +1351,7 @@ void SetPositionAndMoves(std::string positionAndMoves)
 			Trim(fen);
 		}
 
+		// A chess FEN string can have up to 6 tokens
 		std::string fenTokens[6];
 		int fenTokenCount;
 		Split(fen, &fenTokens[0], &fenTokenCount, " \t");

@@ -232,7 +232,7 @@ void Normal::ShowIterationStartMessage()
 			iterationStartMessage += ThreadIdSuffix();
 
 #ifndef _DEBUG
-		if (CurrentTickCount > MessageDelayTickCount)
+		if (currentTickCount > MessageDelayTickCount)
 #endif
 			Output(iterationStartMessage);
 #ifndef _DEBUG
@@ -250,9 +250,9 @@ void Normal::ShowProgressMessage(uint32_t move, int movesMade, short bestMoveSco
 	if (ThreadId == 0)
 	{
 #ifndef _DEBUG
-		if (CurrentTickCount > MessageDelayTickCount)
+		if (currentTickCount > MessageDelayTickCount)
 			if (
-				(CurrentTickCount > LastProgressMessageTickCount + MessageDelayTickCount)
+				(currentTickCount > LastProgressMessageTickCount + MessageDelayTickCount)
 				|| (movesMade == 1)
 				|| (movesMade == RootMovesCount)
 				)
@@ -283,7 +283,7 @@ void Normal::ShowFailedLowMessage(short rootAlpha)
 		std::string failedLowMessage = "info depth " + std::to_string(IterationPly) + " score cp " + std::to_string(rootAlpha) + " upperbound";
 
 #ifndef _DEBUG
-		if (CurrentTickCount > MessageDelayTickCount)
+		if (currentTickCount > MessageDelayTickCount)
 #endif
 			Output(failedLowMessage);
 #ifndef _DEBUG
@@ -312,7 +312,7 @@ void Normal::ShowIterationFinishMessage(uint32_t hashfull)
 		if (ShowBlankLines)
 			iterationFinishMessage += "\n";
 #ifndef _DEBUG
-		if (CurrentTickCount > MessageDelayTickCount)
+		if (currentTickCount > MessageDelayTickCount)
 #endif
 			Output(iterationFinishMessage);
 #ifndef _DEBUG
@@ -448,7 +448,7 @@ void Normal::ShowBestLineMessage(short alpha, uint8_t eul)
 			BestLineMessage += ThreadIdSuffix();
 
 #ifndef _DEBUG
-		if (CurrentTickCount > MessageDelayTickCount)
+		if (currentTickCount > MessageDelayTickCount)
 #endif
 			Output(BestLineMessage);
 #ifndef _DEBUG
@@ -2665,8 +2665,8 @@ std::string Normal::ComputeNormal()
 
 	// Book stuff
 	BookRootMove.ui32 = 0;
-	if (BookFileFound) // If we couldn't open a book file this will be false
-		if (!ExitedBook) // If we were unable to find a position in the book this will be true
+	if (BookFileFound)
+		if (!ExitedBook)
 		{
 			uint64_t polyglotHash64 = Polyglot::Hash64(normalBrain.MailboxBoard64, SideToMove, normalBrain.GameRecordPointer->castlingStatus, normalBrain.GameRecordPointer->epSquare);
 			PolyglotEntry_Struct bookMove = Polyglot::GetBookMove(polyglotHash64);

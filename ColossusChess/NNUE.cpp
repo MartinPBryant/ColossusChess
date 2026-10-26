@@ -414,46 +414,21 @@ int16_t NNUE::RunNetworkChess768(const Brain& brain, int sideToMove)
 	return static_cast<int>(output);
 }
 
-//int16_t NNUE::EvaluateChess768(const Brain& brain, int sideToMove)
-//{
-//	//BuildAccumulatorsChess768(brain);//THESE SHOULD BE INCREMENTALLY UPDATED - NEED TO COMPARE!!! AND TIME!
-//
-//	//bool result = true;
-//	//for (int i = 0; i < FEATURE_DIM_CHESS768; i++)
-//	//{
-//	//	if (whiteAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[0][i])
-//	//	{
-//	//		result = false;
-//	//	}
-//	//	if (blackAccumulatorChess768[i] != brain.GameRecordPointer->nnueAccumulatorsChess768[1][i])
-//	//	{
-//	//		result = false;
-//	//	}
-//	//}
-//
-//	//DON'T NOW NEED THIS FN AS A WRAPPER! CAN JUST CALL RunNetworkChess768 FROM MY EVALUATE.CPP
-//	int16_t result = RunNetworkChess768(brain, sideToMove);
-//
-//	return result;
-//}
-
 //----------------------------------------------------------------------------------------------------
 
-inline int NNUE::FeatureIndexChess768(int square, int pieceType, int colour)
+inline uint32_t NNUE::FeatureIndexChess768(const uint32_t square, const uint32_t pieceType, const uint32_t colour)
 {
-	int result = ((colour * 6) + pieceType) * 64 + square;
-	assert((result >= 0) && (result < 768));
+	uint32_t result = ((colour * 6) + pieceType) * 64 + square;
+	assert(result < 768);
 	return result;
 }
 
 // Add one feature to an accumulator
-void NNUE::AddFeatureToAccumulatorChess768(int16_t* accumulator, int featureIndex)
+void NNUE::AddFeatureToAccumulatorChess768(int16_t* accumulator, const uint32_t featureIndex)
 {
 	// Get a pointer to the weights corresponding to this feature
-	alignas(32) const int16_t* weights = featureWeightsChess768 + static_cast<size_t>(featureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
+	const int16_t* weights = featureWeightsChess768 + static_cast<size_t>(featureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
 
-	//for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; ++i)
-	//	accumulator[i] += weights[i];
 	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i += 16)
 	{
 		__m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(accumulator + i));
@@ -464,13 +439,11 @@ void NNUE::AddFeatureToAccumulatorChess768(int16_t* accumulator, int featureInde
 }
 
 // Subtract one feature from an accumulator
-void NNUE::SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, int featureIndex)
+void NNUE::SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, const uint32_t featureIndex)
 {
 	// Get a pointer to the weights corresponding to this feature
 	const int16_t* weights = featureWeightsChess768 + static_cast<size_t>(featureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
 
-	//for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; ++i)
-	//	accumulator[i] -= weights[i];
 	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i += 16)
 	{
 		__m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(accumulator + i));
@@ -480,68 +453,41 @@ void NNUE::SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, int feat
 	}
 }
 
+void NNUE::MoveFeatureInAccumulatorChess768(int16_t* accumulator, const uint32_t fromFeatureIndex, const uint32_t toFeatureIndex)
+{
+	const int16_t* fromWeights = featureWeightsChess768 + static_cast<size_t>(fromFeatureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
+	const int16_t* toWeights = featureWeightsChess768 + static_cast<size_t>(toFeatureIndex) * FEATURES_WEIGHTS_COUNT_CHESS768;
+
+	for (int i = 0; i < FEATURES_WEIGHTS_COUNT_CHESS768; i += 16)
+	{
+		__m256i a = _mm256_load_si256(reinterpret_cast<const __m256i*>(accumulator + i));
+		__m256i fromW = _mm256_load_si256(reinterpret_cast<const __m256i*>(fromWeights + i));
+		__m256i toW = _mm256_load_si256(reinterpret_cast<const __m256i*>(toWeights + i));
+		a = _mm256_sub_epi16(a, fromW);
+		a = _mm256_add_epi16(a, toW);
+		_mm256_store_si256(reinterpret_cast<__m256i*>(accumulator + i), a);
+	}
+}
+
 // Incrementally update both accumulators
 void NNUE::UpdateAccumulatorsChess768(const Brain& brain)
 {
-	int16_t* nnueAccumulatorsChess768 = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
-	MoveUndo_Struct* currentMove = &(brain.GameRecordPointer - 1)->move;
+	int16_t* const nnueAccumulatorsChess768 = &brain.GameRecordPointer->nnueAccumulatorsChess768[0][0];
+	const MoveUndo_Struct* currentMove = &(brain.GameRecordPointer - 1)->move;
 
-	int movingPieceColour, movingPieceType;
+	uint32_t movingPieceColour, movingPieceType, promotedPieceType, capturedPieceColour, capturedPieceType;
 
-	if (currentMove->mf.flag != MFCastling)
+	movingPieceColour = (currentMove->fromSquarePiece > 0) ? 0 : 1;
+	movingPieceType = std::abs(currentMove->fromSquarePiece) - 1;
+
+	// Move the fromSquarePiece within the accumulators
+	MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.fromSquare, movingPieceType, movingPieceColour), FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
+	MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.fromSquare ^ 56, movingPieceType, movingPieceColour ^ 1), FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, movingPieceColour ^ 1));
+
+	if (currentMove->mf.flag == MFCastling)
 	{
-		movingPieceType = std::abs(currentMove->fromSquarePiece) - 1;
-		movingPieceColour = (currentMove->fromSquarePiece > 0) ? 0 : 1;
-		// Subtract the fromSquarePiece from the fromSquare from the accumulators
-		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.fromSquare, movingPieceType, movingPieceColour));
-		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.fromSquare ^ 56, movingPieceType, 1 - movingPieceColour));
-		if (currentMove->mf.flag >= MFPromotion)
-		{
-			// Add the promoted piece to the accumulators
-			movingPieceType = PromotedPieces[currentMove->mf.flag >> 2] - 1;
-			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
-			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
-		}
-		else if (currentMove->mf.flag != MFEnPassant)
-		{
-			// Add the fromSquarePiece to the toSquare to the accumulators
-			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
-			AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
-		}
-		// Capture?
-		if (currentMove->toSquarePiece != Empty)
-		{
-			// Subtract the toSquarePiece from the toSquare from the accumulators
-			int capturedPieceType = std::abs(currentMove->toSquarePiece) - 1;
-			int capturedPieceColour = movingPieceColour ^ 1;
-			SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, capturedPieceType, capturedPieceColour));
-			SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, capturedPieceType, 1 - capturedPieceColour));
-			if (currentMove->mf.flag == MFEnPassant)
-			{ // An EP move is stored as e.g. fromSquare=d5, toSquare = e5 (not e6), so we have to move the capturing pawn forward one square
-				// Add the fromSquarePiece to the TRUE toSquare to the accumulators
-				int toSquare = currentMove->mf.toSquare + 8;
-				if (currentMove->mf.fromSquare <= H4)
-					toSquare = currentMove->mf.toSquare - 8;
-				AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(toSquare, movingPieceType, movingPieceColour));
-				AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
-			}
-		}
-	}
-	else
-	{
-		// Castling
-		movingPieceType = King -1;
-		movingPieceColour = (currentMove->fromSquarePiece > 0) ? 0 : 1;
-
-		// Subtract the fromSquarePiece from the fromSquare from the accumulators
-		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.fromSquare, movingPieceType, movingPieceColour));
-		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.fromSquare ^ 56, movingPieceType, 1 - movingPieceColour));
-		// Add the fromSquarePiece to the toSquare to the accumulators
-		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour));
-		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, 1 - movingPieceColour));
-
 		// Move the rooks too
-		int initialRookSquare, finalRookSquare;
+		uint32_t initialRookSquare, finalRookSquare;
 		if (currentMove->mf.toSquare == BackRankBaseSquareIndex[movingPieceColour] + G) // King-side?
 		{
 			initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialKingSideRookFile;
@@ -552,10 +498,37 @@ void NNUE::UpdateAccumulatorsChess768(const Brain& brain)
 			initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialQueenSideRookFile;
 			finalRookSquare = BackRankBaseSquareIndex[movingPieceColour] + D;
 		}
-		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(initialRookSquare, Rook - 1, movingPieceColour));
-		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(finalRookSquare, Rook - 1, movingPieceColour));
-		SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(initialRookSquare ^ 56, Rook - 1, 1 - movingPieceColour));
-		AddFeatureToAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(finalRookSquare ^ 56, Rook - 1, 1 - movingPieceColour));
+
+		MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(initialRookSquare, Rook - 1, movingPieceColour), FeatureIndexChess768(finalRookSquare, Rook - 1, movingPieceColour));
+		MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(initialRookSquare ^ 56, Rook - 1, movingPieceColour ^ 1), FeatureIndexChess768(finalRookSquare ^ 56, Rook - 1, movingPieceColour ^ 1));
+	}
+	else
+	{
+		if (currentMove->mf.flag >= MFPromotion)
+		{
+			// Change the pawn to the promoted piece within the accumulators
+			promotedPieceType = PromotedPieces[currentMove->mf.flag >> 2] - 1;
+
+			MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour), FeatureIndexChess768(currentMove->mf.toSquare, promotedPieceType, movingPieceColour));
+			MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, movingPieceColour ^ 1), FeatureIndexChess768(currentMove->mf.toSquare ^ 56, promotedPieceType, movingPieceColour ^ 1));
+		}
+		if (currentMove->toSquarePiece != Empty)
+		{
+			// Subtract the toSquarePiece from the toSquare from the accumulators
+			capturedPieceColour = movingPieceColour ^ 1;
+			capturedPieceType = std::abs(currentMove->toSquarePiece) - 1;
+
+			SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, capturedPieceType, capturedPieceColour));
+			SubtractFeatureFromAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, capturedPieceType, capturedPieceColour ^ 1));
+
+			if (currentMove->mf.flag == MFEnPassant)
+			{ // An EP move is stored as e.g. fromSquare=d5, toSquare = e5 (not e6), so we have to move the capturing pawn forward one square
+				// Move the pawn to the TRUE toSquare within the accumulators
+				int toSquare = currentMove->mf.toSquare + PawnMoveOffset[movingPieceColour];
+				MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768, FeatureIndexChess768(currentMove->mf.toSquare, movingPieceType, movingPieceColour), FeatureIndexChess768(toSquare, movingPieceType, movingPieceColour));
+				MoveFeatureInAccumulatorChess768(nnueAccumulatorsChess768 + FEATURES_WEIGHTS_COUNT_CHESS768, FeatureIndexChess768(currentMove->mf.toSquare ^ 56, movingPieceType, movingPieceColour ^ 1), FeatureIndexChess768(toSquare ^ 56, movingPieceType, movingPieceColour ^ 1));
+			}
+		}
 	}
 }
 

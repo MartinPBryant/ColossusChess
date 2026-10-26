@@ -5,7 +5,8 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-#define VersionX "2026c"
+const std::string Version = "20NNx9";
+const std::string Author = "Martin Bryant";
 
 #define Sides 2
 

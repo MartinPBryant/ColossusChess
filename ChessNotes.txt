@@ -216,12 +216,31 @@ To get all the TT entry data in one go...
 ALL
 ===
 
-add const to any parameters that shouldn't change, even integers
--do profiling to look for culprits e.g. MakeMove and see if it's any faster
+mix and match nnues
+-combine original 227 million? NEVER tried 227 shuffled!
+--NEED TO RATIONALISE NAMING!!! every file needs data-source name in it
+-maybe you need to specialise? e.g. add datasets of K+P endings? write a script to categorise existing generic datasets into specialised datasets?
+endgames are most obvious
+KP
+KRP
+KBP (same and opposite)
+KQP
+-or look at volumes of posns by piece-count? and just add more posns to the lowest counts?
+-try training without the lowest piece-counts e.g. exclude 6 or fewer pieces (100s of MBs) because they will be eval'ed by EGTB
 
 
 
-do SF19vSF19 without repeats!
+the games on PCS1...
+does SF correctly handle castling for DFRC??? :O - YES
+--change Colossus to correctly handle them!
+---can we rationalise ALL castling better? e.g. as KxR? but isn't it always K-g1(8) or K-c1(8) ??? check chess960 code!
+FRC: internally stored as K-g1 but displayed as KxR
+K-g1/c1 does have some advantages
+for initial R-sqs use an array[Sides]
+maybe could use initial R-sqs[Sides] in normal chess to rationalise the code?
+
+
+below a certain ply don't prune move if its static eval is good
 
 
 loss against LGE :O
@@ -290,17 +309,11 @@ DOE
 
 
 
-gen training data of 5,7,9,11 ply and play RR
-openingsnoob_4moves.epd
-
 
 
 try changing the initial layer size from 128 to 64 and 256 and see which one behaves better
 
 
-
-get that pre-written gensfen.py
--just run SF19vSF18 games using bigger books? going on PCS1 now
 
 
 

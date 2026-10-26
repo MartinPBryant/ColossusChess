@@ -43,7 +43,8 @@ private:
 	alignas(32) int16_t outputWeightsChess768[OUTPUT_WEIGHTS_COUNT_CHESS768];
 	int16_t outputBiasChess768;
 
-	void AddFeatureToAccumulatorChess768(int16_t* accumulator, int featureIndex);
-	void SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, int featureIndex);
-	int FeatureIndexChess768(int pieceSquare, int pieceType, int colour);
+	uint32_t FeatureIndexChess768(const uint32_t pieceSquare, const uint32_t pieceType, const uint32_t colour);
+	void AddFeatureToAccumulatorChess768(int16_t* accumulator, const uint32_t featureIndex);
+	void SubtractFeatureFromAccumulatorChess768(int16_t* accumulator, const uint32_t featureIndex);
+	void MoveFeatureInAccumulatorChess768(int16_t* accumulator, const uint32_t fromFeatureIndex, const uint32_t toFeatureIndex);
 };
