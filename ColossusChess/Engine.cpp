@@ -70,9 +70,9 @@ const int EndgameTablebasesCumulativeExpectedFileCounts[8] = { 0, 0, 0, 5, 5 + 3
 short Contempt = 0;
 
 // Castling statuses - Introduced when implementing Chess960/FRC
-int8_t InitialKingFile;
-int8_t InitialKingSideRookFile;
-int8_t InitialQueenSideRookFile;
+uint32_t InitialKingFile;
+uint32_t InitialKingSideRookFile;
+uint32_t InitialQueenSideRookFile;
 
 // Threads
 int Threads = ThreadsDefault;
@@ -708,10 +708,6 @@ void NewGame(bool clearEverything)
 	InitialKingFile = E;
 	InitialKingSideRookFile = H;
 	InitialQueenSideRookFile = A;
-	//EngineBrain.gameRecordPointer->castlingStatus.ui8[0][0] = 0;
-	//EngineBrain.gameRecordPointer->castlingStatus.ui8[0][1] = 0;
-	//EngineBrain.gameRecordPointer->castlingStatus.ui8[1][0] = 0;
-	//EngineBrain.gameRecordPointer->castlingStatus.ui8[1][1] = 0;
 	EngineBrain.GameRecordPointer->castlingStatus.ui32 = 0;
 	SideToMove = 0;
 	EngineBrain.ClearGameRecord();
@@ -955,7 +951,7 @@ void CloseBookFile()
 
 //----------------------------------------------------------------------------------------------------
 
-bool MakeMove(std::string move)
+bool MakeMove(const std::string& move)
 {
 	// Used outside the tree search
 	// TODO: Must validate?? Or is it the hosts responsibility? Doing it here would protect the engine.
@@ -1029,7 +1025,7 @@ bool MakeMove(std::string move)
 	return true;
 }
 
-bool ConvertFENToPosition(std::string position, std::string sideToMove, std::string castling, std::string ep, std::string irreversible, std::string moveNumber, Brain& brain)
+bool ConvertFENToPosition(const std::string& position, const std::string& sideToMove, const std::string& castling, const std::string& ep, const std::string& irreversible, const std::string& moveNumber, Brain& brain)
 {
 	// Normal e.g. rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 	// FRC/Chess960 e.g. bnrknbqr/pppppppp/8/8/8/8/PPPPPPPP/BNRKNBQR w HChc - 0 1
@@ -1144,14 +1140,16 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 	}
 	brain.GameRecord[2].sideToMove = SideToMove;
 
-	// Process the castling element e.g. KQkq, HAha(Chess960/FRC)
-	brain.GameRecord[2].castlingStatus.ui8[0][0] = 1; // Assume no castling allowed initially
-	brain.GameRecord[2].castlingStatus.ui8[0][1] = 1;
-	brain.GameRecord[2].castlingStatus.ui8[1][0] = 1;
-	brain.GameRecord[2].castlingStatus.ui8[1][1] = 1;
+	// Process the castling element e.g. KQkq, HAha(Chess960/FRC), GBhc(DFRC)
+	//brain.GameRecord[2].castlingStatus.ui8[0][0] = 1; // Assume no castling allowed initially
+	//brain.GameRecord[2].castlingStatus.ui8[0][1] = 1;
+	//brain.GameRecord[2].castlingStatus.ui8[1][0] = 1;
+	//brain.GameRecord[2].castlingStatus.ui8[1][1] = 1;
+	brain.GameRecord[2].castlingStatus.ui32 = 0x01010101; // Assume no castling allowed initially
 	if ((castling != "-") && (castling != ""))
 	{
-		if (UCI_Chess960)
+		// The following code works for normal, FRC and DFRC
+		//if (UCI_Chess960)
 		{
 			// Clear the king/rook files
 			InitialKingFile = -1;
@@ -1160,20 +1158,22 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 
 			for (int count = 0; count < castling.length(); count++)
 			{
-				char c = castling[count];
+				char c = castling[count]; // Will be one of 'A'-'H','K','Q','a'-'h','k','q'
 				if (c >= 'A' && c <= 'Z') // Uppercase?
 				{
-					for (int8_t square = A1; square <= H1; square++)
+					// Scan the back rank
+					for (uint32_t square = A1; square <= H1; ++square)
 						if (brain.MailboxBoard64[square] == King)
 						{
 							InitialKingFile = square & 7;
 							break;
 						}
 
+					// If either of K/Q are specified we have to explicitly scan the back rank to find the rooks
 					if (c == 'K')
 					{
 						brain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
-						for (int8_t square = H1; square >= A1; square--) // Find the rightmost rook
+						for (uint32_t square = H1; square >= A1; --square) // Find the rightmost rook
 							if (brain.MailboxBoard64[square] == Rook)
 							{
 								InitialKingSideRookFile = square & 7;
@@ -1183,7 +1183,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 					else if (c == 'Q')
 					{
 						brain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
-						for (int8_t square = A1; square <= H1; square++) // Find the leftmost rook
+						for (uint32_t square = A1; square <= H1; ++square) // Find the leftmost rook
 							if (brain.MailboxBoard64[square] == Rook)
 							{
 								InitialQueenSideRookFile = square & 7;
@@ -1207,17 +1207,19 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 				}
 				else
 				{
-					for (int8_t square = A8; square <= H8; square++)
+					// Scan the back rank
+					for (uint32_t square = A8; square <= H8; ++square)
 						if (brain.MailboxBoard64[square] == -King)
 						{
 							InitialKingFile = square & 7;
 							break;
 						}
 
+					// If either of k/q are specified we have to explicitly scan the back rank to find the rooks
 					if (c == 'k')
 					{
 						brain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
-						for (int8_t square = H8; square >= A8; square--) // Find the rightmost rook
+						for (uint32_t square = H8; square >= A8; --square) // Find the rightmost rook
 							if (brain.MailboxBoard64[square] == -Rook)
 							{
 								InitialKingSideRookFile = square & 7;
@@ -1227,7 +1229,7 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 					else if (c == 'q')
 					{
 						brain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
-						for (int8_t square = A8; square <= H8; square++) // Find the leftmost rook
+						for (uint32_t square = A8; square <= H8; ++square) // Find the leftmost rook
 							if (brain.MailboxBoard64[square] == -Rook)
 							{
 								InitialQueenSideRookFile = square & 7;
@@ -1252,28 +1254,28 @@ bool ConvertFENToPosition(std::string position, std::string sideToMove, std::str
 
 			}
 		}
-		else
-		{
-			if (castling.find_first_of("K") != -1)
-				brain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
-			if (castling.find_first_of("Q") != -1)
-				brain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
-			if (castling.find_first_of("k") != -1)
-				brain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
-			if (castling.find_first_of("q") != -1)
-				brain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
-			InitialKingFile = E;
-			InitialKingSideRookFile = H;
-			InitialQueenSideRookFile = A;
-		}
+		//else
+		//{
+		//	if (castling.find_first_of("K") != -1)
+		//		brain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
+		//	if (castling.find_first_of("Q") != -1)
+		//		brain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
+		//	if (castling.find_first_of("k") != -1)
+		//		brain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
+		//	if (castling.find_first_of("q") != -1)
+		//		brain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
+		//	InitialKingFile = E;
+		//	InitialKingSideRookFile = H;
+		//	InitialQueenSideRookFile = A;
+		//}
 	}
 
 	// Process the en-passant element
 	if ((ep != "-") && (ep != ""))
 	{
-		ep = UpperCase(ep);
+		std::string uep = UpperCase(ep);
 		uint8_t enPassantSquare;
-		enPassantSquare = (uint8_t)((ep[0] - 'A') + 8 * (ep[1] - '1'));
+		enPassantSquare = (uint8_t)((uep[0] - 'A') + 8 * (uep[1] - '1'));
 		brain.GameRecord[2].epSquare = enPassantSquare; // Need this to be initialised for the 'EGTB position at root' code to probe correctly
 		// Set root gameRecord move to the double pawn push
 		if (enPassantSquare <= H3)

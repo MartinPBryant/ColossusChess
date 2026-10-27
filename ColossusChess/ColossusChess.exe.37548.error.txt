@@ -1,0 +1,27 @@
+Tue Oct 27 09:30:59 2026
+*** Error!: Perft counts disagree!!!
+nbnqrkbr/p2ppp2/1p4p1/2p4p/3P3P/3N4/PPP1PPPR/NB1QRKB1 w Ehe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 5 file
+LastCommand: go perft 5 file
+TranspositionTableMemory=256
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+*** Error!: Perft counts disagree!!!
+Tue Oct 27 09:30:59 2026
+*** Error!: Perft counts disagree!!!
+nbnqrkbr/p2ppp2/1p4p1/2p4p/3P3P/3N4/PPP1PPPR/NB1QRKB1 w Ehe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 5 file
+LastCommand: go perft 5 file
+TranspositionTableMemory=256
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

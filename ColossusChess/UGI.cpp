@@ -74,7 +74,7 @@ void SendOptionValues()
 }
 
 // Sets an engine option to a specified value
-void SetOption(std::string currentLine, std::string name, std::string value)
+void SetOption(const std::string& currentLine, const std::string& name, const std::string& value)
 {
 	// e.g. the GUI might send 'setoption name hash value 64'
 	std::string nameUpperCase = UpperCase(name);

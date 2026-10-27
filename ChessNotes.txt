@@ -216,11 +216,16 @@ To get all the TT entry data in one go...
 ALL
 ===
 
+:O my frc openings file doesn't contain castling statuses!!!!!!!?????
+-copy to all PCs!!!
+
+
+
 mix and match nnues
 -combine original 227 million? NEVER tried 227 shuffled!
 --NEED TO RATIONALISE NAMING!!! every file needs data-source name in it
 -maybe you need to specialise? e.g. add datasets of K+P endings? write a script to categorise existing generic datasets into specialised datasets?
-endgames are most obvious
+endgames are most obvious... but how much extra ELO can they bring
 KP
 KRP
 KBP (same and opposite)
@@ -237,7 +242,12 @@ does SF correctly handle castling for DFRC??? :O - YES
 FRC: internally stored as K-g1 but displayed as KxR
 K-g1/c1 does have some advantages
 for initial R-sqs use an array[Sides]
-maybe could use initial R-sqs[Sides] in normal chess to rationalise the code?
+maybe could use initial R-sqs[Sides] in normal chess to rationalise the code? because we now have DFRC aswell
+-they do get init'd!
+--actually if we have [Sides] then the values could be the actual squares! not the files
+-also can use that '& 7' trick in NNUE.cpp although may not need to eventually if we use sqs not files
+
+
 
 
 below a certain ply don't prune move if its static eval is good

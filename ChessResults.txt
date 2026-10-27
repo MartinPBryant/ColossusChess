@@ -51,7 +51,11 @@ THEN WITH SF19V18
 
 128Shuffled v 227Shuffled (-17.54) PCS2 - Non-shuffled was -17.33
 
-128 v 227PlusSF19vSF18-5ply () ASUS1 - separately was -17.33 and -86.13
+128 v 227PlusSF19vSF18-5ply (-99.57) ASUS1 - separately was -17.33 and -86.13
+
+128 v SF19vSF18-5ply-32-7 {so piece counts 6 and fewer omitted} (-100.46) ASUS1 - -86.13 when all pieces included... so +14.33 :)
+
+
 
 
 

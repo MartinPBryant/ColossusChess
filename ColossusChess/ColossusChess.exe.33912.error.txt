@@ -1,0 +1,65 @@
+Tue Oct 27 10:01:05 2026
+*** Error!: Perft counts disagree!!!
+qnnbrk1r/1p1ppbpp/2p5/p4p2/2NP3P/8/PPP1PPP1/Q1NBRKBR w HEhe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 6 file
+LastCommand: go perft 6 file
+TranspositionTableMemory=512
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+Tue Oct 27 10:01:05 2026
+*** Error!: Perft counts disagree!!!
+qnnbrk1r/1p1ppbpp/2p5/p4p2/2NP3P/8/PPP1PPP1/Q1NBRKBR w HEhe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 6 file
+LastCommand: go perft 6 file
+TranspositionTableMemory=512
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+Tue Oct 27 10:01:05 2026
+*** Error!: Perft counts disagree!!!
+qnnbrk1r/1p1ppbpp/2p5/p4p2/2NP3P/8/PPP1PPP1/Q1NBRKBR w HEhe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 6 file
+LastCommand: go perft 6 file
+TranspositionTableMemory=512
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+Tue Oct 27 10:01:05 2026
+*** Error!: Perft counts disagree!!!
+qnnbrk1r/1p1ppbpp/2p5/p4p2/2NP3P/8/PPP1PPP1/Q1NBRKBR w HEhe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 6 file
+LastCommand: go perft 6 file
+TranspositionTableMemory=512
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
+Tue Oct 27 10:01:05 2026
+*** Error!: Perft counts disagree!!!
+qnnbrk1r/1p1ppbpp/2p5/p4p2/2NP3P/8/PPP1PPP1/Q1NBRKBR w HEhe - 0 9
+LastPositionCommand: 
+LastGoCommand: go perft 6 file
+LastCommand: go perft 6 file
+TranspositionTableMemory=512
+StopImmediately=0
+StopWhenIterationComplete=0
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+

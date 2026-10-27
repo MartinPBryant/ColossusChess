@@ -509,58 +509,61 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 	// Generate castling moves
 	if (UCI_Chess960)
 	{
+		bool valid;
+		int offset;
+		int square;
+
 		// King side
 		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 		{
 			// Check passed-over squares are empty and not attacked
-			bool allEmpty;
-			int offset;
-			int square;
 
-			allEmpty = true;
+			valid = true;
 
 			square = kingSquare;
+			// Which way is the king sliding?
 			offset = 1;
-			//if (square > BackRankBaseSquareIndex[sideToMove] + G) // Not neccesary on king side
+			//if ((square & 7) > G) // Not neccesary when castling king side as the king can never move to the left
 			//	offset = -1;
-			while (true) // Scan king squares
+			while (true) // Scan the squares the king has to pass over
 			{
-				if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
+				if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile)) // Ignore the king and rook squares
 					if (MailboxBoard64[square] != Empty)
 					{
-						allEmpty = false;
+						valid = false;
 						break;
 					}
 				if (IsAttacked(square, sideToMove ^ 1)) // Also check king squares for attacks
 				{
-					allEmpty = false;
+					valid = false;
 					break;
 				}
-				if (square == BackRankBaseSquareIndex[sideToMove] + G)
+				if ((square & 7) == G)
 					break;
 				square += offset;
 			}
-			if (allEmpty)
+			if (valid)
 			{
 				square = kingSquare - InitialKingFile + InitialKingSideRookFile;
+				// Which way is the rook sliding?
 				offset = 1;
-				if (square > BackRankBaseSquareIndex[sideToMove] + F)
+				if ((square & 7) > F)
 					offset = -1;
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
 						if (MailboxBoard64[square] != Empty)
 						{
-							allEmpty = false;
+							valid = false;
 							break;
 						}
-					if (square == BackRankBaseSquareIndex[sideToMove] + F)
+					if ((square & 7) == F)
 						break;
 					square += offset;
 				}
-				if (allEmpty)
+				if (valid)
 				{
-					if (((PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0)
+					if (((PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0) // Ensure there isn't an enemy R or Q sat on the h-file!
 						mlp++->ui32 = kingSquare | ((BackRankBaseSquareIndex[sideToMove] + G) << 8) | (MFCastling << 16);
 				}
 			}
@@ -569,57 +572,56 @@ MoveWithScore_Struct* Brain::GenerateCapturesAndNonCaptures(int sideToMove, Move
 		// Queen side
 		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 		{
-			// Check passed-over squares are empty
-			bool allEmpty;
-			int offset;
-			int square;
+			// Check passed-over squares are empty and not attacked
 
-			allEmpty = true;
+			valid = true;
 
 			square = kingSquare;
+			// Which way is the king sliding?
 			offset = 1;
-			if (square > BackRankBaseSquareIndex[sideToMove] + C)
+			if ((square & 7) > C)
 				offset = -1;
-			while (true) // Scan king squares
+			while (true) // Scan the squares the king has to pass over
 			{
 				if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
 					if (MailboxBoard64[square] != Empty)
 					{
-						allEmpty = false;
+						valid = false;
 						break;
 					}
 				if (IsAttacked(square, sideToMove ^ 1)) // Also check king squares for attacks
 				{
-					allEmpty = false;
+					valid = false;
 					break;
 				}
-				if (square == BackRankBaseSquareIndex[sideToMove] + C)
+				if ((square & 7) == C)
 					break;
 				square += offset;
 			}
-			if (allEmpty)
+			if (valid)
 			{
 				square = kingSquare - InitialKingFile + InitialQueenSideRookFile;
+				// Which way is the rook sliding?
 				offset = 1;
-				if (square > BackRankBaseSquareIndex[sideToMove] + D)
+				if ((square & 7) > D)
 					offset = -1;
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
 						if (MailboxBoard64[square] != Empty)
 						{
-							allEmpty = false;
+							valid = false;
 							break;
 						}
-					if (square == BackRankBaseSquareIndex[sideToMove] + D)
+					if ((square & 7) == D)
 						break;
 					square += offset;
 				}
-				if (allEmpty)
+				if (valid)
 				{
-					uint64_t rooksAndQueensBB = PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen];
-					if ((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
-						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
+					uint64_t enemyRooksAndQueensBB = PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]; // Ensure there isn't an enemy R or Q sat on the a/b-file!
+					if ((enemyRooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
+						if (((enemyRooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
 							mlp++->ui32 = kingSquare | ((BackRankBaseSquareIndex[sideToMove] + C) << 8) | (MFCastling << 16);
 				}
 			}
@@ -804,58 +806,61 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 	// Generate castling moves
 	if (UCI_Chess960)
 	{
+		bool valid;
+		int offset;
+		int square;
+
 		// King side
 		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
 		{
 			// Check passed-over squares are empty and not attacked
-			bool allEmpty;
-			int offset;
-			int square;
 
-			allEmpty = true;
+			valid = true;
 
 			square = kingSquare;
+			// Which way is the king sliding?
 			offset = 1;
-			//if (square > BackRankBaseSquareIndex[sideToMove] + G) // Not neccesary on king side
+			//if ((square & 7) > G) // Not neccesary when castling king side as the king can never move to the left
 			//	offset = -1;
 			while (true) // Scan king squares
 			{
-				if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
+				if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile)) // Ignore the king and rook squares
 					if (MailboxBoard64[square] != Empty)
 					{
-						allEmpty = false;
+						valid = false;
 						break;
 					}
 				if (IsAttacked(square, sideToMove ^ 1)) // Also check king squares for attacks
 				{
-					allEmpty = false;
+					valid = false;
 					break;
 				}
-				if (square == BackRankBaseSquareIndex[sideToMove] + G)
+				if ((square & 7) == G)
 					break;
 				square += offset;
 			}
-			if (allEmpty)
+			if (valid)
 			{
 				square = kingSquare - InitialKingFile + InitialKingSideRookFile;
+				// Which way is the rook sliding?
 				offset = 1;
-				if (square > BackRankBaseSquareIndex[sideToMove] + F)
+				if ((square & 7) > F)
 					offset = -1;
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialKingSideRookFile))
 						if (MailboxBoard64[square] != Empty)
 						{
-							allEmpty = false;
+							valid = false;
 							break;
 						}
-					if (square == BackRankBaseSquareIndex[sideToMove] + F)
+					if ((square & 7) == F)
 						break;
 					square += offset;
 				}
-				if (allEmpty)
+				if (valid)
 				{
-					if (((PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0)
+					if (((PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]) & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H)) == 0) // Ensure there isn't an enemy R or Q sat on the h-file!
 						moves++;
 				}
 			}
@@ -864,57 +869,56 @@ uint32_t Brain::CountCapturesAndNonCaptures(int sideToMove)
 		// Queen side
 		if (GameRecordPointer->castlingStatus.ui8[sideToMove][1] == 0)
 		{
-			// Check passed-over squares are empty
-			bool allEmpty;
-			int offset;
-			int square;
+			// Check passed-over squares are empty and not attacked
 
-			allEmpty = true;
+			valid = true;
 
 			square = kingSquare;
+			// Which way is the king sliding?
 			offset = 1;
-			if (square > BackRankBaseSquareIndex[sideToMove] + C)
+			if ((square & 7) > C)
 				offset = -1;
 			while (true) // Scan king squares
 			{
 				if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
 					if (MailboxBoard64[square] != Empty)
 					{
-						allEmpty = false;
+						valid = false;
 						break;
 					}
 				if (IsAttacked(square, sideToMove ^ 1)) // Also check king squares for attacks
 				{
-					allEmpty = false;
+					valid = false;
 					break;
 				}
-				if (square == BackRankBaseSquareIndex[sideToMove] + C)
+				if ((square & 7) == C)
 					break;
 				square += offset;
 			}
-			if (allEmpty)
+			if (valid)
 			{
 				square = kingSquare - InitialKingFile + InitialQueenSideRookFile;
+				// Which way is the rook sliding?
 				offset = 1;
-				if (square > BackRankBaseSquareIndex[sideToMove] + D)
+				if ((square & 7) > D)
 					offset = -1;
 				while (true) // Scan rook squares
 				{
 					if ((square != kingSquare) && ((square & 7) != InitialQueenSideRookFile))
 						if (MailboxBoard64[square] != Empty)
 						{
-							allEmpty = false;
+							valid = false;
 							break;
 						}
-					if (square == BackRankBaseSquareIndex[sideToMove] + D)
+					if ((square & 7) == D)
 						break;
 					square += offset;
 				}
-				if (allEmpty)
+				if (valid)
 				{
-					uint64_t rooksAndQueensBB = PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen];
-					if ((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
-						if (((rooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
+					uint64_t enemyRooksAndQueensBB = PiecesBB[sideToMove ^ 1][Rook] | PiecesBB[sideToMove ^ 1][Queen]; // Ensure there isn't an enemy R or Q sat on the a/b-file!
+					if ((enemyRooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + B)) == 0)
+						if (((enemyRooksAndQueensBB & CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A)) == 0) || ((MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + B] != Empty) && (InitialQueenSideRookFile != B)))
 							moves++;
 				}
 			}
@@ -2798,6 +2802,7 @@ void Brain::MakeMove(const int sideToMove)
 			GameRecordPointer->epSquare = currentMove->mf.toSquare + PawnMoveOffset[sideToMove ^ 1];
 
 		break;
+
 	case Rook:
 		// Update castling statuses
 		if (currentMove->mf.fromSquare == BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile)
@@ -2813,6 +2818,7 @@ void Brain::MakeMove(const int sideToMove)
 			GameRecordPointer->castlingStatus.ui8[sideToMove][1] = 1;
 		}
 		break;
+
 	case King:
 		// Update castling statuses
 		if (GameRecordPointer->castlingStatus.ui8[sideToMove][0] == 0)
@@ -2823,46 +2829,21 @@ void Brain::MakeMove(const int sideToMove)
 		// Was it a castling move?
 		if (currentMove->mf.flag == MFCastling)
 		{
-			if (UCI_Chess960)
+			// The king is moved above so just have to do the rook
+			uint32_t rookFromSquare, rookToSquare;
+			rookFromSquare = BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile;
+			rookToSquare = BackRankBaseSquareIndex[sideToMove] + D;
+			if ((currentMove->mf.toSquare & 7) == G) // Castling king side?
 			{
-				if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G) // King-side?
-				{
-					if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile]) != King)
-						MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = Empty;
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
-					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
-					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
-					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile];
-				}
-				else
-				{
-					if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile]) != King)
-						MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = Empty;
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
-					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
-					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
-					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile];
-				}
+				rookFromSquare = BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile;
+				rookToSquare += 2; // Change D to F
 			}
-			else
-			{
-				if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G) // King-side?
-				{
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = (sideToMove ? -Rook : Rook);
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = Empty;
-					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
-					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F);
-					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + F] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + H];
-				}
-				else
-				{
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = (sideToMove ? -Rook : Rook);
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = Empty;
-					PiecesBB[sideToMove][Rook] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
-					PiecesBB[sideToMove][AllPieces] ^= CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D);
-					hash64 ^= TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + D] ^ TranspositionTableRandoms[sideToMove][Rook][BackRankBaseSquareIndex[sideToMove] + A];
-				}
-			}
+			if (abs(MailboxBoard64[rookFromSquare]) != King) // In Chess960 the king may have moved to the rook's fromSquare so don't clear it! (Code works for normal chess)
+				MailboxBoard64[rookFromSquare] = Empty;
+			MailboxBoard64[rookToSquare] = (sideToMove ? -Rook : Rook);
+			PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(rookFromSquare) ^ CreateBitboardFromSquare(rookToSquare));
+			PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(rookFromSquare) ^ CreateBitboardFromSquare(rookToSquare));
+			hash64 ^= TranspositionTableRandoms[sideToMove][Rook][rookToSquare] ^ TranspositionTableRandoms[sideToMove][Rook][rookFromSquare];
 		}
 		//break;
 	}
@@ -2939,7 +2920,7 @@ void Brain::MakeMove(const int sideToMove)
 void Brain::UnMakeMove(const int sideToMove)
 {
 	GameRecordPointer--;
-	MoveUndo_Struct* currentMove = &GameRecordPointer->move;
+	const MoveUndo_Struct* currentMove = &GameRecordPointer->move;
 	assert((currentMove->mf.fromSquare >= A1) && (currentMove->mf.fromSquare <= H8) && (currentMove->mf.toSquare >= A1) && (currentMove->mf.toSquare <= H8));
 
 	MailboxBoard64[currentMove->mf.toSquare] = currentMove->toSquarePiece; // N.B. must un-update the to-square BEFORE the from-square for Chess960 castling as they might be the same square!
@@ -2949,42 +2930,20 @@ void Brain::UnMakeMove(const int sideToMove)
 
 	if (currentMove->mf.flag == MFCastling)
 	{
-		if (UCI_Chess960)
+		// The king is replaced above so just have to do the rook
+		uint32_t rookFromSquare, rookToSquare;
+		rookFromSquare = BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile;
+		rookToSquare = BackRankBaseSquareIndex[sideToMove] + D;
+		if ((currentMove->mf.toSquare & 7) == G) // Castled king side?
 		{
-			if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G)
-			{
-				if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F]) != King)
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
-				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile] = (sideToMove ? -Rook : Rook);
-				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
-				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
-			}
-			else
-			{
-				if (abs(MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D]) != King)
-					MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
-				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile] = (sideToMove ? -Rook : Rook);
-				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
-				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + InitialQueenSideRookFile) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
-			}
+			rookFromSquare = BackRankBaseSquareIndex[sideToMove] + InitialKingSideRookFile;
+			rookToSquare += 2; // Change D to F
 		}
-		else
-		{
-			if (currentMove->mf.toSquare == BackRankBaseSquareIndex[sideToMove] + G)
-			{
-				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + F] = Empty;
-				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + H] = (sideToMove ? -Rook : Rook);
-				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
-				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + H) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + F));
-			}
-			else
-			{
-				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + D] = Empty;
-				MailboxBoard64[BackRankBaseSquareIndex[sideToMove] + A] = (sideToMove ? -Rook : Rook);
-				PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
-				PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + A) ^ CreateBitboardFromSquare(BackRankBaseSquareIndex[sideToMove] + D));
-			}
-		}
+		if (abs(MailboxBoard64[rookToSquare]) != King) // In Chess960 the king may have come from the rook's toSquare so don't clear it! (Code works for normal chess)
+			MailboxBoard64[rookToSquare] = Empty;
+		MailboxBoard64[rookFromSquare] = (sideToMove ? -Rook : Rook);
+		PiecesBB[sideToMove][Rook] ^= (CreateBitboardFromSquare(rookFromSquare) ^ CreateBitboardFromSquare(rookToSquare));
+		PiecesBB[sideToMove][AllPieces] ^= (CreateBitboardFromSquare(rookFromSquare) ^ CreateBitboardFromSquare(rookToSquare));
 	}
 	else
 	{

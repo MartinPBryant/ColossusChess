@@ -90,7 +90,7 @@ struct CounterMoveHistory_Struct
 	History_Struct CMH[6][64]; // 589824
 };
 
-// Castling statuses
+// Castling statuses e.g. ui8[0][0] is white king-side
 union GameRecordCastlingStatus_Union
 {
 	uint8_t ui8[Sides][2];

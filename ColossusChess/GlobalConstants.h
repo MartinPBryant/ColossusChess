@@ -5,10 +5,15 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-const std::string Version = "20NNx9";
+const std::string Version = "20NNx10";
 const std::string Author = "Martin Bryant";
 
 #define Sides 2
+
+enum PiecesEnum {
+	AllPieces = 0, // For bitboards
+	Empty = 0, Pawn, Knight, Bishop, Rook, Queen, King
+};
 
 // Material values
 #define MVPawn 100
@@ -19,11 +24,6 @@ const std::string Author = "Martin Bryant";
 #define MVKing 1000
 // The maximum number of 'points' of material for one side in a legal position is 9(Q)+10(Rs)+12(B+Ns)+8*9(promoted Ps)=103 ... so a score of ~10300cp or 103.00
 // EGTB winning scores are 140+, mating scores are 150+
-
-enum PiecesEnum {
-	AllPieces = 0, // For bitboards
-	Empty = 0, Pawn, Knight, Bishop, Rook, Queen, King
-};
 
 const short MaterialValue[7] = { 0, MVPawn, MVKnight, MVBishop, MVRook, MVQueen, MVKing };
 const int SimplePieceValues[7] = { 0, 1, 3, 3, 5, 9, 999 };

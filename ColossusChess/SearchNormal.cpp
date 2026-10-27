@@ -2613,15 +2613,8 @@ std::string Normal::ComputeNormal()
 		hash64 = ~hash64;
 	normalBrain.GameRecordPointer->transpositionTableHash64 = hash64;
 	normalBrain.GameRecordPointer->transpositionTableHash64WithEP = hash64 ^ TranspositionTableRandomsEnPassant[normalBrain.GameRecordPointer->epSquare]; // N.B. TranspositionTableRandomsEnPassant[0] = 0
-	//normalBrain.gameRecordPointer->dangerConditions.dc.isZLKM = 0;
 	normalBrain.GameRecordPointer->dangerConditions &= ~TTFlagZeroLegalKingMoves;
 
-	//lastPawnScoreWhite.bb = 0;
-	//lastPawnScoreWhite.pawnStructureOpeningScore = 0;
-	//lastPawnScoreWhite.pawnStructureEndgameScore = 0;
-	//lastPawnScoreBlack.bb = 0;
-	//lastPawnScoreBlack.pawnStructureOpeningScore = 0;
-	//lastPawnScoreBlack.pawnStructureEndgameScore = 0;
 	(normalBrain.GameRecordPointer - 1)->staticEvaluation = Evaluate(SideToMove ^ 1);
 
 	TranspositionTableStores = 0;
