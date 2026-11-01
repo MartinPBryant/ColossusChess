@@ -213,11 +213,71 @@ To get all the TT entry data in one go...
 
 ---------------------------------------------------------------------------------------------------------
 
+fixed castling to handle DFRC
+handles polyglot openings books
+optimisations
+updated network
+
+
 ALL
 ===
 
-:O my frc openings file doesn't contain castling statuses!!!!!!!?????
--copy to all PCs!!!
+release a 'GOLD' edition compilation with BMI2/PEXT. The worst that can happen is testers use the SILVER edition which they would have anyway if I didn't release the GOLD version
+
+
+get rid of syzygypathlog
+
+
+update lichess bot!
+
+
+WITNESSED THIS LICHESS CRASH ACTUALLY HAPPEN!
+THE LICHESS O/P GAVE...
+                    INFO     move: 64                                                                                                                                lichess_bot.py:834
+                    INFO     Searching for wtime 86309 btime 60140 for game jQeIN0Wz                                                                              engine_wrapper.py:728
+[10/27/26 18:56:46] INFO     Source: Engine                                                                                                                       engine_wrapper.py:334
+                    INFO     Evaluation: 0.01                                                                                                                     engine_wrapper.py:334
+                    INFO     Depth: 26                                                                                                                            engine_wrapper.py:334
+                    INFO     Nodes: 11.4M                                                                                                                         engine_wrapper.py:334
+                    INFO     Speed: 2.2Mnps                                                                                                                       engine_wrapper.py:334
+                    INFO     Pv: 64. Rxh5 g4 65. Rg5 Rf3+ 66. Kc4 Rxf2 67. Rxg4+ Kf3 68. Rg8 e4 69. b5 e3 70. Re8 Rb2 71. Re5 e2 72. Rxe2                         engine_wrapper.py:334
+[10/27/26 18:56:49] INFO                                                                                                                                             lichess_bot.py:833
+                    INFO     move: 65                                                                                                                                lichess_bot.py:834
+                    INFO     Searching for wtime 83979 btime 60440 for game jQeIN0Wz                                                                              engine_wrapper.py:728
+[10/27/26 18:56:52] INFO     Source: Engine                                                                                                                       engine_wrapper.py:334
+                    INFO     Evaluation: 0.01                                                                                                                     engine_wrapper.py:334
+                    INFO     Depth: 25                                                                                                                            engine_wrapper.py:334
+                    INFO     Nodes: 7.3M                                                                                                                          engine_wrapper.py:334
+                    INFO     Speed: 2.1Mnps                                                                                                                       engine_wrapper.py:334
+                    INFO     Pv: 65. Rxg5 Rf1 66. Rg8 Kd5 67. Rd8+ Ke4 68. g4 Rc1+ 69. Kb3 Rb1+ 70. Kc4 Rc1+ 71. Kb3                                              engine_wrapper.py:334
+                    INFO                                                                                                                                             lichess_bot.py:833
+                    INFO     move: 66                                                                                                                                lichess_bot.py:834
+                    INFO     Searching for wtime 83439 btime 63380 for game jQeIN0Wz                                                                              engine_wrapper.py:728
+                    WARNING  <UciProtocol (pid=12960)>: Unexpected engine output: ''                                                                                     engine.py:1642
+                    WARNING  <UciProtocol (pid=12960)>: Unexpected engine output: ''                                                                                     engine.py:1642
+
+AND IT JUST TIMED OUT HERE.
+IT DIDN'T GENERATE AN ERROR BUT IS IT SENDING 'BESTMOVE ""' WITHOUT A BEST MOVE CRASHING THE CONTROLLER??? IF WAS PONDERING AND TOLD TO STOP SHOULDN'T O/P ANYTHING?
+IT PROBABLY HAPPENS AS IT TAKES A WHILE PROBING THE 7-PC AT THE ROOT! OTHERWISE IT WOULD GET A PARTIAL SEARCH STARTED
+
+Still getting these errors on Lichess when we get down to 7 pieces
+*** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
+-IS IT BECAUSE NIPOGI1 HAS INCOMPLETE 7-PC???? :O
+-AND MAYBE EXCLUDES EVERYTHING FROM ROOT SEARCH!???
+-CHECK IF THEY ARE ENDGAMES WHERE IT DOESN'T HAVE THE PARTICULAR TABLEBASE - NO AS IT DOES HAVE KQPPvKQP
+-ONE WAS A 5PC, MOST WERE 6PC AND SOMWE WERE 7PC WHERE IT DID HAVE THE EGTB!
+-CHECK THE ROOTMOVE FILTERING CODE! ADD SOME ERRORS INSTEAD OF ASSERTS BECAUSE ITS RELEASE BUILD
+is the lichess egtb bug when it is told to ponder a move but then it's not played and it's still got the same EGTB root stuff as if the ponder move was played somehow???
+-is it just some nonsense from the lichess controller???
+the engine could accumulate all the messages from the UI in the current game and dump them upon error too!
+-CommandsSinceLastNewGame string
+-WERE THEY TIMEUP POSN?!!!! BECAUSE STOPIMMEDIATELY WAS 1 ! :O  DID IT TIMEUP AND EXIT BEFORE GETTING A BEST MOVE?
+-N.B. THERE ARE TWO DIFFERENT ERRORS! 'No best move returned' AND 'ZERO MOVES'
+-the 'no best move' errors do seem to be in the endgame after probing the 7 pc when the timer will be running!!!!! but surely we have to do at least 4 ply?!!!
+-did the lichess controller send a STOP command??? :O DID IT RUN OUT OF TIME PROBING THE 7-PC???
+-is it because the opp didn't play the ponder move so the UI tells Colossus to stop before it's got any move but it doesn't matter?!!
+
+
 
 
 
@@ -232,20 +292,22 @@ KBP (same and opposite)
 KQP
 -or look at volumes of posns by piece-count? and just add more posns to the lowest counts?
 -try training without the lowest piece-counts e.g. exclude 6 or fewer pieces (100s of MBs) because they will be eval'ed by EGTB
+Use multiple networks trained on fewer and fewer pieces - gradually reduce piece count network based on root piece count
+-could test with just 2 to start with - e.g. 32-7 and 24-7
+-have to embed 2 networks???
+-have code look for next best network by name and if found, load it - then can add/remove networks at will to test
+Try dropping the 32 dataset - slightly worse
+Can yuo categorise by other things like no queens/rooks/etc, pawnless/pawnful ['specialist' networks?], castling, game phase, #of Ps(16->0)
+-still need dynamic swicthing when starting new search
+-32-7 (=26) networks = 26*193KB=just over 5MB so very doable!
+-can add posns into the mix up to some limit e.g. 256million?
+--but it may just be that excluding the higher posns gives the snaller # of lower posns more chance to be tuned... but still there would be capacity for more to gain ELO like in my 1st test re sizes
+Could filtering posns by smaller mat imbalance (<1000) give more room for balanced posn? but probably aren't that many >500(?) anyway?
+-easy to regen and test though?
+BIGGER network?
+-then has capacity to extract value from more positions? and then tail off of ELO gain would be delayed? need to redo 'network size' test with bigger network
 
 
-
-the games on PCS1...
-does SF correctly handle castling for DFRC??? :O - YES
---change Colossus to correctly handle them!
----can we rationalise ALL castling better? e.g. as KxR? but isn't it always K-g1(8) or K-c1(8) ??? check chess960 code!
-FRC: internally stored as K-g1 but displayed as KxR
-K-g1/c1 does have some advantages
-for initial R-sqs use an array[Sides]
-maybe could use initial R-sqs[Sides] in normal chess to rationalise the code? because we now have DFRC aswell
--they do get init'd!
---actually if we have [Sides] then the values could be the actual squares! not the files
--also can use that '& 7' trick in NNUE.cpp although may not need to eventually if we use sqs not files
 
 
 
@@ -335,12 +397,7 @@ board.fullmove_number = 1 # Move number
 
 implement multiPV (useful for gensfen?)
 
-could reduce the # of randoms needed for EP to just 8! 1 for each file
 
-
-There are duplicate lines even in the SF19FRC tourney!
-BECAUSE IT PLAYED BOTH SIDES! AND IS THE SAME ENGINE :D
-Use another top engine? SF18
 
 
 'quiet' filters should discard last move(s) of game to try to reduce DBR noise! 4 ply? 6 ply?
@@ -418,23 +475,6 @@ does root EGTB stuff respect syzygyprobelimit?
 -no but it's not quite meant to e.g. syzygyprobelimit defaults to 6 as it's referring to the tree search!
 
 
-
-Still getting these errors on Lichess when we get down to 7 pieces
-*** Error!: No best move returned by search! (RootBestMove.ui32 == 0)
--IS IT BECAUSE NIPOGI1 HAS INCOMPLETE 7-PC???? :O
--AND MAYBE EXCLUDES EVERYTHING FROM ROOT SEARCH!???
--CHECK IF THEY ARE ENDGAMES WHERE IT DOESN'T HAVE THE PARTICULAR TABLEBASE - NO AS IT DOES HAVE KQPPvKQP
--ONE WAS A 5PC, MOST WERE 6PC AND SOMWE WERE 7PC WHERE IT DID HAVE THE EGTB!
--CHECK THE ROOTMOVE FILTERING CODE! ADD SOME ERRORS INSTEAD OF ASSERTS BECAUSE ITS RELEASE BUILD
-is the lichess egtb bug when it is told to ponder a move but then it's not played and it's still got the same EGTB root stuff as if the ponder move was played somehow???
--is it just some nonsense from the lichess controller???
-the engine could accumulate all the messages from the UI in the current game and dump them upon error too!
--CommandsSinceLastNewGame string
--WERE THEY TIMEUP POSN?!!!! BECAUSE STOPIMMEDIATELY WAS 1 ! :O  DID IT TIMEUP AND EXIT BEFORE GETTING A BEST MOVE?
--N.B. THERE ARE TWO DIFFERENT ERRORS! 'No best move returned' AND 'ZERO MOVES'
--the 'no best move' errors do seem to be in the endgame after probing the 7 pc when the timer will be running!!!!! but surely we have to do at least 4 ply?!!!
--did the lichess controller send a STOP command??? :O DID IT RUN OUT OF TIME PROBING THE 7-PC???
--is it because the opp didn't play the ponder move so the UI tells Colossus to stop before it's got any move but it doesn't matter?!!
 
 
 

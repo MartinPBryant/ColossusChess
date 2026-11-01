@@ -101,9 +101,12 @@ extern const int EndgameTablebasesCumulativeExpectedFileCounts[8];
 extern short Contempt;
 
 // Castling statuses - Introduced when implementing Chess960/FRC
-extern uint32_t InitialKingFile;
-extern uint32_t InitialKingSideRookFile;
-extern uint32_t InitialQueenSideRookFile;
+//extern uint32_t InitialKingFile;
+//extern uint32_t InitialKingSideRookFile;
+//extern uint32_t InitialQueenSideRookFile;
+extern int32_t InitialKingSquare[Sides];
+extern int32_t InitialKingSideRookSquare[Sides];
+extern int32_t InitialQueenSideRookSquare[Sides];
 
 // Time control types
 // Tournament mode: X moves in M seconds then Y moves in N seconds.

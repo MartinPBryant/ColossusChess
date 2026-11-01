@@ -1,4 +1,4 @@
-Tue Oct 27 11:57:40 2026
+Wed Oct 28 11:32:35 2026
 
 Command received:
 setoption name SyzygyPath value c:\_Chess\EndgameTablebases\Syzygy\3456

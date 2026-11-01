@@ -446,35 +446,35 @@ std::string ProcessInput(std::string currentLine)
 						else if (subCommand == "WTIME")
 						{
 							validSubCommand = true;
-							TC.CurrentType = (int)TCTTournament;
+							TC.CurrentType = TCTTournament;
 							WTime = atoi(GetNextToken(&currentLine).c_str());
 							MinimumIterationPly = Normal::MinimumIterationPlyTimedModes;
 						}
 						else if (subCommand == "BTIME")
 						{
 							validSubCommand = true;
-							TC.CurrentType = (int)TCTTournament;
+							TC.CurrentType = TCTTournament;
 							BTime = atoi(GetNextToken(&currentLine).c_str());
 							MinimumIterationPly = Normal::MinimumIterationPlyTimedModes;
 						}
 						else if (subCommand == "WINC")
 						{
 							validSubCommand = true;
-							TC.CurrentType = (int)TCTTournament;
+							TC.CurrentType = TCTTournament;
 							WInc = atoi(GetNextToken(&currentLine).c_str());
 							MinimumIterationPly = Normal::MinimumIterationPlyTimedModes;
 						}
 						else if (subCommand == "BINC")
 						{
 							validSubCommand = true;
-							TC.CurrentType = (int)TCTTournament;
+							TC.CurrentType = TCTTournament;
 							BInc = atoi(GetNextToken(&currentLine).c_str());
 							MinimumIterationPly = Normal::MinimumIterationPlyTimedModes;
 						}
 						else if (subCommand == "MOVESTOGO")
 						{
 							validSubCommand = true;
-							TC.CurrentType = (int)TCTTournament;
+							TC.CurrentType = TCTTournament;
 							MovesToGo = atoi(GetNextToken(&currentLine).c_str());
 							MinimumIterationPly = Normal::MinimumIterationPlyTimedModes;
 						}

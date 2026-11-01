@@ -31,32 +31,68 @@ THEREFORE IF THE RESULT BELOW IS -ve IT'S A THUMBS UP FOR THE MODIFICATION
 128 v SF19vSF18-5ply {~3.6 million games -> 272 million positions} (-86.13) ASUS1
 
 128 v SF19vSF19-3ply {~1.8 million games -> 115 million positions} (-19.34) ASUS1
+128 v SF19vSF19-4ply {~1.8 million games -> 117 million positions} (-24.92) ASUS1
 128 v SF19vSF19-5ply {~1.8 million games -> 128 million positions} (-16.39) ASUS1
 128 v SF19vSF19-3&5ply {~3.6 million games -> 243 million positions} (-33.84) ASUS1
 128 v SF19vSF19-7ply {~1.8 million games -> 133 million positions} (-6.01) ASUS1
 128 v SF19vSF19-3&5&7ply {~5.4 million games -> 376 million positions} (-18.00) ASUS1
 128 v SF19vSF19-9ply {~1.8 million games -> 138 million positions} (-5.65) ASUS1
-
 *** Incredibly it seems the deeper the source game searches the worse the NNUE??? :O
-*** Try 4-ply!
-
-128 v SF19vSF19-4ply {~1.8 million games -> 117 million positions} (-24.92) ASUS1
 128 v SF19vSF19-5plyDFRC {~0.9 million games -> 60 million positions} (78.45) ASUS1 - much worse!
 
 NEED TO TRY 3&4&5PLY TOGETHER
 THEN WITH SF19V18
 
 128 v SF19vSF19-3&4&5ply {~5.4 million games -> 360 million positions} (-11.05) ASUS1
+
 128 v SF19vSF18-5ply {~3.6 million games -> 272 million positions} (-86.13) ASUS1 - SANITY CHECK - SAME AS ABOVE SO IS DETERMINISTIC
 
 128Shuffled v 227Shuffled (-17.54) PCS2 - Non-shuffled was -17.33
 
 128 v 227PlusSF19vSF18-5ply (-99.57) ASUS1 - separately was -17.33 and -86.13
 
-128 v SF19vSF18-5ply-32-7 {so piece counts 6 and fewer omitted} (-100.46) ASUS1 - -86.13 when all pieces included... so +14.33 :)
+128 v SF19vSF18-5ply-32-7 {so piece counts 6 and fewer omitted} (-100.46) ASUS1 - -86.13 when all pieces included... so 14.33 better :)
 
+*** VARIOUS OPTIMISATIONS (NNUE AND CASTLING) DONE FROM V1 -> V10
 
+2026cNonPGO v 10 {both using standard embedded 128.bin network} (-7.44) ASUS1
+2026cNonPGO v 10 {10 using SF19vSF18-5ply-32-7 network} (-96.72) ASUS1
 
+128 v SF19vSF18-3ply-32-7 {~3.6 million games -> 241 million positions} (-90.20) ASUS1
+
+***32-7 assumed from now on
+
+128 v SF19vSF18-3+5ply {~7.2 million games -> 513 million positions} (-99.91) ASUS1
+128 v SF19vSF18-3TopHalf+5ply (-88.44) ASUS1
+128 v SF19vSF18-3BottomHalf+5ply (-109.35) ASUS1 - !
+128 v SF19vSF18-5ply-31-7 {i.e. the 32 piece set discarded} (-90.61) PCS2 - slightly worse than the -100.46 above
+128 v SF19vSF18-3BottomThreeQuarters+5ply (-103.47)
+
+128 v SF19vSF18-5ply-500 {with +/-500cp filter rather than 1000. 239 million posns rather than 272} (-112.45) PCS2 - was -100.46 with 1000 filter [11.99 better]
+128 v SF19vSF18-3ply-500 {with +/-500cp filter rather than 1000. 200 million posns rather than 241} (-107.65) PCS2 - was -90.20 with 1000 filter [17.45 better]
+128 v SF19vSF18-3+5ply-500 (-110.45) PCS2
+
+20NNx12 with SF19vSF18-5ply-32-7.bin
+# Name                     Points       %     Elo    +/-  W-L-D                            1     2     3     4     5     6     
+-------------------------------------------------------------------------------------------------------------------------------
+1 Cheng 4.48a (bundled)    2156.0/3500  61.6  +82.1  8.7  +1402-590=1508   [4 time losses]       52.1% 57.3% 61.2% 67.4% 70.1% 
+2 Weiawaga v6.0.0          2090.0/3500  59.7  +68.4  8.9  +1366-686=1448                   47.9%       55.9% 60.5% 67.0% 67.3% 
+3 Colossus Chess 20NNx12   1856.5/3500  53.0  +21.2  8.7  +1100-887=1513   [3 time losses] 42.7% 44.1%       51.9% 63.0% 63.4% 
+4 Pedantic 2.1.0           1687.0/3500  48.2  -12.5  8.8  +960-1086=1454  [13 time losses] 38.8% 39.5% 48.1%       53.1% 61.5% 
+5 Colossus Chess 2026c     1408.5/3500  40.2  -68.7  9.5  +824-1507=1169   [5 time losses] 32.6% 33.0% 37.0% 46.9%       51.7% 
+6 Vajolet2 3.2.0           1302.0/3500  37.2  -91.0  9.0  +603-1499=1398  [17 time losses] 29.9% 32.7% 36.6% 38.5% 48.3%       
+10500/10500 games, 40% draws, time control:8+0.08, book:openings-8ply-10k.pgn, event: Colossus 2026d #1
+
+20NNx12 with SF19vSF18-5ply-500.bin (so not quite as good :D)
+# Name                     Points       %     Elo    +/-  W-L-D                            1     2     3     4     5     6     
+-------------------------------------------------------------------------------------------------------------------------------
+1 Cheng 4.48a (bundled)    2139.0/3500  61.1  +78.5  8.7  +1371-593=1536   [7 time losses]       52.1% 54.8% 61.3% 67.4% 70.1% 
+2 Weiawaga v6.0.0          2077.5/3500  59.4  +65.8  8.9  +1358-703=1439                   47.9%       55.9% 58.7% 67.0% 67.3% 
+3 Colossus Chess 20NNx12   1844.5/3500  52.7  +18.8  8.8  +1116-927=1457   [6 time losses] 45.2% 44.1%       52.8% 61.3% 60.1% 
+4 Pedantic 2.1.0           1706.5/3500  48.8   -8.6  8.7  +956-1043=1501  [13 time losses] 38.7% 41.3% 47.2%       54.0% 62.6% 
+5 Colossus Chess 2026c     1414.5/3500  40.4  -67.4  9.6  +848-1519=1133   [5 time losses] 32.6% 33.0% 38.7% 46.0%       51.7% 
+6 Vajolet2 3.2.0           1318.0/3500  37.7  -87.6  9.1  +633-1497=1370  [18 time losses] 29.9% 32.7% 39.9% 37.4% 48.3%       
+10500/10500 games, 40% draws, time control:8+0.08, book:openings-8ply-10k.pgn, event: Colossus 2026d #1
 
 
 

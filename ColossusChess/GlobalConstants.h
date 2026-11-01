@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------------------------------------
 
 // Version
-const std::string Version = "20NNx10";
+const std::string Version = "20NNx12";
 const std::string Author = "Martin Bryant";
 
 #define Sides 2

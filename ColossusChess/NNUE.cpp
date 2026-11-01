@@ -488,14 +488,17 @@ void NNUE::UpdateAccumulatorsChess768(const Brain& brain)
 	{
 		// Move the rooks too
 		uint32_t initialRookSquare, finalRookSquare;
-		if (currentMove->mf.toSquare == BackRankBaseSquareIndex[movingPieceColour] + G) // King-side?
+		//if (currentMove->mf.toSquare == BackRankBaseSquareIndex[movingPieceColour] + G) // King-side?
+		if ((currentMove->mf.toSquare & 7) == G) // King-side?
 		{
-			initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialKingSideRookFile;
+			//initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialKingSideRookFile;
+			initialRookSquare = InitialKingSideRookSquare[movingPieceColour];
 			finalRookSquare = BackRankBaseSquareIndex[movingPieceColour] + F;
 		}
 		else
 		{
-			initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialQueenSideRookFile;
+			//initialRookSquare = BackRankBaseSquareIndex[movingPieceColour] + InitialQueenSideRookFile;
+			initialRookSquare = InitialQueenSideRookSquare[movingPieceColour];
 			finalRookSquare = BackRankBaseSquareIndex[movingPieceColour] + D;
 		}
 

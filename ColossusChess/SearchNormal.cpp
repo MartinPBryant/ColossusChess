@@ -3259,7 +3259,8 @@ void Normal::ComputeNormalMT()
 		threads[threadId].join();
 
 	// Display best move found
-	Output(bestMoveMessage);
+	if (!bestMoveMessage.empty())
+		Output(bestMoveMessage);
 
 	DisplayAnalysisCounters();
 

@@ -70,9 +70,12 @@ const int EndgameTablebasesCumulativeExpectedFileCounts[8] = { 0, 0, 0, 5, 5 + 3
 short Contempt = 0;
 
 // Castling statuses - Introduced when implementing Chess960/FRC
-uint32_t InitialKingFile;
-uint32_t InitialKingSideRookFile;
-uint32_t InitialQueenSideRookFile;
+//uint32_t InitialKingFile;
+//uint32_t InitialKingSideRookFile;
+//uint32_t InitialQueenSideRookFile;
+int32_t InitialKingSquare[Sides];
+int32_t InitialKingSideRookSquare[Sides];
+int32_t InitialQueenSideRookSquare[Sides];
 
 // Threads
 int Threads = ThreadsDefault;
@@ -237,13 +240,17 @@ std::string ConvertPositionToFEN(int8_t MailboxBoard64[64], int sideToMove, Game
 	if (UCI_Chess960)
 	{
 		if (castlingStatus.ui8[0][0] == 0)
-			_castling += std::string(1, 'A' + InitialKingSideRookFile);
+			//_castling += std::string(1, 'A' + InitialKingSideRookFile);
+			_castling += std::string(1, 'A' + (InitialKingSideRookSquare[0] & 7));
 		if (castlingStatus.ui8[0][1] == 0)
-			_castling += std::string(1, 'A' + InitialQueenSideRookFile);
+			//_castling += std::string(1, 'A' + InitialQueenSideRookFile);
+			_castling += std::string(1, 'A' + (InitialQueenSideRookSquare[0] & 7));
 		if (castlingStatus.ui8[1][0] == 0)
-			_castling += std::string(1, 'a' + InitialKingSideRookFile);
+			//_castling += std::string(1, 'a' + InitialKingSideRookFile);
+			_castling += std::string(1, 'a' + (InitialKingSideRookSquare[1] & 7));
 		if (castlingStatus.ui8[1][1] == 0)
-			_castling += std::string(1, 'a' + InitialQueenSideRookFile);
+			//_castling += std::string(1, 'a' + InitialQueenSideRookFile);
+			_castling += std::string(1, 'a' + (InitialQueenSideRookSquare[1] & 7));
 	}
 	else
 	{
@@ -549,12 +556,15 @@ std::string MoveNotation(uint32_t move)
 		}
 		s = Notation64[ms.mf.fromSquare];
 		int toSquare = ms.mf.toSquare;
-		if (UCI_Chess960 && (ms.mf.flag == MFCastling))
+		if (UCI_Chess960 && (ms.mf.flag == MFCastling)) // Chess960 castling shown as KxR
 		{
+			int sideToMove = ((toSquare <= H1) ? 0 : 1);
 			if ((toSquare & 7) == G) // King side?
-				toSquare = toSquare - G + InitialKingSideRookFile;
+				//toSquare = toSquare - G + InitialKingSideRookFile;
+				toSquare = InitialKingSideRookSquare[sideToMove];
 			else
-				toSquare = toSquare - C + InitialQueenSideRookFile;
+				//toSquare = toSquare - C + InitialQueenSideRookFile;
+				toSquare = InitialQueenSideRookSquare[sideToMove];
 		}
 		s += Notation64[toSquare];
 		if (ms.mf.flag >= MFPromotion)
@@ -705,9 +715,15 @@ void NewGame(bool clearEverything)
 
 	// This assumes a 'normal' chess starting position. 'Chess960/FRC' starting positions are specified via a subsequent POSITION FEN command
 	SetNewGamePositionMailboxBoard64(EngineBrain.MailboxBoard64);
-	InitialKingFile = E;
-	InitialKingSideRookFile = H;
-	InitialQueenSideRookFile = A;
+	//InitialKingFile = E;
+	//InitialKingSideRookFile = H;
+	//InitialQueenSideRookFile = A;
+	InitialKingSquare[0] = E1;
+	InitialKingSideRookSquare[0] = H1;
+	InitialQueenSideRookSquare[0] = A1;
+	InitialKingSquare[1] = E8;
+	InitialKingSideRookSquare[1] = H8;
+	InitialQueenSideRookSquare[1] = A8;
 	EngineBrain.GameRecordPointer->castlingStatus.ui32 = 0;
 	SideToMove = 0;
 	EngineBrain.ClearGameRecord();
@@ -1007,10 +1023,13 @@ bool MakeMove(const std::string& move)
 				{
 					EngineBrain.GameRecordPointer->move.mf.flag = MFCastling;
 
-					if ((EngineBrain.GameRecordPointer->move.mf.toSquare & 7) == InitialKingSideRookFile)
-						EngineBrain.GameRecordPointer->move.mf.toSquare = (SquaresEnum)(EngineBrain.GameRecordPointer->move.mf.toSquare - InitialKingSideRookFile + G);
+					//if ((EngineBrain.GameRecordPointer->move.mf.toSquare & 7) == InitialKingSideRookFile)
+					if (EngineBrain.GameRecordPointer->move.mf.toSquare > EngineBrain.GameRecordPointer->move.mf.fromSquare)
+						//EngineBrain.GameRecordPointer->move.mf.toSquare = (SquaresEnum)(EngineBrain.GameRecordPointer->move.mf.toSquare - InitialKingSideRookFile + G);
+						EngineBrain.GameRecordPointer->move.mf.toSquare = (SquaresEnum)(BackRankBaseSquareIndex[SideToMove] + G);
 					else
-						EngineBrain.GameRecordPointer->move.mf.toSquare = (SquaresEnum)(EngineBrain.GameRecordPointer->move.mf.toSquare - InitialQueenSideRookFile + C);
+						//EngineBrain.GameRecordPointer->move.mf.toSquare = (SquaresEnum)(EngineBrain.GameRecordPointer->move.mf.toSquare - InitialQueenSideRookFile + C);
+						EngineBrain.GameRecordPointer->move.mf.toSquare = (SquaresEnum)(BackRankBaseSquareIndex[SideToMove] + C);
 				}
 		}
 		else
@@ -1152,9 +1171,15 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 		//if (UCI_Chess960)
 		{
 			// Clear the king/rook files
-			InitialKingFile = -1;
-			InitialKingSideRookFile = -1;
-			InitialQueenSideRookFile = -1;
+			//InitialKingFile = -1;
+			//InitialKingSideRookFile = -1;
+			//InitialQueenSideRookFile = -1;
+			InitialKingSquare[0] = -1;
+			InitialKingSideRookSquare[0] = -1;
+			InitialQueenSideRookSquare[0] = -1;
+			InitialKingSquare[1] = -1;
+			InitialKingSideRookSquare[1] = -1;
+			InitialQueenSideRookSquare[1] = -1;
 
 			for (int count = 0; count < castling.length(); count++)
 			{
@@ -1165,7 +1190,8 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 					for (uint32_t square = A1; square <= H1; ++square)
 						if (brain.MailboxBoard64[square] == King)
 						{
-							InitialKingFile = square & 7;
+							//InitialKingFile = square & 7;
+							InitialKingSquare[0] = square;
 							break;
 						}
 
@@ -1176,7 +1202,8 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 						for (uint32_t square = H1; square >= A1; --square) // Find the rightmost rook
 							if (brain.MailboxBoard64[square] == Rook)
 							{
-								InitialKingSideRookFile = square & 7;
+								//InitialKingSideRookFile = square & 7;
+								InitialKingSideRookSquare[0] = square;
 								break;
 							}
 					}
@@ -1186,22 +1213,29 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 						for (uint32_t square = A1; square <= H1; ++square) // Find the leftmost rook
 							if (brain.MailboxBoard64[square] == Rook)
 							{
-								InitialQueenSideRookFile = square & 7;
+								//InitialQueenSideRookFile = square & 7;
+								InitialQueenSideRookSquare[0] = square;
 								break;
 							}
 					}
 					else
 					{
-						int8_t rookfile = 7 - ('H' - c);
-						if (rookfile > InitialKingFile)
+						// Chess960 castling notation used
+						UCI_Chess960 = true;
+						//uint32_t rookfile = 7 - ('H' - c);
+						uint32_t rookSquare = 7 - ('H' - c);
+						//if (rookfile > InitialKingFile)
+						if (rookSquare > InitialKingSquare[0])
 						{
 							brain.GameRecord[2].castlingStatus.ui8[0][0] = 0;
-							InitialKingSideRookFile = rookfile;
+							//InitialKingSideRookFile = rookfile;
+							InitialKingSideRookSquare[0] = rookSquare;
 						}
 						else
 						{
 							brain.GameRecord[2].castlingStatus.ui8[0][1] = 0;
-							InitialQueenSideRookFile = rookfile;
+							//InitialQueenSideRookFile = rookfile;
+							InitialQueenSideRookSquare[0] = rookSquare;
 						}
 					}
 				}
@@ -1211,7 +1245,8 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 					for (uint32_t square = A8; square <= H8; ++square)
 						if (brain.MailboxBoard64[square] == -King)
 						{
-							InitialKingFile = square & 7;
+							//InitialKingFile = square & 7;
+							InitialKingSquare[1] = square;
 							break;
 						}
 
@@ -1222,7 +1257,8 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 						for (uint32_t square = H8; square >= A8; --square) // Find the rightmost rook
 							if (brain.MailboxBoard64[square] == -Rook)
 							{
-								InitialKingSideRookFile = square & 7;
+								//InitialKingSideRookFile = square & 7;
+								InitialKingSideRookSquare[1] = square;
 								break;
 							}
 					}
@@ -1232,22 +1268,29 @@ bool ConvertFENToPosition(const std::string& position, const std::string& sideTo
 						for (uint32_t square = A8; square <= H8; ++square) // Find the leftmost rook
 							if (brain.MailboxBoard64[square] == -Rook)
 							{
-								InitialQueenSideRookFile = square & 7;
+								//InitialQueenSideRookFile = square & 7;
+								InitialQueenSideRookSquare[1] = square;
 								break;
 							}
 					}
 					else
 					{
-						int8_t rookfile = 7 - ('h' - c);
-						if (rookfile > InitialKingFile)
+						// Chess960 castling notation used
+						UCI_Chess960 = true;
+						//uint32_t rookfile = 7 - ('h' - c);
+						uint32_t rookSquare = 7 - ('h' - c) + 56;
+						//if (rookfile > InitialKingFile)
+						if (rookSquare > InitialKingSquare[1])
 						{
 							brain.GameRecord[2].castlingStatus.ui8[1][0] = 0;
-							InitialKingSideRookFile = rookfile;
+							//InitialKingSideRookFile = rookfile;
+							InitialKingSideRookSquare[1] = rookSquare;
 						}
 						else
 						{
 							brain.GameRecord[2].castlingStatus.ui8[1][1] = 0;
-							InitialQueenSideRookFile = rookfile;
+							//InitialQueenSideRookFile = rookfile;
+							InitialQueenSideRookSquare[1] = rookSquare;
 						}
 					}
 				}

@@ -1,0 +1,13 @@
+Wed Oct 28 09:25:10 2026
+*** Error!: Cannot process a GO command whilst a previous GO command is still active
+rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8
+LastPositionCommand: p fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8
+LastGoCommand: go perft 2
+LastCommand: go perft 3
+TranspositionTableMemory=64
+StopImmediately=0
+StopWhenIterationComplete=1
+Ponder=0
+Pondering=0
+ReplyImmediately=0
+
